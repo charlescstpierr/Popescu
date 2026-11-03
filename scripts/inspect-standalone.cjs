@@ -49,4 +49,15 @@ sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbo
   }
  }
  q.renderer.render(q.game,361);
- writeScreenshotAtomic(elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',pelicanPortraitAndAllPhasesSaveResume:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});
+ // Verify the actual bundled director and browser save flow, not just ES imports.
+ q.game.s.enemies=[];const selected=q.game.bossDirector.nextType;
+ Object.assign(q.game.bossDirector,{remaining:5.01,warned:false,retryIn:0});q.game.update(.02);
+ assert.equal(q.game.bossDirector.warned,true);assert.equal(q.game.bossDirector.remaining,5);
+ const director=JSON.stringify(q.game.bossDirector);assert((await q.persistRun()).ok);await q.resumeSaved();
+ assert.equal(JSON.stringify(q.game.bossDirector),director);q.game.update(.25);assert.equal(JSON.stringify(q.game.bossDirector),director);q.resume();
+ for(let i=0;i<21;i++)q.game.update(.25);
+ const major=q.game.s.enemies.filter(e=>['matriarch','travestia','pelican'].includes(e.type)&&!e.dead);
+ assert.equal(major.length,1);assert.equal(major[0].type,selected);
+ for(const other of ['matriarch','travestia','pelican'])assert.equal(q.game.spawnEnemy(other,900,0),null);
+ assert((await q.persistRun()).ok);
+ writeScreenshotAtomic(elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',pelicanPortraitAndAllPhasesSaveResume:'pass',randomBossDirectorSaveAndArrival:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});

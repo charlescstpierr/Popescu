@@ -1,3 +1,4 @@
+import {BOSS_TYPES,BOSS_SCHEDULE,createBossDirector} from './boss-director.js';
 import {ANIMALS} from './animals.js';
 // Versioned, validated persistence for the approved save/resume flow.
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
@@ -6,10 +7,10 @@ import {PELICAN,PELICAN_BANTER} from './pelican.js';
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=5;
+const VERSION=6;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
-const INTERNAL=['seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
+const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
 const MODES=['playing','paused','upgrade','dialogue','victory','gameover'];
 const ENEMIES=[...Object.keys(ANIMALS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const REQUIRED={enemies:'id x y hp maxhp r speed windup hitFlash charmed cooldown attack summon',shots:'x y vx vy life damage r pierce',drops:'x y life value',clouds:'x y vx vy r life',particles:'x y vx vy life maxlife',vehicles:'x y vx vy life damage',pulses:'x y r maxr life maxlife',chests:'id x y openedAt',shockwaves:'x y r prevR maxR life maxlife width damage ownerId'};
@@ -34,21 +35,30 @@ function validate(snapshot){
  if(Number.isInteger(snapshot.version)&&snapshot.version>=1&&snapshot.version<VERSION){
   // Old schemas cannot contain a new boss or invent its missing attack state.
   check(object(snapshot.game)&&object(snapshot.game.timers)&&Array.isArray(snapshot.game.s?.enemies));
-  check(snapshot.game.s.enemies.every(e=>object(e)&&e.type!=='pelican'&&!e.phase?.startsWith('peli_')&&!Object.keys(e).some(key=>key.startsWith('peli'))));
-  if(snapshot.game.timers.pelican===undefined)snapshot.game.timers.pelican=360;
+  if(snapshot.version<5)check(snapshot.game.s.enemies.every(e=>object(e)&&e.type!=='pelican'&&!e.phase?.startsWith('peli_')&&!Object.keys(e).some(key=>key.startsWith('peli'))));
   if(snapshot.version<=3){snapshot.game.timers.animal??=12;snapshot.game.timers.animalIndex??=0;}
   if(snapshot.version===3)check(snapshot.game.s.enemies.every(e=>!ANIMALS[e.type]));
   if(snapshot.version===1){
    // v1 predates Travestia. Never synthesize missing attack state for a boss.
    check(snapshot.game.s.enemies.every(e=>e.type!=='travestia'));
-   if(snapshot.game.timers.travestia===undefined)snapshot.game.timers.travestia=240;
    for(const e of snapshot.game.s.enemies){if(e.tailTime===undefined)e.tailTime=0;if(e.tailFaceX===undefined)e.tailFaceX=1;if(e.tailHitPlayer===undefined)e.tailHitPlayer=false;if(e.tailHitGirl===undefined)e.tailHitGirl=false;}
   }
   if(snapshot.version===2)check(snapshot.game.s.enemies.every(e=>!e.phase?.startsWith('tail_dash')));
+  snapshot.game.bossDirector=createBossDirector(snapshot.game.seed,snapshot.game.s.elapsed,snapshot.game.s.enemies);
+  for(const key of ['boss','travestia','pelican'])delete snapshot.game.timers[key];
   snapshot.version=VERSION;
  }
- check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));check(d.timers.pelican>=0);
- for(const key of INTERNAL){if(['viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
+ check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
+ const director=d.bossDirector;check(object(director));
+ check(integer(director.rng)&&director.rng<=4294967295&&BOSS_TYPES.includes(director.nextType));
+ check(Array.isArray(director.bag)&&director.bag.length<=2&&new Set(director.bag).size===director.bag.length&&director.bag.every(type=>BOSS_TYPES.includes(type)&&type!==director.nextType));
+ check(director.lastType===null||BOSS_TYPES.includes(director.lastType)&&director.lastType!==director.nextType);
+ check(finite(director.remaining)&&director.remaining>=0&&director.remaining<=BOSS_SCHEDULE.firstMax&&typeof director.warned==='boolean');
+ check(finite(director.retryIn)&&director.retryIn>=0&&director.retryIn<=BOSS_SCHEDULE.retry);
+ if(director.warned)check(director.remaining<=BOSS_SCHEDULE.warning);
+ else check(director.retryIn===0);
+ if(director.retryIn>0)check(director.warned&&director.remaining===0);
+ for(const key of INTERNAL){if(['bossDirector','viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
  check(d.viewport.width>=240&&d.viewport.width<=1600&&d.viewport.height>=320&&d.viewport.height<=1600);check(Array.isArray(d.eventSeen)&&d.eventSeen.length<=100&&d.eventSeen.every(x=>typeof x==='string'));
@@ -68,8 +78,8 @@ function validate(snapshot){
  const actorIds=new Set(),majorBosses=new Set();
  for(const e of s.enemies){
   check(ENEMIES.includes(e.type)&&integer(e.id,1)&&e.id<d.id&&e.maxhp>0&&e.r>0&&!actorIds.has(e.id));actorIds.add(e.id);
-  if(e.type==='pelican'){check(!majorBosses.has(e.type));majorBosses.add(e.type);}
-  const template=base.spawnEnemy(e.type,0,0);check(template);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
+  if(['travestia','pelican'].includes(e.type)){check(!majorBosses.has(e.type));majorBosses.add(e.type);}
+  base.s.enemies=[];const template=base.spawnEnemy(e.type,0,0);check(template);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
   if(ANIMALS[e.type]){const a=ANIMALS[e.type],limits={chase:0,animal_warning:a.warning,animal_active:a.duration,animal_recover:a.recovery};check(Object.hasOwn(limits,e.phase)&&e.animalTime>=0&&e.animalTime<=limits[e.phase]&&typeof e.animalHit==='boolean'&&Math.abs(Math.hypot(e.animalDX,e.animalDY)-1)<1e-6&&e.animalTravel>=0&&e.animalTravel<=a.reach+1e-6);}
   if(e.type==='travestia'){
    const interrupted=(e.phase==='charmed'&&e.charmed>0)||(e.phase==='suppressed'&&s.airplane.active);
@@ -138,7 +148,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
+ tree(v);check([1,2,3,4,5,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
 }
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.
