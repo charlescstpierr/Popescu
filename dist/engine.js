@@ -280,7 +280,10 @@ export class Game {
     for(const e of this.s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
     for(const e of this.s.enemies){const cx=Math.floor(e.x/size),cy=Math.floor(e.y/size);let pushes=0;
       neighbors:for(let a=cx-1;a<=cx+1;a++)for(let b=cy-1;b<=cy+1;b++)for(const other of buckets.get(`${a},${b}`)||[]){
-        if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y,d=length(dx,dy),gap=(e.r+other.r)*.8;if(d>=gap)continue;
+        if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y;const gap=(e.r+other.r)*.8;
+        // Most neighboring cells do not overlap. Keep the exact distance and
+        // push for actual contacts, but reject separated bounds first.
+        if(Math.abs(dx)>=gap||Math.abs(dy)>=gap)continue;let d=length(dx,dy);if(d>=gap)continue;
         if(d<.001){const angle=e.id*2.399963+other.id*.37;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
         const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
         if(++pushes>=8)break neighbors;

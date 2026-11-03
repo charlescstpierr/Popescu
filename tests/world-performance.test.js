@@ -28,3 +28,22 @@ test('cached collisions match legacy math across biomes, chunk boundaries and re
   assert.notEqual(after,before);assert.equal(w.collides(300,280,13),reference(w,300,280,13));
  }
 });
+
+// Removing the region reuse makes hundreds of identical chunk lookups return.
+test('adjacent movement collision queries reuse their chunk neighborhood',()=>{
+ const w=new World(42),chunk=w.chunk;let lookups=0;
+ w.chunk=function(...args){lookups++;return chunk.apply(this,args);};
+ assert.equal(w.collides(0,0,13),false);lookups=0;
+ for(let i=0;i<100;i++)assert.equal(w.collides(i/10,i/20,13),false);
+ assert.equal(lookups,0,'small movement within the same neighborhood needs no chunk lookups');
+});
+
+test('collision neighborhood releases evicted footprints before regenerating chunks',()=>{
+ const w=new World(42);w.collides(0,0,13);const before=w.chunk(0,0);
+ w.update(50000,-50000);
+ let lookups=0;const chunk=w.chunk;
+ w.chunk=function(...args){lookups++;return chunk.apply(this,args);};
+ assert.equal(w.collides(0,0,13),false);
+ assert.ok(lookups>0,'returning to an evicted region must regenerate its chunks');
+ assert.notEqual(w.chunk(0,0),before);
+});

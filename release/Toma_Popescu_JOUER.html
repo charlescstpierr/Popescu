@@ -475,7 +475,7 @@ const STREET_CLUSTERS=[
 const STREET_SLOTS=[[174,205],[177,279],[208,320],[218,148],[311,134],[362,137],[406,171],[412,246],[409,390],[366,410],[220,421],[104,382],[151,326],[215,209],[212,274],[155,171]];
 
 class World {
-  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; this.collisionBounds = new WeakMap(); }
+  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; this.collisionBounds = new WeakMap(); this.collisionRegion = null; }
   chunk(cx, cy) {
     const key = `${cx},${cy}`;
     const cached = this.chunks.get(key);
@@ -566,6 +566,8 @@ class World {
     return props;
   }
   update(x, y) {
+    // A single derived neighborhood never keeps evicted geometry alive.
+    this.collisionRegion = null;
     const cx = Math.floor(x / SIZE), cy = Math.floor(y / SIZE);
     for (const key of this.chunks.keys()) { const [a,b] = key.split(',').map(Number); if (Math.abs(a-cx)>4 || Math.abs(b-cy)>4) this.chunks.delete(key); }
     for(let a=cx-2;a<=cx+2;a++) for(let b=cy-2;b<=cy+2;b++) this.chunk(a,b);
@@ -583,16 +585,24 @@ class World {
   collides(x,y,r=0) {
     const minx=Math.floor((x-r-110)/SIZE),maxx=Math.floor((x+r+110)/SIZE);
     const miny=Math.floor((y-r-110)/SIZE),maxy=Math.floor((y+r+110)/SIZE);
-    for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) {
-      const props=this.chunk(a,b);
-      // Props are static for the lifetime of a generated chunk. Weak keys let
-      // eviction release these derived footprints along with the prop array.
-      let solids=this.collisionBounds.get(props);
-      if(!solids){solids=props.filter(p=>p.solid).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
-      for(const bounds of solids){
-        const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
-        if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
+    let region=this.collisionRegion;
+    if(!region||region.minx!==minx||region.maxx!==maxx||region.miny!==miny||region.maxy!==maxy){
+      const bounds=[];
+      for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) {
+        const props=this.chunk(a,b);
+        // Props are static for the lifetime of a generated chunk. Weak keys let
+        // eviction release these derived footprints along with the prop array.
+        let solids=this.collisionBounds.get(props);
+        if(!solids){solids=props.filter(p=>p.solid).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
+        for(const solid of solids)bounds.push(solid);
       }
+      region=this.collisionRegion={minx,maxx,miny,maxy,bounds};
+    }
+    // Crowd pushes often test the same chunk neighborhood several times. Reuse
+    // its ordered footprints; only the original circle/rectangle math varies.
+    for(const bounds of region.bounds){
+      const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
+      if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
     }
     return false;
   }
@@ -1058,7 +1068,10 @@ class Game {
     for(const e of this.s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
     for(const e of this.s.enemies){const cx=Math.floor(e.x/size),cy=Math.floor(e.y/size);let pushes=0;
       neighbors:for(let a=cx-1;a<=cx+1;a++)for(let b=cy-1;b<=cy+1;b++)for(const other of buckets.get(`${a},${b}`)||[]){
-        if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y,d=length(dx,dy),gap=(e.r+other.r)*.8;if(d>=gap)continue;
+        if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y;const gap=(e.r+other.r)*.8;
+        // Most neighboring cells do not overlap. Keep the exact distance and
+        // push for actual contacts, but reject separated bounds first.
+        if(Math.abs(dx)>=gap||Math.abs(dy)>=gap)continue;let d=length(dx,dy);if(d>=gap)continue;
         if(d<.001){const angle=e.id*2.399963+other.id*.37;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
         const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
         if(++pushes>=8)break neighbors;
