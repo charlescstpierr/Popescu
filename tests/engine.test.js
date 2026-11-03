@@ -134,7 +134,7 @@ test('charisma slows approaching enemies and companion aura collects XP', () => 
 });
 
 test('late endless levels still offer three useful choices after upgrade ranks are exhausted', () => {
-  const g=game();const {UPGRADES}=awaitedContent;for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;
+  const g=game();const {UPGRADES}=awaitedContent;for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;g.s.evolutions={billionaire:true,viralLove:true};
   g.s.hp=10;g.s.drops=[{x:0,y:0,kind:'xp',value:20,life:10}];g.update(.02);
   assert.equal(g.s.mode,'upgrade');assert.equal(g.s.options.length,3);assert.equal(new Set(g.s.options.map(o=>o.id)).size,3);
   const option=g.s.options.find(o=>o.id==='recovery');assert.ok(option);g.chooseUpgrade('recovery');assert.ok(g.s.hp>10);assert.equal(g.s.mode,'playing');

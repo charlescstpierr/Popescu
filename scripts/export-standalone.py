@@ -5,7 +5,7 @@ import re, base64, sys
 root=Path(__file__).resolve().parents[1]
 dist=root/'dist'
 parts=['(()=>{\nconst modules=Object.create(null);']
-for name in ['content','discoveries','biomes','prop-geometry','world','hero-frames','hero-pose','travestia-dash','travestia','animals','pelican','boss-director','engine','pelican-art','actor-art','hero-art','city-art','combat-art','discovery-art','renderer','audio','run-save','opening','app']:
+for name in ['content','evolutions','discoveries','biomes','prop-geometry','world','hero-frames','hero-pose','travestia-dash','travestia','animals','pelican','boss-director','drops','engine','pelican-art','actor-art','hero-art','city-art','combat-art','discovery-art','renderer','audio','run-save','opening','app']:
     code=(dist/f'{name}.js').read_text()
     code=re.sub(r"new URL\(['\"]\./assets/([^'\"]+)['\"],\s*import\.meta\.url\)\.href",lambda m:repr('assets/'+m[1]),code)
     exports=re.findall(r'export\s+(?:const|let|class|function)\s+(\w+)',code)

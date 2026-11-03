@@ -1,3 +1,4 @@
+import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
 import {OPENING,openingStage,beginTutorial,updateTutorial,tutorialText} from './opening.js';
 import {discoveryPrompt} from './discoveries.js';
 import {LockedRunStore,restoreRun,captureRun,Autosave} from './run-save.js';
@@ -12,6 +13,7 @@ const canvas=$('world'),app=$('app');
 const renderer=new Renderer(canvas);
 const stored=readStorage();
 let runStore;try{runStore=new LockedRunStore(localStorage,navigator.locks);}catch{runStore=new LockedRunStore(null,null);}
+let upgradePurchasePending=false;
 let savedRecord=runStore.read(),runId=null,runPersistence=false,transitionBusy=false,recoveryPending=false,flushRequested=false,lastSaveError='';
 const prefs={sound:stored.sound!==false,volume:stored.volume??50,reduced:stored.reduced??matchMedia('(prefers-reduced-motion: reduce)').matches,banter:stored.banter!==false};
 const audio=new AudioManager({enabled:prefs.sound,volume:prefs.volume/100});
@@ -49,6 +51,7 @@ function showSaveError(reason){
 function dialogueSnapshot(){return game?.s.mode==='dialogue'?{lines:dialogueLines,index:dialogueIndex}:null;}
 function requestSave(){flushRequested=true;}
 async function persistRun(credit=false){
+ if(upgradePurchasePending)return {ok:false,reason:'transaction-pending'};
  if(!game||!runId||!runPersistence)return {ok:false,reason:'inactive'};
  const current=game,id=runId;
  const result=await runStore.checkpoint(id,current,{credit,dialogue:dialogueSnapshot()});
@@ -120,15 +123,53 @@ function finishOpening(skipped=false){
 }
 function nextDialogue(){if(screen!=='dialogue')return;sound('click');dialogueIndex++;renderDialogue();requestSave();}
 function finishDialogue(skipped=false){clearTimeout(autoTimer);const done=dialogueDone;dialogueDone=null;done?.(skipped);requestSave();}
-function renderUpgrades(options){show('upgrades');audio.unlock().then(()=>sound('level'));$('upgrade-options').replaceChildren();for(const u of options.slice(0,3)){const rank=game?.state.upg[u.id]||0;const permanent=UPGRADES.some(def=>def.id===u.id);const button=document.createElement('button');button.className='upgrade-card';button.setAttribute('aria-label',`${u.name}. ${u.desc}. ${permanent?`Niveau ${rank+1}`:'Récompense immédiate'}`);const icon=document.createElement('canvas');icon.width=48;icon.height=48;drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=u.name;const desc=document.createElement('p');desc.textContent=u.desc;const level=document.createElement('span');level.className='upgrade-rank';level.textContent=permanent?`${rank===0?'NOUVEAU POUVOIR':`NIV. ${rank} → ${rank+1}`}  ${rank+1===u.max?'· MAX':''}`:'RÉCOMPENSE IMMÉDIATE';copy.append(name,desc,level);const arrow=document.createElement('span');arrow.className='upgrade-arrow';arrow.textContent='›';button.append(icon,copy,arrow);button.addEventListener('click',()=>{if(!game||game.state.mode!=='upgrade')return;game.chooseUpgrade(u.id);powerSignature='';syncEngineScreen();updateHud(true);if(u.id==='girlfriend'&&rank===0&&EVENTS.companion)game.startDialogue(EVENTS.companion);requestSave();});$('upgrade-options').append(button);}setText('synergy-note',game?.state.companion&&game?.state.upg.followers?'DUO ACTIF · TOMA TIRE VITE. SA BLONDE CHARME LA HORDE.':'LE TEMPS EST ARRÊTÉ. CHOISIS TRANQUILLEMENT.');}
+function renderUpgrades(options){
+ show('upgrades');audio.unlock().then(()=>sound('level'));$('upgrade-options').replaceChildren();
+ for(const u of options.slice(0,3)){
+  const rank=game?.state.upg[u.id]||0,permanent=UPGRADES.some(def=>def.id===u.id),evolution=EVOLUTIONS.find(def=>def.id===u.id);
+  const button=document.createElement('button');button.className=`upgrade-card${evolution?' evolution-card':''}`;
+  if(evolution)button.style.setProperty('--evolution-color',evolution.color);
+  button.setAttribute('aria-label',`${u.name}. ${evolution?`Évolution disponible. ${evolution.requirement}. `:''}${u.desc}. ${permanent?`Niveau ${rank+1}`:evolution?'Évolution permanente':'Récompense immédiate'}`);
+  const icon=document.createElement('canvas');icon.width=48;icon.height=48;drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
+  const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=u.name;
+  const desc=document.createElement('p');desc.textContent=u.desc;const level=document.createElement('span');level.className='upgrade-rank';
+  if(evolution){level.textContent='ÉVOLUTION DISPONIBLE';const requirement=document.createElement('p');requirement.className='evolution-requirement';requirement.textContent=evolution.requirement;copy.append(name,level,requirement,desc);}
+  else{level.textContent=permanent?`${rank===0?'NOUVEAU POUVOIR':`NIV. ${rank} → ${rank+1}`}  ${rank+1===u.max?'· MAX':''}`:'RÉCOMPENSE IMMÉDIATE';copy.append(name,desc,level);}
+  const arrow=document.createElement('span');arrow.className='upgrade-arrow';arrow.textContent='›';button.append(icon,copy,arrow);
+  button.addEventListener('click',()=>{if(transitionBusy||!game||game.state.mode!=='upgrade'||!game.chooseUpgrade(u.id))return;powerSignature='';syncEngineScreen();updateHud(true);if(u.id==='girlfriend'&&rank===0&&EVENTS.companion)game.startDialogue(EVENTS.companion);requestSave();});$('upgrade-options').append(button);
+ }
+ renderReroll();setText('synergy-note','LE TEMPS EST ARRÊTÉ. CHOISIS TRANQUILLEMENT.');
+}
+function renderReroll(){
+ if(!game)return;const s=game.s,cost=game.rerollCost();setText('upgrade-coins',s.coins);
+ setText('reroll-upgrades',upgradePurchasePending?'SAUVEGARDE…':cost===null?'RELANCES ÉPUISÉES':`↻ RELANCER · ${cost} PIÈCES`);
+ $('reroll-upgrades').disabled=transitionBusy||!runPersistence||!game.canRerollUpgrade();
+ setText('reroll-count',`${s.upgradeRerolls} / 2 relances utilisées`);
+ setText('reroll-feedback',!runPersistence?'Relance indisponible sans sauvegarde.':cost===null?'Deux relances utilisées pour ce niveau.':s.coins<cost?'Pas assez de pièces pour relancer.':!game.canRerollUpgrade()?'Aucune autre carte disponible.':'Nouveau choix de 3 cartes.');
+}
+async function rerollUpgrades(){
+ if(transitionBusy||!game||!runPersistence||!game.canRerollUpgrade())return false;
+ const current=game,id=runId;transitionBusy=true;upgradePurchasePending=true;renderReroll();
+ try{
+  // Do not show new cards or debit the live balance until both are durable.
+  const candidate=restoreRun(captureRun(current));if(!candidate.rerollUpgrade())return false;
+  const result=await runStore.checkpoint(id,candidate);
+  if(game!==current||runId!==id)return false;
+  if(!result.ok){if(result.reason==='conflict')runPersistence=false;showSaveError(result.reason);return false;}
+  candidate.onEvent=onGameEvent;game=candidate;savedRecord={status:'ready',value:result.value};flushRequested=false;lastSaveError='';$('toast').classList.add('hidden');
+  renderUpgrades(game.s.options);updateHud(true);return true;
+ }catch{showSaveError('write-failed');return false;}
+ finally{upgradePurchasePending=false;transitionBusy=false;if(game===current||game?.s.mode==='upgrade')renderReroll();}
+}
+
 function pause(){if(!game||game.state.mode!=='playing')return;game.pause();setText('pause-stats',`${format(game.state.elapsed)}  ·  ${game.state.kills} SINGES  ·  NIV. ${game.state.level}`);show('pause-screen');requestSave();}
 function resume(){if(!game||transitionBusy)return;audio.unlock();lastTime=performance.now();resetInput();
  if(recoveryPending){recoveryPending=false;if(game.s.mode==='dialogue'){show('dialogue');renderDialogue();return;}}
  game.resume();syncEngineScreen();requestSave();}
 async function recordRun(){if(!game)return false;const s=game.s,newRecord=s.elapsed>best;
- const result=await persistRun(true);if(!result.ok){best=Math.max(best,s.elapsed);lifetime+=Math.max(0,s.kills-creditedKills);lifetimeCoins+=Math.max(0,s.coins-creditedCoins);creditedKills=s.kills;creditedCoins=s.coins;}return newRecord;}
-async function renderResult(win){if(!game)return;const current=game,s=game.state;const newRecord=s.elapsed>best;resultRecorded=true;show('results');audio.unlock().then(()=>sound(win?'victory':'defeat'));const panel=document.querySelector('.result-panel');panel.classList.toggle('victory',win);panel.classList.toggle('defeat',!win);setText('result-title',win?'VICTOIRE !':'GAME OVER');setText('result-kicker',win?'20 MINUTES. ZÉRO RETOUCHE.':'UNE FIN TRÈS DRAMATIQUE');setText('result-quote',win?victoryQuote(s):'« Je suis pas mort. Je fais une pause dramatique pour mes fans. »');setText('result-time',format(s.elapsed));setText('result-kills',s.kills.toLocaleString('fr-CA'));setText('result-coins',s.coins.toLocaleString('fr-CA'));setText('result-gems',s.gems.toLocaleString('fr-CA'));setText('record-message',newRecord?'✦ NOUVEAU RECORD PERSONNEL ✦':`RECORD PERSONNEL · ${format(best)}`);$('endless').classList.toggle('hidden',!win);$('retry').classList.toggle('secondary',win);$('retry').classList.toggle('primary',!win);await recordRun();if(game===current&&screen==='results')updateRecordMenu();}
-function updateHud(force=false){if(!game)return;const s=game.state;const help=tutorialText(game);$('opening-help').classList.toggle('hidden',!help);setText('opening-help-text',help);audio.setIntensity?.(Math.min(1,s.elapsed/1000+s.enemies.length/650));setText('level',`NIV. ${s.level}`);setText('time',format(s.elapsed));setText('time-goal',s.endless?'SURVIE INFINIE':'OBJECTIF 20:00');setText('health-text',`${Math.max(0,Math.ceil(s.hp))} / ${s.maxhp}${s.shield>0?' + ◇':''}`);$('health-fill').style.width=`${Math.max(0,s.hp)/s.maxhp*100}%`;$('xp-fill').style.width=`${Math.min(100,s.xp/s.xpNeed*100)}%`;setText('xp-text',`EXPÉRIENCE ${Math.floor(s.xp)} / ${s.xpNeed}`);setText('coins',s.coins);setText('gems',s.gems);setText('kills',s.kills);setText('coordinates',`SECTEUR ${Math.floor(s.x/512)} · ${Math.floor(s.y/512)}  /  ${DIFFICULTIES[s.difficulty]?.label||s.difficulty}`);$('companion').classList.toggle('unlocked',s.companion);setText('companion-status',s.companion?(s.girl?.down>0?'SIGNAL EN RECONSTRUCTION':'CONNECTÉE · ♥ ACTIF'):'SIGNAL VERROUILLÉ');setText('companion-lock',s.companion?'♥':'◇');const sig=JSON.stringify(s.upg);if(sig!==powerSignature||force){powerSignature=sig;$('powers').replaceChildren();for(const [id,rank] of Object.entries(s.upg)){if(!rank)continue;const u=UPGRADES.find(u=>u.id===id);if(!u)continue;const el=document.createElement('span');el.className='power-icon';el.title=`${u.name} · Niveau ${rank}`;const c=document.createElement('canvas');c.width=26;c.height=26;drawIcon(c.getContext('2d'),u.icon||id,0,0,26);const n=document.createElement('small');n.textContent=rank;el.append(c,n);$('powers').append(el);}}updateDiscoveryHud();drawArrows();}
+ const result=await persistRun(true);if(!result.ok){best=Math.max(best,s.elapsed);lifetime+=Math.max(0,s.kills-creditedKills);lifetimeCoins+=Math.max(0,totalEarnedCoins(s)-creditedCoins);creditedKills=s.kills;creditedCoins=totalEarnedCoins(s);}return newRecord;}
+async function renderResult(win){if(!game)return;const current=game,s=game.state;const newRecord=s.elapsed>best;resultRecorded=true;show('results');audio.unlock().then(()=>sound(win?'victory':'defeat'));const panel=document.querySelector('.result-panel');panel.classList.toggle('victory',win);panel.classList.toggle('defeat',!win);setText('result-title',win?'VICTOIRE !':'GAME OVER');setText('result-kicker',win?'20 MINUTES. ZÉRO RETOUCHE.':'UNE FIN TRÈS DRAMATIQUE');setText('result-quote',win?victoryQuote(s):'FUCKK ! Efface la vidéo. On recommence.');setText('result-time',format(s.elapsed));setText('result-kills',s.kills.toLocaleString('fr-CA'));setText('result-coins',totalEarnedCoins(s).toLocaleString('fr-CA'));setText('result-gems',s.gems.toLocaleString('fr-CA'));setText('record-message',newRecord?'✦ NOUVEAU RECORD PERSONNEL ✦':`RECORD PERSONNEL · ${format(best)}`);$('endless').classList.toggle('hidden',!win);$('retry').classList.toggle('secondary',win);$('retry').classList.toggle('primary',!win);await recordRun();if(game===current&&screen==='results')updateRecordMenu();}
+function updateHud(force=false){if(!game)return;const s=game.state;const help=tutorialText(game);$('opening-help').classList.toggle('hidden',!help);setText('opening-help-text',help);audio.setIntensity?.(Math.min(1,s.elapsed/1000+s.enemies.length/650));setText('level',`NIV. ${s.level}`);setText('time',format(s.elapsed));setText('time-goal',s.endless?'SURVIE INFINIE':'OBJECTIF 20:00');setText('health-text',`${Math.max(0,Math.ceil(s.hp))} / ${s.maxhp}${s.shield>0?' + ◇':''}`);$('health-fill').style.width=`${Math.max(0,s.hp)/s.maxhp*100}%`;$('xp-fill').style.width=`${Math.min(100,s.xp/s.xpNeed*100)}%`;setText('xp-text',`EXPÉRIENCE ${Math.floor(s.xp)} / ${s.xpNeed}`);setText('coins',s.coins);setText('gems',s.gems);setText('kills',s.kills);setText('coordinates',`SECTEUR ${Math.floor(s.x/512)} · ${Math.floor(s.y/512)}  /  ${DIFFICULTIES[s.difficulty]?.label||s.difficulty}`);$('companion').classList.toggle('unlocked',s.companion);setText('companion-status',s.companion?(s.girl?.down>0?'SIGNAL EN RECONSTRUCTION':'CONNECTÉE · ♥ ACTIF'):'SIGNAL VERROUILLÉ');setText('companion-lock',s.companion?'♥':'◇');const sig=JSON.stringify([s.upg,s.evolutions]);if(sig!==powerSignature||force){powerSignature=sig;$('powers').replaceChildren();for(const [id,rank] of Object.entries(s.upg)){if(!rank)continue;const u=UPGRADES.find(u=>u.id===id);if(!u)continue;const el=document.createElement('span');el.className='power-icon';const evolved=EVOLUTIONS.find(def=>s.evolutions[def.id]&&def.requires.includes(id));el.title=`${u.name} · Niveau ${rank}${evolved?` · ${evolved.name}`:''}`;const c=document.createElement('canvas');c.width=26;c.height=26;drawIcon(c.getContext('2d'),u.icon||id,0,0,26);const n=document.createElement('small');n.textContent=rank;el.append(c,n);$('powers').append(el);}}updateDiscoveryHud();drawArrows();}
 function updateDiscoveryHud(){
   const discovery=game.state.discovery,active=discovery?.active,site=active||discovery?.nearby;
   $('discovery-status').classList.toggle('hidden',!site);
@@ -148,6 +189,7 @@ app.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;const dx=
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(event,e=>{if(e.pointerId===pointer)resetInput();});
 window.addEventListener('blur',()=>{resetInput();if(screen==='hud')pause();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(autoTimer);resetInput();if(screen==='hud')pause();audio.setScene('paused');if(game)autosave.flush();}else{lastTime=performance.now();syncAudio();if(screen==='dialogue'&&auto)renderDialogue();}});
+$('reroll-upgrades').onclick=rerollUpgrades;
 $('resume-saved').onclick=resumeSaved;$('play').onclick=start;$('story').onclick=()=>{runId=null;runPersistence=false;game=new Game({difficulty,seed:42});game.setViewport(width,height);game.s.mode='dialogue';openDialogue(OPENING,mainMenu);sound();};
 $('next-dialogue').onclick=nextDialogue;$('skip-dialogue').onclick=()=>finishDialogue(true);$('auto-dialogue').onclick=()=>{auto=!auto;$('auto-dialogue').setAttribute('aria-pressed',String(auto));setText('auto-dialogue',`AUTO : ${auto?'OUI':'NON'}`);renderDialogue();};
 $('opening-help-skip').onclick=()=>{if(game?.s.opening){game.s.opening.phase='done';requestSave();updateHud(true);}};

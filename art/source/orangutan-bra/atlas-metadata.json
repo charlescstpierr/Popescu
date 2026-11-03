@@ -1,0 +1,231 @@
+{
+  "image": "dist/assets/orangutan-walk-v3.png",
+  "width": 512,
+  "height": 256,
+  "columns": 4,
+  "rows": 2,
+  "cell": 128,
+  "baseline": 121,
+  "source": "art/source/orangutan-bra/poses-transparent-source.png",
+  "sourceSha256": "24674f462de47ad8450bf5d850032de1c9edc7f078b4e6e76c1eb105c7c642d6",
+  "generation": "Built-in image_gen costume edit of existing orangutan atlas using the approved pink-bra mockup.",
+  "registration": "Whole painted frames only; uniform per-frame scaling and translation preserve original body height and foot baseline. Runtime path, atlas size, renderer and cache unchanged.",
+  "frames": [
+    {
+      "index": 0,
+      "view": "front",
+      "sourceRect": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "sourceBounds": [
+        33,
+        30,
+        410,
+        422
+      ],
+      "targetBounds": [
+        11,
+        10,
+        116,
+        120
+      ],
+      "scale": 0.2824427480916031,
+      "translation": [
+        1.2977099236641152,
+        1.5267175572518994
+      ]
+    },
+    {
+      "index": 1,
+      "view": "front",
+      "sourceRect": [
+        444,
+        0,
+        443,
+        444
+      ],
+      "sourceBounds": [
+        30,
+        31,
+        411,
+        422
+      ],
+      "targetBounds": [
+        10,
+        10,
+        117,
+        120
+      ],
+      "scale": 0.28316326530612246,
+      "translation": [
+        1.4209183673469354,
+        1.2219387755101963
+      ]
+    },
+    {
+      "index": 2,
+      "view": "front",
+      "sourceRect": [
+        887,
+        0,
+        444,
+        444
+      ],
+      "sourceBounds": [
+        34,
+        45,
+        407,
+        422
+      ],
+      "targetBounds": [
+        11,
+        15,
+        115,
+        120
+      ],
+      "scale": 0.2804232804232804,
+      "translation": [
+        1.5264550264550323,
+        2.380952380952394
+      ]
+    },
+    {
+      "index": 3,
+      "view": "front",
+      "sourceRect": [
+        1331,
+        0,
+        443,
+        444
+      ],
+      "sourceBounds": [
+        24,
+        45,
+        416,
+        422
+      ],
+      "targetBounds": [
+        7,
+        13,
+        119,
+        120
+      ],
+      "scale": 0.2857142857142857,
+      "translation": [
+        0.5,
+        0.142857142857153
+      ]
+    },
+    {
+      "index": 4,
+      "view": "back",
+      "sourceRect": [
+        0,
+        444,
+        444,
+        443
+      ],
+      "sourceBounds": [
+        31,
+        26,
+        410,
+        423
+      ],
+      "targetBounds": [
+        10,
+        9,
+        116,
+        120
+      ],
+      "scale": 0.2814070351758794,
+      "translation": [
+        1.3090452261306567,
+        1.6834170854271377
+      ]
+    },
+    {
+      "index": 5,
+      "view": "back",
+      "sourceRect": [
+        444,
+        444,
+        443,
+        443
+      ],
+      "sourceBounds": [
+        26,
+        26,
+        412,
+        423
+      ],
+      "targetBounds": [
+        9,
+        9,
+        117,
+        120
+      ],
+      "scale": 0.2814070351758794,
+      "translation": [
+        1.7311557788944754,
+        1.6834170854271377
+      ]
+    },
+    {
+      "index": 6,
+      "view": "back",
+      "sourceRect": [
+        887,
+        444,
+        444,
+        443
+      ],
+      "sourceBounds": [
+        41,
+        38,
+        407,
+        423
+      ],
+      "targetBounds": [
+        12,
+        12,
+        115,
+        120
+      ],
+      "scale": 0.2823834196891192,
+      "translation": [
+        0.6049222797927456,
+        1.2694300518134725
+      ]
+    },
+    {
+      "index": 7,
+      "view": "back",
+      "sourceRect": [
+        1331,
+        444,
+        443,
+        443
+      ],
+      "sourceBounds": [
+        21,
+        38,
+        417,
+        423
+      ],
+      "targetBounds": [
+        7,
+        12,
+        119,
+        120
+      ],
+      "scale": 0.2823834196891192,
+      "translation": [
+        1.5168393782383376,
+        1.2694300518134725
+      ]
+    }
+  ]
+}

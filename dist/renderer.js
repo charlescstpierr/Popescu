@@ -348,7 +348,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.defeatStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -440,12 +440,59 @@ export class Renderer {
     if(!foreground){rect(ctx,'#dcff68',cloud.x-r*.3,cloud.y-r*.16,3,3);rect(ctx,'#dcff68',cloud.x+r*.35,cloud.y+r*.1,2,2);}
     ctx.restore();
   }
-  _drop(p) {
-    const ctx=this.ctx,x=p.x,y=p.y+Math.sin(this.time*4+p.x)*2;
+  _drop(p,state,trail=true) {
+    const ctx=this.ctx,x=p.x,y=p.y+(this.reducedEffects?0:Math.sin(this.time*4+p.x)*2);
+    if(p.kind==='xp'){
+      let drewTrail=false;
+      if(trail&&!this.reducedEffects&&state){
+        let target=state;const girl=state.girl;
+        if(state.companion&&girl&&girl.down<=0&&(p.x-girl.x)**2+(p.y-girl.y)**2<(p.x-state.x)**2+(p.y-state.y)**2)target=girl;
+        const dx=p.x-target.x,dy=p.y-target.y,distance=Math.hypot(dx,dy);
+        if(distance>22&&distance<(state.stats?.magnet||0)){
+          drewTrail=true;ctx.save();ctx.globalAlpha=.8;ctx.fillStyle='#75e7f2';
+          for(let i=1;i<=4;i++)ctx.fillRect(Math.round(x+dx/distance*i*6),Math.round(y+dy/distance*i*6),3,2);
+          ctx.restore();
+        }
+      }
+      // A hollow cyan diamond stays distinct from coins, gems and purple debris.
+      this._shadow(x,p.y+5,9,4,.3);
+      poly(ctx,'#172239',[[x,y-8],[x+7,y],[x,y+8],[x-7,y]]);
+      poly(ctx,'#75e7f2',[[x,y-6],[x+5,y],[x,y+6],[x-5,y]]);
+      poly(ctx,'#23536a',[[x,y-3],[x+2,y],[x,y+3],[x-2,y]]);
+      rect(ctx,'#e0ffff',x-1,y-5,2,2);
+      return drewTrail;
+    }
     this._shadow(x,p.y+5,9,4,.3);
     if(p.kind==='coin') {oval(ctx,'#6b3d0c',x-5,y-6,10,12);oval(ctx,C.gold,x-4,y-5,8,10);oval(ctx,'#d99512',x-2,y-3,4,6);rect(ctx,C.goldLight,x-3,y-4,2,5);}
     else if(p.kind==='heal') {rect(ctx,C.ink,x-6,y-6,13,13);rect(ctx,'#eee9d5',x-5,y-5,11,11);rect(ctx,'#e83967',x-2,y-4,4,9);rect(ctx,'#e83967',x-4,y-2,9,4);}
     else {const gem=p.kind==='gem';poly(ctx,C.ink,[[x,y-7],[x+6,y-2],[x+3,y+6],[x-3,y+6],[x-6,y-2]]);poly(ctx,gem?'#e875f5':'#71d3fd',[[x,y-6],[x+5,y-2],[x+2,y+5],[x-2,y+5],[x-5,y-2]]);poly(ctx,gem?'#ffc0ff':'#c0f8ff',[[x,y-5],[x+1,y-2],[x-2,y+3],[x-4,y-2]]);line(ctx,gem?'#9144bf':'#3575bb',x+1,y-2,x+2,y+4,1);}
+  }
+  _defeatImpact(effect,s){
+    const age=s.elapsed-effect.start,duration=this.reducedEffects?.16:.07;
+    if(age<0||age>=duration)return;
+    if(this.reducedEffects){
+      // Low-effects mode never allocates outlines or offscreen defeat canvases.
+      const ctx=this.ctx;ctx.save();ctx.globalAlpha=1-age/duration;
+      this.actors.draw(ctx,{...effect.actor,hitFlash:0},'enemy',effect.phase,s,effect.start,true);ctx.restore();return;
+    }
+    let stamp=this.defeatStamps.get(effect);
+    if(!stamp){
+      const original=makeCanvas(224,224),ivory=makeCanvas(224,224);if(!original||!ivory)return;
+      const c=original.getContext('2d');c.imageSmoothingEnabled=false;c.translate(112,184);
+      const actor={...effect.actor,x:0,y:0,hitFlash:0};
+      if(!this.actors.draw(c,actor,'enemy',effect.phase,s,effect.start,true)){
+        const scale=ENEMY_SCALE[actor.type]||.84,sprite=this._sprite('gorilla',effect.phase,actor.faceY<-.45,actor.type);
+        if(sprite)c.drawImage(sprite,-34*scale,10-71*scale,68*scale,76*scale);
+      }
+      const tint=ivory.getContext('2d');tint.drawImage(original,0,0);tint.globalCompositeOperation='source-in';tint.fillStyle='#fff4d7';tint.fillRect(0,0,224,224);
+      stamp={original,ivory};this.defeatStamps.set(effect,stamp);
+    }
+    const ctx=this.ctx,x=Math.round(effect.actor.x)-112,y=Math.round(effect.actor.y)-184;ctx.save();
+    {
+      ctx.globalAlpha=.95;for(const [dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]])ctx.drawImage(stamp.ivory,x+dx,y+dy);
+      ctx.globalAlpha=1;ctx.drawImage(stamp.original,x,y);ctx.globalAlpha=.3*(1-age/duration);ctx.drawImage(stamp.ivory,x,y);
+    }
+    ctx.restore();
   }
   _actor(actor,kind,phase,s) {
     if(kind==='hero'){this._shadow(Math.round(actor.x),Math.round(actor.y)+11,34,9);if(this.hero.draw(this.ctx,s,this.time,this.reducedEffects))return;}
@@ -560,7 +607,7 @@ export class Renderer {
 
   _shot(p) {
     const ctx=this.ctx;
-    if(p.kind==='heart'){heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
+    if(p.kind==='heart'){if(p.viral&&p.hitIds?.size){line(ctx,'#f58cbe',p.linkX,p.linkY,p.x,p.y,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
@@ -569,7 +616,7 @@ export class Renderer {
     const s=game.state||game.s;if(!s)return;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
-    const seed=game.world?.seed??42;this.combat.prepare(s,seed);if(this.seed!==seed)this.seed=seed;
+    const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
     const ctx=this.ctx,w=this.width,h=this.height;
     ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
     rect(ctx,'#191b31',0,0,w,h);
@@ -582,7 +629,7 @@ export class Renderer {
     for(const p of props)if(p.type==='lamp'){
       ctx.save();ctx.globalAlpha=.1;oval(ctx,'#edb8ba',p.x-40,p.y-9,92,35,2);ctx.globalAlpha=.065;oval(ctx,'#edbf8d',p.x-25,p.y-3,62,22,2);ctx.restore();
     }
-    for(const p of drops)this._drop(p);
+    let xpTrails=16;for(const p of drops)if(this._drop(p,s,xpTrails>0))xpTrails--;
     for(const p of clouds)this._cloud(p);
     for(const p of s.pulses||[]){const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
     if(s.airplane?.active) {
@@ -604,11 +651,13 @@ export class Renderer {
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
     for(const v of s.vehicles||[])items.push({y:v.y+13,kind:'vehicle',data:v});
     for(const e of enemies)if(!e.dead&&e.hp>0&&inView(e.x,e.y))items.push({y:e.y+10,kind:'enemy',data:e});
+    for(const effect of game.defeatEffects||[])if(s.elapsed-effect.start<(this.reducedEffects?.16:.07)&&inView(effect.actor.x,effect.actor.y))items.push({y:effect.actor.y+10,kind:'defeat',data:effect});
     if(s.companion&&s.girl)items.push({y:s.girl.y+10,kind:'girl',data:s.girl});
     items.push({y:s.y+10,kind:'hero',data:s});items.sort((a,b)=>a.y-b.y);
     const phase=Math.floor((s.elapsed||this.time)*12)%8;
     for(const item of items){
-      if(item.kind==='prop')this._prop(item.data);
+      if(item.kind==='defeat')this._defeatImpact(item.data,s);
+      else if(item.kind==='prop')this._prop(item.data);
       else if(item.kind==='chest')this._chest(item.data);
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {

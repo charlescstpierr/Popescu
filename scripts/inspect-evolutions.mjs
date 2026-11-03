@@ -1,0 +1,18 @@
+import {createRequire} from 'node:module';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url),{createCanvas,Image}=require('@napi-rs/canvas');
+globalThis.OffscreenCanvas=class{constructor(w,h){return createCanvas(w,h);}};globalThis.Image=Image;
+const out=resolve(process.argv[2]||'/tmp/popescu-evolutions-qa');mkdirSync(out,{recursive:true});process.chdir(new URL('../dist',import.meta.url).pathname);
+const {Game}=await import('../dist/engine.js'),{Renderer}=await import('../dist/renderer.js');
+const c=createCanvas(390,844),renderer=new Renderer(c);await renderer.ready;
+function setup(id){const g=new Game({seed:42});Object.assign(g.s.upg,{car:3,money:3,girlfriend:3,charisma:3});g.recalculate();g.s.mode='upgrade';g.s.options=[{id}];assert(g.chooseUpgrade(id));g.s.elapsed=80;for(const [x,y]of [[-110,-75],[-15,-100],[82,-100],[110,128]]){const e=g.spawnEnemy('tank',x,y);e.hp=e.maxhp=1000;}return g;}
+const car=setup('billionaire');car.timers.car=0;car.timers.money=999;car.weapons(.001);
+for(let i=0;i<100;i++){car.updateShots(.01);car.updateVehicles(.01);}assert.equal(car.s.vehicles[0].billSalvos,1);assert.equal(car.s.shots.filter(p=>p.kind==='bill').length,3);
+let state=JSON.stringify(car.s);renderer.render(car,80);assert.equal(JSON.stringify(car.s),state);writeFileSync(resolve(out,'billionaire-car.png'),c.toBuffer('image/png'));
+const heart=setup('viralLove');heart.s.companion=true;Object.assign(heart.s.girl,{x:-145,y:-62,shoot:0});heart.updateCompanion(0);
+for(let i=0;i<200&&!heart.s.shots.some(p=>p.viral&&p.hitIds.size===2);i++)heart.updateShots(.01);assert(heart.s.shots.some(p=>p.viral&&p.hitIds.size===2));
+state=JSON.stringify(heart.s);renderer.render(heart,80);assert.equal(JSON.stringify(heart.s),state);writeFileSync(resolve(out,'viral-heart.png'),c.toBuffer('image/png'));
+renderer.resize(320,640);renderer.render(heart,80);writeFileSync(resolve(out,'viral-heart-320.png'),c.toBuffer('image/png'));
+console.log(JSON.stringify({nativeCanvas:true,actualBrowser:false,physicalMobile:false,carSalvosRemaining:car.s.vehicles[0].billSalvos,heartHitCounts:heart.s.shots.map(p=>p.hitIds.size),output:out}));

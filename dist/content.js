@@ -25,13 +25,34 @@ export const UPGRADES = [
 ];
 
 export const INTRO = [
-  { who: 'TOMA', text: 'Ma villa à Dubaï. Mon char de 800 000 piasses. Mes douze abdos. Une autre journée normale de légende.' },
-  { who: 'BLONDE IA', text: 'Toutes tes photos sont générées, Toma. Même moi.' },
-  { who: 'TOMA', text: 'Justement ! J’ai une blonde IA parce que TOUTES les femmes sont après moi. J’ai pu une minute de paix !' },
-  { who: 'BLONDE IA', text: 'Personne t’a écrit depuis trois mois. Ta dentiste attend encore ta confirmation.' },
-  { who: 'TOMA', text: 'Elles sont intimidées par mon charisme. IA, ajoute-moi un yacht pour les rassurer.' },
-  { who: 'SYSTÈME', text: 'ERREUR MONDIALE. IA HORS LIGNE. Tes créations prennent vie. Survis 20 minutes dans la réalité.' },
-  { who: 'TOMA', text: 'QUOI ?! Comment le monde va savoir que je suis riche ?!' },
+  {
+    "who": "TOMA",
+    "text": "Check le char. Huit cent mille piasses, mes abdos sont sortis, pis y'a même pas une criss de feuille dans ma piscine à Dubaï."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "T'as demandé de retirer les feuilles de la photo. La piscine aussi est générée."
+  },
+  {
+    "who": "TOMA",
+    "text": "YEAHHHHHH ! Rajoute un hélicoptère. Les filles vont capoter."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Ta dentiste t'a écrit. Elle veut savoir si tu viens jeudi."
+  },
+  {
+    "who": "TOMA",
+    "text": "Encore elle ! Dis-lui de prendre un numéro, j'ai une vie à vivre."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "PANNE MONDIALE. IA hors ligne. Tes créations se promènent en ville. Survis 20 minutes."
+  },
+  {
+    "who": "TOMA",
+    "text": "Hein ?! Rallume ça, tabarnak ! Mon char est encore en train de charger !"
+  }
 ];
 
 export const GORILLA_NAMES = [
@@ -40,251 +61,818 @@ export const GORILLA_NAMES = [
 ];
 
 export const BARKS = [
-  { context:'orangutan', who: 'TOMA', text: 'Mon fan-club a ouvert une division rousse. J’appelle ça une expansion internationale.' },
-  { context:'orangutan', who: 'BLONDE IA', text: 'C’est une orang-outan, Toma. Elle fait pas partie de ton équipe marketing.' },
-  { context:'orangutan', who: 'TOMA', text: 'Des bras aussi longs ? Elle veut clairement me faire un câlin de milliardaire.' },
-  { context:'orangutan', who: 'BLONDE IA', text: 'Elle prépare une claque. Même moi, je la vois venir.' },
-  { context:'horde', who: 'TOMA', text: 'Plus y’a de singes, plus mon potentiel de réseautage augmente.' },
-  { context:'horde', who: 'TOMA', text: 'C’est pas une horde. C’est ma liste d’attente VIP qui a appris à courir.' },
-  { context:'horde', who: 'BLONDE IA', text: 'On devrait éviter le groupe de discussion. Il a des très grosses mains.' },
-  { who: 'TOMA', text: 'IA, transforme ce stand à hot-dogs en restaurant étoilé. Avec moi sur toutes les étoiles.' },
-  { who: 'TOMA', text: 'Je suis pas perdu. Le GPS est intimidé.' },
-  { who: 'TOMA', text: 'L’IA m’a donné 10 sur 10. J’avais précisé le barème.' },
-  { who: 'TOMA', text: 'Ma modestie prend beaucoup de place.' },
-  { who: 'TOMA', text: 'Ce recul tactique mérite une conférence TED.' },
-  { who: 'TOMA', text: 'J’ai pas peur. Je fais du cardio émotionnel.' },
-  { who: 'TOMA', text: 'Qui a mis une date d’expiration sur mon charisme?' },
-  { who: 'TOMA', text: 'Même mon ombre demande un autographe.' },
-  { who: 'TOMA', text: 'Mon plan B, c’est de renommer le plan A.' },
-  { who: 'TOMA', text: 'La gravité me tire vers elle. Encore une admiratrice.' },
-  { who: 'TOMA', text: 'J’ai fait mes recherches. J’ai relu ma bio.' },
-  { who: 'TOMA', text: 'Mon égo est en télétravail. Il occupe tout le bureau.' },
-  { who: 'TOMA', text: 'L’IA dit de respirer. Ça manque de personnalisation.' },
-  { who: 'TOMA', text: 'J’ai un six-pack. Il est dans le coffre du char.' },
-  { who: 'TOMA', text: 'Mon aura a pris un abonnement premium.' },
-  { who: 'TOMA', text: 'C’est-tu normal que mon public ait autant de bras?' },
-  { who: 'TOMA', text: 'Mon assurance vient de mettre mon égo en franchise.' },
-  { who: 'TOMA', text: 'Je vaux de l’or. Selon une estimation de moi-même.' },
-  { who: 'TOMA', text: 'J’ai demandé une stratégie. L’IA a écrit « bonne chance ».' },
-  { who: 'TOMA', text: 'Un héros ne transpire pas. Il devient édition brillante.' },
-  { who: 'TOMA', text: 'Ce trottoir a clairement un problème avec mon succès.' },
-  { who: 'TOMA', text: 'Je ne cours pas après la gloire. Elle prend le mauvais bus.' },
-  { who: 'TOMA', text: 'Ma zone de confort a demandé une zone tampon.' },
-  { who: 'TOMA', text: 'J’ai un fan-club. Pour l’instant, c’est un fichier Excel.' },
-  { who: 'TOMA', text: 'Le silence de l’IA est une forme d’applaudissement.' },
-  { who: 'TOMA', text: 'Cette poutine a plus de réseau que mon téléphone.' },
-  { who: 'TOMA', text: 'J’ai manifesté l’abondance. Ça fait beaucoup de gorilles.' },
-  { who: 'TOMA', text: 'Ma confiance est rechargeable. Où est la prise?' },
-  { who: 'TOMA', text: 'C’est pas une crise. C’est mon documentaire qui commence.' },
-  { who: 'TOMA', text: 'Mon profil disait « aime les longues marches ». Erreur.' },
-  { who: 'TOMA', text: 'Je suis mon propre coach. Les résultats se négocient.' },
-  { who: 'TOMA', text: 'L’IA connaît ma valeur. Je lui ai dicté le montant.' },
-  { who: 'TOMA', text: 'Mes bottes fuient le danger avant le reste de moi.' },
-  { who: 'TOMA', text: 'J’ai un char sport. Le sport, c’est de le pousser.' },
-  { who: 'TOMA', text: 'J’ai beaucoup de présence. Surtout dans mes propres pensées.' },
-  { who: 'TOMA', text: 'On m’avait promis une carrière explosive. Pas ce genre-là.' },
-  { who: 'TOMA', text: 'Mes haters ont loué un département des travaux publics?' },
-  { who: 'TOMA', text: 'Je suis une icône. Mon téléphone refuse de me déplacer.' },
-  { who: 'TOMA', text: 'Siri? Alexa? Le grille-pain? Quelqu’un pour me valider?' },
-  { who: 'TOMA', text: 'J’ai du potentiel. Je le garde dans son emballage.' },
-  { who: 'TOMA', text: 'Le destin frappe à ma porte. Il pourrait texter avant.' },
-  { who: 'TOMA', text: 'Ma légende grandit. Mon souffle, beaucoup moins.' },
-  { who: 'TOMA', text: 'Je vais transformer cette panique en contenu.' },
-  { who: 'TOMA', text: 'L’IA m’a conseillé des limites. J’ai choisi illimité.' },
-  { who: 'TOMA', text: 'C’est une poursuite admirative. Je refuse les autres termes.' },
-  { who: 'SYSTÈME', text: 'Aucun sondage sérieux n’appuie les déclarations de Toma.' },
-  { who: 'SYSTÈME', text: 'Le serveur de compliments est encore en maintenance.' },
-  { who: 'SYSTÈME', text: 'Égo détecté. Espace disque insuffisant.' },
-  { who: 'SYSTÈME', text: 'La réalité a refusé sa demande de vérification.' },
-  { who: 'SYSTÈME', text: 'Son charisme n’est pas couvert par la garantie.' },
-  { who: 'SYSTÈME', text: 'Les gorilles n’ont pas lu sa bio. Ça aide.' },
-  { who: 'SYSTÈME', text: 'La ville recommande de garder son égo en laisse.' },
-  { who: 'SYSTÈME', text: 'Nouvelle compétence humaine découverte. Se déplacer.' },
-  { who: 'SYSTÈME', text: 'L’algorithme ne comprend toujours pas le mot « humble ».' },
-  { who: 'SYSTÈME', text: 'Ceci est une crise imaginaire. Les dégâts, eux, comptent.' },
-  { who: 'SYSTÈME', text: 'Le panneau SORTIE ne lui proposait pas un rendez-vous.' },
-  { who: 'SYSTÈME', text: 'Toma a survécu sans tutoriel pendant huit secondes.' },
-  { who: 'BLONDE IA', text: 'Je suis avec toi. Regarde devant, ça va aider.' },
-  { who: 'BLONDE IA', text: 'Un pas à la fois. Un gros égo, deux petites jambes.' },
-  { who: 'BLONDE IA', text: 'T’as pas besoin d’être parfait pour avancer.' },
-  { who: 'BLONDE IA', text: 'J’ai vu ton plan. J’ai apporté un autre plan.' },
-  { who: 'BLONDE IA', text: 'Beau réflexe. On va célébrer quand on sera en vie.' },
-  { who: 'BLONDE IA', text: 'Respire. L’air est gratuit, les compliments attendront.' },
-  { who: 'BLONDE IA', text: 'Je couvre ta gauche. Essaie de couvrir ta droite.' },
-  { who: 'BLONDE IA', text: 'Elles courent vers le bruit, Toma. Baisse ton monologue.' },
-  { who: 'BLONDE IA', text: 'On peut avoir confiance sans se raconter des affaires.' },
-  { who: 'BLONDE IA', text: 'Tu viens de demander au banc s’il te trouvait beau.' },
-  { who: 'BLONDE IA', text: 'Tu fais mieux quand tu regardes ailleurs que dans une vitre.' },
-  { who: 'BLONDE IA', text: 'Je t’encourage. Je n’approuve pas le discours de remerciement.' },
-  { who: 'BLONDE IA', text: 'On ramasse les pièces. On laisse les conclusions hâtives.' },
-  { who: 'BLONDE IA', text: 'Demander de l’aide, c’est déjà une bonne décision.' },
-  { who: 'BLONDE IA', text: 'Tu peux douter deux secondes. Je reste là.' },
-  { who: 'BLONDE IA', text: 'Bon mouvement! Garde celui-là, enlève le commentaire.' },
-  { who: 'BLONDE IA', text: 'Ton téléphone est hors ligne. Tes jambes fonctionnent.' },
-  { who: 'BLONDE IA', text: 'Ta valeur ne dépend pas d’un compteur. Tes PV, oui.' },
-  { who: 'BLONDE IA', text: 'Je vise la horde. Toi, vise une décision raisonnable.' },
-  { who: 'BLONDE IA', text: 'On s’en sort ensemble. Même sans ton jet privé imaginaire.' },
+  {
+    "context": "orangutan",
+    "who": "TOMA",
+    "text": "Check les bras ! Elle peut liker mes photos dans deux quartiers en même temps !"
+  },
+  {
+    "context": "orangutan",
+    "who": "BLONDE IA",
+    "text": "Toma, tasse-toi. L'orang-outan prépare sa claque."
+  },
+  {
+    "context": "orangutan",
+    "who": "TOMA",
+    "text": "Wo, doucement ! Mon visage est assuré pour un montant que j'ai choisi moi-même !"
+  },
+  {
+    "context": "orangutan",
+    "who": "BLONDE IA",
+    "text": "Elle s'en va te plier. Cours."
+  },
+  {
+    "context": "horde",
+    "who": "TOMA",
+    "text": "YEAHHHHHH ! Ça, c'est du monde à mon lancement !"
+  },
+  {
+    "context": "horde",
+    "who": "TOMA",
+    "text": "Y'a-tu quelqu'un qui gère la file, tabarnak ?!"
+  },
+  {
+    "context": "horde",
+    "who": "BLONDE IA",
+    "text": "Passe par le côté. Le milieu est plein de poings."
+  },
+  {
+    "who": "TOMA",
+    "text": "IA, mets une nappe sur le stand à hot-dogs. J'vas manger riche."
+  },
+  {
+    "who": "TOMA",
+    "text": "Où c'est qu'il est, mon criss de char ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Dix sur dix. J'ai demandé à l'IA de vérifier deux fois."
+  },
+  {
+    "who": "TOMA",
+    "text": "Pousse-toi, la vedette passe !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Filme-moi de côté, on voit mieux mes abdos."
+  },
+  {
+    "who": "TOMA",
+    "text": "FUCKK ! J'avais pas signé pour courir autant !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Mon parfum coûte plus cher que cette rue-là !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Même mon ombre me suit partout. Décroche un peu !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Bon. Qui a encore changé mon plan sans me consulter ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Le trottoir m'a fait une jambette. J'ai des témoins !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Va lire ma bio si tu me crois pas."
+  },
+  {
+    "who": "TOMA",
+    "text": "J'ai besoin d'un bureau avec deux chaises. Une pour moi pis une pour mon trophée."
+  },
+  {
+    "who": "TOMA",
+    "text": "IA ? Réponds, câlisse !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Mes abdos sont là. En dessous."
+  },
+  {
+    "who": "TOMA",
+    "text": "Je brille-tu encore ? Check vite."
+  },
+  {
+    "who": "TOMA",
+    "text": "Pourquoi tout le monde court après moi avec les mains ouvertes ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Ça se réclame-tu aux assurances, une réputation ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Cent mille piasses pour une photo avec moi. Cash."
+  },
+  {
+    "who": "TOMA",
+    "text": "Mon plan disait juste de rester beau. C'était clair pourtant."
+  },
+  {
+    "who": "TOMA",
+    "text": "Touche pas à mes cheveux !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Ils pourraient laver leurs trottoirs avant que j'arrive."
+  },
+  {
+    "who": "TOMA",
+    "text": "Mon chauffeur est où ?! J'vas lui mettre une étoile !"
+  },
+  {
+    "who": "TOMA",
+    "text": "J'aurais dû rester dans ma piscine générée."
+  },
+  {
+    "who": "TOMA",
+    "text": "J'ai une liste de fans. Ma mère est inscrite deux fois."
+  },
+  {
+    "who": "TOMA",
+    "text": "Elle répond pu. Elle doit être émue."
+  },
+  {
+    "who": "TOMA",
+    "text": "Une poutine pis un chargeur. C'est tout c'que j'demande."
+  },
+  {
+    "who": "TOMA",
+    "text": "IA, quand j'ai dit plein de filles, fallait me poser des questions !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Donnez-moi deux secondes. J'ai un point dans le côté."
+  },
+  {
+    "who": "TOMA",
+    "text": "Le documentaire, filme pas ce bout-là !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Des longues marches ? Qui a écrit ça sur mon profil ?!"
+  },
+  {
+    "who": "TOMA",
+    "text": "Mon coach, c'est moi. Pis là j'me donne une pause."
+  },
+  {
+    "who": "TOMA",
+    "text": "Je lui ai dit milliardaire. Elle m'a mis millionnaire, l'ostie."
+  },
+  {
+    "who": "TOMA",
+    "text": "Mes bottes valent trois loyers !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Le char est à moi. La compagnie de location comprend pas le concept."
+  },
+  {
+    "who": "TOMA",
+    "text": "Avez-vous remarqué que j'suis encore le plus beau ici ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Ça pète de partout, criss !"
+  },
+  {
+    "who": "TOMA",
+    "text": "C'est qui qui a commandé tout ce monde-là ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "J'ai une coche bleue. Vous pouvez pas me traiter de même !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Même le grille-pain me répond pu."
+  },
+  {
+    "who": "TOMA",
+    "text": "J'pourrais gagner là. J'étire le suspense."
+  },
+  {
+    "who": "TOMA",
+    "text": "Cogne pas, texte-moi. J'suis occupé à être célèbre."
+  },
+  {
+    "who": "TOMA",
+    "text": "Attends... attends... j'reprends mon souffle."
+  },
+  {
+    "who": "TOMA",
+    "text": "Filme ça ! Non, efface. Recommence."
+  },
+  {
+    "who": "TOMA",
+    "text": "IA, enlève la sueur. Toute."
+  },
+  {
+    "who": "TOMA",
+    "text": "Mes fans sont intenses en tabarnak."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Toma s'est donné cinq étoiles avec le compte de sa mère."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Compliments indisponibles. Il va falloir marcher sans."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Mémoire pleine. 4 812 selfies à supprimer."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Sa demande de vérification est encore dans les brouillons."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "La garantie couvre le téléphone. Toma devra se gérer lui-même."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Aucun gorille ne suit Toma sur les réseaux."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "La ville cherche le propriétaire d'un ego stationné en double."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Toma vient de courir sans publier sa distance."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Le mot humble a été retiré de sa bio à sa demande."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Les dégâts restent actifs pendant ses explications."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Il a fait un clin d'oeil au panneau SORTIE."
+  },
+  {
+    "who": "SYSTÈME",
+    "text": "Huit secondes sans demander un compliment. Record battu."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "J'suis là. Regarde la rue."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "T'as deux jambes, sers-t'en !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Laisse tes cheveux tranquilles, y'a du monde derrière."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Ton plan finit par un selfie. On va improviser."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Beau réflexe ! Continue !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Respire par le nez. Oui, même ton nez de vedette."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Je prends la gauche. Bouge à droite."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Ils suivent ta voix. Tu veux-tu essayer de te taire ?"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "T'as rien à prouver au parcomètre."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Le banc te trouve beau. Avance, là."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "La vitrine sera encore là tantôt."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Garde ton discours. J'ai besoin de tes jambes."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Les pièces, Toma ! Ramasse les pièces !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Viens par ici, j'te couvre."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Deux secondes de panique, c'est assez. On repart."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Oui ! Refais ça !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Lâche ton téléphone. Ça pogne pas."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Tes PV baissent. Fais ton beau plus loin."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Je tire. Toi, passe entre les deux."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Ton jet viendra nous chercher après. Cours !"
+  }
 ];
 
 
 export const EVENTS = {
-  foodcart: [
-    { who: 'TOMA', text: 'IA, transforme ce hot-dog en menu dégustation à 900 piasses. Ajoute-moi une étoile.' },
-    { who: 'SYSTÈME', text: 'IA indisponible. Le hot-dog conserve son statut de hot-dog.' },
-    { who: 'TOMA', text: 'C’est de la gastronomie minimaliste. Le chef est juste en retard sur ma vision.' },
+  "foodcart": [
+    {
+      "who": "TOMA",
+      "text": "IA, mets-moi une assiette en or avec ça. Pis cache la moutarde sur mon chandail."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "IA hors ligne. Supplément moutarde : 50 cents."
+    },
+    {
+      "who": "TOMA",
+      "text": "Cinquante cennes ? Sais-tu à qui tu parles ?!"
+    }
   ],
-  vending: [
-    { who: 'TOMA', text: 'IA, transforme cette distributrice en banque privée. Je veux retirer mon aura en argent.' },
-    { who: 'SYSTÈME', text: 'Solde : un sac de chips coincé derrière la spirale.' },
-    { who: 'TOMA', text: 'Mon capital est gelé. C’est une stratégie de milliardaire.' },
+  "vending": [
+    {
+      "who": "TOMA",
+      "text": "Ouvre-toi, criss. J'ai une carte VIP."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Les chips sont coincées."
+    },
+    {
+      "who": "TOMA",
+      "text": "J'vas acheter la compagnie. Après, tu vas voir."
+    }
   ],
-  trophy: [
-    { who: 'TOMA', text: 'Enfin ! Ils ont construit mon monument. J’avais même pas encore gagné.' },
-    { who: 'SYSTÈME', text: 'Ce trophée provient de sa commande « rends-moi encore plus légendaire ».' },
-    { who: 'TOMA', text: 'Un trophée qui reconnaît le talent sans attendre les résultats. Visionnaire.' },
+  "trophy": [
+    {
+      "who": "TOMA",
+      "text": "YEAHHHHHH ! Mon trophée ! Ils ont enfin compris !"
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Commande retrouvée : un trophée plus grand que celui du voisin."
+    },
+    {
+      "who": "TOMA",
+      "text": "Il l'a-tu vu ? Tourne-le vers sa fenêtre."
+    }
   ],
-  planter: [
-    { who: 'TOMA', text: 'IA, transforme cette plante en arbre à billets. Avec des billets qui portent mon visage.' },
-    { who: 'SYSTÈME', text: 'La plante ne réagit pas. Elle poursuit sa photosynthèse.' },
-    { who: 'TOMA', text: 'Elle me ghoste parce qu’elle trouve ma lumière trop intense.' },
+  "planter": [
+    {
+      "who": "TOMA",
+      "text": "IA, fais pousser des cent piasses là-dedans."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Aucune connexion. La plante garde ses feuilles."
+    },
+    {
+      "who": "TOMA",
+      "text": "Arrose-la avec du champagne. Ça va la motiver."
+    }
   ],
-  bike: [
-    { who: 'TOMA', text: 'Mon bolide! Deux roues, zéro taxe de luxe.' },
-    { who: 'SYSTÈME', text: 'C’est un vélo communal. Il ne reconnaît pas son propriétaire imaginaire.' },
-    { who: 'TOMA', text: 'Normal. Je protège ma vie privée.' },
+  "bike": [
+    {
+      "who": "TOMA",
+      "text": "Check mon nouveau bolide ! Édition européenne !"
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Vélo communal. Selle manquante."
+    },
+    {
+      "who": "TOMA",
+      "text": "J'conduis debout. C'est sportif."
+    }
   ],
-  mirror: [
-    { who: 'TOMA', text: 'Enfin quelqu’un à mon niveau.' },
-    { who: 'SYSTÈME', text: 'Le miroir demande une pause syndicale.' },
-    { who: 'TOMA', text: 'Il peut prendre ma photo pendant sa pause?' },
+  "mirror": [
+    {
+      "who": "TOMA",
+      "text": "Wo. Check le beau gars."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Batterie du téléphone : 2 %."
+    },
+    {
+      "who": "TOMA",
+      "text": "Vite, prends-en douze !"
+    }
   ],
-  car: [
-    { who: 'TOMA', text: 'Mon char de millionnaire est juste là!' },
-    { who: 'SYSTÈME', text: 'La plaque dit LOCATION. Le pare-brise dit RETARD.' },
-    { who: 'TOMA', text: 'C’est du branding mystérieux.' },
+  "car": [
+    {
+      "who": "TOMA",
+      "text": "C'est mon char ! Touche pas !"
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Le contrat de location a expiré mardi."
+    },
+    {
+      "who": "TOMA",
+      "text": "J'avais dit que j'allais le rapporter. Ils sont fatigants."
+    }
   ],
-  bench: [
-    { who: 'TOMA', text: 'Mon trône attend son roi.' },
-    { who: 'SYSTÈME', text: 'Le banc municipal ne prend pas position.' },
-    { who: 'TOMA', text: 'L’IA aurait au moins mis un coussin.' },
+  "bench": [
+    {
+      "who": "TOMA",
+      "text": "Réservez-moi ce banc. Au complet."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Un pigeon occupe déjà la place."
+    },
+    {
+      "who": "TOMA",
+      "text": "Il paie-tu, lui ?!"
+    }
   ],
-  bin: [
-    { who: 'TOMA', text: 'Tiens, le dossier de mes haters.' },
-    { who: 'SYSTÈME', text: 'La poubelle contient surtout ses anciens plans de génie.' },
-    { who: 'TOMA', text: 'Je recycle mon potentiel.' },
+  "bin": [
+    {
+      "who": "TOMA",
+      "text": "Mets mes commentaires négatifs là-dedans."
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "La poubelle est pleine de factures au nom de Toma."
+    },
+    {
+      "who": "TOMA",
+      "text": "Ça, c'est confidentiel, tabarnak !"
+    }
   ],
-  phone: [
-    { who: 'TOMA', text: 'Du réseau! IA, explique pourquoi je suis exceptionnel!' },
-    { who: 'SYSTÈME', text: 'Erreur 503. Même les compliments ont leurs limites.' },
-    { who: 'TOMA', text: 'Cinq cent trois. C’est-tu ma note sur dix?' },
+  "phone": [
+    {
+      "who": "TOMA",
+      "text": "Du réseau ! IA, vite, dis que j'suis beau !"
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Erreur 503."
+    },
+    {
+      "who": "TOMA",
+      "text": "Cinq cent trois sur dix ? YEAHHHHHH !"
+    }
   ],
-  horde: [
-    { who: 'TOMA', text: 'Mes admiratrices arrivent! Elles ont fait de la muscu.' },
-    { who: 'SYSTÈME', text: 'Ginette Turbo et ses amies représentent son imagination en roue libre.' },
-    { who: 'TOMA', text: 'J’aurais dû imaginer un comité d’accueil assis.' },
+  "horde": [
+    {
+      "who": "TOMA",
+      "text": "Les filles arrivent ! Attendez, j'arrange mes cheveux !"
+    },
+    {
+      "who": "SYSTÈME",
+      "text": "Ginette Turbo prépare un coup de poing."
+    },
+    {
+      "who": "TOMA",
+      "text": "Wo ! Les autographes après !"
+    }
   ],
-  companion: [
-    { who: 'BLONDE IA', text: 'Salut. Je viens t’aider à traverser ça.' },
-    { who: 'TOMA', text: 'Je le savais. Mon charme a encore frappé.' },
-    { who: 'BLONDE IA', text: 'J’ai un plan et des cœurs. Garde ton histoire pour le retour.' },
-    { who: 'TOMA', text: 'Tu peux être mon IA de secours?' },
-    { who: 'BLONDE IA', text: 'Je peux être ton alliée. Les décisions, on les prend ensemble.' },
-  ],
+  "companion": [
+    {
+      "who": "BLONDE IA",
+      "text": "Toma ! Par ici !"
+    },
+    {
+      "who": "TOMA",
+      "text": "Ah ! Ma blonde ! T'es venue m'admirer ?"
+    },
+    {
+      "who": "BLONDE IA",
+      "text": "J'suis venue tirer. Tasse-toi un peu."
+    },
+    {
+      "who": "TOMA",
+      "text": "Prends mon bon côté si tu filmes."
+    },
+    {
+      "who": "BLONDE IA",
+      "text": "J'ai les deux mains prises à te sauver."
+    }
+  ]
 };
 
 // Ce sont les vantardises de Toma, pas des faits sur les personnes qu'il cite.
 export const STUNT_BARKS = [
-  { who: 'TOMA', text: 'Jean-Claude Van Damme a deux camions. Moi, deux bottes pis une dette. Même calibre !' },
-  { who: 'TOMA', text: 'Chuck Norris fait le grand écart. Moi, j’écarte la réalité au complet !' },
-  { who: 'TOMA', text: 'Les Olympiques ont appelé. J’ai décliné : le podium était trop petit pour mon aura.' },
-  { who: 'TOMA', text: 'L’IA m’a classé athlète d’élite. J’avais coché « ne pas contredire le client ».' },
-  { who: 'TOMA', text: 'Usain Bolt court vite. Moi, mon compte bancaire me rattrape jamais !' },
-  { who: 'TOMA', text: 'Simone Biles a des médailles. Moi, j’ai un certificat PNG de flexibilité !' },
-  { who: 'TOMA', text: 'Jackie Chan fait ses cascades. Moi, j’me cascade un compliment !' },
-  { who: 'TOMA', text: 'Rocky montait des marches. Moi, j’descends mes standards en grand écart !' },
-  { who: 'TOMA', text: 'Ben oui que j’suis souple ! Mon CV fait pareil avec la vérité.' },
-  { who: 'TOMA', text: 'Regarde ça ! Deux jambes ouvertes, douze commandites imaginaires !' },
-  { who: 'TOMA', text: 'J’viens de battre le record mondial dans la catégorie « moi, selon moi » !' },
-  { who: 'TOMA', text: 'Le Cirque du Soleil m’attend. Probablement à la billetterie, mais y m’attend !' },
-  { who: 'TOMA', text: 'Mon échauffement a besoin d’un tapis rouge, pas d’un tapis de yoga !' },
-  { who: 'TOMA', text: 'IA, ajoute « médaillé du salon » à mon profil. Avec la p’tite coche bleue !' },
-  { who: 'TOMA', text: 'J’fais le grand écart entre mon talent pis les preuves. C’est immense !' },
-  { who: 'TOMA', text: 'Tabarouette ! Mes adducteurs viennent de demander leur propre agent !' },
+  {
+    "who": "TOMA",
+    "text": "YEAHHHHHH ! Van Damme, check ça ! J'ai même pas enlevé mes jeans !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Chuck Norris peut aller se rhabiller ! Moi aussi, d'ailleurs, ça vient de craquer."
+  },
+  {
+    "who": "TOMA",
+    "text": "Mets-moi sur le podium ! En haut !"
+  },
+  {
+    "who": "TOMA",
+    "text": "IA, filme mes jambes ! Les deux, câlisse !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Usain Bolt m'aurait jamais rattrapé avec mes souliers !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Simone Biles, prends des notes ! Bon, filme pas l'atterrissage."
+  },
+  {
+    "who": "TOMA",
+    "text": "Jackie Chan fait-tu ça dans des bottes de même ?!"
+  },
+  {
+    "who": "TOMA",
+    "text": "Rocky avait des marches. Moi j'ai un criss de trottoir !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Aïe ! C'était mon pantalon ou ma hanche ?"
+  },
+  {
+    "who": "TOMA",
+    "text": "Photographe ! C'est là qu'y faut cliquer !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Record mondial ! Quelqu'un l'a vu ? Quelqu'un ?!"
+  },
+  {
+    "who": "TOMA",
+    "text": "Le Cirque du Soleil peut m'appeler. J'charge à la jambe."
+  },
+  {
+    "who": "TOMA",
+    "text": "Tasse le tapis de yoga, j'ai besoin du stationnement !"
+  },
+  {
+    "who": "TOMA",
+    "text": "Rajoute une médaille sur ma photo. Une grosse."
+  },
+  {
+    "who": "TOMA",
+    "text": "Regarde mes jambes, tabarnak ! Ça mérite une commandite !"
+  },
+  {
+    "who": "TOMA",
+    "text": "FUCKK YEAHHHHHH ! ... Ouch."
+  }
 ];
 
 export const STUNT_REPLIES = [
-  { who: 'BLONDE IA', text: 'Beau grand écart. Garde aussi un petit espace pour le trottoir.' },
-  { who: 'BLONDE IA', text: 'Je te suis. Le podium, on le laissera dans ta tête.' },
-  { who: 'BLONDE IA', text: 'Bravo pour les jambes. Regarde la route, champion.' },
-  { who: 'BLONDE IA', text: 'T’as pas besoin de battre personne. On essaie surtout de rester en vie.' },
-  { who: 'BLONDE IA', text: 'J’encourage l’effort. Le certificat PNG reste dans ton téléphone.' },
-  { who: 'BLONDE IA', text: 'Tu bouges bien. C’est encore mieux quand tu regardes où tu vas.' },
-  { who: 'BLONDE IA', text: 'On avance ensemble. Tes adducteurs pourront négocier après.' },
-  { who: 'BLONDE IA', text: 'Respire, grande vedette. Je couvre ton retour sur deux pieds.' },
+  {
+    "who": "BLONDE IA",
+    "text": "Ton pantalon a tenu. Belle surprise."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "C'était beau. Le poteau, maintenant."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Champion, regarde en avant !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Tu peux fermer les jambes, y'a du trafic."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "La médaille attendra. Relève-toi."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "J'ai vu ! Pas besoin de recommencer pour moi."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Garde du jus pour courir."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Je couvre. Reviens sur tes pieds."
+  }
 ];
 
 // Répliques réservées aux deux rivaux masculins. Jamais dans les barks généraux.
 export const RIVAL_BARKS = [
-  { who: 'TOMA', target: 'male', text: 'T’as pas d’argent ! Même tes lunettes sont sur quatre paiements !' },
-  { who: 'TOMA', target: 'male', text: 'Trouve-toi une job, le BS ! Ton CV, c’est-tu juste une photo de tes biceps ?' },
-  { who: 'TOMA', target: 'male', text: 'J’te chie dans bouche ! Voyons, même ma menace a besoin d’un filtre IA !' },
-  { who: 'TOMA', target: 'male', text: 'T’as mis une chaîne en or sur un découvert bancaire, mon champion !' },
-  { who: 'TOMA', target: 'male', text: 'Ton charisme est en mise à pied, mon gars !' },
-  { who: 'TOMA', target: 'male', text: 'Ta grosse vie de luxe, c’est trois reçus pis une location qui sent le sapin !' },
-  { who: 'TOMA', target: 'male', text: 'T’as autant de classe qu’un texto de recouvrement, tabarouette !' },
-  { who: 'TOMA', target: 'male', text: 'Même ton ego magasine dans le bac à une piasse !' },
-  { who: 'TOMA', target: 'male', text: 'Ton compte premium, c’est le Wi-Fi du Tim, mon influenceur !' },
-  { who: 'TOMA', target: 'male', text: 'T’es pas un mâle alpha. T’es la version d’essai qui demande encore le courriel !' },
-  { who: 'TOMA', target: 'male', text: 'Ostie que tu frimes pour quelqu’un qui loue sa confiance à l’heure !' },
-  { who: 'TOMA', target: 'male', text: 'Ta fortune, c’est-tu les huit cennes oubliées dans le char de ta mère ?' },
-  { who: 'TOMA', target: 'male', text: 'Mon IA te donnerait zéro sur dix. J’ai déjà préparé la question !' },
-  { who: 'TOMA', target: 'male', text: 'Retourne travailler ton branding, mon gars. Même ton ombre te bloque !' },
-  { who: 'TOMA', target: 'male', text: 'T’as des gros bras, mais ton budget fait des push-ups à genoux !' },
-  { who: 'TOMA', target: 'male', text: 'Ta face de patron, c’est la photo de stock d’un gars qui doit vingt piasses !' },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "T'as pas d'argent ! Tes lunettes sont encore sur quatre paiements !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Trouve-toi une job, le BS !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "J'te chie dans bouche ! Viens pas plus proche, par exemple !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Ta chaîne verdit, mon gars. J'la vois d'ici !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Ta yeule ! C'est moi qu'on filme !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Ton char de luxe a encore le collant de location !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Tu m'dois vingt piasses, tabarnak !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "T'as pris ton ego dans le bac à une piasse ?"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Influenceur de Wi-Fi gratuit !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Le mâle alpha a oublié son mot de passe !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Ostie que tu frimes ! Bouge, j'prends une photo."
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Va compter le change dans ton porte-gobelet !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Mon IA t'a donné zéro. J'ai gardé la capture !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Même ton ombre veut pu t'suivre !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Des gros bras de même pour porter un portefeuille vide !"
+  },
+  {
+    "who": "TOMA",
+    "target": "male",
+    "text": "Ta photo de patron, je l'ai vue dans une pub de matelas !"
+  }
 ];
 
 export const ROOSTER_REACTION = {who:'TOMA',text:'Men, farmes ta criss de gueule !'};
 
 export const RIVAL_REPLIES = {
-  rival_rooster: [
-    'COCORICO ! Mes lunettes coûtent plus cher que ton char loué, Toma.',
-    'Tu parles de job, mais ton occupation, c’est de te complimenter.',
-    'J’ai des abonnés. Toi, t’as un onglet qui dit « nouvelle conversation ».',
-    'Garde ton souffle. Tes jambes ont déjà ouvert un ticket de support.',
+  "rival_rooster": [
+    "COCORICO ! Ramène ton char avant qu'ils appellent la remorqueuse !",
+    "Ta job, c'est de te liker avec ton deuxième compte ?",
+    "Tes abonnés ont tous la même photo, Toma.",
+    "Garde ton souffle. Tu siffles quand tu cours."
   ],
-  rival_goat: [
-    'Mon complet est cheap. Ton assurance, elle, est entièrement inventée.',
-    'Tu confonds ton solde avec le nombre de notifications, Toma.',
-    'Ta grande fortune a encore demandé à payer vendredi.',
-    'J’ai une chaîne plaquée. Toi, c’est ton CV qui est plaqué or.',
-  ],
+  "rival_goat": [
+    "J'ai payé mon complet. Essaie ça une fois.",
+    "T'as compté tes notifications dans ton solde, encore ?",
+    "Ta carte a refusé un café, Toma.",
+    "Ton yacht a le même numéro que la photo de stock."
+  ]
 };
 
 export const RIVAL_COMPANION_REPLIES = [
-  { who: 'BLONDE IA', text: 'Il t’attaque, Toma. Son budget attendra.' },
-  { who: 'BLONDE IA', text: 'Je t’aide à survivre. Je ne valide pas ton discours sur l’emploi.' },
-  { who: 'BLONDE IA', text: 'On garde les pieds au sol, même quand ton commentaire part très loin.' },
-  { who: 'BLONDE IA', text: 'Tu peux esquiver sans faire un bilan financier à tout le monde.' },
+  {
+    "who": "BLONDE IA",
+    "text": "Il charge, Toma ! Tasse-toi !"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Son CV attendra. Regarde ses cornes."
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Tu peux l'insulter en courant ?"
+  },
+  {
+    "who": "BLONDE IA",
+    "text": "Il s'en vient. Ferme ton enquête sur ses finances."
+  }
 ];
 
 // Short, non-modal street encounters. Each object type speaks once per run.
 export const WORLD_REMARKS = {
-  foodcart: {who:'TOMA',text:'Mon resto étoilé! Bon, c’est un hot-dog. L’étoile est dans ma tête.'},
-  vending: {who:'SYSTÈME',text:'Banque privée de Toma : une distributrice. Capital : des chips pognées.'},
-  trophy: {who:'TOMA',text:'Mon trophée! Enfin un objet qui croit mon CV.'},
-  planter: {who:'SYSTÈME',text:'Toma a demandé un arbre à billets. La plante a choisi les feuilles.'},
-  bike: {who:'TOMA',text:'Deux roues, zéro essence. Mon empire coupe dans le luxe.'},
-  mirror: {who:'SYSTÈME',text:'Le miroir confirme : même Toma, moins de batterie.'},
-  car: {who:'TOMA',text:'Mon char! Ah non. Le propriétaire est encore dedans.'},
-  bench: {who:'TOMA',text:'Mon trône municipal. Pas de coussin, mais zéro hypothèque.'},
-  bin: {who:'SYSTÈME',text:'Archives de Toma : trois plans de génie, tous recyclables.'},
-  phone: {who:'TOMA',text:'IA, rappelle-moi! Même un message automatique, ça compte comme un fan.'},
+  "foodcart": {
+    "who": "TOMA",
+    "text": "Un hot-dog ? Mets ça à mon compte VIP."
+  },
+  "vending": {
+    "who": "SYSTÈME",
+    "text": "Chips coincées. La banque privée de Toma ouvre pas aujourd'hui."
+  },
+  "trophy": {
+    "who": "TOMA",
+    "text": "Mon trophée ! Mettez une lumière dessus !"
+  },
+  "planter": {
+    "who": "SYSTÈME",
+    "text": "La plante attend encore le virement promis par Toma."
+  },
+  "bike": {
+    "who": "TOMA",
+    "text": "Où c'est qu'on met la clé de ce char-là ?"
+  },
+  "mirror": {
+    "who": "SYSTÈME",
+    "text": "Toma s'est arrêté pour saluer son reflet."
+  },
+  "car": {
+    "who": "TOMA",
+    "text": "C'est mon char ! ... Pourquoi le gars barre les portes ?"
+  },
+  "bench": {
+    "who": "TOMA",
+    "text": "Gardez ma place, j'reviens quand j'serai célèbre."
+  },
+  "bin": {
+    "who": "SYSTÈME",
+    "text": "La poubelle déborde de factures marquées urgent."
+  },
+  "phone": {
+    "who": "TOMA",
+    "text": "IA ? Allô ? Fais au moins semblant de m'écouter !"
+  }
 };
 export const STORY_MILESTONES = [
-  {at:300,who:'TOMA',text:'Cinq minutes de survie. Mon autobiographie vient de gagner un fait vérifiable.'},
-  {at:600,who:'SYSTÈME',text:'Dix minutes. Toma a découvert le cardio. Le cardio demande un deuxième avis.'},
-  {at:900,who:'TOMA',text:'Quinze minutes! Mon char est imaginaire, mais mes ampoules sont ben réelles.'},
-  {at:1140,who:'SYSTÈME',text:'Une minute à tenir. Le discours de Toma dure trois heures. Priorité : survivre.'},
+  {
+    "at": 300,
+    "who": "TOMA",
+    "text": "Cinq minutes de survie ! YEAHHHHHH ! Quelqu'un a parti le chrono ou c'est juste moi qui sue ?"
+  },
+  {
+    "at": 600,
+    "who": "SYSTÈME",
+    "text": "Dix minutes. Toma demande si le cardio se rembourse."
+  },
+  {
+    "at": 900,
+    "who": "TOMA",
+    "text": "Quinze minutes, tabarnak ! J'sens pu mes pieds !"
+  },
+  {
+    "at": 1140,
+    "who": "SYSTÈME",
+    "text": "Encore une minute. Toma prépare déjà ses remerciements à lui-même."
+  }
 ];
 export function contextualBarks(s){
   return BARKS.filter(line=>{
@@ -295,8 +883,8 @@ export function contextualBarks(s){
   });
 }
 export function victoryQuote(s){
-  if(s.companion)return '« On a survécu ensemble. Je vais mettre ton nom en gros. Bon… aussi gros que le mien. »';
-  if(s.upg.truth)return '« La vérité m’a sauvé. Je vais essayer ça dans ma bio. Juste une ligne pour commencer. »';
-  if(s.discovery?.count>=3)return '« J’ai survécu grâce au quartier. Mon documentaire va enfin créditer quelqu’un d’autre. »';
-  return '« Vingt minutes sans retouche. Pour une fois, j’ai pas besoin de générer la preuve. »';
+  if(s.companion)return "YEAHHHHHH ! On l'a fait ! Viens dans la photo. Attends, de l'autre bord, c'est mon bon côté.";
+  if(s.upg.truth)return "La vérité, ça cogne en tabarnak. J'vas peut-être en mettre un peu dans ma bio.";
+  if(s.discovery?.count>=3)return "J'connais tout le quartier maintenant ! La prochaine fois, quelqu'un me prête un char.";
+  return "Vingt minutes ! Sans IA ! Y'a quelqu'un qui a filmé, au moins ?!";
 }

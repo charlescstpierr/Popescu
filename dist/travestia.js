@@ -1,10 +1,21 @@
 import {TAIL_DASH,beginTailDash,advanceTailDash} from './travestia-dash.js';
 // Shared simulation/render constants keep warning and damage footprints identical.
 export const TRAVESTIA_BANTER=[
-  ['Vas-y Toma, je sais que tu veux toucher ma queue, touche-la Toma','FUCKK !'],
-  ['Avoue, Toma, tu voudrais sentir ma queue dans ta main !','T’es pas ben, men !!'],
-  ['Toma, t’es attiré, ça paraît ! Tu me trouves beau, hein ?','T’es pas ben, men !!']
+  [
+    "Vas-y Toma, je sais que tu veux toucher ma queue, touche-la Toma",
+    "FUCKK !"
+  ],
+  [
+    "Avoue, Toma, tu voudrais sentir ma queue dans ta main !",
+    "Range ça, câlisse ! J'ai déjà les mains pleines !"
+  ],
+  [
+    "Toma, arrête de regarder ma queue. Ou viens la voir de proche !",
+    "Je check où j'marche, tabarnak !"
+  ]
 ];
+// Old saves may still have one of these replies waiting to play.
+export const TRAVESTIA_BANTER_LEGACY_REPLIES=["FUCKK !","T’es pas ben, men !!"];
 export const TRAVESTIA={radius:105,warning:1.2,spin:1.4,recovery:1.2,damage:24};
 export function tailLocked(e){return e.type==='travestia'&&e.tailTime>0;}
 export function updateTravestia(game,e,dt,suppressed){

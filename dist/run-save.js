@@ -1,13 +1,15 @@
+import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
+import {compactDrops} from './drops.js';
 import {BOSS_TYPES,BOSS_SCHEDULE,createBossDirector} from './boss-director.js';
 import {ANIMALS} from './animals.js';
 // Versioned, validated persistence for the approved save/resume flow.
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
-import {TRAVESTIA_BANTER} from './travestia.js';
-import {PELICAN,PELICAN_BANTER} from './pelican.js';
+import {TRAVESTIA_BANTER,TRAVESTIA_BANTER_LEGACY_REPLIES} from './travestia.js';
+import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js';
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=6;
+const VERSION=7;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
@@ -44,8 +46,11 @@ function validate(snapshot){
    for(const e of snapshot.game.s.enemies){if(e.tailTime===undefined)e.tailTime=0;if(e.tailFaceX===undefined)e.tailFaceX=1;if(e.tailHitPlayer===undefined)e.tailHitPlayer=false;if(e.tailHitGirl===undefined)e.tailHitGirl=false;}
   }
   if(snapshot.version===2)check(snapshot.game.s.enemies.every(e=>!e.phase?.startsWith('tail_dash')));
-  snapshot.game.bossDirector=createBossDirector(snapshot.game.seed,snapshot.game.s.elapsed,snapshot.game.s.enemies);
-  for(const key of ['boss','travestia','pelican'])delete snapshot.game.timers[key];
+  if(snapshot.version<6){
+   snapshot.game.bossDirector=createBossDirector(snapshot.game.seed,snapshot.game.s.elapsed,snapshot.game.s.enemies);
+   for(const key of ['boss','travestia','pelican'])delete snapshot.game.timers[key];
+  }
+  snapshot.game.s.coinsSpent=0;snapshot.game.s.upgradeRerolls=0;snapshot.game.s.evolutions={};
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -71,6 +76,8 @@ function validate(snapshot){
  if(active!==null){check(object(active)&&Object.hasOwn(DISCOVERIES,active.kind));const def=DISCOVERIES[active.kind];check(typeof active.id==='string'&&active.duration===def.duration&&finite(active.remaining)&&active.remaining>=0&&active.remaining<=def.duration&&active.name===def.name&&active.description===def.description&&active.color===def.color);}
  const nearby=s.discovery.nearby;if(nearby!==null)check(object(nearby)&&Object.hasOwn(DISCOVERIES,nearby.discoveryType)&&typeof nearby.id==='string'&&finite(nearby.x)&&finite(nearby.y)&&finite(nearby.cooldown)&&nearby.cooldown>=0&&typeof nearby.needsExit==='boolean');
  check(MODES.includes(s.mode)&&s.elapsed>=0&&s.maxhp>0&&s.hp>=0&&s.hp<=s.maxhp&&s.xp>=0&&s.xpNeed>0&&s.shield>=0);for(const k of ['level','kills','coins','gems'])check(integer(s[k],k==='level'?1:0));
+ check(integer(s.coinsSpent)&&integer(totalEarnedCoins(s))&&integer(s.upgradeRerolls)&&s.upgradeRerolls<=2);
+ check(object(s.evolutions));for(const [id,active] of Object.entries(s.evolutions)){const def=EVOLUTIONS.find(u=>u.id===id);check(def&&active===true&&def.requires.every(key=>(s.upg[key]||0)>=3));}
  check(integer(s.stunt.count));
  check(s.girl.maxhp>0&&s.stunt.duration>0&&s.stunt.progress>=0&&s.stunt.progress<=1);
  check(object(s.upg));for(const [id,rank] of Object.entries(s.upg)){const def=UPGRADES.find(u=>u.id===id);check(def&&integer(rank)&&rank<=def.max);}
@@ -98,7 +105,7 @@ function validate(snapshot){
    if(e.tailMoving!==undefined)check(typeof e.tailMoving==='boolean');
    if(e.tailReplyPending!==undefined||e.tailWarning===4.2)check(typeof e.tailReplyPending==='boolean');
    if(e.tailWarning!==undefined||e.phase==='tail_windup')check([1.2,4.2].includes(e.tailWarning));
-   if(e.tailReplyPending)check((e.phase==='tail_windup'||interrupted)&&TRAVESTIA_BANTER.some(pair=>pair[1]===e.tailReply));
+   if(e.tailReplyPending)check((e.phase==='tail_windup'||interrupted)&&(TRAVESTIA_BANTER.some(pair=>pair[1]===e.tailReply)||TRAVESTIA_BANTER_LEGACY_REPLIES.includes(e.tailReply)));
   }
   if(e.type==='pelican'){
    const interrupted=(e.phase==='charmed'&&e.charmed>0)||(e.phase==='suppressed'&&s.airplane.active);
@@ -116,18 +123,21 @@ function validate(snapshot){
     check(Math.abs(e.x-e.peliX-e.peliDX*e.peliTravel)<1e-5&&Math.abs(e.y-e.peliY-e.peliDY*e.peliTravel)<1e-5);
    }
    check(e.peliReplyTime>=0&&e.peliReplyTime<=PELICAN.replyDelay);
-   if(e.peliReplyPending)check(e.peliReplyTime>0&&PELICAN_BANTER.some(pair=>pair[1]===e.peliReply));
+   if(e.peliReplyPending)check(e.peliReplyTime>0&&(PELICAN_BANTER.some(pair=>pair[1]===e.peliReply)||PELICAN_BANTER_LEGACY_REPLIES.includes(e.peliReply)));
    else check(e.peliReplyTime===0);
-   check(e.peliReply===''||PELICAN_BANTER.some(pair=>pair[1]===e.peliReply));
+   check(e.peliReply===''||(PELICAN_BANTER.some(pair=>pair[1]===e.peliReply)||PELICAN_BANTER_LEGACY_REPLIES.includes(e.peliReply)));
   }
   if(e.type==='gas'&&(e.windup>0||e.gasPose>0))check(finite(e.gasDirX)&&Math.abs(e.gasDirX)<=1.001&&finite(e.gasDirY)&&Math.abs(e.gasDirY)<=1.001);
  }
  if(s.opening!==undefined){check(object(s.opening)&&['move','shoot','done'].includes(s.opening.phase)&&finite(s.opening.startedAt)&&s.opening.startedAt>=0&&s.opening.startedAt<=s.elapsed);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
- for(const item of s.drops)check(['xp','coin','gem','heal'].includes(item.kind)&&item.value>=0);
+ for(const shot of s.shots)if(shot.viral!==undefined){check(shot.viral===true&&shot.kind==='heart'&&s.evolutions.viralLove===true&&shot.hitIds.length<3&&new Set(shot.hitIds).size===shot.hitIds.length&&finite(shot.linkX)&&finite(shot.linkY)&&Math.abs(shot.linkX)<=1e8&&Math.abs(shot.linkY)<=1e8&&shot.pierce===0);}
+ for(const car of s.vehicles)if(car.billSalvos!==undefined||car.billClock!==undefined){check(car.kind==='car'&&s.evolutions.billionaire===true&&integer(car.billSalvos)&&car.billSalvos<=2&&finite(car.billClock)&&car.billClock>=0&&car.billClock<=.8&&(car.billSalvos>0||car.billClock===0));}
+ for(const item of s.drops){check(['xp','coin','gem','heal'].includes(item.kind)&&item.value>=0);if(item.compact!==undefined)check(typeof item.compact==='boolean'&&item.kind==='xp');}
+ check(s.drops.filter(item=>item.compact===true).length<=1);
  for(const c of s.chests)check(typeof c.open==='boolean');for(const wave of s.shockwaves)check(typeof wave.hitPlayer==='boolean'&&typeof wave.hitGirl==='boolean');
- for(const option of s.options)check([...UPGRADES.map(u=>u.id),'recovery','payday','barrier'].includes(option.id)&&typeof option.name==='string'&&typeof option.desc==='string');
+ for(const option of s.options)check([...EVOLUTIONS.map(u=>u.id),...UPGRADES.map(u=>u.id),'recovery','payday','barrier'].includes(option.id)&&typeof option.name==='string'&&typeof option.desc==='string');
  if(s.mode==='upgrade')check(s.options.length>0);if(s.mode==='gameover')check(s.hp===0);if(s.mode==='victory')check(s.elapsed>=1200&&!s.endless);
  if(s.mode==='dialogue'){const ui=snapshot.dialogue;check(object(ui)&&Array.isArray(ui.lines)&&ui.lines.length>0&&ui.lines.length<=100&&integer(ui.index)&&ui.index<ui.lines.length);for(const line of ui.lines)check(object(line)&&typeof line.who==='string'&&typeof line.text==='string');}else check(snapshot.dialogue===null);
  return snapshot;
@@ -137,7 +147,8 @@ export function captureRun(game,dialogue=null){
  const snapshot=copy({version:VERSION,game:data,dialogue:game.s.mode==='dialogue'?dialogue:null});
  // Terminal events return before the engine's usual end-of-step capacity trim.
  // Apply that same policy to the detached checkpoint, never to live state.
- for(const [key,cap] of Object.entries(CAPS))if(key!=='options'&&snapshot.game.s[key]?.length>cap)snapshot.game.s[key]=snapshot.game.s[key].slice(-cap);
+ snapshot.game.s.drops=compactDrops(snapshot.game.s,game.world);
+ for(const [key,cap] of Object.entries(CAPS))if(!['options','drops'].includes(key)&&snapshot.game.s[key]?.length>cap)snapshot.game.s[key]=snapshot.game.s[key].slice(-cap);
  validate(snapshot);check(JSON.stringify(snapshot).length<=MAX_BYTES);return snapshot;
 }
 export function restoreRun(snapshot,{onEvent=()=>{}}={}){
@@ -148,7 +159,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
+ tree(v);check([1,2,3,4,5,6,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.
@@ -165,14 +176,14 @@ export class RunStore {
   if(old){
    if(previous)check(previous.id===old.run.id);
    const source=previous?validate(copy(previous.snapshot)):old.run.snapshot,s=source.game.s;
-   check(s.kills>=old.run.creditedKills&&s.coins>=old.run.creditedCoins);
-   accumulated.best=Math.max(accumulated.best,s.elapsed);accumulated.lifetime+=s.kills-old.run.creditedKills;accumulated.coins+=s.coins-old.run.creditedCoins;
+   check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);
+   accumulated.best=Math.max(accumulated.best,s.elapsed);accumulated.lifetime+=s.kills-old.run.creditedKills;accumulated.coins+=totalEarnedCoins(s)-old.run.creditedCoins;
   }
   return {totals:accumulated,run:{id,snapshot:captureRun(game,dialogue),creditedKills:0,creditedCoins:0}};
  });}
  checkpoint(id,game,{credit=false,dialogue=null}={}){return this.transaction(old=>{
- if(!old||old.run.id!==id)throw Error('conflict');const s=game.s;check(s.kills>=old.run.creditedKills&&s.coins>=old.run.creditedCoins);const next={totals:{...old.totals},run:{...old.run,snapshot:captureRun(game,dialogue)}};
- if(credit){next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=s.coins-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=s.coins;}return next;
+ if(!old||old.run.id!==id)throw Error('conflict');const s=game.s;check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);const next={totals:{...old.totals},run:{...old.run,snapshot:captureRun(game,dialogue)}};
+ if(credit){next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=totalEarnedCoins(s)-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=totalEarnedCoins(s);}return next;
  });}
 }
 export class Autosave {
