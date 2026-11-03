@@ -27,7 +27,7 @@ export class Game {
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
     this.bossDirector=createBossDirector(this.seed);
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
-    this.defeatEffects=[];
+    this.defeatEffects=[];this.powerEffects=[];
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
@@ -56,6 +56,7 @@ export class Game {
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
+    if(['car','girlfriend','airplane','muscle','truth'].includes(id))this.powerEffect(id,'acquire');
     s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;
   }
   gainXP(value){
@@ -370,13 +371,13 @@ export class Game {
 
     if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle;const underBarrel=dist(target,s)<80&&(target.x-muzzle.x)*pose.aim.x+(target.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;
-    const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.sound('truth');}
+    const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.powerEffect('car','activate');this.sound('truth');}
     const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);}
     const airplane=this.rank('airplane');
     if(airplane && this.timers.airplane<=0){
       this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
       for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';interruptAnimal(e);interruptPelican(e,'suppressed');}
-      this.pulse(s.x,s.y,s.airplane.r,'#8adce6',1);this.sound('truth');
+      this.powerEffect('airplane','activate',s.x,s.y,s.airplane.r);this.sound('truth');
     }
     if(s.airplane.active){s.airplane.x=s.x;s.airplane.y=s.y;s.airplane.life-=dt;if(s.airplane.life<=0)s.airplane.active=false;}
     const chopper=this.rank('chopper');
@@ -384,7 +385,7 @@ export class Game {
       this.timers.chopper=Math.max(2.7,5.7-chopper*.6);const angle=target?Math.atan2(target.y-s.y,target.x-s.x):0,dx=Math.cos(angle),dy=Math.sin(angle);
       s.vehicles.push({x:s.x-dx*300,y:s.y-dy*300+22,vx:dx*640,vy:dy*640,life:1.15,kind:'bike',damage:42+chopper*21,knockback:75+chopper*10,hitIds:new Set()});this.pulse(s.x,s.y,64,'#8bbfef',.4);
     }
-    const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.pulse(s.x,s.y,145+truth*24,'#c9a8ff',.7);this.sound('truth');}
+    const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.powerEffect('truth','activate',s.x,s.y,145+truth*24);this.sound('truth');}
   }
   shoot(x,y,target,kind,damage,speed,offset=0){const a=Math.atan2(target.y-y,target.x-x)+offset;this.s.shots.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,kind,life:1.8,damage,r:kind==='heart'?8:kind==='bill'?7:4,pierce:kind==='bill'?1:0,hitIds:new Set(),...(kind==='heart'&&this.s.evolutions.viralLove?{viral:true,linkX:x,linkY:y}:{})});}
   updateShots(dt){
@@ -442,10 +443,10 @@ export class Game {
     s.shockwaves=s.shockwaves.filter(w=>w.life>0);
   }
   updateDrops(dt){
-    const s=this.s,g=s.girl,collected=new Set();s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
+    const s=this.s,g=s.girl,collected=new Set();let girlCollected=false;s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
       if(distance<s.stats.magnet&&distance>0){const speed=130+Math.max(0,s.stats.magnet-distance)*4,pull=Math.min(distance,speed*dt);d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
-      if(distance<22){collected.add(d);if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
-    }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);
+      if(distance<22){collected.add(d);if(target===g)girlCollected=true;if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
+    }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);if(girlCollected)this.powerEffect('girlfriend','collect',g.x,g.y);
   }
   updateChests(dt){
     const s=this.s;this.timers.chest-=dt;if(this.timers.chest<=0){this.timers.chest=47;const angle=this.random()*TAU;let x=s.x+Math.cos(angle)*210,y=s.y+Math.sin(angle)*210;for(let i=0;i<10 && this.world.collides(x,y,16);i++){x+=30;y-=25;}s.chests.push({id:this.id++,x,y,open:false,openedAt:0});}
@@ -453,8 +454,17 @@ export class Game {
     s.chests=s.chests.filter(c=>(!c.open || s.elapsed-c.openedAt<8) && dist(c,s)<1600);
   }
   pulse(x,y,r,color,life=.5){this.s.pulses.push({x,y,r:4,maxr:r,life,maxlife:life,color});}
+  powerEffect(power,kind,x=this.s.x,y=this.s.y,r=0){
+    // Visual-only records never consume gameplay RNG or enter saved checkpoints.
+    // Coalesce companion pickups and bound the queue before any next-frame trim.
+    this.prunePowerEffects();
+    if(kind==='collect'&&this.powerEffects.some(e=>e.kind===kind&&e.power===power))return;
+    if(this.powerEffects.length>=16)this.powerEffects.shift();
+    this.powerEffects.push({power,kind,x,y,r,rank:this.rank(power),start:this.s.elapsed,life:kind==='acquire'?.85:kind==='collect'?.28:power==='truth'?.42:power==='airplane'?.5:.55});
+  }
+  prunePowerEffects(){let count=0;for(const effect of this.powerEffects)if(this.s.elapsed-effect.start<effect.life)this.powerEffects[count++]=effect;this.powerEffects.length=count;}
   burst(x,y,color,count){for(let i=0;i<count;i++){const a=this.random()*TAU,v=20+this.random()*70,life=.25+this.random()*.35;this.s.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,maxlife:life,color});}}
-  updateEffects(dt){const s=this.s;this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
+  updateEffects(dt){const s=this.s;this.prunePowerEffects();this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
   updateStunt(dt,moved){
     const s=this.s,stunt=s.stunt;
     if(stunt.active){stunt.time=Math.min(stunt.duration,stunt.time+dt);stunt.progress=clamp(stunt.time/stunt.duration,0,1);if(stunt.time>=stunt.duration){stunt.active=false;s.walkDistance=0;}}

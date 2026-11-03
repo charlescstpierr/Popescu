@@ -1636,7 +1636,7 @@ class Game {
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
     this.bossDirector=createBossDirector(this.seed);
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
-    this.defeatEffects=[];
+    this.defeatEffects=[];this.powerEffects=[];
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
@@ -1665,6 +1665,7 @@ class Game {
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
+    if(['car','girlfriend','airplane','muscle','truth'].includes(id))this.powerEffect(id,'acquire');
     s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;
   }
   gainXP(value){
@@ -1979,13 +1980,13 @@ class Game {
 
     if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle;const underBarrel=dist(target,s)<80&&(target.x-muzzle.x)*pose.aim.x+(target.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;
-    const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.sound('truth');}
+    const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.powerEffect('car','activate');this.sound('truth');}
     const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);}
     const airplane=this.rank('airplane');
     if(airplane && this.timers.airplane<=0){
       this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
       for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';interruptAnimal(e);interruptPelican(e,'suppressed');}
-      this.pulse(s.x,s.y,s.airplane.r,'#8adce6',1);this.sound('truth');
+      this.powerEffect('airplane','activate',s.x,s.y,s.airplane.r);this.sound('truth');
     }
     if(s.airplane.active){s.airplane.x=s.x;s.airplane.y=s.y;s.airplane.life-=dt;if(s.airplane.life<=0)s.airplane.active=false;}
     const chopper=this.rank('chopper');
@@ -1993,7 +1994,7 @@ class Game {
       this.timers.chopper=Math.max(2.7,5.7-chopper*.6);const angle=target?Math.atan2(target.y-s.y,target.x-s.x):0,dx=Math.cos(angle),dy=Math.sin(angle);
       s.vehicles.push({x:s.x-dx*300,y:s.y-dy*300+22,vx:dx*640,vy:dy*640,life:1.15,kind:'bike',damage:42+chopper*21,knockback:75+chopper*10,hitIds:new Set()});this.pulse(s.x,s.y,64,'#8bbfef',.4);
     }
-    const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.pulse(s.x,s.y,145+truth*24,'#c9a8ff',.7);this.sound('truth');}
+    const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.powerEffect('truth','activate',s.x,s.y,145+truth*24);this.sound('truth');}
   }
   shoot(x,y,target,kind,damage,speed,offset=0){const a=Math.atan2(target.y-y,target.x-x)+offset;this.s.shots.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,kind,life:1.8,damage,r:kind==='heart'?8:kind==='bill'?7:4,pierce:kind==='bill'?1:0,hitIds:new Set(),...(kind==='heart'&&this.s.evolutions.viralLove?{viral:true,linkX:x,linkY:y}:{})});}
   updateShots(dt){
@@ -2051,10 +2052,10 @@ class Game {
     s.shockwaves=s.shockwaves.filter(w=>w.life>0);
   }
   updateDrops(dt){
-    const s=this.s,g=s.girl,collected=new Set();s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
+    const s=this.s,g=s.girl,collected=new Set();let girlCollected=false;s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
       if(distance<s.stats.magnet&&distance>0){const speed=130+Math.max(0,s.stats.magnet-distance)*4,pull=Math.min(distance,speed*dt);d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
-      if(distance<22){collected.add(d);if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
-    }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);
+      if(distance<22){collected.add(d);if(target===g)girlCollected=true;if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
+    }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);if(girlCollected)this.powerEffect('girlfriend','collect',g.x,g.y);
   }
   updateChests(dt){
     const s=this.s;this.timers.chest-=dt;if(this.timers.chest<=0){this.timers.chest=47;const angle=this.random()*TAU;let x=s.x+Math.cos(angle)*210,y=s.y+Math.sin(angle)*210;for(let i=0;i<10 && this.world.collides(x,y,16);i++){x+=30;y-=25;}s.chests.push({id:this.id++,x,y,open:false,openedAt:0});}
@@ -2062,8 +2063,17 @@ class Game {
     s.chests=s.chests.filter(c=>(!c.open || s.elapsed-c.openedAt<8) && dist(c,s)<1600);
   }
   pulse(x,y,r,color,life=.5){this.s.pulses.push({x,y,r:4,maxr:r,life,maxlife:life,color});}
+  powerEffect(power,kind,x=this.s.x,y=this.s.y,r=0){
+    // Visual-only records never consume gameplay RNG or enter saved checkpoints.
+    // Coalesce companion pickups and bound the queue before any next-frame trim.
+    this.prunePowerEffects();
+    if(kind==='collect'&&this.powerEffects.some(e=>e.kind===kind&&e.power===power))return;
+    if(this.powerEffects.length>=16)this.powerEffects.shift();
+    this.powerEffects.push({power,kind,x,y,r,rank:this.rank(power),start:this.s.elapsed,life:kind==='acquire'?.85:kind==='collect'?.28:power==='truth'?.42:power==='airplane'?.5:.55});
+  }
+  prunePowerEffects(){let count=0;for(const effect of this.powerEffects)if(this.s.elapsed-effect.start<effect.life)this.powerEffects[count++]=effect;this.powerEffects.length=count;}
   burst(x,y,color,count){for(let i=0;i<count;i++){const a=this.random()*TAU,v=20+this.random()*70,life=.25+this.random()*.35;this.s.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,maxlife:life,color});}}
-  updateEffects(dt){const s=this.s;this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
+  updateEffects(dt){const s=this.s;this.prunePowerEffects();this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
   updateStunt(dt,moved){
     const s=this.s,stunt=s.stunt;
     if(stunt.active){stunt.time=Math.min(stunt.duration,stunt.time+dt);stunt.progress=clamp(stunt.time/stunt.duration,0,1);if(stunt.time>=stunt.duration){stunt.active=false;s.walkDistance=0;}}
@@ -2897,6 +2907,117 @@ class CombatArt {
 modules["./combat-art.js"]={CombatArt};
 })();
 (()=>{
+/* Read-only, simulation-clock artwork. Sprite anatomy and combat ranges belong
+   to their existing renderers; these short accents never define hit geometry. */
+const GOLD='#ffd634', LIGHT='#fff3a6', PINK='#ff43aa', CYAN='#71eeff', LILAC='#d0a6ff';
+const COLORS={car:GOLD,girlfriend:PINK,airplane:CYAN,muscle:PINK,truth:CYAN};
+const SHAPES={
+  car:[-16,5,-16,-2,-11,-4,-7,-11,7,-11,12,-4,16,-2,16,5],
+  girlfriend:[0,12,-13,-1,-13,-7,-8,-11,-3,-11,0,-7,3,-11,8,-11,13,-7,13,-1,0,12],
+  airplane:[-16,1,-5,-2,1,-14,5,-14,3,-2,14,-2,17,1,3,4,5,13,1,13,-5,4,-13,5],
+  muscle:[-13,8,-13,0,-9,-9,-6,-14,1,-14,3,-10,-1,-7,-4,-7,-5,0,0,2,5,-3,11,-2,15,3,14,9,8,13,-3,13],
+  truth:[0,-16,14,0,0,16,-14,0]
+};
+function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
+function segment(c,color,x,y,xx,yy,width=2){c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(Math.round(x),Math.round(y));c.lineTo(Math.round(xx),Math.round(yy));c.stroke();}
+function icon(c,power,x,y,scale=1){
+  const points=SHAPES[power];if(!points)return;
+  c.fillStyle='#19152b';c.strokeStyle=COLORS[power];c.lineWidth=2;c.beginPath();
+  for(let i=0;i<points.length;i+=2){const px=Math.round(x+points[i]*scale),py=Math.round(y+points[i+1]*scale);if(i===0)c.moveTo(px,py);else c.lineTo(px,py);}
+  c.closePath();c.fill();c.stroke();
+  if(power==='car'){
+    segment(c,LIGHT,x-10*scale,y-3*scale,x+10*scale,y-3*scale);
+    rect(c,GOLD,x-12*scale,y+4*scale,5*scale,4*scale);rect(c,GOLD,x+7*scale,y+4*scale,5*scale,4*scale);
+  }else if(power==='truth'){
+    segment(c,LIGHT,x-11*scale,y,x+11*scale,y);segment(c,CYAN,x,y-12*scale,x,y+12*scale);
+  }else if(power==='airplane')segment(c,'#e1fcff',x-9*scale,y+1*scale,x+12*scale,y+1*scale);
+  else if(power==='muscle')segment(c,'#ffd0ed',x-5*scale,y+5*scale,x+7*scale,y+6*scale);
+}
+function corners(c,color,x,y,w,h){
+  for(let i=0;i<4;i++){const sx=i%2?-1:1,sy=i<2?1:-1,xx=x+(i%2?w:0),yy=y+(i<2?0:h);
+    segment(c,color,xx,yy+sy*9,xx,yy);segment(c,color,xx,yy,xx+sx*9,yy);
+  }
+}
+function chevrons(c,x,y,t,count){for(let i=0;i<count;i++){const xx=x+i*15+Math.floor(t*4)*2;segment(c,GOLD,xx-4,y-4,xx+2,y);segment(c,LIGHT,xx+2,y,xx-4,y+4);}}
+function spark(c,color,x,y,size=4){rect(c,color,x-size,y,size*2+2,2);rect(c,color,x,y-size,2,size*2+2);}
+function progress(s,e){return(s.elapsed-e.start)/e.life;}
+function alive(t){return Number.isFinite(t)&&t>=0&&t<1;}
+function fade(c,t){c.globalAlpha=Math.min(1,(1-t)*2);}
+
+class PowerArt{
+  drawGround(c,s,effects,reduced=false){
+    if(reduced)return;
+    for(let i=Math.max(0,effects.length-16);i<effects.length;i++){
+      const e=effects[i],t=progress(s,e);if(!alive(t))continue;
+      c.save();fade(c,t);
+      if(e.power==='car')chevrons(c,e.x-38,e.y+(e.kind==='activate'?40:5),t,e.kind==='activate'?8:5);
+      if(e.power==='girlfriend'&&e.kind==='acquire'){
+        const g=s.girl||e;
+        for(let n=0;n<8;n++){const a=n*Math.PI/4;rect(c,PINK,g.x+Math.cos(a)*27,g.y+Math.sin(a)*7+4,4,2);}
+      }
+      c.restore();
+    }
+  }
+  drawForeground(c,s,effects,reduced=false){
+    let acquiringAirplane=false;
+    for(let i=Math.max(0,effects.length-16);i<effects.length;i++){
+      const e=effects[i];if(e.power==='airplane'&&e.kind==='acquire'&&alive(progress(s,e)))acquiringAirplane=true;
+    }
+    if(s.airplane?.active){
+      c.save();
+      if(!reduced)corners(c,CYAN,s.x-28,s.y-74,56,76);
+      if(!acquiringAirplane)icon(c,'airplane',s.x-22,s.y-90,.65);c.restore();
+    }
+    for(let i=Math.max(0,effects.length-16);i<effects.length;i++){
+      const e=effects[i],t=progress(s,e);if(!alive(t)||!COLORS[e.power])continue;
+      if(reduced&&e.power==='airplane'&&e.kind==='activate'&&(s.airplane?.active||acquiringAirplane))continue;
+      c.save();
+      if(reduced){
+        // Reduced mode has no interpolation, pulse, floor mark or particle shower.
+        const x=e.kind==='acquire'?s.x:e.x,y=e.kind==='acquire'?s.y-94:e.y-32;
+        icon(c,e.power,x,y,e.kind==='collect'?.4:.8);c.restore();continue;
+      }
+      fade(c,t);
+      if(e.kind==='acquire'){
+        icon(c,e.power,s.x,s.y-94-Math.floor(t*10));
+        const color=COLORS[e.power];
+        // Four deterministic pixels, never allocated particles.
+        for(let n=0;n<4;n++){const a=n*Math.PI/2+Math.PI/4,r=23+t*9;rect(c,color,s.x+Math.cos(a)*r-1,s.y-96+Math.sin(a)*r-t*10,3,3);}
+        if(e.power==='girlfriend'){
+          const g=s.girl||e;icon(c,'girlfriend',g.x-19,g.y-68-t*8,.48);icon(c,'girlfriend',g.x+19,g.y-50-t*10,.3);
+        }else if(e.power==='muscle'){
+          corners(c,PINK,s.x-28,s.y-72,56,74);spark(c,'#ffd0ed',s.x+36,s.y-72-t*6);spark(c,PINK,s.x-36,s.y-20+t*4,3);
+        }else if(e.power==='airplane'&&!s.airplane?.active)corners(c,CYAN,s.x-28,s.y-74,56,76);
+        else if(e.power==='truth')spark(c,LILAC,s.x-26,s.y-50,3);
+      }else if(e.power==='girlfriend'&&e.kind==='collect'){
+        icon(c,'girlfriend',e.x-9,e.y-38-t*15,.32);icon(c,'girlfriend',e.x+8,e.y-29-t*12,.22);
+      }else if(e.power==='airplane'&&e.kind==='activate'){
+        // A few broken local arcs indicate activation, not a defensive perimeter.
+        for(let n=0;n<6;n++){const a=n*Math.PI/3+.15,r=46;segment(c,CYAN,e.x+Math.cos(a)*r,e.y-36+Math.sin(a)*r,e.x+Math.cos(a+.24)*r,e.y-36+Math.sin(a+.24)*r);rect(c,CYAN,e.x+Math.cos(a)*(48+t*15),e.y-36+Math.sin(a)*(48+t*15),3,3);}
+      }else if(e.power==='truth'&&e.kind==='activate'){
+        // Every shard reaches the actual radius from frame zero. Nothing travels
+        // outward and there is no filled disc to conceal enemies or gas warnings.
+        const r=e.r||150;c.globalAlpha=.72*(1-t);
+        for(let n=0;n<12;n++){const a=n*Math.PI/6,inner=r*(n%2?.83:.76);segment(c,n%2?LILAC:LIGHT,e.x+Math.cos(a)*inner,e.y+Math.sin(a)*inner,e.x+Math.cos(a)*r,e.y+Math.sin(a)*r,2);}
+        // Local impact rays match the approved burst around the torso. Both
+        // endpoints are fixed from first frame; only opacity changes with age.
+        for(let color=0;color<2;color++){
+          c.strokeStyle=color?LILAC:LIGHT;c.lineWidth=2;c.beginPath();
+          for(let n=color;n<8;n+=2){const a=n*Math.PI/4+.12;
+            c.moveTo(Math.round(e.x+Math.cos(a)*36),Math.round(e.y-35+Math.sin(a)*36));
+            c.lineTo(Math.round(e.x+Math.cos(a)*65),Math.round(e.y-35+Math.sin(a)*65));
+          }c.stroke();
+        }
+        spark(c,CYAN,e.x,e.y,6);spark(c,LILAC,e.x,e.y,3);
+      }
+      c.restore();
+    }
+  }
+}
+
+modules["./power-art.js"]={PowerArt};
+})();
+(()=>{
 // Small, hand-drawn landmarks. Rendering never changes discovery state.
 const rect=(ctx,color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h);};
 const polygon=(ctx,color,points)=>{ctx.fillStyle=color;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
@@ -2971,6 +3092,7 @@ const {TRAVESTIA}=modules['./travestia.js'];
 const {drawPelicanGround,drawPelicanCards}=modules['./pelican-art.js'];
 const {HeroArt}=modules['./hero-art.js'];
 const {CombatArt}=modules['./combat-art.js'];
+const {PowerArt}=modules['./power-art.js'];
 const {ActorArt}=modules['./actor-art.js'];
 const {CityArt}=modules['./city-art.js'];
 /* Original hand-pixelled city and actors. Simulation remains entirely in engine.js. */
@@ -3313,7 +3435,7 @@ class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.defeatStamps=new Map();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -3342,6 +3464,12 @@ class Renderer {
   }
   _car(p,moving=false) {
     const ctx=this.ctx,x=p.x,y=p.y;
+    if(moving&&!this.reducedEffects){
+      // Speed marks stay attached to the actual car, never a second hitbox.
+      ctx.save();ctx.globalAlpha=.75;
+      for(let i=0;i<3;i++)line(ctx,C.gold,x-34-i*4,y-9+i*6,x-51-i*5,y-9+i*6,2);
+      ctx.restore();
+    }
     if(!moving&&(p.h||0)>(p.w||0)*1.3) {
       // Parked cars use their full, vertical world footprint so collisions are visible.
       const w=p.w||34,h=p.h||66,left=x-w/2,top=y-h/2;
@@ -3570,11 +3698,12 @@ class Renderer {
     ctx.restore();
   }
 
-  _shot(p) {
+  _shot(p,s) {
     const ctx=this.ctx;
     if(p.kind==='heart'){if(p.viral&&p.hitIds?.size){line(ctx,'#f58cbe',p.linkX,p.linkY,p.x,p.y,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
+    if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
   }
   render(game,time=0) {
@@ -3596,12 +3725,14 @@ class Renderer {
     }
     let xpTrails=16;for(const p of drops)if(this._drop(p,s,xpTrails>0))xpTrails--;
     for(const p of clouds)this._cloud(p);
-    for(const p of s.pulses||[]){const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    // Old checkpoints can contain legacy power rings. Do not replay them as
+    // travelling attacks: truth damages at once and airplane is defensive.
+    for(const p of s.pulses||[]){if(p.color==='#c9a8ff'||p.color==='#8adce6')continue;const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    this.powers.drawGround(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.airplane?.active) {
       const a=s.airplane,r=a.r||95,x=a.x??s.x,y=a.y??s.y;
-      ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.time*.12,1);
-      ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-this.time*.08,1);ctx.restore();
-      drawIcon(ctx,'airplane',x-7,y-r-9,14);
+      ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
+      if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
     for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
       const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
@@ -3633,12 +3764,13 @@ class Renderer {
         this._actor(a,item.kind,(actorPhase+8)%8,s);
       }
     }
-    for(const p of shots)this._shot(p);
+    for(const p of shots)this._shot(p,s);
     for(const e of enemies)if(!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
     for(const e of enemies)if(!e.dead)this._rivalAttack(e,true);
     if(!this.reducedEffects)for(const p of clouds)this._cloud(p,true);
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
+    this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.shield>0){ctx.save();ctx.globalAlpha=.42+.15*Math.sin(this.time*4);ring(ctx,'#84eaff',s.x,s.y-6,27,.15,2,this.time*.2);sparkle(ctx,s.x+24*Math.cos(this.time),s.y-6+15*Math.sin(this.time),'#bdf4ff',2);ctx.restore();}
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.

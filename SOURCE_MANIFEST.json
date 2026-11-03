@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-approved-upgrades-save-performance",
+  "version": "1.5-plus-five-power-animations",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -329,8 +329,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 48769,
-      "sha256": "2e22c66295495d01877eaa009a67a251935a52d713995c0291a53eabc2abe6d6"
+      "bytes": 49873,
+      "sha256": "a4eac9d9854382705f626da8cb6d8d354df8c5a2f44ab8fb649fcbdf970e25d5"
     },
     {
       "path": "dist/evolutions.js",
@@ -373,14 +373,19 @@
       "sha256": "260e26decca1ebd032b248c75f6aa145b2f6bba81d2a6b86bae17ceaa036808d"
     },
     {
+      "path": "dist/power-art.js",
+      "bytes": 6457,
+      "sha256": "ac328baedd3ae65b4bd6d7adc6db50c3d5128b6fe9c03f4215dda56b112addc4"
+    },
+    {
       "path": "dist/prop-geometry.js",
       "bytes": 791,
       "sha256": "7606fa21312602094101d9825d86dd1abb68dbba33e350a7c856852c6a2cef31"
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 46842,
-      "sha256": "ad9d96f87853ba2952f16a31406a00145bd66103e22f06ef7a9b33c8833ab89f"
+      "bytes": 47648,
+      "sha256": "5811f8925e56edd59fd535b1fe33f7cee0270e3de3b9ba6a6586530f29b8e8ec"
     },
     {
       "path": "dist/run-save.js",
@@ -508,6 +513,11 @@
       "sha256": "f4729deec1ca2d142885a06e8e482eb551c651f48012688214ec9908c616bbb8"
     },
     {
+      "path": "docs/QA-POWER-ANIMATIONS.md",
+      "bytes": 3943,
+      "sha256": "c5f3b9e796272b23de6f88fb2ddb659d0dbd9b21d108e204347e9c254ed13b5e"
+    },
+    {
       "path": "docs/QA-REBUILD-2026-11-03.md",
       "bytes": 2992,
       "sha256": "a032b602412305a237e2f7e229e6acc6004daf9056b3053236af683e2d6f6cdc"
@@ -578,6 +588,11 @@
       "sha256": "e22f949142d8023e2155afa1caa751fa06d5b19fd25bd8a7fe658bb0c9f5ca39"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-03-five-power-animations.md",
+      "bytes": 2311,
+      "sha256": "eaf23b68fa68aedf66c51a71205523f3281454ab31141861fd1dae82ea1115e5"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-03-interactive-opening.md",
       "bytes": 2126,
       "sha256": "ed08b14c09d396c574e56857abdcbff59960e1de373c24dab71101e55c777922"
@@ -589,8 +604,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14010553,
-      "sha256": "b33eeee2ac54e955b2af4091298ef93d1dc7da6f688d93975ba2af004ce20b4b"
+      "bytes": 14018968,
+      "sha256": "1f1cd5cd72fc807d4fc3876fa647bf47592aba213582a5a4dca33032fbd21d8e"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -604,8 +619,8 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1901,
-      "sha256": "c478edaa38bce5cd98a6fd0b3bdf1e465eaba3c7d7002f135ef6f69c72a58550"
+      "bytes": 1913,
+      "sha256": "461b266c5545a7888acd94c374095355e1e8e18c19885fb5a20e8a25a6495265"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -653,6 +668,11 @@
       "sha256": "9deac1aa2c5c785ab939e14c3e9d4c9e4780c2d51c78f99263ae378807a2622d"
     },
     {
+      "path": "scripts/inspect-power-animations.mjs",
+      "bytes": 4563,
+      "sha256": "145875ca8d9079ba95fed7d862e5bf1eaf7079674285d8d5d0c1bfc5f8536284"
+    },
+    {
       "path": "scripts/inspect-scenery.mjs",
       "bytes": 2056,
       "sha256": "4a38030c7e8466e640cce1c1bef2f2509e5b40e9ad5cc22a0d42d584a65eea2c"
@@ -693,6 +713,11 @@
       "sha256": "f775cfb89252e781843624e56613aba2081bd8cb1de24a1e383c183bea34a1b3"
     },
     {
+      "path": "scripts/render-power-preview.mjs",
+      "bytes": 2370,
+      "sha256": "5b56583a402a0faa5fcf28eaa1da0d6c96cdf78c715bb3aff6c5a0131a7f5ae3"
+    },
+    {
       "path": "scripts/verify-boss-arrivals.mjs",
       "bytes": 2394,
       "sha256": "692003fe66b0cea64cfc30f15fd2d27ea851aa1cc44774595ba98ae06ddbcd7c"
@@ -711,6 +736,11 @@
       "path": "scripts/verify-crowd-render.mjs",
       "bytes": 2069,
       "sha256": "ab8a581c9787b728dac8881af6ed7ef772ab87ee3771e85d0438df2d0d465b8c"
+    },
+    {
+      "path": "scripts/verify-power-equivalence.mjs",
+      "bytes": 1789,
+      "sha256": "b0aa1b2c7d92a37a00faa2c8afbf6694e80faff2f112678e178a4e15e0af825f"
     },
     {
       "path": "tests/animals.test.js",
@@ -843,6 +873,21 @@
       "sha256": "4d251fc0221df47eef503abfd3f237f1e3f2a0c8a39fd72867cb6a781163ca9f"
     },
     {
+      "path": "tests/power-art.test.js",
+      "bytes": 5037,
+      "sha256": "1692a5a76a13d5b51c6768a837ad7c95a41cc36a47e9fcd5037f01fed371c891"
+    },
+    {
+      "path": "tests/power-effects.test.js",
+      "bytes": 4477,
+      "sha256": "c0abe984714ba22aef46121b8faa756cbe52294d86cd2ef95197619afe32dc63"
+    },
+    {
+      "path": "tests/power-renderer.test.js",
+      "bytes": 2701,
+      "sha256": "d5ef8e9530513d42b2becab92e7418d0588049ffb73782d37bb251f14af5e6e4"
+    },
+    {
       "path": "tests/progression.test.js",
       "bytes": 2736,
       "sha256": "7371e8a4da4fcec6f3706f240883af4ea226e9483fb8e4a06c2abe700c531b8c"
@@ -938,6 +983,6 @@
       "sha256": "47c3ea1282499bb353023889432ca504b1fbf8bd50833c05e526187f73468e03"
     }
   ],
-  "base_github_commit": "993b19b9ef6e6469441f76bf06d80ba4b769b127",
+  "base_github_commit": "ea7f98cfa40c63731f9dca9fe159908a112eb9f3",
   "integration_date": "2026-11-03"
 }
