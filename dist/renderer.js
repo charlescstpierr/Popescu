@@ -6,6 +6,7 @@ import {TRAVESTIA} from './travestia.js';
 import {drawPelicanGround,drawPelicanCards} from './pelican-art.js';
 import {HeroArt} from './hero-art.js';
 import {CombatArt} from './combat-art.js';
+import {PowerArt} from './power-art.js';
 import {ActorArt} from './actor-art.js';
 import {CityArt} from './city-art.js';
 /* Original hand-pixelled city and actors. Simulation remains entirely in engine.js. */
@@ -348,7 +349,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.defeatStamps=new Map();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -377,6 +378,12 @@ export class Renderer {
   }
   _car(p,moving=false) {
     const ctx=this.ctx,x=p.x,y=p.y;
+    if(moving&&!this.reducedEffects){
+      // Speed marks stay attached to the actual car, never a second hitbox.
+      ctx.save();ctx.globalAlpha=.75;
+      for(let i=0;i<3;i++)line(ctx,C.gold,x-34-i*4,y-9+i*6,x-51-i*5,y-9+i*6,2);
+      ctx.restore();
+    }
     if(!moving&&(p.h||0)>(p.w||0)*1.3) {
       // Parked cars use their full, vertical world footprint so collisions are visible.
       const w=p.w||34,h=p.h||66,left=x-w/2,top=y-h/2;
@@ -605,11 +612,12 @@ export class Renderer {
     ctx.restore();
   }
 
-  _shot(p) {
+  _shot(p,s) {
     const ctx=this.ctx;
     if(p.kind==='heart'){if(p.viral&&p.hitIds?.size){line(ctx,'#f58cbe',p.linkX,p.linkY,p.x,p.y,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
+    if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
   }
   render(game,time=0) {
@@ -631,12 +639,14 @@ export class Renderer {
     }
     let xpTrails=16;for(const p of drops)if(this._drop(p,s,xpTrails>0))xpTrails--;
     for(const p of clouds)this._cloud(p);
-    for(const p of s.pulses||[]){const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    // Old checkpoints can contain legacy power rings. Do not replay them as
+    // travelling attacks: truth damages at once and airplane is defensive.
+    for(const p of s.pulses||[]){if(p.color==='#c9a8ff'||p.color==='#8adce6')continue;const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    this.powers.drawGround(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.airplane?.active) {
       const a=s.airplane,r=a.r||95,x=a.x??s.x,y=a.y??s.y;
-      ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.time*.12,1);
-      ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-this.time*.08,1);ctx.restore();
-      drawIcon(ctx,'airplane',x-7,y-r-9,14);
+      ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
+      if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
     for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
       const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
@@ -668,12 +678,13 @@ export class Renderer {
         this._actor(a,item.kind,(actorPhase+8)%8,s);
       }
     }
-    for(const p of shots)this._shot(p);
+    for(const p of shots)this._shot(p,s);
     for(const e of enemies)if(!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
     for(const e of enemies)if(!e.dead)this._rivalAttack(e,true);
     if(!this.reducedEffects)for(const p of clouds)this._cloud(p,true);
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
+    this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.shield>0){ctx.save();ctx.globalAlpha=.42+.15*Math.sin(this.time*4);ring(ctx,'#84eaff',s.x,s.y-6,27,.15,2,this.time*.2);sparkle(ctx,s.x+24*Math.cos(this.time),s.y-6+15*Math.sin(this.time),'#bdf4ff',2);ctx.restore();}
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
