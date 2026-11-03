@@ -1,0 +1,78 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Game} from '../dist/engine.js';
+import {captureRun,restoreRun} from '../dist/run-save.js';
+function quiet(time=0){const events=[],g=new Game({seed:42,onEvent:(t,p)=>events.push([t,p])});for(const k in g.timers)g.timers[k]=100000;g.s.elapsed=time;g.nextEvent=100000;return {g,events};}
+function spawnCount(time){const {g}=quiet(time);g.timers.spawn=0;g.timers.pack=0;for(let i=0;i<150;i++){g.s.elapsed+=1/30;g.spawnWave(1/30);}return g.s.enemies.length;}
+test('recovery window reduces arrivals and holds packs without a catch-up burst',()=>{
+ assert.ok(spawnCount(180)<spawnCount(160)/2);
+ const {g}=quiet(194.99);g.timers.pack=0;g.spawnWave(.01);assert.equal(g.s.enemies.length,0);g.s.elapsed=195.01;g.spawnWave(.02);assert.ok(g.s.enemies.length<=6);
+});
+test('later hordes alternate existing enemy compositions',()=>{
+ const kinds=[];for(const time of [155,215,245]){const {g}=quiet(time);g.timers.horde=0;g.spawnWave(.01);kinds.push([...new Set(g.s.enemies.map(e=>e.type))]);}
+ assert.equal(new Set(kinds.map(x=>x.join(','))).size,3);
+});
+test('horde warning precedes spawning by six seconds even when a previous speech reservation is active',()=>{
+ const {g,events}=quiet(150);g.speechUntil=999;g.timers.horde=6.01;g.spawnWave(.02);assert.equal(g.s.enemies.length,0);assert.ok(events.some(([t,p])=>t==='bark'&&p.text.includes('six secondes')));
+ g.spawnWave(5.97);assert.equal(g.s.enemies.length,0);g.spawnWave(.03);assert.ok(g.s.enemies.length>0);
+});
+test('scheduled bosses warn five seconds before arrival',()=>{
+ for(const key of ['boss','travestia']){const {g,events}=quiet(300);g.timers[key]=5.01;g.spawnWave(.02);assert.equal(g.s.enemies.length,0);assert.ok(events.some(([t,p])=>t==='bark'&&p.text.includes('cinq secondes')));g.spawnWave(5);assert.equal(g.s.enemies.length,1);}
+});
+test('final minute is announced and staged without simultaneous regular encounters',()=>{
+ const {g,events}=quiet(1129.99);g.s.elapsed+=.02;g.spawnWave(.02);assert.ok(events.some(([t,p])=>t==='bark'&&p.text.includes('Dernière minute')));
+ g.s.elapsed=1140.01;g.timers.horde=g.timers.boss=g.timers.travestia=g.timers.rival=0;g.spawnWave(.02);assert.deepEqual(g.s.enemies.map(e=>e.type),['travestia']);
+ g.s.elapsed=1160.01;g.spawnWave(.02);assert.equal(g.s.enemies.filter(e=>e.type.startsWith('rival_')).length,1);
+ g.s.elapsed=1180.01;g.spawnWave(.02);assert.ok(g.s.enemies.length>10);assert.ok(g.s.enemies.length<=300);
+});
+test('finale milestones survive checkpoint without replay and old saves skip past beats',()=>{
+ const {g}=quiet(1140.01);g.spawnWave(.02);const saved=captureRun(g),b=restoreRun(saved);b.spawnWave(.02);g.spawnWave(.02);assert.equal(b.s.enemies.length,1);
+ const {g:old}=quiet(1150);old.spawnWave(.02);assert.equal(old.s.enemies.length,0);
+ g.s.elapsed=b.s.elapsed=1160.01;g.spawnWave(.02);b.spawnWave(.02);assert.deepEqual(captureRun(b),captureRun(g));
+});
+test('endless continuation uses normal schedule and never replays finale',()=>{
+ const {g,events}=quiet(1201);g.s.endless=true;g.timers.horde=0;g.timers.travestia=0;g.spawnWave(.02);assert.ok(g.s.enemies.some(e=>e.type==='travestia'));assert.ok(g.s.enemies.length>10);assert.ok(!events.some(([t,p])=>t==='bark'&&p.text.includes('Dernière minute')));
+});
+test('finale preserves visible enemies and reserves only an offscreen ordinary slot',()=>{
+ const {g}=quiet(1140.01);for(let i=0;i<300;i++)g.spawnEnemy('normal',i===299?800:0,0);
+ const visibleIds=g.s.enemies.slice(0,299).map(e=>e.id);g.spawnWave(.02);
+ assert.equal(g.s.enemies.length,300);assert.ok(g.s.enemies.some(e=>e.type==='travestia'));assert.deepEqual(g.s.enemies.filter(e=>e.type==='normal').map(e=>e.id),visibleIds);
+ const boss=g.s.enemies.find(e=>e.type==='travestia');assert.ok(Math.abs(boss.x)>g.viewport.width/2+boss.r||boss.y < -g.viewport.height*.48-boss.r||boss.y > g.viewport.height*.52+boss.r);
+});
+test('an already present finale boss does not retire another enemy at capacity',()=>{
+ const {g}=quiet(1140.01);g.spawnEnemy('travestia',500,0);for(let i=0;i<299;i++)g.spawnEnemy('normal',800,i);
+ const ids=g.s.enemies.map(e=>e.id);g.spawnWave(.02);assert.deepEqual(g.s.enemies.map(e=>e.id),ids);
+});
+test('pausing before a finale boundary freezes its warning and encounter clock',()=>{
+ const {g,events}=quiet(1129.99);g.pause();g.update(.2);assert.equal(g.s.elapsed,1129.99);assert.equal(events.length,0);
+ g.resume();g.update(.02);assert.equal(events.filter(([t,p])=>t==='bark'&&p.text.includes('Dernière minute')).length,1);
+});
+test('full final minute survives deterministic saves and reaches victory once',()=>{
+ const events=[],g=new Game({seed:71,onEvent:(t,p)=>events.push([t,p])});g.s.elapsed=1129.8;g.s.invulnerable=200;g.nextEvent=100000;
+ let b=restoreRun(captureRun(g));
+ for(let i=0;i<1500&&g.s.mode!=='victory';i++){
+  for(const run of [g,b]){if(run.s.mode==='upgrade')run.chooseUpgrade(run.s.options[0].id);if(run.s.mode==='dialogue')run.finishDialogue();run.update(.05,{x:Math.cos(i/50),y:Math.sin(i/50)});}
+  if(i%100===0){assert.deepEqual(captureRun(b),captureRun(g));b=restoreRun(captureRun(b));}
+ }
+ assert.equal(g.s.mode,'victory');assert.equal(events.filter(([t])=>t==='victory').length,1);assert.deepEqual(captureRun(b),captureRun(g));
+ assert.ok(g.eventSeen.has('finale:1180'));assert.ok(g.s.enemies.length<=300);
+});
+test('a capped final boss retries after space opens and persists the pending encounter',()=>{
+ const {g}=quiet(1140.01);for(let i=0;i<300;i++)g.spawnEnemy('normal',0,0);g.spawnWave(.02);assert.equal(g.s.enemies.length,300);
+ const b=restoreRun(captureRun(g));b.s.enemies.pop();b.s.elapsed=1140.04;b.spawnWave(.03);assert.ok(b.s.enemies.some(e=>e.type==='travestia'));
+});
+test('final horde reserves offscreen slots or retries without deleting visible actors',()=>{
+ for(const offscreen of [true,false]){const {g}=quiet(1180.01);for(let i=0;i<300;i++)g.spawnEnemy('normal',offscreen?800:0,0);g.spawnWave(.02);
+ if(!offscreen){assert.ok(g.s.enemies.every(e=>e.type==='normal'));g.s.enemies.splice(0,20);g.s.elapsed=1180.04;g.spawnWave(.03);}
+ assert.ok(g.s.enemies.some(e=>e.type!=='normal'));assert.ok(g.s.enemies.length<=300);}
+});
+test('scheduled horde composition tolerates floating point boundary drift',()=>{
+ const kinds=[];for(const time of [155-1e-7,155+1e-7]){const {g}=quiet(time);g.timers.horde=0;g.spawnWave(.01);kinds.push(g.s.enemies.map(e=>e.type));}assert.deepEqual(kinds[0],kinds[1]);
+});
+test('an active Travestia does not produce repeated arrival warnings on retry',()=>{
+ const {g,events}=quiet(475);g.spawnEnemy('travestia',500,0);g.timers.travestia=5.01;g.spawnWave(.02);assert.ok(!events.some(([t,p])=>t==='bark'&&p.text.includes('Travestia arrive')));
+});
+test('regular warnings do not promise encounters that the finale will suppress',()=>{
+ const {g,events}=quiet(1139);g.timers.horde=6.01;g.timers.boss=g.timers.travestia=5.01;g.spawnWave(.02);assert.equal(events.filter(([t])=>t==='bark').length,0);
+ g.s.endless=true;g.timers.horde=6.01;g.spawnWave(.02);assert.ok(events.some(([t,p])=>t==='bark'&&p.text.includes('six secondes')));
+});

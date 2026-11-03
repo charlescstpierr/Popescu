@@ -40,13 +40,13 @@ export const GORILLA_NAMES = [
 ];
 
 export const BARKS = [
-  { who: 'TOMA', text: 'Mon fan-club a ouvert une division rousse. J’appelle ça une expansion internationale.' },
-  { who: 'BLONDE IA', text: 'C’est une orang-outan, Toma. Elle fait pas partie de ton équipe marketing.' },
-  { who: 'TOMA', text: 'Des bras aussi longs ? Elle veut clairement me faire un câlin de milliardaire.' },
-  { who: 'BLONDE IA', text: 'Elle prépare une claque. Même moi, je la vois venir.' },
-  { who: 'TOMA', text: 'Plus y’a de singes, plus mon potentiel de réseautage augmente.' },
-  { who: 'TOMA', text: 'C’est pas une horde. C’est ma liste d’attente VIP qui a appris à courir.' },
-  { who: 'BLONDE IA', text: 'On devrait éviter le groupe de discussion. Il a des très grosses mains.' },
+  { context:'orangutan', who: 'TOMA', text: 'Mon fan-club a ouvert une division rousse. J’appelle ça une expansion internationale.' },
+  { context:'orangutan', who: 'BLONDE IA', text: 'C’est une orang-outan, Toma. Elle fait pas partie de ton équipe marketing.' },
+  { context:'orangutan', who: 'TOMA', text: 'Des bras aussi longs ? Elle veut clairement me faire un câlin de milliardaire.' },
+  { context:'orangutan', who: 'BLONDE IA', text: 'Elle prépare une claque. Même moi, je la vois venir.' },
+  { context:'horde', who: 'TOMA', text: 'Plus y’a de singes, plus mon potentiel de réseautage augmente.' },
+  { context:'horde', who: 'TOMA', text: 'C’est pas une horde. C’est ma liste d’attente VIP qui a appris à courir.' },
+  { context:'horde', who: 'BLONDE IA', text: 'On devrait éviter le groupe de discussion. Il a des très grosses mains.' },
   { who: 'TOMA', text: 'IA, transforme ce stand à hot-dogs en restaurant étoilé. Avec moi sur toutes les étoiles.' },
   { who: 'TOMA', text: 'Je suis pas perdu. Le GPS est intimidé.' },
   { who: 'TOMA', text: 'L’IA m’a donné 10 sur 10. J’avais précisé le barème.' },
@@ -125,6 +125,7 @@ export const BARKS = [
   { who: 'BLONDE IA', text: 'Je vise la horde. Toi, vise une décision raisonnable.' },
   { who: 'BLONDE IA', text: 'On s’en sort ensemble. Même sans ton jet privé imaginaire.' },
 ];
+
 
 export const EVENTS = {
   foodcart: [
@@ -265,3 +266,37 @@ export const RIVAL_COMPANION_REPLIES = [
   { who: 'BLONDE IA', text: 'On garde les pieds au sol, même quand ton commentaire part très loin.' },
   { who: 'BLONDE IA', text: 'Tu peux esquiver sans faire un bilan financier à tout le monde.' },
 ];
+
+// Short, non-modal street encounters. Each object type speaks once per run.
+export const WORLD_REMARKS = {
+  foodcart: {who:'TOMA',text:'Mon resto étoilé! Bon, c’est un hot-dog. L’étoile est dans ma tête.'},
+  vending: {who:'SYSTÈME',text:'Banque privée de Toma : une distributrice. Capital : des chips pognées.'},
+  trophy: {who:'TOMA',text:'Mon trophée! Enfin un objet qui croit mon CV.'},
+  planter: {who:'SYSTÈME',text:'Toma a demandé un arbre à billets. La plante a choisi les feuilles.'},
+  bike: {who:'TOMA',text:'Deux roues, zéro essence. Mon empire coupe dans le luxe.'},
+  mirror: {who:'SYSTÈME',text:'Le miroir confirme : même Toma, moins de batterie.'},
+  car: {who:'TOMA',text:'Mon char! Ah non. Le propriétaire est encore dedans.'},
+  bench: {who:'TOMA',text:'Mon trône municipal. Pas de coussin, mais zéro hypothèque.'},
+  bin: {who:'SYSTÈME',text:'Archives de Toma : trois plans de génie, tous recyclables.'},
+  phone: {who:'TOMA',text:'IA, rappelle-moi! Même un message automatique, ça compte comme un fan.'},
+};
+export const STORY_MILESTONES = [
+  {at:300,who:'TOMA',text:'Cinq minutes de survie. Mon autobiographie vient de gagner un fait vérifiable.'},
+  {at:600,who:'SYSTÈME',text:'Dix minutes. Toma a découvert le cardio. Le cardio demande un deuxième avis.'},
+  {at:900,who:'TOMA',text:'Quinze minutes! Mon char est imaginaire, mais mes ampoules sont ben réelles.'},
+  {at:1140,who:'SYSTÈME',text:'Une minute à tenir. Le discours de Toma dure trois heures. Priorité : survivre.'},
+];
+export function contextualBarks(s){
+  return BARKS.filter(line=>{
+    if(line.who==='BLONDE IA'&&(!s.companion||s.girl.down>0))return false;
+    if(line.context==='orangutan')return s.enemies.some(e=>!e.dead&&e.type==='orangutan');
+    if(line.context==='horde')return s.enemies.filter(e=>!e.dead).length>=12;
+    return true;
+  });
+}
+export function victoryQuote(s){
+  if(s.companion)return '« On a survécu ensemble. Je vais mettre ton nom en gros. Bon… aussi gros que le mien. »';
+  if(s.upg.truth)return '« La vérité m’a sauvé. Je vais essayer ça dans ma bio. Juste une ligne pour commencer. »';
+  if(s.discovery?.count>=3)return '« J’ai survécu grâce au quartier. Mon documentaire va enfin créditer quelqu’un d’autre. »';
+  return '« Vingt minutes sans retouche. Pour une fois, j’ai pas besoin de générer la preuve. »';
+}
