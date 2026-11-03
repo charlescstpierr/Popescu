@@ -54,14 +54,14 @@ test('compaction preserves non-XP expiry rules and normal nearby crystal positio
 });
 
 test('relocation uses a reachable point instead of placing XP inside a warehouse',()=>{
- const g=new Game({seed:0});g.s.x=222.5414872660474;g.s.y=375.1593543962962;g.s.faceX=-1;g.s.faceY=0;g.s.stats.magnet=70;
+ const g=new Game({seed:0});g.s.x=222.5414872660474;g.s.y=375.1593543962962;g.s.travelX=-1;g.s.travelY=0;g.s.stats.magnet=70;
  g.world.update(g.s.x,g.s.y);g.s.drops=[xp(12,g.s.x+2000)];g.s.drops[0].y=g.s.y;g.updateDrops(.01);
  const d=g.s.drops[0];assert.equal(total(g),12);assert.equal(g.s.xp,0);assert.equal(g.world.collides(d.x,d.y,13),false);
  const length=Math.hypot(d.x-g.s.x,d.y-g.s.y);assert.ok(length>g.s.stats.magnet);
  for(let step=0;step<=length;step+=6){const t=step/length;assert.equal(g.world.collides(g.s.x+(d.x-g.s.x)*t,g.s.y+(d.y-g.s.y)*t,13),false);}
 });
-test('relocation respects horizontal facing in an open arena',()=>{
- const g=run();g.s.faceX=-1;g.s.faceY=0;g.s.drops=[xp(4,2000)];g.updateDrops(.01);assert.equal(g.s.drops[0].y,0);assert.ok(g.s.drops[0].x>0);
+test('relocation respects actual horizontal travel in an open arena',()=>{
+ const g=run();g.update(1/30,{x:-1,y:0});g.s.faceX=1;g.s.faceY=0;g.s.drops=[xp(4,2000)];g.updateDrops(.01);assert.equal(g.s.drops[0].y,0);assert.ok(g.s.drops[0].x>0);
 });
 test('blocked relocation retains the old XP instead of forcing an inaccessible pickup',()=>{
  const g=run();g.world.collides=()=>true;g.s.drops=[xp(7,2000)];g.updateDrops(.01);
@@ -69,6 +69,6 @@ test('blocked relocation retains the old XP instead of forcing an inaccessible p
  g.world.collides=()=>false;g.updateDrops(.01);assert.ok(g.s.drops[0].x<1800);assert.equal(total(g),7);
 });
 test('terminal capture also chooses reachable terrain for relocated XP',()=>{
- const g=new Game({seed:0});g.s.x=222.5414872660474;g.s.y=375.1593543962962;g.s.faceX=-1;g.s.faceY=0;g.s.stats.magnet=70;g.s.drops=[xp(12,g.s.x+2000)];g.s.drops[0].y=g.s.y;
+ const g=new Game({seed:0});g.s.x=222.5414872660474;g.s.y=375.1593543962962;g.s.travelX=-1;g.s.travelY=0;g.s.stats.magnet=70;g.s.drops=[xp(12,g.s.x+2000)];g.s.drops[0].y=g.s.y;
  const snapshot=captureRun(g),d=snapshot.game.s.drops[0];assert.equal(g.world.collides(d.x,d.y,13),false);assert.equal(g.s.drops[0].x,g.s.x+2000);assert.equal(snapshot.game.s.xp,0);
 });

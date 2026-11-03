@@ -23,11 +23,11 @@ export class Game {
     this.onEvent=onEvent;this.seed=seed|0;this.rng=(seed|0) || 1;this.id=1;this.world=new World(seed);this.viewport={width:390,height:844};
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
-    this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
+    this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
     this.bossDirector=createBossDirector(this.seed);
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
-    this.defeatEffects=[];this.powerEffects=[];
+    this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
@@ -47,16 +47,27 @@ export class Game {
   chooseUpgrade(id){
     const s=this.s;if(s.mode!=='upgrade' || !s.options.some(o=>o.id===id))return false;
     const evolution=EVOLUTIONS.find(o=>o.id===id);
-    if(evolution){if(!evolutionReady(s,evolution))return false;s.evolutions[id]=true;s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;}
-    if(CONSUMABLES.some(o=>o.id===id)){if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);if(id==='payday')s.coins+=8;if(id==='barrier')s.shield=Math.max(s.shield,Math.min(Math.max(30,s.stats.shieldMax),s.shield+30));s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');this.gainXP(0);return true;}
+    if(evolution){if(!evolutionReady(s,evolution))return false;s.evolutions[id]=true;this.powerEffect(id,'acquire');s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;}
+    if(CONSUMABLES.some(o=>o.id===id)){
+      const from=id==='recovery'?s.hp:id==='barrier'?s.shield:s.coins;
+      if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);
+      if(id==='payday')s.coins+=8;
+      if(id==='barrier')s.shield=Math.max(s.shield,Math.min(Math.max(30,s.stats.shieldMax),s.shield+30));
+      const to=id==='recovery'?s.hp:id==='barrier'?s.shield:s.coins;
+      this.powerEffect(id,'acquire',s.x,s.y,0,{from,to,amount:to-from,maximum:id==='recovery'?s.maxhp:Math.max(30,s.stats.shieldMax)});
+      s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');this.gainXP(0);return true;
+    }
     const def=UPGRADES.find(u=>u.id===id);if(!def)return false;if(def && this.rank(id)>=(def.max||5))return false;
+    const previousHp=s.hp,previousShield=s.shield;
     s.upg[id]=this.rank(id)+1;
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
     if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA','Je suis avec toi. On avance ensemble.');}}
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
-    if(['car','girlfriend','airplane','muscle','truth'].includes(id))this.powerEffect(id,'acquire');
+    const restoration=id==='ego'?{from:previousHp,to:s.hp,amount:s.hp-previousHp,maximum:s.maxhp}:id==='validation'?{from:previousShield,to:s.shield,amount:s.shield-previousShield,maximum:s.stats.shieldMax}:{};
+    if(id==='followers'){const muzzle=computeHeroPose(s).muzzle;restoration.tx=muzzle.x;restoration.ty=muzzle.y;}
+    this.powerEffect(id,'acquire',s.x,s.y,0,restoration);
     s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;
   }
   gainXP(value){
@@ -95,9 +106,12 @@ export class Game {
     this.updateDiscoveries(dt);
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0;const n=Math.max(1,length(mx,my));s.moveX=mx/n;s.moveY=my/n;
     if(length(mx,my)>.08){s.faceX=mx/n;s.faceY=my/n;}
-    const previousX=s.x,previousY=s.y,previousGirlX=s.girl.x,previousGirlY=s.girl.y;this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=length(s.x-previousX,s.y-previousY);s.walkMoving=moved>1e-7&&length(s.moveX,s.moveY)>.08;if(s.walkMoving)s.walkDistance+=moved;this.world.update(s.x,s.y);
-    if(this.rank('detox'))s.hp=Math.min(s.maxhp,s.hp+.2*this.rank('detox')*dt);
-    if(s.elapsed-this.lastHit>6 && s.shield<s.stats.shieldMax)s.shield=Math.min(s.stats.shieldMax,s.shield+(3+2*this.rank('validation'))*dt);
+    const previousX=s.x,previousY=s.y,previousGirlX=s.girl.x,previousGirlY=s.girl.y;this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=length(s.x-previousX,s.y-previousY);s.walkMoving=moved>1e-7&&length(s.moveX,s.moveY)>.08;if(s.walkMoving)s.walkDistance+=moved;
+    // Keep actual travel separate from aim and blocked movement intent.
+    if(moved>1e-7){s.travelX=(s.x-previousX)/moved;s.travelY=(s.y-previousY)/moved;}
+    this.world.update(s.x,s.y);
+    if(this.rank('detox')){const from=s.hp;s.hp=Math.min(s.maxhp,s.hp+.2*this.rank('detox')*dt);if(s.hp>from)this.powerEffect('detox','heal',s.x,s.y,0,{amount:s.hp-from});}
+    if(s.elapsed-this.lastHit>6 && s.shield<s.stats.shieldMax){const from=s.shield;s.shield=Math.min(s.stats.shieldMax,s.shield+(3+2*this.rank('validation'))*dt);if(this.rank('validation')&&s.shield>from)this.powerEffect('validation','recharge',s.x,s.y,0,{from,to:s.shield,maximum:s.stats.shieldMax,amount:s.shield-from});}
     this.spawnWave(dt);this.updateCompanion(dt);this.updateEnemies(dt);if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
     if(s.hp<=0){s.hp=0;s.mode='gameover';this.sound('defeat');this.emit('gameover',s);return;}
     if(s.elapsed>=1200 && !s.endless){s.mode='victory';this.sound('victory');this.emit('victory',s);return;}
@@ -142,10 +156,10 @@ export class Game {
     const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
     if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
-    // Summons already prolong the matriarch fight, so her early boost is smaller.
-    // Reach 2x by 18 min, then cap the extra factor; saved HP stays untouched.
-    const earlyBossHealth=type==='matriarch'?1.35:1.6;
-    const bossDurability=isMajorBoss(type)?earlyBossHealth+(2-earlyBossHealth)*clamp((minutes-3)/15,0,1):1;
+    // Several attack cycles must survive developed offensive builds. Summons
+    // justify a gentler first matriarch; only newly spawned bosses gain HP.
+    const earlyBossHealth=type==='matriarch'?1.8:2.4;
+    const bossDurability=isMajorBoss(type)?earlyBossHealth+(8-earlyBossHealth)*clamp((minutes-3)/15,0,1):1;
     const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1)*bossDurability;
     const enemy={id:this.id++,type,sex:['travestia','pelican'].includes(type)?null:isRival(type)?'male':'female',x,y,hp,maxhp:hp,r:spec.r,speed:spec.speed*(this.difficulty.speed||1)*(1+Math.min(.35,minutes*.014)),phase:'chase',faceX:0,faceY:1,gasPose:0,windup:0,hitFlash:0,charmed:0,dead:false,cooldown:type==='gas'?2+this.random()*2:0,attack:0,summon:6,crow:0,charge:0,chargeDirX:0,chargeDirY:1,banterCount:0,nextTaunt:0,swipe:0,swipeDirX:0,swipeDirY:1,target:'player',tailTime:0,tailFaceX:1,tailHitPlayer:false,tailHitGirl:false};
     if(type==='pelican')Object.assign(enemy,{peliTime:0,peliDX:1,peliDY:0,peliX:x,peliY:y,peliTravel:0,peliAttackCount:0,peliHitPlayer:false,peliHitGirl:false,peliReplyPending:false,peliBanterIndex:0,peliTauntAt:0,peliReply:'',peliReplyTime:0,peliWalkDistance:0,peliMoving:false});
@@ -170,8 +184,27 @@ export class Game {
     const recovery=t>=120&&!finale&&(t-120)%90>=60&&(t-120)%90<75;
     return {finale,recovery,pressure:recovery?.35:finale?.65:1};
   }
-  announceEncounter(text){
-    this.bark('SYSTÈME',text,true);
+  pendingEncounterNotices(){
+    // Rebuild only pending threats from saved simulation clocks, never old jokes.
+    const s=this.s,d=this.bossDirector,notices={};
+    if(d.warned&&(s.endless||s.elapsed+d.remaining<1140)&&!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)){
+      const name={matriarch:'La modération',travestia:'Travestia',pelican:'Péli Zodiaque'}[d.nextType];
+      notices.boss=`${name} arrive ${d.remaining>0?`dans environ ${Math.ceil(d.remaining)} s`:'bientôt'}. Garde une sortie !`;
+    }
+    if(s.elapsed>=120&&this.timers.horde>0&&this.timers.horde<=6&&(s.endless||s.elapsed+this.timers.horde<1140)){
+      notices.horde=`Une horde arrive dans environ ${Math.ceil(this.timers.horde)} s. Garde une sortie !`;
+    }
+    if(!s.endless)for(const [at,arrival,label,hint] of [[1130,1140,'Dernière minute','Garde une sortie !'],[1154,1160,'Le dernier rival arrive','Garde tes distances !'],[1174,1180,'Dernière vague','Tiens jusqu’à vingt minutes !']]){
+      if(this.eventSeen.has(`finale:${at}`)&&s.elapsed>=at&&s.elapsed<arrival)notices.finale=`${label} dans environ ${Math.ceil(arrival-s.elapsed)} s. ${hint}`;
+    }
+    return notices;
+  }
+  pendingEncounterWarning(){return Object.values(this.pendingEncounterNotices()).join(' ');}
+  announceEncounter(text,kind){
+    // Keep other pending threats readable when a new critical notice replaces the bubble.
+    if(kind){const pending=this.pendingEncounterNotices();delete pending[kind];text=[text,...Object.values(pending)].join(' ');}
+    // Encounter notices remain visible even when optional banter is disabled.
+    this.emit('bark',{who:'SYSTÈME',text,encounter:true});
     // Narrative uses the UI's full reading duration; combat reactions stay immediate.
     this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+Math.max(4.3,text.length*.039));
     // Do not let a previously queued joke immediately cover an encounter warning.
@@ -202,16 +235,16 @@ export class Game {
         else{this.eventSeen.delete(pending);this.eventSeen.add(key);}
       }
     };
-    beat(1130,()=>this.announceEncounter('Dernière minute dans dix secondes. Un dernier défi t’attend : garde une sortie !'));
+    beat(1130,()=>this.announceEncounter('Dernière minute dans dix secondes. Un dernier défi t’attend : garde une sortie !','finale'));
     beat(1140,()=>{
       this.timers.horde=45;this.timers.rival=90;
       if(!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)&&!this.spawnScheduledBoss())return false;
-      this.announceEncounter('Le dernier direct ! Survis jusqu’à vingt minutes. Ses attaques restent esquivables.');
+      this.announceEncounter('Le dernier direct ! Survis jusqu’à vingt minutes. Ses attaques restent esquivables.','finale');
     });
-    beat(1154,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !'));
+    beat(1154,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !','finale'));
     beat(1160,()=>{if(!this.spawnFinaleEnemy(this.rivalIndex%2?'rival_goat':'rival_rooster'))return false;this.rivalIndex++;});
-    beat(1174,()=>this.announceEncounter('Dernière vague dans six secondes. Tiens jusqu’à vingt minutes !'));
-    beat(1180,()=>{this.reserveFinaleSlots(24);if(s.enemies.length>=CAP.enemies)return false;this.spawnHorde();this.announceEncounter('Dernière vague ! Pas besoin de tout éliminer : survis jusqu’à vingt minutes !');});
+    beat(1174,()=>this.announceEncounter('Dernière vague dans six secondes. Tiens jusqu’à vingt minutes !','finale'));
+    beat(1180,()=>{this.reserveFinaleSlots(24);if(s.enemies.length>=CAP.enemies)return false;this.spawnHorde();this.announceEncounter('Dernière vague ! Pas besoin de tout éliminer : survis jusqu’à vingt minutes !','finale');});
   }
   spawnHorde(){
     const s=this.s,m=s.elapsed/60,count=18+Math.min(24,Math.floor(m*1.4));
@@ -232,7 +265,7 @@ export class Game {
     this.timers.pack-=dt;
     if(this.timers.pack<=0){this.timers.pack=pacing.recovery||pacing.finale?.1:7;if(!pacing.recovery&&!pacing.finale)this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
     if(pacing.finale)return;
-    if((s.endless||s.elapsed+this.timers.horde<1140)&&s.elapsed>=120&&this.timers.horde>6&&this.timers.horde-dt<=6)this.announceEncounter('Une horde arrive dans six secondes. Garde une sortie !');
+    if((s.endless||s.elapsed+this.timers.horde<1140)&&s.elapsed>=120&&this.timers.horde>6&&this.timers.horde-dt<=6)this.announceEncounter('Une horde arrive dans six secondes. Garde une sortie !','horde');
     this.timers.horde-=dt;
     if(this.timers.horde<=0){
       this.timers.horde=45;this.spawnHorde();
@@ -267,22 +300,50 @@ export class Game {
       if(!s.endless&&s.elapsed+BOSS_SCHEDULE.warning>=BOSS_SCHEDULE.finaleAt)return;
       d.warned=true;d.remaining=BOSS_SCHEDULE.warning;
       const warnings={matriarch:'La modération arrive dans cinq secondes. Prépare une sortie !',travestia:'Travestia arrive dans cinq secondes. Méfie-toi de sa queue !',pelican:'Péli Zodiaque arrive dans cinq secondes. Garde une sortie pour ses câlins !'};
-      this.announceEncounter(warnings[d.nextType]);return;
+      this.announceEncounter(warnings[d.nextType],'boss');return;
     }
     if(d.remaining>0)return;
     d.retryIn=Math.max(0,d.retryIn-dt);if(d.retryIn>0)return;
     const boss=this.spawnScheduledBoss();
     if(!boss){d.retryIn=BOSS_SCHEDULE.retry;return;}
     const arrivals={matriarch:'La modération entre en scène !',travestia:'Travestia entre en scène ! Gare à la queue hélicoptère.',pelican:'Péli Zodiaque entre en scène ! Câlins, tarot et astrologie.'};
-    this.bark('SYSTÈME',arrivals[boss.type]);
+    this.announceEncounter(arrivals[boss.type],'boss');
   }
 
   nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.s.enemies){if(e.dead || e===exclude || e.charmed>0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<best){best=d;target=e;}}return target;}
+  reenterBoss(e){
+    // Running out of the active city must not count as defeating a boss.
+    // Reuse its identity/HP, outside the camera and with a fresh attack delay.
+    // The existing cooldown also bounds retries if every candidate is blocked.
+    if(e.cooldown>0)return false;
+    const s=this.s,v=this.viewport,moving=length(s.moveX,s.moveY)>.08;
+    // Old saves may contain overlapping encounters. Preserve both, but do not
+    // bring a distant second boss back on top of the one already nearby.
+    if(s.enemies.some(other=>other!==e&&!other.dead&&isMajorBoss(other.type)&&dist(other,s)<=1600)){e.cooldown=.5;return false;}
+    const angle=Math.atan2(moving?s.moveY:e.y-s.y,moving?s.moveX:e.x-s.x);
+    for(let i=0;i<24;i++){
+      const offset=i===0?0:(i%2?1:-1)*Math.ceil(i/2)*Math.PI/12;
+      const dx=Math.cos(angle+offset),dy=Math.sin(angle+offset);
+      const edgeX=(v.width/2+e.r+112)/Math.max(.001,Math.abs(dx));
+      const edgeY=(v.height*(dy<0?.48:.52)+e.r+144)/Math.max(.001,Math.abs(dy));
+      const radius=Math.max(520,Math.min(edgeX,edgeY)),x=s.x+dx*radius,y=s.y+dy*radius;
+      // Check the full body plus a short approach, never force it through cover.
+      if([0,40,80].some(back=>this.world.collides(x-dx*back,y-dy*back,e.r)))continue;
+      e.x=x;e.y=y;e.phase='chase';e.cooldown=2.5;e.attack=Math.max(e.attack,2.5);
+      e.windup=0;e.tailTime=0;e.tailReplyPending=false;e.tailMoving=false;
+      e.summon=Math.max(e.summon,3);interruptPelican(e);
+      if(e.type==='pelican'){e.peliX=x;e.peliY=y;e.peliTravel=0;}
+      return true;
+    }
+    e.cooldown=.5;return false;
+  }
   updateEnemies(dt){
     const s=this.s,g=s.girl;
     for(const e of s.enemies){
       if(e.dead)continue;if(e.type==='pelican')e.peliMoving=false;if(e.type==='travestia')e.tailMoving=false;e.hitFlash=Math.max(0,e.hitFlash-dt);e.attack=Math.max(0,(e.attack||0)-dt);e.cooldown=Math.max(0,(e.cooldown||0)-dt);e.gasPose=Math.max(0,e.gasPose-dt);e.swipe=Math.max(0,(e.swipe||0)-dt);e.charge=Math.max(0,(e.charge||0)-dt);e.crow=Math.max(0,(e.crow||0)-dt);e.charmed=Math.max(0,e.charmed-dt);
-      if(length(e.x-s.x,e.y-s.y)>1600){e.dead=true;continue;}
+      // Optional on older saves; absent means the first charm can interrupt.
+      if(e.bossCharmResistance!==undefined)e.bossCharmResistance=Math.max(0,e.bossCharmResistance-dt);
+      if(length(e.x-s.x,e.y-s.y)>1600){if(!isMajorBoss(e.type)){e.dead=true;continue;}if(!this.reenterBoss(e))continue;}
       let target=s;e.target='player';if(e.type==='jealous' && s.companion && g.down<=0){target=g;e.target='girl';}
       if(e.charmed>0){const friend=this.nearest(e.x,e.y,350,e);if(friend){target=friend;e.target='enemy';}else target={x:e.x+(e.x-s.x),y:e.y+(e.y-s.y)};}
       const dx=target.x-e.x,dy=target.y-e.y,d=length(dx,dy)||1;if(e.type==='gas' && (e.windup>0 || e.gasPose>0) && Number.isFinite(e.gasDirX)){e.faceX=e.gasDirX;e.faceY=e.gasDirY;}else if(e.type==='orangutan'&&(e.windup>0||e.swipe>0)){e.faceX=e.swipeDirX;e.faceY=e.swipeDirY;}else if(isRival(e.type)&&(e.windup>0||e.charge>0||e.crow>0)){e.faceX=e.chargeDirX;e.faceY=e.chargeDirY;}else{e.faceX=dx/d;e.faceY=dy/d;}
@@ -329,7 +390,7 @@ export class Game {
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,87,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
-      if(!animalLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}}
+      if(!animalLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
       if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch');}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
     }
@@ -372,7 +433,7 @@ export class Game {
     if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle;const underBarrel=dist(target,s)<80&&(target.x-muzzle.x)*pose.aim.x+(target.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;
     const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.powerEffect('car','activate');this.sound('truth');}
-    const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);}
+    const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);this.powerEffect('money','activate');}
     const airplane=this.rank('airplane');
     if(airplane && this.timers.airplane<=0){
       this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
@@ -383,7 +444,7 @@ export class Game {
     const chopper=this.rank('chopper');
     if(chopper && this.timers.chopper<=0){
       this.timers.chopper=Math.max(2.7,5.7-chopper*.6);const angle=target?Math.atan2(target.y-s.y,target.x-s.x):0,dx=Math.cos(angle),dy=Math.sin(angle);
-      s.vehicles.push({x:s.x-dx*300,y:s.y-dy*300+22,vx:dx*640,vy:dy*640,life:1.15,kind:'bike',damage:42+chopper*21,knockback:75+chopper*10,hitIds:new Set()});this.pulse(s.x,s.y,64,'#8bbfef',.4);
+      s.vehicles.push({x:s.x-dx*300,y:s.y-dy*300+22,vx:dx*640,vy:dy*640,life:1.15,kind:'bike',damage:42+chopper*21,knockback:75+chopper*10,hitIds:new Set()});this.powerEffect('chopper','activate',s.x,s.y+22,0,{tx:s.x+dx*30,ty:s.y+22+dy*30});
     }
     const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.powerEffect('truth','activate',s.x,s.y,145+truth*24);this.sound('truth');}
   }
@@ -391,7 +452,9 @@ export class Game {
   updateShots(dt){
     const s=this.s,buckets=new Map(),size=80;
     for(const e of s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
-    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')){e.charmed=2.5+.9*this.rank('charisma');e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
+    // Boss hearts retain full damage. Brief interrupts plus recovery let the
+    // existing warned attacks finish without long untargetable charm windows.
+    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
     s.shots=s.shots.filter(p=>p.life>0);
   }
   hurt(e,damage){if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
@@ -415,10 +478,10 @@ export class Game {
       this.sound('kill');
     }
   }
-  damage(value,source){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;value*=s.stats.gasMultiplier;}const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
+  damage(value,source){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
   explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion');if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.s.enemies)if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead){const d=length(e.x-x,e.y-y)||1;this.move(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
-  updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.s.enemies)if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.knockback && !e.dead){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
+  updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.s.enemies)if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
   updateClouds(dt){const s=this.s;for(const c of s.clouds){c.life-=dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=Math.exp(-dt*.45);c.vy*=Math.exp(-dt*.45);c.r=Math.min(c.maxr||49,c.r+dt*(c.maxr?16:10));c.arm=Math.max(0,(c.arm||0)-dt);if(c.life>0 && c.arm<=0 && length(c.x-s.x,c.y-s.y)<c.r+10)this.damage(7*(this.difficulty.damage||1),'gas');if(c.arm<=0 && s.companion && s.girl.down<=0 && length(c.x-s.girl.x,c.y-s.girl.y)<c.r+8)s.girl.hp-=dt*3*s.stats.gasMultiplier;}s.clouds=s.clouds.filter(c=>c.life>0);}
   updateShockwaves(dt,previousPlayer=this.s,previousGirl=this.s.girl){
     const s=this.s;
@@ -444,8 +507,8 @@ export class Game {
   }
   updateDrops(dt){
     const s=this.s,g=s.girl,collected=new Set();let girlCollected=false;s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
-      if(distance<s.stats.magnet&&distance>0){const speed=130+Math.max(0,s.stats.magnet-distance)*4,pull=Math.min(distance,speed*dt);d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
-      if(distance<22){collected.add(d);if(target===g)girlCollected=true;if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
+      if(distance<s.stats.magnet&&distance>0){const speed=130+Math.max(0,s.stats.magnet-distance)*4,pull=Math.min(distance,speed*dt);if(pull>0&&this.rank('magnet'))this.powerEffect('magnet','attract',d.x,d.y,0,{tx:target.x,ty:target.y});d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
+      if(distance<22){collected.add(d);if(target===g)girlCollected=true;if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;const from=s.hp;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);if(s.hp>from)this.powerEffect('money','heal',s.x,s.y,0,{amount:s.hp-from});this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
     }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);if(girlCollected)this.powerEffect('girlfriend','collect',g.x,g.y);
   }
   updateChests(dt){
@@ -454,13 +517,16 @@ export class Game {
     s.chests=s.chests.filter(c=>(!c.open || s.elapsed-c.openedAt<8) && dist(c,s)<1600);
   }
   pulse(x,y,r,color,life=.5){this.s.pulses.push({x,y,r:4,maxr:r,life,maxlife:life,color});}
-  powerEffect(power,kind,x=this.s.x,y=this.s.y,r=0){
-    // Visual-only records never consume gameplay RNG or enter saved checkpoints.
-    // Coalesce companion pickups and bound the queue before any next-frame trim.
+  powerEffect(power,kind,x=this.s.x,y=this.s.y,r=0,detail={}){
+    // Cosmetic records and their throttles never enter saved state or consume RNG.
     this.prunePowerEffects();
+    const now=this.s.elapsed,key=`${power}:${kind}`,period=kind==='heal'||kind==='recharge'?1.2:kind==='impact'?.12:0;
+    if(period&&now<(this.powerCueCooldowns.get(key)??-Infinity))return;
     if(kind==='collect'&&this.powerEffects.some(e=>e.kind===kind&&e.power===power))return;
+    if(kind==='attract'||kind==='slow'){let count=0;for(const e of this.powerEffects)if(e.kind===kind&&++count>=3)return;}
+    if(period)this.powerCueCooldowns.set(key,now+period);
     if(this.powerEffects.length>=16)this.powerEffects.shift();
-    this.powerEffects.push({power,kind,x,y,r,rank:this.rank(power),start:this.s.elapsed,life:kind==='acquire'?.85:kind==='collect'?.28:power==='truth'?.42:power==='airplane'?.5:.55});
+    this.powerEffects.push({power,kind,x,y,r,rank:this.rank(power),start:now,life:kind==='acquire'?.85:kind==='collect'||kind==='attract'?.28:power==='truth'?.42:power==='airplane'?.5:.55,...detail});
   }
   prunePowerEffects(){let count=0;for(const effect of this.powerEffects)if(this.s.elapsed-effect.start<effect.life)this.powerEffects[count++]=effect;this.powerEffects.length=count;}
   burst(x,y,color,count){for(let i=0;i<count;i++){const a=this.random()*TAU,v=20+this.random()*70,life=.25+this.random()*.35;this.s.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,maxlife:life,color});}}

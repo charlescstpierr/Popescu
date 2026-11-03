@@ -9,7 +9,7 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=7;
+const VERSION=8;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
@@ -50,7 +50,9 @@ function validate(snapshot){
    snapshot.game.bossDirector=createBossDirector(snapshot.game.seed,snapshot.game.s.elapsed,snapshot.game.s.enemies);
    for(const key of ['boss','travestia','pelican'])delete snapshot.game.timers[key];
   }
-  snapshot.game.s.coinsSpent=0;snapshot.game.s.upgradeRerolls=0;snapshot.game.s.evolutions={};
+  if(snapshot.version<7){snapshot.game.s.coinsSpent=0;snapshot.game.s.upgradeRerolls=0;snapshot.game.s.evolutions={};}
+  // Facing and input in older saves do not prove actual, unblocked movement.
+  snapshot.game.s.travelX=0;snapshot.game.s.travelY=0;
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -79,12 +81,14 @@ function validate(snapshot){
  check(integer(s.coinsSpent)&&integer(totalEarnedCoins(s))&&integer(s.upgradeRerolls)&&s.upgradeRerolls<=2);
  check(object(s.evolutions));for(const [id,active] of Object.entries(s.evolutions)){const def=EVOLUTIONS.find(u=>u.id===id);check(def&&active===true&&def.requires.every(key=>(s.upg[key]||0)>=3));}
  check(integer(s.stunt.count));
+ const travel=Math.hypot(s.travelX,s.travelY);check(travel===0||Math.abs(travel-1)<1e-6);
  check(s.girl.maxhp>0&&s.stunt.duration>0&&s.stunt.progress>=0&&s.stunt.progress<=1);
  check(object(s.upg));for(const [id,rank] of Object.entries(s.upg)){const def=UPGRADES.find(u=>u.id===id);check(def&&integer(rank)&&rank<=def.max);}
  for(const [key,cap] of Object.entries(CAPS)){check(Array.isArray(s[key])&&s[key].length<=cap);for(const item of s[key]){check(object(item));for(const field of (REQUIRED[key]||'').split(' ').filter(Boolean))check(finite(item[field]));}}
  const actorIds=new Set(),majorBosses=new Set();
  for(const e of s.enemies){
   check(ENEMIES.includes(e.type)&&integer(e.id,1)&&e.id<d.id&&e.maxhp>0&&e.r>0&&!actorIds.has(e.id));actorIds.add(e.id);
+  if(e.bossCharmResistance!==undefined)check(BOSS_TYPES.includes(e.type)&&finite(e.bossCharmResistance)&&e.bossCharmResistance>=0&&e.bossCharmResistance<=10);
   if(['travestia','pelican'].includes(e.type)){check(!majorBosses.has(e.type));majorBosses.add(e.type);}
   base.s.enemies=[];const template=base.spawnEnemy(e.type,0,0);check(template);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
   if(ANIMALS[e.type]){const a=ANIMALS[e.type],limits={chase:0,animal_warning:a.warning,animal_active:a.duration,animal_recover:a.recovery};check(Object.hasOwn(limits,e.phase)&&e.animalTime>=0&&e.animalTime<=limits[e.phase]&&typeof e.animalHit==='boolean'&&Math.abs(Math.hypot(e.animalDX,e.animalDY)-1)<1e-6&&e.animalTravel>=0&&e.animalTravel<=a.reach+1e-6);}
@@ -159,7 +163,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,6,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
+ tree(v);check([1,2,3,4,5,6,7,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
   const accumulated=old?{...old.totals}:totals(copy(legacy));

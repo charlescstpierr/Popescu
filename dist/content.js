@@ -14,7 +14,7 @@ export const UPGRADES = [
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
   { id: 'airplane', name: 'Mode avion', desc: 'Dissipe le gaz, suspend les attaques spéciales proches et ralentit les ennemis. Immunité temporaire au gaz.', icon: 'airplane', max: 5, color: '#a5d8ff' },
   { id: 'girlfriend', name: 'Blonde IA', desc: 'Débloque la compagne, ses cœurs, son aura de collecte et +20 bouclier. Puis améliore ses PV et ses tirs.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
-  { id: 'charisma', name: 'Charisme imaginaire', desc: 'Les cœurs charment mieux et plus longtemps. Vitesse ennemie réduite de 7 % par rang.', icon: 'charisma', max: 5, color: '#fca8d4' },
+  { id: 'charisma', name: 'Charisme imaginaire', desc: 'Les cœurs charment mieux et plus longtemps. Les boss résistent aux charmes répétés. Vitesse ennemie réduite de 7 % par rang.', icon: 'charisma', max: 5, color: '#fca8d4' },
   { id: 'chopper', name: 'Chopper inexistant', desc: 'Une moto holographique traverse la horde, frappe et repousse. Chaque rang augmente les dégâts et la fréquence.', icon: 'chopper', max: 5, color: '#6ce2cc' },
   { id: 'truth', name: 'Vérité brute', desc: 'Une onde de vérité blesse et repousse les ennemis proches. Les faits cognent fort.', icon: 'truth', max: 5, color: '#ffe193' },
   { id: 'filter', name: 'Filtre beauté', desc: 'Dégâts de gaz réduits de 16 % et vitesse de déplacement +3 % par rang.', icon: 'filter', max: 5, color: '#9cd99b' },

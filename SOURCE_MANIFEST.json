@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-power-animations-ego-de-guerre",
+  "version": "1.5-plus-combined-powers-xp-pursuit-alerts-hardening",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -179,8 +179,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 29644,
-      "sha256": "71ae9fb2bc450ff3006c8bf1ccf7e812e552e344074119d02861354865f9144a"
+      "bytes": 29821,
+      "sha256": "c493b4f3937b9223314517c37b3dddfd36b7cc5aaebbc5f26b6a86b3ef481ee6"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -309,8 +309,8 @@
     },
     {
       "path": "dist/content.js",
-      "bytes": 23698,
-      "sha256": "672089d77cd8d0e397b51f60130b5d34099a843ac6a8ab270742d88c6a0cd04a"
+      "bytes": 23742,
+      "sha256": "fadc7e33c751645091095722f77e193777e4808156b55fe9c0b1ce618eecf14a"
     },
     {
       "path": "dist/discoveries.js",
@@ -324,18 +324,18 @@
     },
     {
       "path": "dist/drops.js",
-      "bytes": 2455,
-      "sha256": "1fbdf7db7a07365f62fc94c18fc692d5627c9c445c6999912b4bb6859cf73c74"
+      "bytes": 2864,
+      "sha256": "74092118aa9c9836a618b53fc5dfeae8044326a99b9851be26c23c1382227927"
     },
     {
       "path": "dist/engine.js",
-      "bytes": 49873,
-      "sha256": "a4eac9d9854382705f626da8cb6d8d354df8c5a2f44ab8fb649fcbdf970e25d5"
+      "bytes": 55767,
+      "sha256": "c83056bd569afb8780b063482672ccc7f9466521f462ffe05e0f753ac06f9376"
     },
     {
       "path": "dist/evolutions.js",
-      "bytes": 1848,
-      "sha256": "a4196fdf6576059fca8954a2c79c08734881087eb382a619b8611e34a96dba38"
+      "bytes": 1993,
+      "sha256": "ed52a5949e8dee585ac673dba05d0778af95805f48e21b5b88c2db119bd93b4a"
     },
     {
       "path": "dist/hero-art.js",
@@ -374,8 +374,8 @@
     },
     {
       "path": "dist/power-art.js",
-      "bytes": 6457,
-      "sha256": "ac328baedd3ae65b4bd6d7adc6db50c3d5128b6fe9c03f4215dda56b112addc4"
+      "bytes": 15246,
+      "sha256": "16a75ae14ed9f2b5a58f812a1a4fd391553202a2a68f905f540a1b6907fb5965"
     },
     {
       "path": "dist/prop-geometry.js",
@@ -384,13 +384,13 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 47648,
-      "sha256": "5811f8925e56edd59fd535b1fe33f7cee0270e3de3b9ba6a6586530f29b8e8ec"
+      "bytes": 51525,
+      "sha256": "5aaca9d84298fbda6ce73abd95c76650133ad49ef5c72ef911d22f9d7a108001"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 22564,
-      "sha256": "f5fb6377bc848646329d93b3c39c35b15f872cb611c72f33e9907d76a826676e"
+      "bytes": 22972,
+      "sha256": "069535ecb2b097e1785c1dfa12fcc3f3e8b971fe879570892f1c79a251a011bd"
     },
     {
       "path": "dist/styles.css",
@@ -419,8 +419,8 @@
     },
     {
       "path": "docs/BOSS-RESISTANCE.md",
-      "bytes": 5508,
-      "sha256": "a58885f8e329aa2ba64ba28ddbd962fd8f46d81b5ffe2bfc777c716330323914"
+      "bytes": 7041,
+      "sha256": "bdd73810af2e1ef2aa140221defbb778f576436215af37bf778468e3d7e32ca4"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -483,6 +483,16 @@
       "sha256": "8f08785f5cca5e342e0f0ec0abd6ff966feb6edc2091181b17aa0dcbdbaf2e1f"
     },
     {
+      "path": "docs/QA-BOSS-PURSUIT.md",
+      "bytes": 6689,
+      "sha256": "dacbcca4c82f54ccd98cc63bab3d692761956f9feb822795281ecd619aa41635"
+    },
+    {
+      "path": "docs/QA-COMBINED-NOV3.md",
+      "bytes": 3934,
+      "sha256": "0fe9b1e42afdc4d5e7a1b71de5450cb44f476417fb155343f58c8ec5f5a430fb"
+    },
+    {
       "path": "docs/QA-CONTENT.md",
       "bytes": 2910,
       "sha256": "a85e3b20a8f3e744f79fc78f9e872c43e7a6e58d1eff1803fff7e8e182abca0b"
@@ -523,6 +533,11 @@
       "sha256": "a032b602412305a237e2f7e229e6acc6004daf9056b3053236af683e2d6f6cdc"
     },
     {
+      "path": "docs/QA-REMAINING-POWER-ANIMATIONS.md",
+      "bytes": 5481,
+      "sha256": "8b818f9a72071079c81d3d3165eecffc0e80d11a7cb5773c66304da7158d5d8c"
+    },
+    {
       "path": "docs/QA-REVIEW.md",
       "bytes": 3608,
       "sha256": "c27992ce89e31ad0c45faba872901a36005ec5b1a9dadbed32b87e3752c1a7fd"
@@ -556,6 +571,11 @@
       "path": "docs/QA-V1.5.md",
       "bytes": 3593,
       "sha256": "a19eb67e2538b91729276af6a02ab743bf0c4402959d75f73c32efc64682dffc"
+    },
+    {
+      "path": "docs/QA-XP-DIRECTION.md",
+      "bytes": 2829,
+      "sha256": "15a01c891d809efd81cb20b69e83fc810c311a1c1480499563343970fa6a90c5"
     },
     {
       "path": "docs/REPRISE.md",
@@ -604,8 +624,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14020793,
-      "sha256": "4866b1c7f6dd6ba134c3a38c48c77a9dfcc373b69af8d39d7355fb6e4cd399bd"
+      "bytes": 14040539,
+      "sha256": "c5f199720f0a427f94aaf857c69009e60ad7770d058b99cef2495e2d862ec172"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -673,6 +693,11 @@
       "sha256": "145875ca8d9079ba95fed7d862e5bf1eaf7079674285d8d5d0c1bfc5f8536284"
     },
     {
+      "path": "scripts/inspect-remaining-powers.mjs",
+      "bytes": 6794,
+      "sha256": "7b0606313acef37fb2add84744a6f35a25ae81035d57f3001d190f8647acda05"
+    },
+    {
       "path": "scripts/inspect-scenery.mjs",
       "bytes": 2056,
       "sha256": "4a38030c7e8466e640cce1c1bef2f2509e5b40e9ad5cc22a0d42d584a65eea2c"
@@ -718,14 +743,24 @@
       "sha256": "5b56583a402a0faa5fcf28eaa1da0d6c96cdf78c715bb3aff6c5a0131a7f5ae3"
     },
     {
+      "path": "scripts/render-remaining-power-preview.mjs",
+      "bytes": 3668,
+      "sha256": "1b21fadd4c913849321bf29b719ebc6d273c0754a8857ed5947a5d86c9cf07a0"
+    },
+    {
       "path": "scripts/verify-boss-arrivals.mjs",
       "bytes": 2394,
       "sha256": "692003fe66b0cea64cfc30f15fd2d27ea851aa1cc44774595ba98ae06ddbcd7c"
     },
     {
       "path": "scripts/verify-boss-durability.mjs",
-      "bytes": 1699,
-      "sha256": "2bc13fe99536b4a8838eb768334eccefbbd9f5bbf3d55ef585ad957ca4fbaee3"
+      "bytes": 2745,
+      "sha256": "ff4ce655d6bf3471e1d88789a2c8f8885a9a363ade6264e35860dee8b92852ca"
+    },
+    {
+      "path": "scripts/verify-boss-pursuit.mjs",
+      "bytes": 3482,
+      "sha256": "eea8506ab8deb45fa2313cf4218e1b13a96cdb54505c16c66c0b186f7589adc1"
     },
     {
       "path": "scripts/verify-crowd-equivalence.mjs",
@@ -743,14 +778,19 @@
       "sha256": "b0aa1b2c7d92a37a00faa2c8afbf6694e80faff2f112678e178a4e15e0af825f"
     },
     {
+      "path": "scripts/verify-remaining-power-equivalence.mjs",
+      "bytes": 3346,
+      "sha256": "7793bbd7e999ddf5dafcbf43b9b9cca4ab95be6a9f0062fe0e6c44c89c4a4dbd"
+    },
+    {
       "path": "tests/animals.test.js",
       "bytes": 4034,
       "sha256": "a697ee4a81dc1f6117212c29c092f9da464591eba1c3939be33432323fc414b9"
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 14906,
-      "sha256": "2e30e99a64ea34f8d3c3e998562928937012996a59c7156f164688115d6aa9c9"
+      "bytes": 23511,
+      "sha256": "fe0f62600d3b5e80d6a9d35c2f691952d01ed57b6a63881393ea500e7e849636"
     },
     {
       "path": "tests/audio.test.js",
@@ -764,18 +804,33 @@
     },
     {
       "path": "tests/boss-arrivals.test.js",
-      "bytes": 3355,
-      "sha256": "4184f6598d5ba8dc27e6a309aa5816b11184bff8e8e072f3e8bf61bf3aa91b21"
+      "bytes": 3375,
+      "sha256": "23da4d5caea7b904b385cead241cd96bd739f06c42d88bd5011bbf12d476beaf"
     },
     {
       "path": "tests/boss-director.test.js",
       "bytes": 11885,
-      "sha256": "2022f4bd471334780c3f4a13d6161c5455a455789dd116588de67131b445028c"
+      "sha256": "a8155f779e933a5e79c03a6932aaf5e01d7d2dfa87680b4597532a6e0ae3bdfa"
     },
     {
       "path": "tests/boss-durability.test.js",
-      "bytes": 4753,
-      "sha256": "877a0d27d47550083b42d07d034ae10c15ef9d1f01e4851a2db660798f603581"
+      "bytes": 4770,
+      "sha256": "217dfd391fdeaea72a3503b4f73e1f87123910985f5b190c00da9b365fb9d6b2"
+    },
+    {
+      "path": "tests/boss-hardening.test.js",
+      "bytes": 4234,
+      "sha256": "954fd7fc97d50e688c5f5a1f4f5c65c028b9c0c1b7a3347eb08f03b006e0be0a"
+    },
+    {
+      "path": "tests/boss-pursuit.test.js",
+      "bytes": 6563,
+      "sha256": "d2412d470ba6b4c1229aa0c0918b2845c8296ca2456a71a3255f6f9c6429ec53"
+    },
+    {
+      "path": "tests/combined-candidate.test.js",
+      "bytes": 1719,
+      "sha256": "f8074276bbba32b4bcf6425319f68134f48c6e80cc0ca3bef97ed404673ab517"
     },
     {
       "path": "tests/crowd-performance.test.js",
@@ -823,9 +878,14 @@
       "sha256": "c78851ab3631a560d21f787b20d3dc7b7b8786972367d3f002380d44a8ed9ef8"
     },
     {
+      "path": "tests/fixtures/runstore-v7-xp.json",
+      "bytes": 1921,
+      "sha256": "fd128bb994fe1f81f157da970f0b5e777a3d67467d08ad27903c63b1a970cb62"
+    },
+    {
       "path": "tests/helpers/boss-combat.js",
-      "bytes": 2601,
-      "sha256": "eff88283768e83e0cfa907208fe3addf5fb07b66fea7c716f5eea60b1b6d1dfe"
+      "bytes": 3507,
+      "sha256": "693ca68971aecc3bfae0210d3d9f428f8c2cf20c7de3ed7de025d3a63e3c394b"
     },
     {
       "path": "tests/hero-art.test.js",
@@ -874,13 +934,13 @@
     },
     {
       "path": "tests/power-art.test.js",
-      "bytes": 5037,
-      "sha256": "1692a5a76a13d5b51c6768a837ad7c95a41cc36a47e9fcd5037f01fed371c891"
+      "bytes": 11462,
+      "sha256": "73e94a9a39103a7da9498e963245372321dc7eb16b86fc2186752af8fe3f4d09"
     },
     {
       "path": "tests/power-effects.test.js",
-      "bytes": 4477,
-      "sha256": "c0abe984714ba22aef46121b8faa756cbe52294d86cd2ef95197619afe32dc63"
+      "bytes": 4493,
+      "sha256": "8ecc32fbffd315d9924abf1ff6c08d1ab84d886d31cc117a1562721f7466c30a"
     },
     {
       "path": "tests/power-renderer.test.js",
@@ -898,6 +958,16 @@
       "sha256": "6068c06c63cac17f4250930bfbc65bbe7dafe29f8e7480fe254071290ade8e27"
     },
     {
+      "path": "tests/remaining-power-contract.test.js",
+      "bytes": 6770,
+      "sha256": "7ba9f37922f5b97a0b04e59d5184b68f4660f2aeda5d8dfdf299145cfeec96e3"
+    },
+    {
+      "path": "tests/remaining-power-renderer.test.js",
+      "bytes": 3995,
+      "sha256": "f95c1a075488b1feda749d44379a94bf22db9ffc3151da0e0b0865a25c57f766"
+    },
+    {
       "path": "tests/rooster-reaction.test.js",
       "bytes": 2037,
       "sha256": "4c9f5c39596fcca1e376d6b52373f0fea9c0972af7999e49b479d75d1c85c984"
@@ -909,18 +979,18 @@
     },
     {
       "path": "tests/run-pacing.test.js",
-      "bytes": 7351,
-      "sha256": "055d4982e0db0046946d1be7dcfe24225f244a715c4dee5e99bc1ad1040c4b69"
+      "bytes": 8714,
+      "sha256": "2f8a519eaa64f9a36540cec51209e400dc295c7350bbce7ed73919c2848d10aa"
     },
     {
       "path": "tests/run-pelican.test.js",
       "bytes": 14534,
-      "sha256": "a4992c0e33c87298bd116b18f9a57bc9f437a674182986afc833bcd9c88df2d1"
+      "sha256": "d74c71f7b6c415166e207f4960a099498929cdb0941625d9d895ee00746b1022"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11178,
-      "sha256": "e26b90a707cfdec6f5d39fd9f2abc0fdb32a3c69e43f65e37dd3f4fd94251864"
+      "sha256": "eab00457bfda72b8e2f5d16b63122a775c46ab5c9a2d8982856410494b0348e0"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -979,10 +1049,15 @@
     },
     {
       "path": "tests/xp-conservation.test.js",
-      "bytes": 5722,
-      "sha256": "47c3ea1282499bb353023889432ca504b1fbf8bd50833c05e526187f73468e03"
+      "bytes": 5762,
+      "sha256": "5e4f678a7b189ef8a2bafd4674132ced82b99385b7e0c6fe1850b4254eb173f3"
+    },
+    {
+      "path": "tests/xp-direction.test.js",
+      "bytes": 7396,
+      "sha256": "cccef205f93a7e2a3d061f2ed36c2dc80b4c6b9195b681e4fe02f49601ba5a54"
     }
   ],
-  "base_github_commit": "8b95b9749df23f3ecc06e92ea2e4ad13aa7a9bfd",
+  "base_github_commit": "b89ebc0495f4f77730445757ffbe66f841f8caa5",
   "integration_date": "2026-11-03"
 }
