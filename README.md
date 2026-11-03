@@ -49,4 +49,11 @@ Le monde alterne désormais quartiers urbains et régions boisées connectées. 
 
 ## Péli Zodiaque
 
-Un nouveau boss majeur entre en scène après six minutes : un pélican à petite bedaine, veste étoilée et cartes de tarot. Câlin annoncé, cercle du zodiaque avec ouverture et cartes qui reviennent composent ses trois attaques. Les échanges non bloquants jouent sur Toma, Poissons ascendant Sagittaire. Les rencontres restent espacées de Travestia et les anciennes parties sont migrées. [Règles et vérification](docs/PELI-ZODIAQUE.md).
+Un boss majeur rejoint les rencontres aléatoires : un pélican à petite bedaine, veste étoilée et cartes de tarot. Câlin annoncé, cercle du zodiaque avec ouverture et cartes qui reviennent composent ses trois attaques. Les échanges non bloquants jouent sur Toma, Poissons ascendant Sagittaire. Péli, Travestia et la matriarche arrivent un à la fois, à des moments aléatoires. Les anciennes parties sont migrées. [Règles et vérification](docs/PELI-ZODIAQUE.md).
+
+
+## Boss à moments aléatoires
+
+Péli, Travestia et la matriarche partagent un seul calendrier : première rencontre entre 2 min 30 et 3 min 30, puis une pause aléatoire de 1 min 35 à 2 min 45 après chaque défaite. Leur ordre est mélangé par groupes de trois, avec chaque boss une fois par groupe et aucune répétition immédiate. Une annonce précède l'arrivée de cinq secondes. Le dernier direct garde un boss vivant ou fait venir le prochain déjà tiré au sort. La victoire reste à vingt minutes.
+
+La sauvegarde v6 garde le prochain boss, le délai et le tirage aléatoire exacts. Reprendre une partie ne relance pas le hasard. [Détails et vérification](docs/BOSS-ALEATOIRES.md).

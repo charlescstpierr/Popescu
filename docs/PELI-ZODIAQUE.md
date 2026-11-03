@@ -4,7 +4,7 @@ Boss majeur inspiré du concept approuvé : pélican anthropomorphe blanc, petit
 
 ## Rencontre
 
-Première arrivée à six minutes, annoncée cinq secondes avant. La prochaine rencontre est prévue sept minutes après son apparition. Péli et Travestia ne sont jamais ajoutés simultanément par le calendrier : un boss déjà vivant retarde le prochain, avec un nouveau compte à rebours lisible. Le dernier direct conserve le boss déjà présent au lieu de superposer les deux.
+Péli, Travestia et la matriarche partagent désormais un calendrier aléatoire : première rencontre entre 2 min 30 et 3 min 30, puis 1 min 35 à 2 min 45 après chaque défaite. Le prochain boss est tiré dans un groupe mélangé sans répétition immédiate. Une seule rencontre majeure à la fois, annoncée cinq secondes avant. Le dernier direct conserve le boss déjà présent ou utilise le prochain boss déjà sélectionné. [Règles du calendrier](BOSS-ALEATOIRES.md).
 
 Péli possède 760 PV de base, ajustés par la progression existante. Sa défaite donne les mêmes récompenses de boss que Travestia : expérience, gemmes, soin et coffre. Il ne remplace pas une espèce ordinaire et les réservations de place ne retirent jamais un boss vivant.
 
@@ -20,7 +20,7 @@ Chaque attaque peut toucher Toma et sa compagne une seule fois. La récupératio
 
 Les échanges portent sur l’astrologie, le tarot, les câlins et l’ego fictif de Toma. Toma est Poissons ascendant Sagittaire. Ses réactions restent vulgaires, explosives et séparées, selon la demande. Les échanges n’ouvrent jamais un écran modal et respectent les réglages de bavardage.
 
-La sauvegarde passe au schéma v5 et migre les parties v1 à v4 sans changer les records ni les découvertes. Direction verrouillée, progression de l’attaque, trajet des cartes, dégâts déjà reçus et réplique en attente sont conservés. Les positions incohérentes, attaques sans durée, doubles boss et états incomplets sont rejetés. Les calculs de visibilité restent bornés, même devant un état mémoire incohérent.
+La sauvegarde utilise maintenant le schéma v6 et migre les parties v1 à v5 sans changer les records ni les découvertes. Direction verrouillée, progression de l’attaque, trajet des cartes, dégâts déjà reçus et réplique en attente sont conservés. Les positions incohérentes, attaques sans durée, doubles boss et états incomplets sont rejetés. Les calculs de visibilité restent bornés, même devant un état mémoire incohérent.
 
 ## Vérification
 

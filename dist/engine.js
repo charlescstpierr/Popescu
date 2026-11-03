@@ -1,3 +1,4 @@
+import {BOSS_SCHEDULE,createBossDirector,scheduleNextBoss,isMajorBoss} from './boss-director.js';
 import {pelicanLocked,updatePelican,interruptPelican} from './pelican.js';
 import {ANIMALS,animalLocked,updateAnimal,interruptAnimal} from './animals.js';
 import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
@@ -13,8 +14,6 @@ const dist=(a,b)=>length(a.x-b.x,a.y-b.y);
 const CAP={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12};
 const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 % des PV maximum.',icon:'ego',max:1,color:'#8eddab'},{id:'payday',name:'Petit contrat',desc:'Reçois 8 pièces immédiatement.',icon:'money',max:1,color:'#edc764'},{id:'barrier',name:'Compliment gratuit',desc:'Récupère jusqu’à 30 bouclier, sans dépasser ta capacité (minimum 30).',icon:'validation',max:1,color:'#8adce6'}];
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
-const isFeaturedBoss=type=>type==='travestia'||type==='pelican';
-const isMajorBoss=type=>type==='travestia'||type==='pelican'||type==='matriarch';
 const BASE={...ANIMALS,pelican:{hp:760,speed:42,r:29},travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
 export class Game {
@@ -23,7 +22,8 @@ export class Game {
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
-    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,boss:175,rival:60,travestia:240,pelican:360,animal:12,animalIndex:0};
+    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
+    this.bossDirector=createBossDirector(this.seed);
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
@@ -38,7 +38,7 @@ export class Game {
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
   startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
   finishDialogue(){if(this.s.mode==='dialogue'){this.s.mode=this.s.options.length?'upgrade':'playing';if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);}}
-  continueEndless(){if(this.s.mode==='victory'){this.s.endless=true;this.s.mode=this.s.options.length?'upgrade':'playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);}}
+  continueEndless(){if(this.s.mode==='victory'){if(this.bossDirector.warned){this.bossDirector.warned=false;this.bossDirector.remaining=BOSS_SCHEDULE.warning;this.bossDirector.retryIn=0;}this.s.endless=true;this.s.mode=this.s.options.length?'upgrade':'playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);}}
   recalculate(){const r=id=>this.rank(id);this.s.stats={speed:144*(1+.08*r('speed')+.03*r('filter')),damage:18*(1+.25*r('muscle')),fireInterval:.52/(1+.18*r('followers')),magnet:70+35*r('magnet')+(this.s.companion?35:0),gasMultiplier:Math.max(.2,1-.16*r('filter')),shieldMax:16*r('validation')+(this.s.companion?20:0),range:620+25*r('followers')};const effect=DISCOVERIES[this.s.discovery?.active?.kind];if(effect){this.s.stats.speed*=effect.speed||1;this.s.stats.damage*=effect.damage||1;this.s.stats.fireInterval*=effect.fireInterval||1;this.s.stats.magnet+=effect.magnet||0;}}
   chooseUpgrade(id){
     const s=this.s;if(s.mode!=='upgrade' || !s.options.some(o=>o.id===id))return false;
@@ -114,7 +114,7 @@ export class Game {
     if(entity.type==='travestia'){const moved=length(entity.x-oldX,entity.y-oldY);entity.tailWalkDistance=(entity.tailWalkDistance||0)+moved;if(moved>1e-7)entity.tailMoving=true;}
   }
   spawnEnemy(type,x,y){
-    const s=this.s;if(['travestia','pelican'].includes(type)&&s.enemies.some(e=>e.type===type&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
+    const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
     if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1);
@@ -158,7 +158,7 @@ export class Game {
     }
   }
   spawnFinaleEnemy(type){
-    if(['travestia','pelican'].includes(type)){const existing=this.s.enemies.find(e=>e.type===type&&!e.dead);if(existing)return existing;}
+    if(isMajorBoss(type)){const existing=this.s.enemies.find(e=>isMajorBoss(e.type)&&!e.dead);if(existing)return existing.type===type?existing:null;}
     if(isRival(type)&&this.s.enemies.filter(e=>isRival(e.type)&&!e.dead).length>=2)return null;
     this.reserveFinaleSlots(1);return this.spawnEnemy(type);
   }
@@ -175,8 +175,8 @@ export class Game {
     };
     beat(1130,()=>this.announceEncounter('Dernière minute dans dix secondes. Un dernier défi t’attend : garde une sortie !'));
     beat(1140,()=>{
-      this.timers.horde=45;this.timers.rival=90;this.timers.boss=180;this.timers.travestia=240;
-      if(!s.enemies.some(e=>isFeaturedBoss(e.type)&&!e.dead)&&!this.spawnFinaleEnemy('travestia'))return false;
+      this.timers.horde=45;this.timers.rival=90;
+      if(!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)&&!this.spawnScheduledBoss())return false;
       this.announceEncounter('Le dernier direct ! Survis jusqu’à vingt minutes. Ses attaques restent esquivables.');
     });
     beat(1154,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !'));
@@ -217,20 +217,37 @@ export class Game {
         if(e){this.rivalIndex++;this.timers.rival=this.rivalIndex===1?45:90+this.rivalRandom()*30;}else this.timers.rival=5;
       }else this.timers.rival=10;
     }
-    // Keep featured bosses in separate encounters, including coincident timers.
-    // A held timer resumes at ten seconds, so the five-second warning stays honest.
-    const featuredActive=s.enemies.some(e=>isFeaturedBoss(e.type)&&!e.dead);
-    if(featuredActive){this.timers.travestia=Math.max(this.timers.travestia,10);this.timers.pelican=Math.max(this.timers.pelican,10);}
-    if(this.timers.travestia<=10)this.timers.pelican=Math.max(this.timers.pelican,10);
-    if((s.endless||s.elapsed+this.timers.travestia<1140)&&this.timers.travestia>5&&this.timers.travestia-dt<=5&&!featuredActive)this.announceEncounter('Travestia arrive dans cinq secondes. Méfie-toi de sa queue !');
-    if((s.endless||s.elapsed+this.timers.boss<1140)&&this.timers.boss>5&&this.timers.boss-dt<=5)this.announceEncounter('La modération arrive dans cinq secondes. Prépare une sortie !');
-    if((s.endless||s.elapsed+this.timers.pelican<1140)&&this.timers.pelican>5&&this.timers.pelican-dt<=5&&!featuredActive)this.announceEncounter('Péli Zodiaque arrive dans cinq secondes. Garde une sortie pour ses câlins !');
-    this.timers.pelican-=dt;
-    if(this.timers.pelican<=0){const existing=s.enemies.some(e=>isFeaturedBoss(e.type)&&!e.dead);if(!existing)this.reserveFinaleSlots(1);const boss=existing?null:this.spawnEnemy('pelican');this.timers.pelican=boss?420:10;if(boss)this.bark('SYSTÈME','Péli Zodiaque entre en scène ! Câlins, tarot et astrologie.');}
-    this.timers.travestia-=dt;
-    if(this.timers.travestia<=0){const boss=s.enemies.some(e=>isFeaturedBoss(e.type)&&!e.dead)?null:this.spawnEnemy('travestia');this.timers.travestia=boss?240:10;if(boss)this.bark('SYSTÈME','Travestia entre en scène ! Gare à la queue hélicoptère.');}
-    this.timers.boss-=dt;if(this.timers.boss<=0){this.timers.boss=180;this.spawnEnemy('matriarch');this.bark('TOMA','La modération est arrivée en personne.');}
+    this.updateBossArrivals(dt);
   }
+  spawnScheduledBoss(){
+    if(this.s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;
+    const d=this.bossDirector;
+    this.reserveFinaleSlots(1);
+    const boss=this.spawnEnemy(d.nextType);
+    if(!boss)return null; // Keep the same decision and RNG when the cap blocks it.
+    d.lastType=d.nextType;scheduleNextBoss(d);
+    return boss;
+  }
+  updateBossArrivals(dt){
+    const s=this.s,d=this.bossDirector;
+    // Cooldown is quiet play time after defeat, never combat time or wall time.
+    if(s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return;
+    if(!s.endless&&(s.elapsed>=BOSS_SCHEDULE.finaleAt||s.elapsed+d.remaining-dt>=BOSS_SCHEDULE.finaleAt))return;
+    d.remaining=Math.max(0,d.remaining-dt);
+    if(!d.warned&&d.remaining<=BOSS_SCHEDULE.warning){
+      if(!s.endless&&s.elapsed+BOSS_SCHEDULE.warning>=BOSS_SCHEDULE.finaleAt)return;
+      d.warned=true;d.remaining=BOSS_SCHEDULE.warning;
+      const warnings={matriarch:'La modération arrive dans cinq secondes. Prépare une sortie !',travestia:'Travestia arrive dans cinq secondes. Méfie-toi de sa queue !',pelican:'Péli Zodiaque arrive dans cinq secondes. Garde une sortie pour ses câlins !'};
+      this.announceEncounter(warnings[d.nextType]);return;
+    }
+    if(d.remaining>0)return;
+    d.retryIn=Math.max(0,d.retryIn-dt);if(d.retryIn>0)return;
+    const boss=this.spawnScheduledBoss();
+    if(!boss){d.retryIn=BOSS_SCHEDULE.retry;return;}
+    const arrivals={matriarch:'La modération entre en scène !',travestia:'Travestia entre en scène ! Gare à la queue hélicoptère.',pelican:'Péli Zodiaque entre en scène ! Câlins, tarot et astrologie.'};
+    this.bark('SYSTÈME',arrivals[boss.type]);
+  }
+
   nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.s.enemies){if(e.dead || e===exclude || e.charmed>0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<best){best=d;target=e;}}return target;}
   updateEnemies(dt){
     const s=this.s,g=s.girl;
