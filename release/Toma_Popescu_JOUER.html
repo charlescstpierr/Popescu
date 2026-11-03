@@ -475,10 +475,11 @@ const STREET_CLUSTERS=[
 const STREET_SLOTS=[[174,205],[177,279],[208,320],[218,148],[311,134],[362,137],[406,171],[412,246],[409,390],[366,410],[220,421],[104,382],[151,326],[215,209],[212,274],[155,171]];
 
 class World {
-  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; }
+  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; this.collisionBounds = new WeakMap(); }
   chunk(cx, cy) {
     const key = `${cx},${cy}`;
-    if (this.chunks.has(key)) return this.chunks.get(key);
+    const cached = this.chunks.get(key);
+    if (cached) return cached;
     if(biomeForChunk(cx,cy,this.seed)==='forest'){
       const props=this.forestChunk(cx,cy);this.addDiscovery(props,cx,cy);this.chunks.set(key,props);return props;
     }
@@ -582,11 +583,16 @@ class World {
   collides(x,y,r=0) {
     const minx=Math.floor((x-r-110)/SIZE),maxx=Math.floor((x+r+110)/SIZE);
     const miny=Math.floor((y-r-110)/SIZE),maxy=Math.floor((y+r+110)/SIZE);
-    for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) for(const p of this.chunk(a,b)) {
-      if (!p.solid) continue;
-      const bounds=propCollisionBounds(p);
-      const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
-      if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
+    for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) {
+      const props=this.chunk(a,b);
+      // Props are static for the lifetime of a generated chunk. Weak keys let
+      // eviction release these derived footprints along with the prop array.
+      let solids=this.collisionBounds.get(props);
+      if(!solids){solids=props.filter(p=>p.solid).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
+      for(const bounds of solids){
+        const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
+        if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
+      }
     }
     return false;
   }

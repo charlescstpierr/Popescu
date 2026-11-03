@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-story-rewards-pacing",
+  "version": "1.5-plus-world-cache-performance",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -309,8 +309,8 @@
     },
     {
       "path": "dist/world.js",
-      "bytes": 7834,
-      "sha256": "bb3f17586330b52f836741cd30b26324f65ea979ae10a1e2be160990ee49f90e"
+      "bytes": 8185,
+      "sha256": "ed9e447113d5dc11f9ccd9f55b53d53e81bf3eda9adcc67d54d1273f652e8da9"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -331,6 +331,11 @@
       "path": "docs/GRAPHICS.md",
       "bytes": 3488,
       "sha256": "f46411e68b22af3aa84c19590fb8621db9b35a24429192de19f20f20acc0e7b7"
+    },
+    {
+      "path": "docs/PERFORMANCE-COLLISIONS.md",
+      "bytes": 3901,
+      "sha256": "220f9a70aa43869853befc59289f02cf38d3836bdf9f8270f5941c141941604b"
     },
     {
       "path": "docs/PLAN-TOMA-APPROUVE.md",
@@ -434,8 +439,13 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 9518424,
-      "sha256": "7eb686cdad07ea0e25d7878ca8474bf4d5e3bc9a4d28b89e7bdc88d42d7d1d7c"
+      "bytes": 9518775,
+      "sha256": "6363b84a1e24c7e92cd4e804f36a608305d0301d3668fc906e206324ec71bc24"
+    },
+    {
+      "path": "scripts/benchmark-crowd.mjs",
+      "bytes": 1667,
+      "sha256": "86e56b9a66f4acb86de00b5464feb6ee24b4f5b32b9e439d9a89d56698e407d1"
     },
     {
       "path": "scripts/export-standalone.py",
@@ -469,8 +479,8 @@
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 5521,
-      "sha256": "0f28c44556d121bd7d546939ab5cf173a09939341e7d5e18a01d8ca52bdd39a8"
+      "bytes": 6043,
+      "sha256": "a424a53fd181e947f159445907d69be44bdd8cce40af9deed3af8bad8f22024c"
     },
     {
       "path": "scripts/inspect-tail-dash.mjs",
@@ -603,6 +613,11 @@
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
     },
     {
+      "path": "tests/standalone-output-safety.test.js",
+      "bytes": 1601,
+      "sha256": "d77c255f65b4ffbb6404115a5d3f3f12ccb5042c96e045d5acc80ec171a4be77"
+    },
+    {
       "path": "tests/story.test.js",
       "bytes": 4755,
       "sha256": "e243b05f75f146b696b93a3a9805d6a3adaa78f9834bcf3f0715c9a8f70e2e09"
@@ -628,11 +643,16 @@
       "sha256": "4f113fc5c268fa3c5c847c3bfc684215ec8a51d27eee1c0696362ae0212237d3"
     },
     {
+      "path": "tests/world-performance.test.js",
+      "bytes": 1518,
+      "sha256": "b12c65ccad0d980e48753eb230041e11855d6719c4dc888c090457034e5bbaf8"
+    },
+    {
       "path": "tests/world.test.js",
       "bytes": 4155,
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "9eb6334f33546ee5bebb787c519b5fef006cf32a",
+  "base_github_commit": "536e5c862bd05877dce2c8e69bbd700b507f4025",
   "integration_date": "2026-11-03"
 }
