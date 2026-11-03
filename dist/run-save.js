@@ -1,13 +1,15 @@
 // Versioned, validated persistence for the approved save/resume flow.
+import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
+import {TRAVESTIA_BANTER} from './travestia.js';
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=1;
+const VERSION=3;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
 const MODES=['playing','paused','upgrade','dialogue','victory','gameover'];
-const ENEMIES=['normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
+const ENEMIES=['travestia','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const REQUIRED={enemies:'id x y hp maxhp r speed windup hitFlash charmed cooldown attack summon',shots:'x y vx vy life damage r pierce',drops:'x y life value',clouds:'x y vx vy r life',particles:'x y vx vy life maxlife',vehicles:'x y vx vy life damage',pulses:'x y r maxr life maxlife',chests:'id x y openedAt',shockwaves:'x y r prevR maxR life maxlife width damage ownerId'};
 function check(ok){if(!ok)throw new Error('Invalid run save');}
 function object(v){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;}
@@ -26,7 +28,17 @@ function physics(v){
 }
 function copy(v){return JSON.parse(JSON.stringify(v,(_k,x)=>{if(typeof x==='number')check(finite(x));return x instanceof Set||x instanceof Map?[...x]:x;}));}
 function validate(snapshot){
- tree(snapshot);check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);
+ tree(snapshot);
+ if(snapshot.version===1){
+  // v1 predates Travestia. Never synthesize missing attack state for a boss.
+  check(object(snapshot.game)&&object(snapshot.game.timers)&&Array.isArray(snapshot.game.s?.enemies));
+  check(snapshot.game.s.enemies.every(e=>e.type!=='travestia'));
+  if(snapshot.game.timers.travestia===undefined)snapshot.game.timers.travestia=240;
+  for(const e of snapshot.game.s.enemies){if(e.tailTime===undefined)e.tailTime=0;if(e.tailFaceX===undefined)e.tailFaceX=1;if(e.tailHitPlayer===undefined)e.tailHitPlayer=false;if(e.tailHitGirl===undefined)e.tailHitGirl=false;}
+  snapshot.version=VERSION;
+ }
+ if(snapshot.version===2){check(Array.isArray(snapshot.game?.s?.enemies)&&snapshot.game.s.enemies.every(e=>!e.phase?.startsWith('tail_dash')));snapshot.version=VERSION;}
+ check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);
  for(const key of INTERNAL){if(['viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
@@ -48,6 +60,25 @@ function validate(snapshot){
  for(const e of s.enemies){
   check(ENEMIES.includes(e.type)&&integer(e.id,1)&&e.id<d.id&&e.maxhp>0&&e.r>0&&!actorIds.has(e.id));actorIds.add(e.id);
   const template=base.spawnEnemy(e.type,0,0);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
+  if(e.type==='travestia'){
+   const interrupted=(e.phase==='charmed'&&e.charmed>0)||(e.phase==='suppressed'&&s.airplane.active);
+   const limits={chase:0,suppressed:interrupted?4.2:0,charmed:interrupted?4.2:0,tail_windup:4.2,tail_spin:1.4,tail_recover:1.2,tail_dash_windup:TAIL_DASH.warning,tail_dash:TAIL_DASH.duration,tail_dash_recover:TAIL_DASH.recovery};
+   check(Object.hasOwn(limits,e.phase)&&e.tailTime>=0&&e.tailTime<=limits[e.phase]&&[-1,1].includes(e.tailFaceX));
+   if(e.phase.startsWith('tail_'))check(e.tailTime>0);
+   if(e.tailAttackCount!==undefined)check(integer(e.tailAttackCount));
+   const dash=e.phase.startsWith('tail_dash');
+   if(dash||e.tailDashDir!==undefined){
+    check(integer(e.tailDashDir)&&e.tailDashDir<8&&finite(e.tailDashX)&&Math.abs(e.tailDashX)<=1e8&&finite(e.tailDashY)&&Math.abs(e.tailDashY)<=1e8&&finite(e.tailDashDistance)&&e.tailDashDistance>=0&&e.tailDashDistance<=TAIL_DASH.speed*TAIL_DASH.duration+1e-6);
+    if(dash){const dir=DASH_DIRECTIONS[e.tailDashDir];check(Math.abs(e.x-e.tailDashX-dir.x*e.tailDashDistance)<1e-5&&Math.abs(e.y-e.tailDashY-dir.y*e.tailDashDistance)<1e-5);}
+   }
+   if(e.tailBanterIndex!==undefined)check(integer(e.tailBanterIndex));
+   if(e.tailTauntAt!==undefined)check(finite(e.tailTauntAt)&&e.tailTauntAt>=0);
+   if(e.tailWalkDistance!==undefined)check(finite(e.tailWalkDistance)&&e.tailWalkDistance>=0);
+   if(e.tailMoving!==undefined)check(typeof e.tailMoving==='boolean');
+   if(e.tailReplyPending!==undefined||e.tailWarning===4.2)check(typeof e.tailReplyPending==='boolean');
+   if(e.tailWarning!==undefined||e.phase==='tail_windup')check([1.2,4.2].includes(e.tailWarning));
+   if(e.tailReplyPending)check((e.phase==='tail_windup'||interrupted)&&TRAVESTIA_BANTER.some(pair=>pair[1]===e.tailReply));
+  }
   if(e.type==='gas'&&(e.windup>0||e.gasPose>0))check(finite(e.gasDirX)&&Math.abs(e.gasDirX)<=1.001&&finite(e.gasDirY)&&Math.abs(e.gasDirY)<=1.001);
  }
  physics(s);
@@ -75,7 +106,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check(v.version===VERSION&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
+ tree(v);check([1,2,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
 }
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.

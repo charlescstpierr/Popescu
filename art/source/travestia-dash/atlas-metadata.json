@@ -1,0 +1,486 @@
+{
+  "image": "dist/assets/travestia-dash.png",
+  "width": 800,
+  "height": 400,
+  "columns": 4,
+  "rows": 2,
+  "cell": [
+    200,
+    200
+  ],
+  "anchor": [
+    100,
+    174
+  ],
+  "renderSize": [
+    200,
+    200
+  ],
+  "renderAnchor": [
+    100,
+    174
+  ],
+  "bodyHeight": 110,
+  "source": "art/source/travestia-dash/poses-transparent-source.png",
+  "sourceSha256": "e45cfafd6227178f24b3d6de64e6ae57a2edc91d80be3390e0a1c37e1a118be3",
+  "generation": "Built-in image_gen, transparent background, approved identity and mockup references.",
+  "note": "All eight entries are independently painted complete characters. Mechanical source-cell crop, uniform whole-pose scaling and translation only. No runtime body rotation. Direction labels describe tail/travel direction; body faces the opposite direction. Tail offsets are screen-space from floor anchor. North root is occluded by body; its tail tip rises above the head. Root points on NW/N/NE are inferred behind the body, not detached rendered parts.",
+  "frames": [
+    {
+      "index": 0,
+      "name": "E",
+      "rect": [
+        0,
+        0,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        0,
+        0,
+        444,
+        444
+      ],
+      "sourceFoot": [
+        194,
+        389
+      ],
+      "sourceHeadY": 63,
+      "scale": 0.337,
+      "translation": [
+        34.54,
+        42.742
+      ],
+      "tailRoot": [
+        118.896,
+        126.086
+      ],
+      "tailTip": [
+        177.945,
+        127.098
+      ],
+      "tailRootOffset": [
+        18.896,
+        -47.914
+      ],
+      "tailTipOffset": [
+        77.945,
+        -46.902
+      ],
+      "tailRootOccluded": false,
+      "paintedTailAngleRadians": 0.017,
+      "alphaBounds": [
+        57,
+        64,
+        122,
+        111
+      ],
+      "occupiedPixelCount": 5272
+    },
+    {
+      "index": 1,
+      "name": "SE",
+      "rect": [
+        200,
+        0,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        444,
+        0,
+        443,
+        444
+      ],
+      "sourceFoot": [
+        182,
+        386
+      ],
+      "sourceHeadY": 62,
+      "scale": 0.34,
+      "translation": [
+        38.21,
+        42.951
+      ],
+      "tailRoot": [
+        109.506,
+        126.809
+      ],
+      "tailTip": [
+        162.469,
+        168.907
+      ],
+      "tailRootOffset": [
+        9.506,
+        -47.191
+      ],
+      "tailTipOffset": [
+        62.469,
+        -5.093
+      ],
+      "tailRootOccluded": false,
+      "paintedTailAngleRadians": 0.672,
+      "alphaBounds": [
+        54,
+        64,
+        109,
+        110
+      ],
+      "occupiedPixelCount": 5599
+    },
+    {
+      "index": 2,
+      "name": "S",
+      "rect": [
+        400,
+        0,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        887,
+        0,
+        444,
+        444
+      ],
+      "sourceFoot": [
+        226,
+        377
+      ],
+      "sourceHeadY": 57,
+      "scale": 0.344,
+      "translation": [
+        22.313,
+        44.406
+      ],
+      "tailRoot": [
+        100,
+        130.688
+      ],
+      "tailTip": [
+        100,
+        185
+      ],
+      "tailRootOffset": [
+        0,
+        -43.313
+      ],
+      "tailTipOffset": [
+        0,
+        11
+      ],
+      "tailRootOccluded": false,
+      "paintedTailAngleRadians": 1.571,
+      "alphaBounds": [
+        52,
+        64,
+        96,
+        122
+      ],
+      "occupiedPixelCount": 5652
+    },
+    {
+      "index": 3,
+      "name": "SW",
+      "rect": [
+        600,
+        0,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        1331,
+        0,
+        443,
+        444
+      ],
+      "sourceFoot": [
+        252,
+        391
+      ],
+      "sourceHeadY": 58,
+      "scale": 0.33,
+      "translation": [
+        16.757,
+        44.841
+      ],
+      "tailRoot": [
+        89.76,
+        126.432
+      ],
+      "tailTip": [
+        40.541,
+        169.045
+      ],
+      "tailRootOffset": [
+        -10.24,
+        -47.568
+      ],
+      "tailTipOffset": [
+        -59.459,
+        -4.955
+      ],
+      "tailRootOccluded": false,
+      "paintedTailAngleRadians": 2.428,
+      "alphaBounds": [
+        40,
+        64,
+        105,
+        111
+      ],
+      "occupiedPixelCount": 5411
+    },
+    {
+      "index": 4,
+      "name": "W",
+      "rect": [
+        0,
+        200,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        0,
+        444,
+        444,
+        443
+      ],
+      "sourceFoot": [
+        244,
+        392
+      ],
+      "sourceHeadY": 62,
+      "scale": 0.333,
+      "translation": [
+        18.667,
+        43.333
+      ],
+      "tailRoot": [
+        85.333,
+        123.667
+      ],
+      "tailTip": [
+        29.667,
+        123.333
+      ],
+      "tailRootOffset": [
+        -14.667,
+        -50.333
+      ],
+      "tailTipOffset": [
+        -70.333,
+        -50.667
+      ],
+      "tailRootOccluded": false,
+      "paintedTailAngleRadians": -3.136,
+      "alphaBounds": [
+        29,
+        64,
+        115,
+        110
+      ],
+      "occupiedPixelCount": 5058
+    },
+    {
+      "index": 5,
+      "name": "NW",
+      "rect": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        444,
+        444,
+        443,
+        443
+      ],
+      "sourceFoot": [
+        247,
+        391
+      ],
+      "sourceHeadY": 71,
+      "scale": 0.344,
+      "translation": [
+        15.094,
+        39.594
+      ],
+      "tailRoot": [
+        87.625,
+        121.75
+      ],
+      "tailTip": [
+        33.313,
+        76.031
+      ],
+      "tailRootOffset": [
+        -12.375,
+        -52.25
+      ],
+      "tailTipOffset": [
+        -66.688,
+        -97.969
+      ],
+      "tailRootOccluded": true,
+      "paintedTailAngleRadians": -2.442,
+      "alphaBounds": [
+        33,
+        64,
+        116,
+        111
+      ],
+      "occupiedPixelCount": 5842
+    },
+    {
+      "index": 6,
+      "name": "N",
+      "rect": [
+        400,
+        200,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        887,
+        444,
+        444,
+        443
+      ],
+      "sourceFoot": [
+        224,
+        400
+      ],
+      "sourceHeadY": 118,
+      "scale": 0.39,
+      "translation": [
+        12.624,
+        17.972
+      ],
+      "tailRoot": [
+        99.22,
+        115.489
+      ],
+      "tailTip": [
+        98.83,
+        25.773
+      ],
+      "tailRootOffset": [
+        -0.78,
+        -58.511
+      ],
+      "tailTipOffset": [
+        -1.17,
+        -148.227
+      ],
+      "tailRootOccluded": true,
+      "paintedTailAngleRadians": -1.575,
+      "alphaBounds": [
+        47,
+        26,
+        105,
+        148
+      ],
+      "occupiedPixelCount": 6652
+    },
+    {
+      "index": 7,
+      "name": "NE",
+      "rect": [
+        600,
+        200,
+        200,
+        200
+      ],
+      "anchor": [
+        100,
+        174
+      ],
+      "bodyHeight": 110,
+      "headY": 64,
+      "sourceRect": [
+        1331,
+        444,
+        443,
+        443
+      ],
+      "sourceFoot": [
+        202,
+        389
+      ],
+      "sourceHeadY": 83,
+      "scale": 0.359,
+      "translation": [
+        27.386,
+        34.163
+      ],
+      "tailRoot": [
+        104.673,
+        124.392
+      ],
+      "tailTip": [
+        159.314,
+        60.046
+      ],
+      "tailRootOffset": [
+        4.673,
+        -49.608
+      ],
+      "tailTipOffset": [
+        59.314,
+        -113.954
+      ],
+      "tailRootOccluded": true,
+      "paintedTailAngleRadians": -0.867,
+      "alphaBounds": [
+        46,
+        60,
+        114,
+        115
+      ],
+      "occupiedPixelCount": 6275
+    }
+  ]
+}

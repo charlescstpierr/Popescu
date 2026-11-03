@@ -22,8 +22,17 @@ Integrated after Charles approved the Resume menu. This isolated candidate combi
 
 ## Verification and limitations
 
-The combined suite currently passes 135/135 Node tests. It includes real-controller tests for replacement/cancellation, record deduplication, modal recovery, safe-boundary autosave and pagehide, plus discovery-effect/cooldown/contact recovery and deterministic continuation. A 500-second real-engine save stress test passes.
+The combined suite currently passes 160/160 Node tests. It includes real-controller tests for replacement/cancellation, record deduplication, modal recovery, safe-boundary autosave and pagehide, plus discovery-effect/cooldown/contact recovery and deterministic continuation. A 500-second real-engine save stress test passes.
 
 The regenerated standalone HTML executes with embedded art decoded through a native Canvas + DOM adapter: boot, start, discovery activation/HUD, read-only rendering, pause/resume and save/restore of discovery state pass. This is not an actual browser or physical-mobile test.
 
 Local Chromium launch is blocked by socket creation restrictions, including after an approved escalation. Actual CSS layout, browser-storage lifecycle, touch controls and iPhone/Android behavior still need browser/device QA. The approved PNG is a static mockup, not a screenshot.
+
+
+## Separate Travestia merge
+
+The stable no-boss candidate is retained unchanged in its own copy. This candidate adds the independently reviewed whole-body Travestia art and boss behavior. The three-way merge preserved world discoveries, progression fixes, saved-run UI, lifecycle boundaries and atomic record accounting.
+
+Snapshot version 2 includes explicit validation of boss phases, remaining times, locked direction, hit-once flags, pending reply, taunt counter, warning duration and walk state. Version-1 snapshots migrate the missing spawn timer to 240 seconds and add only the new common non-boss fields; they never fabricate partial boss attack state. Cooldowns and discovery contact survive migration.
+
+Ten added regressions cover warning/reply restoration, spin without repeat damage, harmless recovery, charm/Mode avion cancellation including changes made late in a simulation step, pause/walk/spawn state, invalid boss state, older-save migration and a missing announced-reply flag. Native standalone smoke now also decodes the embedded boss atlas, renders the boss and restores an actual warning.

@@ -1,7 +1,8 @@
+import {travestiaFrame} from './travestia.js';
 // Raster actor atlases share one light direction and one registered foot baseline.
-const FILES={hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
+const FILES={travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
 const ENEMY_SIZE={normal:76,sprinter:66,gas:79,tank:96,jealous:76,explosive:80,matriarch:116,orangutan:83,rival_rooster:78,rival_goat:88};
-const sourceKind=(kind,type)=>kind==='enemy'&&['orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
+const sourceKind=(kind,type)=>kind==='enemy'&&['travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
 function load(src){return new Promise(resolve=>{if(typeof Image==='undefined'){resolve(null);return;}const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=src;});}
 function box(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -31,7 +32,16 @@ export class ActorArt {
     if(flash){c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,128,128);c.globalCompositeOperation='source-over';}
     this.cache.set(key,frame);if(this.cache.size>144)this.cache.delete(this.cache.keys().next().value);return frame;
   }
+  drawTravestia(ctx,e,time){
+    if(e.phase?.startsWith('tail_dash')&&this.images.travestia_dash){const image=this.images.travestia_dash,w=image.width/4,h=image.height/2,index=e.tailDashDir;ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,Math.round(e.x)-100,Math.round(e.y)+11-174,200,200);return true;}
+    const image=this.images.travestia;if(!image)return false;
+    const index=travestiaFrame(e,time),w=image.width/4,h=image.height/3,size=144;
+    ctx.save();ctx.translate(Math.round(e.x),Math.round(e.y)+11);if((e.tailTime>0?e.tailFaceX:e.faceX)<0)ctx.scale(-1,1);
+    ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,-72,-132,size,size);
+    ctx.restore();return true;
+  }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
+    if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
     const gas=enemy&&actor.gasPose>0;const moving=Math.hypot(state.moveX||0,state.moveY||0)>.05;
     const fx=kind==='hero'&&moving?state.moveX:(actor.faceX??state.faceX??1);const fy=kind==='hero'&&moving?state.moveY:(actor.faceY??state.faceY??0);
