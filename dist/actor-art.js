@@ -1,8 +1,9 @@
+import {ANIMALS} from './animals.js';
 import {travestiaFrame} from './travestia.js';
 // Raster actor atlases share one light direction and one registered foot baseline.
-const FILES={travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
+const FILES={animals:'assets/animals-approved.png',travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
 const ENEMY_SIZE={normal:76,sprinter:66,gas:79,tank:96,jealous:76,explosive:80,matriarch:116,orangutan:83,rival_rooster:78,rival_goat:88};
-const sourceKind=(kind,type)=>kind==='enemy'&&['travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
+const sourceKind=(kind,type)=>ANIMALS[type]?'animals':kind==='enemy'&&['travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
 function load(src){return new Promise(resolve=>{if(typeof Image==='undefined'){resolve(null);return;}const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=src;});}
 function box(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -41,6 +42,7 @@ export class ActorArt {
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
+    if(ANIMALS[actor.type]){const im=this.images.animals;if(!im)return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,size=actor.type==='moose'?104:actor.type==='ostrich'?98:80,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+10);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,-size/2,-size*.94,size,size);ctx.restore();return true;}
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
     const gas=enemy&&actor.gasPose>0;const moving=Math.hypot(state.moveX||0,state.moveY||0)>.05;

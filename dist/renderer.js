@@ -1,3 +1,4 @@
+import {drawAnimalWarning} from './animals.js';
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
 import {propDepth} from './prop-geometry.js';
 import {drawDiscovery} from './discovery-art.js';
@@ -594,7 +595,7 @@ export class Renderer {
       ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
       rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
     }
-    for(const e of enemies)if(!e.dead){this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
+    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
     for(const p of s.shockwaves||[])this._shockwave(p);
     const items=[];const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});

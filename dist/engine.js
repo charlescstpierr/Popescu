@@ -1,3 +1,4 @@
+import {ANIMALS,animalLocked,updateAnimal,interruptAnimal} from './animals.js';
 import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
@@ -11,7 +12,7 @@ const dist=(a,b)=>length(a.x-b.x,a.y-b.y);
 const CAP={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12};
 const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 % des PV maximum.',icon:'ego',max:1,color:'#8eddab'},{id:'payday',name:'Petit contrat',desc:'Reçois 8 pièces immédiatement.',icon:'money',max:1,color:'#edc764'},{id:'barrier',name:'Compliment gratuit',desc:'Récupère jusqu’à 30 bouclier, sans dépasser ta capacité (minimum 30).',icon:'validation',max:1,color:'#8adce6'}];
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
-const BASE={travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
+const BASE={...ANIMALS,travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
 export class Game {
   constructor({difficulty='normal',seed=42,onEvent=()=>{}}={}) {
@@ -19,7 +20,7 @@ export class Game {
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
-    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,boss:175,rival:60,travestia:240};
+    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,boss:175,rival:60,travestia:240,animal:12,animalIndex:0};
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
@@ -102,7 +103,7 @@ export class Game {
     this.emit('discovery',{...d.active});
   }
   move(entity,dx,dy,r){
-    if(tailLocked(entity))return;
+    if(tailLocked(entity)||animalLocked(entity))return;
     const oldX=entity.x,oldY=entity.y;
     if(!this.world.collides(entity.x+dx,entity.y,r))entity.x+=dx;
     if(!this.world.collides(entity.x,entity.y+dy,r))entity.y+=dy;
@@ -114,7 +115,7 @@ export class Game {
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1);
     const enemy={id:this.id++,type,sex:type==='travestia'?null:isRival(type)?'male':'female',x,y,hp,maxhp:hp,r:spec.r,speed:spec.speed*(this.difficulty.speed||1)*(1+Math.min(.35,minutes*.014)),phase:'chase',faceX:0,faceY:1,gasPose:0,windup:0,hitFlash:0,charmed:0,dead:false,cooldown:type==='gas'?2+this.random()*2:0,attack:0,summon:6,crow:0,charge:0,chargeDirX:0,chargeDirY:1,banterCount:0,nextTaunt:0,swipe:0,swipeDirX:0,swipeDirY:1,target:'player',tailTime:0,tailFaceX:1,tailHitPlayer:false,tailHitGirl:false};
-    s.enemies.push(enemy);return enemy;
+    if(ANIMALS[type])Object.assign(enemy,{animalTime:0,animalDX:1,animalDY:0,animalX:x,animalY:y,animalTravel:0,animalHit:false});s.enemies.push(enemy);return enemy;
   }
   spawnPack(type,count){
     const first=this.spawnEnemy(type);if(!first)return [];
@@ -193,6 +194,7 @@ export class Game {
       if(m>.5&&p<.2)type='sprinter';else if(m>1&&p<.36)type='gas';else if(m>2&&p<.45)type='jealous';else if(m>3&&p<.55)type='tank';else if(m>4&&p<.65)type='explosive';
       if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
+    this.timers.animal-=dt;if(this.timers.animal<=0&&!pacing.finale&&!pacing.recovery){if(s.enemies.filter(e=>ANIMALS[e.type]&&!e.dead).length<8){const types=Object.keys(ANIMALS);const rng=this.rng;this.rng=(this.seed^Math.imul(this.timers.animalIndex+1,1640531527))|0;const animal=this.spawnEnemy(types[this.timers.animalIndex%4]);this.rng=rng;if(animal){this.timers.animalIndex++;this.timers.animal=this.timers.animalIndex<4?14:22;}}else this.timers.animal=3;}
     this.timers.pack-=dt;
     if(this.timers.pack<=0){this.timers.pack=pacing.recovery||pacing.finale?.1:7;if(!pacing.recovery&&!pacing.finale)this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
     if(pacing.finale)return;
@@ -226,7 +228,8 @@ export class Game {
       if(e.charmed>0){const friend=this.nearest(e.x,e.y,350,e);if(friend){target=friend;e.target='enemy';}else target={x:e.x+(e.x-s.x),y:e.y+(e.y-s.y)};}
       const dx=target.x-e.x,dy=target.y-e.y,d=length(dx,dy)||1;if(e.type==='gas' && (e.windup>0 || e.gasPose>0) && Number.isFinite(e.gasDirX)){e.faceX=e.gasDirX;e.faceY=e.gasDirY;}else if(e.type==='orangutan'&&(e.windup>0||e.swipe>0)){e.faceX=e.swipeDirX;e.faceY=e.swipeDirY;}else if(isRival(e.type)&&(e.windup>0||e.charge>0||e.crow>0)){e.faceX=e.chargeDirX;e.faceY=e.chargeDirY;}else{e.faceX=dx/d;e.faceY=dy/d;}
       const suppressed=s.airplane.active && dist(e,s)<s.airplane.r;
-      if(suppressed){e.cooldown=Math.max(e.cooldown,1.5);e.windup=0;e.gasPose=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='suppressed';}
+      if(suppressed){e.cooldown=Math.max(e.cooldown,1.5);e.windup=0;e.gasPose=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='suppressed';interruptAnimal(e);}
+      if(ANIMALS[e.type])updateAnimal(this,e,dt,suppressed);
       if(e.type==='travestia')updateTravestia(this,e,dt,suppressed);
       if(e.type==='gas' && e.charmed<=0 && !suppressed){
         if(e.windup>0){e.phase='windup';e.windup=Math.max(0,e.windup-dt);if(e.windup===0){e.phase='gas';e.gasPose=.9;e.cooldown=5;e.emitClock=0;this.sound('gas');}}
@@ -266,8 +269,8 @@ export class Game {
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,87,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
-      if(e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}}
-      if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&e.type!=='travestia'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch');}
+      if(!animalLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}}
+      if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&e.type!=='travestia'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch');}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
     }
     s.enemies=s.enemies.filter(e=>!e.dead);this.separateEnemies(dt);
@@ -279,7 +282,7 @@ export class Game {
       neighbors:for(let a=cx-1;a<=cx+1;a++)for(let b=cy-1;b<=cy+1;b++)for(const other of buckets.get(`${a},${b}`)||[]){
         if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y,d=length(dx,dy),gap=(e.r+other.r)*.8;if(d>=gap)continue;
         if(d<.001){const angle=e.id*2.399963+other.id*.37;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
-        const push=Math.min((gap-d)*.5,35*dt);if(!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
+        const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
         if(++pushes>=8)break neighbors;
       }
     }
@@ -310,7 +313,7 @@ export class Game {
     const airplane=this.rank('airplane');
     if(airplane && this.timers.airplane<=0){
       this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
-      for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';}
+      for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';interruptAnimal(e);}
       this.pulse(s.x,s.y,s.airplane.r,'#8adce6',1);this.sound('truth');
     }
     if(s.airplane.active){s.airplane.x=s.x;s.airplane.y=s.y;s.airplane.life-=dt;if(s.airplane.life<=0)s.airplane.active=false;}
@@ -325,7 +328,7 @@ export class Game {
   updateShots(dt){
     const s=this.s,buckets=new Map(),size=80;
     for(const e of s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
-    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')){e.charmed=2.5+.9*this.rank('charisma');e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';this.burst(e.x,e.y,'#ff80b5',4);}if((p.pierce||0)>0)p.pierce--;else p.life=0;hit=true;break;}}}
+    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')){e.charmed=2.5+.9*this.rank('charisma');e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);this.burst(e.x,e.y,'#ff80b5',4);}if((p.pierce||0)>0)p.pierce--;else p.life=0;hit=true;break;}}}
     s.shots=s.shots.filter(p=>p.life>0);
   }
   hurt(e,damage){if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}

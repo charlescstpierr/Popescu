@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-world-cache-performance",
+  "version": "1.5-plus-four-approved-animals",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -114,8 +114,13 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 6749,
-      "sha256": "763df655634777a9e032c5d0b6db02a867f6bf902e9f0566fcbb4c1c47836437"
+      "bytes": 7337,
+      "sha256": "beb444986e0957ac432b61129cec895beb9b126538e045498062a10e3f750df2"
+    },
+    {
+      "path": "dist/animals.js",
+      "bytes": 3650,
+      "sha256": "300d6e3a8ae360a46c9a851c9fab89bfc52bd5b56d658cb0d494b3951696ad19"
     },
     {
       "path": "dist/app.js",
@@ -126,6 +131,11 @@
       "path": "dist/assets/actors-v2.json",
       "bytes": 981,
       "sha256": "fa142a4df0a45a98844aba855a60dc886013ab9f4c6a10a725f433cb77e0a9c4"
+    },
+    {
+      "path": "dist/assets/animals-approved.png",
+      "bytes": 1928857,
+      "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
     },
     {
       "path": "dist/assets/couverture-personnages.webp",
@@ -249,8 +259,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 42545,
-      "sha256": "80d0937f6f120fee53b4268fed2f7623a2113036410a74e81080e46829f41fb4"
+      "bytes": 43465,
+      "sha256": "faec814425b9ed37e223b53cb156a7e4868ca931d1cc9d7d8976aafe3f0ebf10"
     },
     {
       "path": "dist/hero-art.js",
@@ -284,13 +294,13 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 42817,
-      "sha256": "8b020fc56d0a82c52ae36357d944990b537b29c038db0542b1965374d5712aea"
+      "bytes": 42890,
+      "sha256": "453b5e7203b736ebcac4af94ebb1d3cd61726e5565e600ebb7a7a887fc17ff2f"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 16372,
-      "sha256": "eca2175eb074a08e40e7d68b8504a76efbfe9b786444990be53ada3b0c224a01"
+      "bytes": 17085,
+      "sha256": "74ea743ef2686fb4379c41c3aefc5af024dd7907717750be07e6079ec926f730"
     },
     {
       "path": "dist/styles.css",
@@ -351,6 +361,11 @@
       "path": "docs/PLAN.md",
       "bytes": 1942,
       "sha256": "d39a94e696eb6434222b3da6328b20c30d165e84e36823289769b26968fc9e0d"
+    },
+    {
+      "path": "docs/QA-ANIMALS.md",
+      "bytes": 2591,
+      "sha256": "8f08785f5cca5e342e0f0ec0abd6ff966feb6edc2091181b17aa0dcbdbaf2e1f"
     },
     {
       "path": "docs/QA-CONTENT.md",
@@ -439,8 +454,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 9518775,
-      "sha256": "6363b84a1e24c7e92cd4e804f36a608305d0301d3668fc906e206324ec71bc24"
+      "bytes": 12096623,
+      "sha256": "ec3668ab4344fad788b26b7f01422897ccbd7f8c01c21fb20a11d1aa555b768b"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -449,8 +464,13 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1830,
-      "sha256": "5c7e6869550513bc3ca957881b0e28e0cc44472904c7de2985735720956d973a"
+      "bytes": 1840,
+      "sha256": "96befc4f9755684fb0583fbd1c301a4ee924617adf8371f7f01eda0a7de49430"
+    },
+    {
+      "path": "scripts/inspect-animals.mjs",
+      "bytes": 1291,
+      "sha256": "4e3c5b3f82f14a693ae6c34fff935ce6132f93de942c900da620ff59bd399bed"
     },
     {
       "path": "scripts/inspect-discoveries.mjs",
@@ -511,6 +531,11 @@
       "path": "scripts/render-music-preview.mjs",
       "bytes": 6498,
       "sha256": "f775cfb89252e781843624e56613aba2081bd8cb1de24a1e383c183bea34a1b3"
+    },
+    {
+      "path": "tests/animals.test.js",
+      "bytes": 4034,
+      "sha256": "a697ee4a81dc1f6117212c29c092f9da464591eba1c3939be33432323fc414b9"
     },
     {
       "path": "tests/app-records.test.js",
@@ -653,6 +678,6 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "536e5c862bd05877dce2c8e69bbd700b507f4025",
+  "base_github_commit": "1ebf87a37062308b087545b87073c5fda26e4293",
   "integration_date": "2026-11-03"
 }
