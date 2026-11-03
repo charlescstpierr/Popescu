@@ -40,3 +40,9 @@ Le modèle approuvé reprend la calvitie visible, les sourcils marqués, la barb
 Le coq arrive après une minute, le bouc après 1 min 45, puis ils alternent. Deux rivaux maximum sont actifs à la fois. Le bouc baisse les cornes pendant 0,8 s et charge dans le couloir annoncé pendant 0,55 s. Le coq s’immobilise, prépare son cri pendant 0,85 s, puis crie « COCORICO! » avec une onde circulaire : seul l’anneau en expansion inflige des dégâts, une fois par cible. Les deux attaques peuvent être esquivées; charme et Mode avion interrompent leur préparation.
 
 Seize insultes contextuelles sont réservées aux rivaux masculins. Les rivaux et la blonde répondent; les échanges sont espacés et peuvent être désactivés dans les paramètres. Au « COCORICO! », Toma réplique : « Men, farmes ta criss de gueule ! ». Cette réaction attend le vrai cri, reste lisible pendant l’action et n’est pas déclenchée si la préparation est interrompue.
+
+## Monde à découvertes
+Les ruines, cabanes, autels, épaves et failles hors ligne enrichissent la même ville infinie. Approche-toi d'un lieu pour obtenir un effet temporaire sans interrompre le combat : puissance du fusil, récupération, ramassage, vitesse ou cadence contre un léger ralentissement. Le HUD indique la règle et le temps restant. Un seul effet à la fois; un lieu se recharge après deux minutes et exige de s'éloigner avant de revenir. [Règles et vérification](docs/DECOUVERTES.md).
+
+## Forêts et ville endommagée
+Le monde alterne désormais quartiers urbains et régions boisées connectées. Pins, rochers et vestiges entourent des sentiers praticables; les villes mêlent appartements, garages, entrepôts, commerces et ruines. Les découvertes et le combat continuent sans changer de carte. [Direction, génération et vérification](docs/FORETS-ET-RUINES.md).

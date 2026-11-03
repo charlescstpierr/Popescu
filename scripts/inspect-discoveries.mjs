@@ -1,0 +1,33 @@
+import {createRequire} from 'node:module';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);
+const {createCanvas,Image}=require('@napi-rs/canvas');
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+process.chdir(resolve(root,'dist'));
+globalThis.Image=Image;
+globalThis.OffscreenCanvas=class{constructor(w,h){return createCanvas(w,h);}};
+const {Game}=await import('../dist/engine.js');
+const {Renderer}=await import('../dist/renderer.js');
+const {DISCOVERIES}=await import('../dist/discoveries.js');
+const output=resolve(process.argv[2]||'/tmp/toma-discoveries-qa');mkdirSync(output,{recursive:true});
+const sheet=createCanvas(390*5,844),sheetCtx=sheet.getContext('2d');
+let index=0;
+for(const [kind,definition]of Object.entries(DISCOVERIES)){
+  const game=new Game({seed:42}),s=game.state;
+  let site;
+  for(let cx=-12;cx<=12&&!site;cx++)for(let cy=-12;cy<=12&&!site;cy++)site=game.world.chunk(cx,cy).find(p=>p.type==='discovery'&&p.discoveryType===kind);
+  assert.ok(site,`${kind} exists in generated world`);
+  s.x=site.x+43;s.y=site.y+75;s.elapsed=40;
+  s.discovery.nearby={...site,...definition,cooldown:0};
+  const canvas=createCanvas(390,844),renderer=new Renderer(canvas);await renderer.ready;
+  const before=JSON.stringify(s);renderer.render(game,40);assert.equal(JSON.stringify(s),before,'renderer preserves simulation');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#11162b';ctx.fillRect(12,12,366,44);ctx.fillStyle=definition.color;ctx.font='bold 15px sans-serif';ctx.fillText(definition.name,24,31);ctx.fillStyle='#eee6ef';ctx.font='12px sans-serif';ctx.fillText(definition.description,24,48);
+  writeFileSync(resolve(output,`${kind}.png`),canvas.toBuffer('image/png'));
+  sheetCtx.drawImage(canvas,index++*390,0);
+}
+writeFileSync(resolve(output,'discoveries-contact.png'),sheet.toBuffer('image/png'));
+console.log(`Five generated sites rendered without state mutation: ${output}`);

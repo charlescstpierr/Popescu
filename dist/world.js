@@ -1,3 +1,6 @@
+import { propCollisionBounds } from './prop-geometry.js';
+import { biomeForChunk, BUILDING_KINDS } from './biomes.js';
+import { DISCOVERIES, DISCOVERY_KINDS } from './discoveries.js';
 // Chunk-local randomness makes the city independent of exploration order.
 const SIZE = 512;
 function hash(x, y, seed) {
@@ -25,6 +28,9 @@ export class World {
   chunk(cx, cy) {
     const key = `${cx},${cy}`;
     if (this.chunks.has(key)) return this.chunks.get(key);
+    if(biomeForChunk(cx,cy,this.seed)==='forest'){
+      const props=this.forestChunk(cx,cy);this.addDiscovery(props,cx,cy);this.chunks.set(key,props);return props;
+    }
     const rand = generator(hash(cx, cy, this.seed));
     const props = [];
     const add = (type, x, y, w, h, solid = false) => props.push({ id: `${key}:${props.length}`, type, x: cx * SIZE + x, y: cy * SIZE + y, w, h, r: Math.min(w, h) / 2, solid, variant: Math.floor(rand() * 5) });
@@ -60,7 +66,51 @@ export class World {
     for(const type of cluster)if(place(type))dressed++;
     const extras=['cone','bags','crate','planter','hydrant','pallet','barricade','table'];
     for(let i=0;i<30&&dressed<target;i++)if(place(extras[Math.floor(rand()*extras.length)]))dressed++;
+    const scenery=generator(hash(cx,cy,this.seed^0x74a412cd));
+    for(const p of props){
+      p.biome='city';p.damage=Math.floor(scenery()*4);
+      if(p.type==='building')p.buildingKind=BUILDING_KINDS[Math.floor(scenery()*BUILDING_KINDS.length)];
+    }
+    this.addDiscovery(props,cx,cy);
     this.chunks.set(key, props);
+    return props;
+  }
+  addDiscovery(props,cx,cy){
+    const key=`${cx},${cy}`;
+    // An independent stream preserves the existing streets and combat seed.
+    // Open roadside lots are reachable, decorative, and never close a road.
+    const discover = generator(hash(cx, cy, this.seed ^ 0x6ac690c5));
+    if (discover() < .42 || (cx === 0 && cy === 0)) {
+      const kind = DISCOVERY_KINDS[Math.floor(discover() * DISCOVERY_KINDS.length)];
+      const def = DISCOVERIES[kind];
+      props.push({id:`${key}:discovery`,type:'discovery',discoveryType:kind,
+        x:cx*SIZE+466,y:cy*SIZE+240+Math.floor(discover()*40),w:72,h:70,r:35,
+        solid:false,name:def.name,description:def.description,color:def.color});
+    }
+  }
+  forestChunk(cx,cy){
+    const rand=generator(hash(cx,cy,this.seed^0x6274b03d)),props=[],key=`${cx},${cy}`;
+    const add=(type,x,y,w,h,solid=false)=>props.push({id:`${key}:forest:${props.length}`,type,
+      x:cx*SIZE+x,y:cy*SIZE+y,w,h,r:Math.min(w,h)/2,solid,variant:Math.floor(rand()*5),biome:'forest',damage:2});
+    // Keep a broad cross-shaped walking trail inside each grove as well as the
+    // existing crossroads. Trunk footprints, not canopies, stop movement.
+    const place=(type,w,h,solid)=>{
+      for(let tries=0;tries<160;tries++){
+        const x=108+rand()*290,y=108+rand()*290;
+        if(Math.abs(x-256)<50+w/2||Math.abs(y-256)<50+h/2)continue;
+        const wx=cx*SIZE+x,wy=cy*SIZE+y;
+        if(props.some(p=>Math.abs(wx-p.x)<(w+p.w)/2+12&&Math.abs(wy-p.y)<(h+p.h)/2+12))continue;
+        add(type,Math.round(x),Math.round(y),w,h,solid);return;
+      }
+    };
+    // Reserve larger and distinctive objects first; dense trees must not starve
+    // the ruin/log/rock placement on less forgiving random seeds.
+    if(rand()<.55)place('forestRuin',48,35,true);
+    place('rock',24,18,true);place('log',36,16,false);place('stump',18,16,false);
+    for(let i=0;i<18;i++)place('pine',20,18,true);
+    for(let i=0;i<4;i++)place('rock',24,18,true);
+    for(let i=0;i<2;i++)place('stump',18,16,false);
+    place('log',36,16,false);
     return props;
   }
   update(x, y) {
@@ -83,7 +133,8 @@ export class World {
     const miny=Math.floor((y-r-110)/SIZE),maxy=Math.floor((y+r+110)/SIZE);
     for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) for(const p of this.chunk(a,b)) {
       if (!p.solid) continue;
-      const dx=Math.max(Math.abs(x-p.x)-p.w/2,0),dy=Math.max(Math.abs(y-p.y)-p.h/2,0);
+      const bounds=propCollisionBounds(p);
+      const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
       if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
     }
     return false;

@@ -1,3 +1,4 @@
+import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim } from './hero-pose.js';
 import { UPGRADES, DIFFICULTIES, BARKS, EVENTS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
@@ -18,6 +19,7 @@ export class Game {
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,boss:175,rival:60};
+    this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
   }
   random(){let x=this.rng;x^=x<<13;x^=x>>>17;x^=x<<5;this.rng=x|0;return (x>>>0)/4294967296;}
@@ -30,12 +32,12 @@ export class Game {
   pause(){if(this.s.mode==='playing')this.s.mode='paused';}
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
   startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
-  finishDialogue(){if(this.s.mode==='dialogue')this.s.mode='playing';}
-  continueEndless(){if(this.s.mode==='victory'){this.s.endless=true;this.s.mode='playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);}}
-  recalculate(){const r=id=>this.rank(id);this.s.stats={speed:144*(1+.08*r('speed')+.03*r('filter')),damage:18*(1+.25*r('muscle')),fireInterval:.52/(1+.18*r('followers')),magnet:70+35*r('magnet')+(this.s.companion?35:0),gasMultiplier:Math.max(.2,1-.16*r('filter')),shieldMax:16*r('validation')+(this.s.companion?20:0),range:620+25*r('followers')};}
+  finishDialogue(){if(this.s.mode==='dialogue'){this.s.mode=this.s.options.length?'upgrade':'playing';if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);}}
+  continueEndless(){if(this.s.mode==='victory'){this.s.endless=true;this.s.mode=this.s.options.length?'upgrade':'playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);}}
+  recalculate(){const r=id=>this.rank(id);this.s.stats={speed:144*(1+.08*r('speed')+.03*r('filter')),damage:18*(1+.25*r('muscle')),fireInterval:.52/(1+.18*r('followers')),magnet:70+35*r('magnet')+(this.s.companion?35:0),gasMultiplier:Math.max(.2,1-.16*r('filter')),shieldMax:16*r('validation')+(this.s.companion?20:0),range:620+25*r('followers')};const effect=DISCOVERIES[this.s.discovery?.active?.kind];if(effect){this.s.stats.speed*=effect.speed||1;this.s.stats.damage*=effect.damage||1;this.s.stats.fireInterval*=effect.fireInterval||1;this.s.stats.magnet+=effect.magnet||0;}}
   chooseUpgrade(id){
     const s=this.s;if(s.mode!=='upgrade' || !s.options.some(o=>o.id===id))return false;
-    if(CONSUMABLES.some(o=>o.id===id)){if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);if(id==='payday')s.coins+=8;if(id==='barrier')s.shield=Math.min(Math.max(30,s.stats.shieldMax),s.shield+30);s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');return true;}
+    if(CONSUMABLES.some(o=>o.id===id)){if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);if(id==='payday')s.coins+=8;if(id==='barrier')s.shield=Math.min(Math.max(30,s.stats.shieldMax),s.shield+30);s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');this.gainXP(0);return true;}
     const def=UPGRADES.find(u=>u.id===id);if(def && this.rank(id)>=(def.max||5))return false;
     s.upg[id]=this.rank(id)+1;
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
@@ -43,7 +45,7 @@ export class Game {
     this.recalculate();
     if(id==='validation')s.shield=s.stats.shieldMax;
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
-    s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');return true;
+    s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;
   }
   gainXP(value){
     const s=this.s;s.xp+=value;if(s.xp<s.xpNeed || s.mode!=='playing')return;
@@ -60,6 +62,7 @@ export class Game {
   }
   step(dt,input){
     const s=this.s;s.elapsed+=dt;s.invulnerable=Math.max(0,s.invulnerable-dt);
+    this.updateDiscoveries(dt);
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0;const n=Math.max(1,length(mx,my));s.moveX=mx/n;s.moveY=my/n;
     if(length(mx,my)>.08){s.faceX=mx/n;s.faceY=my/n;}
     const previousX=s.x,previousY=s.y,previousGirlX=s.girl.x,previousGirlY=s.girl.y;this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=length(s.x-previousX,s.y-previousY);s.walkMoving=moved>1e-7&&length(s.moveX,s.moveY)>.08;if(s.walkMoving)s.walkDistance+=moved;this.world.update(s.x,s.y);
@@ -70,6 +73,32 @@ export class Game {
     if(s.elapsed>=1200 && !s.endless){s.mode='victory';this.sound('victory');this.emit('victory',s);return;}
     if(s.mode==='playing')this.story(dt);
     for(const [key,max] of Object.entries(CAP))if(s[key].length>max)s[key].splice(0,s[key].length-max);
+  }
+  updateDiscoveries(dt){
+    const s=this.s,d=s.discovery;
+    if(d.active){
+      const def=DISCOVERIES[d.active.kind];
+      if(def.healing)s.hp=Math.min(s.maxhp,s.hp+def.healing*Math.min(dt,d.active.remaining));
+      d.active.remaining=Math.max(0,d.active.remaining-dt);
+      if(d.active.remaining===0){d.active=null;this.recalculate();}
+    }
+    for(const [id,until] of this.discoveryCooldowns)if(until<=s.elapsed)this.discoveryCooldowns.delete(id);
+    const cx=Math.floor(s.x/512),cy=Math.floor(s.y/512);let nearby=null,nearest=210;
+    for(let x=cx-1;x<=cx+1;x++)for(let y=cy-1;y<=cy+1;y++){
+      const site=this.world.chunk(x,y).find(p=>p.type==='discovery');
+      if(site){const distance=dist(s,site);if(distance<nearest){nearest=distance;nearby=site;}}
+    }
+    // Contact must be broken to reactivate a replenished site. No camping loop.
+    if(!nearby||nearest>78)this.discoveryContact=null;
+    d.nearby=nearby?{...nearby,needsExit:this.discoveryContact===nearby.id,cooldown:Math.max(0,(this.discoveryCooldowns.get(nearby.id)||0)-s.elapsed)}:null;
+    if(!nearby||nearest>52||d.active||this.discoveryContact===nearby.id||this.discoveryCooldowns.has(nearby.id))return;
+    const def=DISCOVERIES[nearby.discoveryType];
+    this.discoveryContact=nearby.id;
+    this.discoveryCooldowns.set(nearby.id,s.elapsed+DISCOVERY_COOLDOWN);
+    while(this.discoveryCooldowns.size>256)this.discoveryCooldowns.delete(this.discoveryCooldowns.keys().next().value);
+    d.active={id:nearby.id,kind:nearby.discoveryType,name:def.name,description:def.description,color:def.color,remaining:def.duration,duration:def.duration};
+    d.count++;this.recalculate();this.pulse(nearby.x,nearby.y,72,def.color,.8);this.sound('collect');
+    this.emit('discovery',{...d.active});
   }
   move(entity,dx,dy,r){
     if(!this.world.collides(entity.x+dx,entity.y,r))entity.x+=dx;

@@ -1,3 +1,5 @@
+import {buildingGeometry} from './prop-geometry.js';
+import {biomeForChunk} from './biomes.js';
 /* Original, deterministic pixel city. All positions are world coordinates. */
 const INK='#100e20', TAU=Math.PI*2;
 const PALETTES=[
@@ -24,9 +26,132 @@ function blot(c,x,y,w,h,color,random){const pts=[];for(let i=0;i<12;i++){const a
 
 export class CityArt {
   constructor(){this.tiles=new Map();this.props=new Map();this.seed=null;}
+  _forestEdge(c,tx,ty,seed){
+    const cx=Math.floor(tx/2),cy=Math.floor(ty/2),localX=((tx%2)+2)%2,localY=((ty%2)+2)%2;
+    const edges=[];
+    if(localX===0&&biomeForChunk(cx-1,cy,seed)==='forest')edges.push('left');
+    if(localX===1&&biomeForChunk(cx+1,cy,seed)==='forest')edges.push('right');
+    if(localY===0&&biomeForChunk(cx,cy-1,seed)==='forest')edges.push('top');
+    if(localY===1&&biomeForChunk(cx,cy+1,seed)==='forest')edges.push('bottom');
+    for(const edge of edges)for(let q=0;q<256;q+=4){
+      const n=hash(tx*256+q,ty*256+q,seed+97),depth=8+Math.floor(n*23);
+      if(edge==='left')R(c,'#51434b',0,q,depth,4);
+      if(edge==='right')R(c,'#51434b',256-depth,q,depth,4);
+      if(edge==='top')R(c,'#51434b',q,0,4,depth);
+      if(edge==='bottom')R(c,'#51434b',q,256-depth,4,depth);
+      if(n>.65){const a=(edge==='left'?depth-1:edge==='right'?256-depth:q),b=(edge==='top'?depth-1:edge==='bottom'?256-depth:q);R(c,'#717260',a,b,3,2);}
+    }
+  }
+  _forestTile(c,tx,ty,seed){
+    const random=rng(Math.floor(hash(tx,ty,seed+61)*4294967295));
+    R(c,'#253b39',0,0,256,256);
+    for(let i=0;i<85;i++)blot(c,random()*256,random()*256,20+random()*65,10+random()*34,['#2c4540','#33493e','#24343a','#34463e'][i%4],random);
+    // Crossroads remain broad, walkable dirt trails, matching collision-free roads.
+    for(let y=0;y<256;y+=4)for(let x=0;x<256;x+=4){
+      const wx=((tx*256+x)%512+512)%512,wy=((ty*256+y)%512+512)%512;
+      const globalX=tx*256+x,globalY=ty*256+y;
+      const roadX=Math.abs((wx>256?wx-512:wx)+11*Math.sin(globalY/79));
+      const roadY=Math.abs((wy>256?wy-512:wy)+11*Math.sin(globalX/89));
+      const pathX=Math.abs(wx-256+14*Math.sin(globalY/67)+4*Math.sin(globalY/23));
+      const pathY=Math.abs(wy-256+14*Math.sin(globalX/71)+4*Math.sin(globalX/29));
+      const edge=Math.min(roadX,roadY,pathX+24,pathY+24);
+      const noise=hash(Math.floor(globalX/12),Math.floor(globalY/12),seed+84)*13+4*Math.sin(globalY/19+globalX/31);
+      if(edge<44+noise)R(c,edge<30?'#51434b':'#454441',x,y,4,4);
+    }
+    for(let i=0;i<1500;i++){const x=random()*256,y=random()*256;R(c,['#677161','#3b5447','#788368','#695b5c','#34423e'][i%5],x,y,i%8===0?3:1,1);}
+    for(let i=0;i<36;i++){const x=random()*256,y=random()*256,wx=((tx*256+x)%512+512)%512,wy=((ty*256+y)%512+512)%512;if(Math.min(wx,512-wx,wy,512-wy)<80)continue;L(c,'#4c6654',x,y,x-2,y-5,1);L(c,'#78906a',x+2,y,x+3,y-4,1);if(i%5===0){R(c,'#9b759e',x,y-6,2,2);R(c,'#c0a0ab',x+1,y-7,1,1);}}
+  }
+  _nature(c,p,seed){
+    const v=(p.variant||0)%5,random=rng(Math.floor(hash(v,0,seed+88)*4294967295));
+    shadow(c,2,6,Math.max(38,p.w+20),20,.45);
+    if(p.type==='pine'){
+      const height=76+v*7;
+      P(c,'#302735',[[-8,8],[-4,-height+12],[4,-height+12],[7,8],[13,12],[1,9],[-13,12]]);
+      R(c,'#9c776d',-3,-height+15,3,height-9);L(c,'#56404c',3,-50,8,-43,2);
+      for(let tier=3;tier>=0;tier--){const top=-height+tier*15,width=15+tier*8,base=top+31+tier*3;
+        const pts=[[0,top],[-width*.55,top+14],[-width*.35,top+13],[-width,base-4],[-width*.65,base-5],[-width*.88,base+2],[-9,base-2],[-3,base+3],[4,base-2],[width*.8,base+2],[width*.6,base-5],[width,base-4],[width*.4,top+14],[width*.6,top+15]];
+        P(c,'#172d36',pts.map(([x,y])=>[x,y+3]));P(c,['#2a494e','#31565a','#345e60','#3b6562'][3-tier],pts);
+        for(let branch=0;branch<4;branch++){const yy=top+13+branch*6,span=Math.min(width-3,5+branch*7);L(c,'#527c72',-span,yy+5,0,yy,2);L(c,'#426865',0,yy,span,yy+6,2);}
+        R(c,'#7b9580',-2,top+6,2,4);
+      }
+    }else if(p.type==='rock'){
+      const w=Math.max(24,p.w),h=20+v*3;
+      P(c,'#202a33',[[-w/2,7],[-w/2+3,-h/2],[-7,-h],[w/2-5,-h+6],[w/2+3,4],[10,12]]);
+      P(c,'#5a6063',[[-w/2+2,4],[-w/2+5,-h/2],[-7,-h+2],[w/2-7,-h+8],[w/2,3],[9,9]]);
+      P(c,'#7c7a78',[[-w/2+5,-h/2],[-7,-h+2],[w/2-7,-h+8],[0,-h/2+5]]);
+      P(c,'#3f4c54',[[0,-h/2+5],[w/2-7,-h+8],[w/2,3],[9,9]]);
+      L(c,'#313c45',-5,-h+5,0,-h/2+5,2);L(c,'#303d44',0,-h/2+5,-4,4,1);
+      for(let i=0;i<8;i++)R(c,i%2?'#7a8961':'#596c51',-w/2+5+random()*(w-12),-h/2+random()*6,4,2);
+    }else if(p.type==='stump'){
+      P(c,'#46333d',[[-16,10],[-9,-15],[9,-15],[14,7],[21,13],[4,10],[-4,12]]);R(c,'#825b54',-8,-14,16,23);R(c,'#b18968',-7,-13,3,18);O(c,'#ceac80',-10,-19,21,9);O(c,'#78574e',-6,-17,13,5);O(c,'#b4906b',-4,-16,9,3);L(c,'#493d40',4,-10,3,6,2);
+    }else if(p.type==='log'){
+      P(c,'#483440',[[-27,-5],[19,-18],[28,-8],[-17,8]]);L(c,'#a47c62',-24,-5,20,-16,3);L(c,'#755545',-18,3,23,-10,5);O(c,'#d0ac7b',-29,-7,15,17);O(c,'#79604e',-26,-4,10,11);O(c,'#b6956d',-24,-2,6,7);L(c,'#4c3f3e',-7,-6,1,-11,2);R(c,'#687654',8,-15,7,3);
+    }else{
+      P(c,'#3a3447',[[-29,10],[-29,-38],[-20,-38],[-20,-48],[-9,-43],[-9,-16],[8,-16],[8,-58],[20,-58],[20,-43],[29,-43],[29,9]]);
+      for(let y=-52;y<8;y+=9)for(let x=-27;x<29;x+=12){if((x< -9&&y> -37)||(x>7&&y> -51)||y> -15){R(c,'#75616d',x+(Math.floor(y/9)%2)*3,y,10,7);R(c,'#a18788',x+(Math.floor(y/9)%2)*3,y,8,1);}}
+      for(let i=0;i<9;i++)R(c,i%2?'#6c7d58':'#4c654d',-28+random()*55,-10+random()*19,4,3);
+    }
+  }
+  _damage(c,p,seed){
+    const damage=Math.max(0,Math.min(3,p.damage||0));if(!damage)return;
+    const random=rng(Math.floor(hash(p.x,p.y,seed+93)*4294967295)),w=p.w,foot=p.artFoot??p.h/2,top=p.artTop??(-p.h/2-43);
+    for(let i=0;i<damage*3;i++){
+      const x=-w/2+8+random()*(w-20),y=top+15+random()*Math.max(8,foot-top-34);
+      if(p.buildingKind==='ruin'&&Math.abs(x)<w*.22+6&&y<foot-46)continue;
+      L(c,'#1f2431',x,y,x+4,y+9,2);L(c,'#292533',x+4,y+9,x-2,y+17,2);L(c,'#a28c86',x+5,y+9,x+1,y+15,1);
+    }
+    for(let side=0;side<2;side++){const x=side?w/2-13:-w/2+8;
+      for(let j=0;j<damage*8;j++){const yy=foot-j*4,xx=x+Math.sin(j*1.3)*6;R(c,'#4f654d',xx,yy,4,4);R(c,'#839168',xx+2,yy-2,3,2);}
+    }
+    for(let i=0;i<damage*3;i++){const x=-w/2+random()*w;R(c,'#635765',x,foot+8+random()*9,5+random()*5,3);R(c,'#a18b89',x,foot+8+random()*8,4,1);}
+  }
+  _buildingVariant(c,p,seed){
+    const kind=p.buildingKind||'apartment',w=p.w,{foot,height,top}=buildingGeometry(p),left=-w/2;
+    if(kind==='apartment'){
+      this._building(c,p,seed);
+      // Exterior fire escape and balconies distinguish the taller apartment block.
+      if(w>100){const x=left+12;for(let y=-p.h/2-4;y<foot-70;y+=40){R(c,'#201f30',x,y,w-35,4);R(c,'#8e7b84',x,y-10,w-35,2);for(let xx=x+3;xx<x+w-35;xx+=9)R(c,'#554b5c',xx,y-9,1,10);L(c,'#625b68',x+4,y+3,x+32,y+38,3);}}
+      this._damage(c,p,seed);return;
+    }
+    shadow(c,6,foot+8,w+25,24,.6);R(c,'#433c4a',left-8,foot-3,w+19,17);R(c,'#99858b',left-8,foot+10,w+18,2);
+    if(kind==='ruin'){
+      const gap=w*.22;
+      P(c,'#292333',[[left-3,foot],[left-3,top+20],[left+13,top+20],[left+13,top],[left+30,top+4],[left+30,top+29],[-gap,top+37],[-gap,foot-48],[gap,foot-48],[gap,top+15],[gap+17,top+15],[gap+17,top-9],[w/2-10,top-9],[w/2-10,top+20],[w/2+5,top+25],[w/2+5,foot]]);
+      for(let row=top+27;row<foot;row+=10)for(let x=left+2;x<w/2;x+=18){if(Math.abs(x)<gap&&row<foot-45)continue;R(c,'#775466',x+(Math.floor(row/10)%2)*5,row,15,8);R(c,'#a17d83',x+(Math.floor(row/10)%2)*5,row,13,1);}
+      L(c,'#a1898e',-gap,foot-50,-gap,top+39,3);L(c,'#a1898e',gap,foot-50,gap,top+16,3);
+      for(let i=0;i<10;i++){const x=left+8+i*(w-20)/10;R(c,'#795e6e',x,foot-3+(i%3)*4,10,6);R(c,'#b18e8c',x,foot-3+(i%3)*4,8,1);}
+    }else{
+      R(c,'#252334',left-3,top-3,w+12,height+5);R(c,kind==='warehouse'?'#4b5960':'#66525c',left,top,w,height);R(c,'#343543',w/2-13,top,18,height);
+      if(kind==='warehouse'){
+        P(c,'#252b38',[[left-7,top+3],[left+18,top-30],[w/2+5,top-16],[w/2+12,top+3]]);P(c,'#7f7375',[[left-4,top],[left+19,top-27],[w/2+3,top-14],[w/2+8,top]]);
+        for(let x=left+5;x<w/2-14;x+=7){R(c,'#7a8280',x,top+2,2,height-5);R(c,'#303d48',x+3,top+4,1,height-7);}
+        for(let x=left+10;x<w/2-26;x+=27)this._window(c,x,top+15,20,29,PALETTES[1],Math.round(hash(x,p.y,seed)*5),()=>0);
+        R(c,'#b17a5e',left+15,top-45,18,39);R(c,'#dd9c6e',left+16,top-44,4,37);R(c,'#5f4b4c',left+14,top-44,21,3);
+        R(c,'#262c37',left+w*.3,foot-46,w*.42,46);R(c,'#67767a',left+w*.3+2,foot-44,w*.42-4,42);for(let y=foot-40;y<foot;y+=5)R(c,'#3b454f',left+w*.3+2,y,w*.42-4,1);
+      }else if(kind==='garage'){
+        R(c,'#9a8989',left-7,top-6,w+18,8);R(c,'#4b4754',left-3,top-11,w+10,6);
+        const gx=left+35,gw=w-52;R(c,'#262638',gx-3,top+15,gw+6,height-14);R(c,'#7e7a7b',gx,top+17,gw,height-17);
+        for(let y=top+20;y<foot-3;y+=5){R(c,'#3f4351',gx,y,gw,2);R(c,'#a49790',gx+1,y-1,gw-3,1);}
+        P(c,'#242534',[[gx+gw*.55,foot],[gx+gw,foot-21],[gx+gw,foot]]);
+        this._window(c,left+8,top+17,18,24,PALETTES[1],3,()=>0);R(c,'#393c49',left+6,foot-26,23,27);R(c,'#88918b',left+8,foot-24,2,22);
+        R(c,'#252433',-18,top-3,39,11);text(c,'GARAGE',1,top,'#d7ba91',1,'center');
+      }else{
+        P(c,'#2b2437',[[left-6,top+1],[0,top-36],[w/2+9,top+1]]);P(c,'#967377',[[left-2,top],[0,top-31],[w/2+5,top]]);L(c,'#d0a28d',left-3,top,0,top-33,2);L(c,'#b78982',0,top-33,w/2+6,top,2);
+        O(c,'#372a3d',-12,top-22,24,20);O(c,'#dbb584',-8,top-18,16,12);R(c,'#503c4c',-1,top-17,2,12);
+        for(let x=left+10;x<w/2-25;x+=29)this._window(c,x,top+13,22,Math.max(28,height-25),PALETTES[2],0,()=>0);
+        R(c,'#2b2336',w/2-28,foot-40,22,41);R(c,'#d49a63',w/2-25,foot-37,16,31);R(c,'#765050',w/2-18,foot-37,2,31);
+        for(let x=left-2;x<w/2+2;x+=10){P(c,(Math.floor((x-left+2)/10)%2)?'#bd9c91':'#86485a',[[x,top+8],[x+9,top+8],[x+12,top+22],[x-3,top+22]]);R(c,'#4e3349',x-3,top+22,13,3);}
+      }
+    }
+    // Ivy anchors each building to the same abandoned, reclaimed world.
+    this._damage(c,{...p,artFoot:foot,artTop:top,damage:p.damage??2},seed);
+    for(let i=0;i<8;i++){const xx=left+4+i*4,yy=(kind==='ruin'?foot-12:top+4)+(i%3)*5;R(c,'#4d6650',xx,yy,4,4);R(c,'#8a9366',xx+1,yy-1,2,2);}
+  }
+
   _tile(tx,ty,seed){
     const key=`${tx}:${ty}`;if(this.tiles.has(key))return this.tiles.get(key);
     const image=canvas(256,256);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;
+    if(biomeForChunk(Math.floor(tx/2),Math.floor(ty/2),seed)==='forest'){this._forestTile(c,tx,ty,seed);this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;}
     const random=rng(Math.floor(hash(tx,ty,seed)*4294967295));
     R(c,'#30283f',0,0,256,256);
     // Broad, irregular repairs and worn asphalt have many scales of detail.
@@ -47,9 +172,11 @@ export class CityArt {
     // Small narrative debris, laid into the ground with contact shadows.
     for(let i=0;i<7;i++)this._litter(c,random()*244+6,random()*244+6,Math.floor(random()*6),random);
     if(random()>.42)this._drain(c,24+random()*205,20+random()*215);
+    this._forestEdge(c,tx,ty,seed);
     this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;
   }
   _blockGround(c,x,y,seed){
+    if(biomeForChunk(Math.floor(x/512),Math.floor(y/512),seed)==='forest')return;
     const v=Math.floor(hash(x,y,seed)*5),p=PALETTES[v];
     // The block is a raised, damaged island with corner cuts and a service yard.
     P(c,'#17192b',[[x+84,y+97],[x+97,y+84],[x+415,y+84],[x+428,y+97],[x+428,y+415],[x+415,y+428],[x+97,y+428],[x+84,y+415]]);
@@ -89,6 +216,7 @@ export class CityArt {
     for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){const tile=this._tile(x,y,seed);if(tile)ctx.drawImage(tile,x*256,y*256);else R(ctx,'#30283f',x*256,y*256,256,256);}
     // Restrained local light settles into pavement, independent of actor depth.
     if(!reduced){ctx.save();for(let x=Math.floor(left/512);x<=(left+width)/512;x++)for(let y=Math.floor(top/512);y<=(top+height)/512;y++){
+      if(biomeForChunk(x,y,seed)==='forest')continue;
       const px=x*512+112,py=y*512+111,g=ctx.createRadialGradient(px,py,2,px,py,71);g.addColorStop(0,'rgba(239,164,102,.15)');g.addColorStop(.45,'rgba(209,115,146,.065)');g.addColorStop(1,'rgba(209,115,146,0)');ctx.fillStyle=g;ctx.fillRect(px-72,py-72,144,144);
       const p=PALETTES[Math.floor(hash(x*512,y*512,seed)*5)];ctx.globalAlpha=.13;for(let i=0;i<7;i++)R(ctx,p.neon,x*512+215+i%3*6,y*512+393+i*3,29-i*3,1);ctx.globalAlpha=1;
     }ctx.restore();}
@@ -316,11 +444,11 @@ export class CityArt {
     O(c,INK,-10,-9,21,20);R(c,color,-8,-15,17,21);O(c,'#c98a8b',-7,-25,15,14);O(c,INK,-9,-21,19,9);R(c,color,-8,-20,17,8);R(c,'#deaaa0',-6,-22,10,3);R(c,'#e6b5a2',-6,-13,2,16);R(c,'#63374e',5,-13,3,16);R(c,INK,-15,-12,9,9);R(c,'#b37683',-14,-11,8,7);R(c,'#dec1b4',-14,-10,2,4);R(c,INK,7,-12,9,9);R(c,'#bb7d87',9,-11,6,7);R(c,'#493d52',-10,5,22,5);R(c,'#9c8a99',-8,6,17,2);R(c,'#c4b7b9',-5,-27,10,3);R(c,'#7b5369',-3,-29,6,2);L(c,'#796778',13,-4,17,3,1);L(c,'#796778',17,3,11,8,1);
   }
   _propImage(p,seed){
-    const w=Math.round(p.w||40),h=Math.round(p.h||40),v=p.variant??Math.floor(hash(p.x,p.y,seed)*5),detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${w}:${h}:${v}:${detail}`;
+    const w=Math.round(p.w||40),h=Math.round(p.h||40),v=p.variant??Math.floor(hash(p.x,p.y,seed)*5),detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${p.buildingKind||'apartment'}:${p.damage||0}:${w}:${h}:${v}:${detail}`;
     if(this.props.has(key))return this.props.get(key);
     const building=p.type==='building',cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100,ch=building?h+190:180,ax=Math.floor(cw/2),ay=building?Math.ceil(h/2)+110:110;
     const image=canvas(cw,ch);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;c.translate(ax,ay);
-    if(building)this._building(c,p,seed);else if(p.type==='car')this._car(c,p,seed);else if(p.type==='bike')this._bike(c,p);else if(p.type==='bin')this._bin(c);else if(p.type==='bench')this._bench(c);else if(p.type==='lamp')this._lamp(c);else if(p.type==='mirror')this._mirror(c);else if(p.type==='phone')this._phone(c);else if(p.type==='billboard')this._billboard(c,p);else if(p.type==='foodcart')this._foodcart(c,p);else if(p.type==='vending')this._vending(c,p);else if(p.type==='planter')this._planter(c,p);else if(p.type==='tree')this._tree(c,p);else if(p.type==='table')this._table(c,p);else if(p.type==='cone')this._cone(c,p);else if(p.type==='barricade')this._barricade(c,p);else if(p.type==='crate')this._crate(c,p);else if(p.type==='pallet')this._pallet(c,p);else if(p.type==='bags')this._bags(c,p);else if(p.type==='trophy')this._trophy(c,p);else if(p.type==='hydrant')this._hydrant(c,p);
+    if(building)this._buildingVariant(c,p,seed);else if(['pine','rock','stump','log','forestRuin'].includes(p.type))this._nature(c,p,seed);else if(p.type==='car')this._car(c,p,seed);else if(p.type==='bike')this._bike(c,p);else if(p.type==='bin')this._bin(c);else if(p.type==='bench')this._bench(c);else if(p.type==='lamp')this._lamp(c);else if(p.type==='mirror')this._mirror(c);else if(p.type==='phone')this._phone(c);else if(p.type==='billboard')this._billboard(c,p);else if(p.type==='foodcart')this._foodcart(c,p);else if(p.type==='vending')this._vending(c,p);else if(p.type==='planter')this._planter(c,p);else if(p.type==='tree')this._tree(c,p);else if(p.type==='table')this._table(c,p);else if(p.type==='cone')this._cone(c,p);else if(p.type==='barricade')this._barricade(c,p);else if(p.type==='crate')this._crate(c,p);else if(p.type==='pallet')this._pallet(c,p);else if(p.type==='bags')this._bags(c,p);else if(p.type==='trophy')this._trophy(c,p);else if(p.type==='hydrant')this._hydrant(c,p);
     const result={image,x:-ax,y:-ay};this.props.set(key,result);if(this.props.size>96)this.props.delete(this.props.keys().next().value);return result;
   }
   drawProp(ctx,p,seed=42,time=0,reduced=false){

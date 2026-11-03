@@ -1,3 +1,5 @@
+import {propDepth} from './prop-geometry.js';
+import {drawDiscovery} from './discovery-art.js';
 import {HeroArt} from './hero-art.js';
 import {CombatArt} from './combat-art.js';
 import {ActorArt} from './actor-art.js';
@@ -405,7 +407,7 @@ export class Renderer {
     rect(ctx,C.ink,x-7,y-15,11,4);line(ctx,'#d2c7d3',x+8,y-18,x+16,y-18,2);
     if(chopper){oval(ctx,'#d63a82',x-1,y-11,14,8);rect(ctx,'#c0bbc8',x-6,y+6,18,3);rect(ctx,C.goldLight,x+11,y-15,5,3);}
   }
-  _prop(p) { this.city.drawProp(this.ctx,p,this.seed,this.time,this.reducedEffects); }
+  _prop(p) { if(p.type==='discovery'){drawDiscovery(this.ctx,p,this.time,this.reducedEffects);return;}this.city.drawProp(this.ctx,p,this.seed,this.time,this.reducedEffects); }
 
   _chest(p) {
     const ctx=this.ctx,x=Math.round(p.x),y=Math.round(p.y),open=p.open;
@@ -571,7 +573,7 @@ export class Renderer {
     for(const e of enemies)if(!e.dead){this._orangutanAttack(e);this._rivalAttack(e);}
     for(const p of s.shockwaves||[])this._shockwave(p);
     const items=[];const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
-    for(const p of props)items.push({y:p.y+(['building','car'].includes(p.type)?(p.h||30)/2:10),kind:'prop',data:p});
+    for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
     for(const v of s.vehicles||[])items.push({y:v.y+13,kind:'vehicle',data:v});
     for(const e of enemies)if(!e.dead&&e.hp>0&&inView(e.x,e.y))items.push({y:e.y+10,kind:'enemy',data:e});
