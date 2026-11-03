@@ -72,7 +72,7 @@ test('city events require proximity and never immediately interrupt the opening'
   assert.ok(!events.some(e=>e.t==='dialogue'));
   g.s.elapsed=35;const prop=g.world.getVisible(0,0,1500,1500).find(p=>['mirror','phone','bench','bike','bin'].includes(p.type));
   assert.ok(prop);g.s.x=prop.x;g.s.y=prop.y;g.update(.05);
-  assert.equal(g.s.mode,'dialogue');g.finishDialogue();g.update(.05);assert.equal(g.s.mode,'playing');
+  assert.equal(g.s.mode,'playing');assert.ok(events.some(e=>e.t==='bark'));assert.ok(g.eventSeen.has(prop.type));assert.ok(!events.some(e=>e.t==='dialogue'));
 });
 
 test('long travel bounds simulation entities and regenerates the city deterministically', () => {

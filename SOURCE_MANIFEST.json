@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-travestia-interactive-opening",
+  "version": "1.5-plus-story-rewards-pacing",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -119,8 +119,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 26988,
-      "sha256": "7f4b444461c9177f249be5dc1ff3620c5737bae55f50b79384234964bab14990"
+      "bytes": 27060,
+      "sha256": "3b0f1f291062174e94f1c06e6167ad2653309827d8292697219904595b36a890"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -234,8 +234,8 @@
     },
     {
       "path": "dist/content.js",
-      "bytes": 20805,
-      "sha256": "a55ccc69e6cc06ece172a822827b24540beb8a89381d629adab3bdffee943231"
+      "bytes": 23340,
+      "sha256": "f572629cee54064b42b3dadb0c76f7832e731059036fb9d69dff1cee59562eb5"
     },
     {
       "path": "dist/discoveries.js",
@@ -249,8 +249,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 37775,
-      "sha256": "d4f96c3f8aa8e72591ff75ed19391411da667d8c21a5a9b793805d3623060ec6"
+      "bytes": 42545,
+      "sha256": "80d0937f6f120fee53b4268fed2f7623a2113036410a74e81080e46829f41fb4"
     },
     {
       "path": "dist/hero-art.js",
@@ -358,6 +358,11 @@
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
     },
     {
+      "path": "docs/QA-INTEGRATION.md",
+      "bytes": 2125,
+      "sha256": "3ff33cec0c27dda263bc898881d9f8ab4ca7e7d51c26b8de1d26fdc759e7aa98"
+    },
+    {
       "path": "docs/QA-OPENING.md",
       "bytes": 2536,
       "sha256": "f4729deec1ca2d142885a06e8e482eb551c651f48012688214ec9908c616bbb8"
@@ -366,6 +371,11 @@
       "path": "docs/QA-REVIEW.md",
       "bytes": 3608,
       "sha256": "c27992ce89e31ad0c45faba872901a36005ec5b1a9dadbed32b87e3752c1a7fd"
+    },
+    {
+      "path": "docs/QA-RUN-PACING.md",
+      "bytes": 2359,
+      "sha256": "241ef8e644694669a7f7a295c37c59b0ca988626dc8cae549e89ee1c013e4768"
     },
     {
       "path": "docs/QA-TAIL-DASH.md",
@@ -398,6 +408,11 @@
       "sha256": "12a3737606a5ab415173d7c93eeac6157ff5073318f864c7e37af5ffd57b2cab"
     },
     {
+      "path": "docs/RUN-PACING.md",
+      "bytes": 1785,
+      "sha256": "a6e28d124df5d2ae53d65f36b13bb08797b4665ffbfb8d732de3cb7e910bd3cf"
+    },
+    {
       "path": "docs/RUN-SAVE-INTEGRATION.md",
       "bytes": 5375,
       "sha256": "f4b2f4357bdc022aff2954e3b6b7b90fe0c9dd2493b4a28461cb23fd74880d8e"
@@ -419,8 +434,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 9511015,
-      "sha256": "65bb4eb1ecec255cf03c01b39bdc59040d4ee291930f5c8d5a26a011d3bba73b"
+      "bytes": 9518424,
+      "sha256": "7eb686cdad07ea0e25d7878ca8474bf4d5e3bc9a4d28b89e7bdc88d42d7d1d7c"
     },
     {
       "path": "scripts/export-standalone.py",
@@ -489,8 +504,8 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 10084,
-      "sha256": "e5a19cc1b1640464c2e890841aa932f7ce94a497452f1331be6b24bd1066b2b9"
+      "bytes": 10556,
+      "sha256": "35b1023d45f538290deb937b63fbd9009f19b68cad9fdaa7e0c20edb9bda96fa"
     },
     {
       "path": "tests/audio.test.js",
@@ -514,8 +529,8 @@
     },
     {
       "path": "tests/engine.test.js",
-      "bytes": 27835,
-      "sha256": "818234d15649ba61c1440035d2330edbf9bb765fb65d3ca23cf656b93917990f"
+      "bytes": 27891,
+      "sha256": "56085e5ca72dc9f25e1781027ed36a800d7a222ca1de1130504c2447f792616f"
     },
     {
       "path": "tests/hero-art.test.js",
@@ -536,6 +551,11 @@
       "path": "tests/hero-pose.test.js",
       "bytes": 6120,
       "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
+    },
+    {
+      "path": "tests/integration-pacing-story.test.js",
+      "bytes": 2133,
+      "sha256": "b0e285e2d78ca06214d274866364e865ae365220d4f1f2ceb513ce43e1912d9e"
     },
     {
       "path": "tests/opening.test.js",
@@ -563,6 +583,11 @@
       "sha256": "c2cb843639d2bf867d6b1065bc3517d33bd42f9860c10d4d18a8810754663819"
     },
     {
+      "path": "tests/run-pacing.test.js",
+      "bytes": 7137,
+      "sha256": "ddf61af01c473de95e377cf36d102a4fb7c4de564ae7c85e338b8178520f1b2b"
+    },
+    {
       "path": "tests/run-save.test.js",
       "bytes": 9643,
       "sha256": "0ce2c0d405d3193dabce8677e27994f3a11dfc9be887f97fca2d262bd8a17da6"
@@ -576,6 +601,11 @@
       "path": "tests/scenery-art.test.js",
       "bytes": 1916,
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
+    },
+    {
+      "path": "tests/story.test.js",
+      "bytes": 4755,
+      "sha256": "e243b05f75f146b696b93a3a9805d6a3adaa78f9834bcf3f0715c9a8f70e2e09"
     },
     {
       "path": "tests/travestia-art.test.js",
@@ -593,10 +623,16 @@
       "sha256": "e67e2a88805fa2b053d5399255f488b0bbc431c5e1b30ba16f4dd175e101f8f4"
     },
     {
+      "path": "tests/upgrade-rewards.test.js",
+      "bytes": 1677,
+      "sha256": "4f113fc5c268fa3c5c847c3bfc684215ec8a51d27eee1c0696362ae0212237d3"
+    },
+    {
       "path": "tests/world.test.js",
       "bytes": 4155,
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "0a027c92b7ba9351a2a7799c5d2c73ee9abe4ee0"
+  "base_github_commit": "9eb6334f33546ee5bebb787c519b5fef006cf32a",
+  "integration_date": "2026-11-03"
 }

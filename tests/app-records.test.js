@@ -11,7 +11,7 @@ import * as opening from '../dist/opening.js';
 // Run the real app controller with inert browser surfaces, real engine and storage.
 function app(existingValues){
   const sounds=[];const elements=new Map(),values=existingValues||new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})]]);let queue=Promise.resolve(),confirmed=true;const events={};
-  const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(key){this.state.add(key);},remove(key){this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(){},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({})});
+  const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(key){this.state.add(key);},remove(key){this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(key,value){this[key]=value;},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({})});
   const get=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
   const context=vm.createContext({...content,...opening,...persistence,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
@@ -97,4 +97,10 @@ test('skip opening starts immediately and replay cannot overwrite saved progress
  a.game.s.elapsed=30;await a.click('pause-menu');const before=a.values.get('toma-popescu-run-v1');
  a.click('story');a.click('next-dialogue');a.click('next-dialogue');assert.ok(a.game);a.click('next-dialogue');
  assert.equal(a.controller.screen,'menu');assert.equal(a.values.get('toma-popescu-run-v1'),before);
+});
+
+test('one-time rewards are not announced as new permanent powers',async()=>{
+ const a=app();await a.click('play');for(const u of content.UPGRADES)a.game.s.upg[u.id]=u.max;
+ a.game.gainXP(8);
+ for(const card of a.get('upgrade-options').children){assert.equal(card.children[1].children[2].textContent,'RÉCOMPENSE IMMÉDIATE');assert.ok(card['aria-label'].endsWith('Récompense immédiate'));assert.ok(!card['aria-label'].includes('Niveau'));}
 });

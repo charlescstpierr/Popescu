@@ -2,14 +2,14 @@ import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim } from './hero-pose.js';
-import { UPGRADES, DIFFICULTIES, BARKS, EVENTS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
+import { UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 const TAU=Math.PI*2;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const length=(x,y)=>Math.hypot(x,y);
 const dist=(a,b)=>length(a.x-b.x,a.y-b.y);
 const CAP={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12};
-const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 % des PV maximum.',icon:'ego',max:1,color:'#8eddab'},{id:'payday',name:'Petit contrat',desc:'Reçois 8 pièces immédiatement.',icon:'money',max:1,color:'#edc764'},{id:'barrier',name:'Compliment gratuit',desc:'Récupère 30 points de bouclier.',icon:'validation',max:1,color:'#8adce6'}];
+const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 % des PV maximum.',icon:'ego',max:1,color:'#8eddab'},{id:'payday',name:'Petit contrat',desc:'Reçois 8 pièces immédiatement.',icon:'money',max:1,color:'#edc764'},{id:'barrier',name:'Compliment gratuit',desc:'Récupère jusqu’à 30 bouclier, sans dépasser ta capacité (minimum 30).',icon:'validation',max:1,color:'#8adce6'}];
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
 const BASE={travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
@@ -38,13 +38,13 @@ export class Game {
   recalculate(){const r=id=>this.rank(id);this.s.stats={speed:144*(1+.08*r('speed')+.03*r('filter')),damage:18*(1+.25*r('muscle')),fireInterval:.52/(1+.18*r('followers')),magnet:70+35*r('magnet')+(this.s.companion?35:0),gasMultiplier:Math.max(.2,1-.16*r('filter')),shieldMax:16*r('validation')+(this.s.companion?20:0),range:620+25*r('followers')};const effect=DISCOVERIES[this.s.discovery?.active?.kind];if(effect){this.s.stats.speed*=effect.speed||1;this.s.stats.damage*=effect.damage||1;this.s.stats.fireInterval*=effect.fireInterval||1;this.s.stats.magnet+=effect.magnet||0;}}
   chooseUpgrade(id){
     const s=this.s;if(s.mode!=='upgrade' || !s.options.some(o=>o.id===id))return false;
-    if(CONSUMABLES.some(o=>o.id===id)){if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);if(id==='payday')s.coins+=8;if(id==='barrier')s.shield=Math.min(Math.max(30,s.stats.shieldMax),s.shield+30);s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');this.gainXP(0);return true;}
+    if(CONSUMABLES.some(o=>o.id===id)){if(id==='recovery')s.hp=Math.min(s.maxhp,s.hp+s.maxhp*.3);if(id==='payday')s.coins+=8;if(id==='barrier')s.shield=Math.max(s.shield,Math.min(Math.max(30,s.stats.shieldMax),s.shield+30));s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('collect');this.gainXP(0);return true;}
     const def=UPGRADES.find(u=>u.id===id);if(def && this.rank(id)>=(def.max||5))return false;
     s.upg[id]=this.rank(id)+1;
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
     if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA','Je suis avec toi. On avance ensemble.');}}
     this.recalculate();
-    if(id==='validation')s.shield=s.stats.shieldMax;
+    if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
     s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.gainXP(0);return true;
   }
@@ -129,21 +129,77 @@ export class Game {
     }
     return pack;
   }
+  // Pacing is derived from the existing simulation clock, so old saves need no migration.
+  runPacing(){
+    const t=this.s.elapsed,finale=!this.s.endless&&t>=1140;
+    const recovery=t>=120&&!finale&&(t-120)%90>=60&&(t-120)%90<75;
+    return {finale,recovery,pressure:recovery?.35:finale?.65:1};
+  }
+  announceEncounter(text){
+    this.bark('SYSTÈME',text,true);
+    // Narrative uses the UI's full reading duration; combat reactions stay immediate.
+    this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+Math.max(4.3,text.length*.039));
+    // Do not let a previously queued joke immediately cover an encounter warning.
+    for(const reply of [this.pendingStuntReply,this.pendingRivalReply])if(reply)reply.at=Math.max(reply.at,this.speechUntil+.2);
+  }
+  reserveFinaleSlots(count){
+    // Only retire ordinary enemies already offscreen, never visible threats or bosses.
+    const s=this.s,w=this.viewport.width/2,h=this.viewport.height;
+    let needed=Math.max(0,s.enemies.length+count-CAP.enemies);
+    for(let i=s.enemies.length-1;i>=0&&needed>0;i--){
+      const e=s.enemies[i];
+      if(!isRival(e.type)&&!['travestia','matriarch'].includes(e.type)&&(Math.abs(e.x-s.x)>w+e.r+32||e.y<s.y-h*.48-e.r-32||e.y>s.y+h*.52+e.r+32)){s.enemies.splice(i,1);needed--;}
+    }
+  }
+  spawnFinaleEnemy(type){
+    if(type==='travestia'){const existing=this.s.enemies.find(e=>e.type===type&&!e.dead);if(existing)return existing;}
+    if(isRival(type)&&this.s.enemies.filter(e=>isRival(e.type)&&!e.dead).length>=2)return null;
+    this.reserveFinaleSlots(1);return this.spawnEnemy(type);
+  }
+  updateFinale(dt){
+    const s=this.s;if(s.endless)return;
+    const beat=(at,action)=>{
+      const key=`finale:${at}`,pending=`${key}:pending`;
+      const crossed=s.elapsed>=at&&s.elapsed-dt<at;
+      if(s.elapsed>=at+20){this.eventSeen.delete(pending);return;}
+      if(!this.eventSeen.has(key)&&(crossed||this.eventSeen.has(pending))){
+        if(action()===false)this.eventSeen.add(pending);
+        else{this.eventSeen.delete(pending);this.eventSeen.add(key);}
+      }
+    };
+    beat(1130,()=>this.announceEncounter('Dernière minute dans dix secondes. Travestia revient : garde une sortie !'));
+    beat(1140,()=>{
+      this.timers.horde=45;this.timers.rival=90;this.timers.boss=180;this.timers.travestia=240;
+      if(!this.spawnFinaleEnemy('travestia'))return false;
+      this.announceEncounter('Le dernier direct ! Survis jusqu’à vingt minutes. Ses attaques restent esquivables.');
+    });
+    beat(1154,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !'));
+    beat(1160,()=>{if(!this.spawnFinaleEnemy(this.rivalIndex%2?'rival_goat':'rival_rooster'))return false;this.rivalIndex++;});
+    beat(1174,()=>this.announceEncounter('Dernière vague dans six secondes. Tiens jusqu’à vingt minutes !'));
+    beat(1180,()=>{this.reserveFinaleSlots(24);if(s.enemies.length>=CAP.enemies)return false;this.spawnHorde();this.announceEncounter('Dernière vague ! Pas besoin de tout éliminer : survis jusqu’à vingt minutes !');});
+  }
+  spawnHorde(){
+    const s=this.s,m=s.elapsed/60,count=18+Math.min(24,Math.floor(m*1.4));
+    const variant=s.elapsed<120?0:Math.round((s.elapsed-20)/45)%3;
+    const groups=variant===0?[['orangutan',1/3],['sprinter',1/5],['normal',.5]]:variant===1?[['gas',.2],['orangutan',.35],['normal',.45]]:[['tank',.15],['jealous',.35],['normal',.5]];
+    for(const [type,share] of groups)this.spawnPack(type,Math.ceil(count*share));
+    this.pulse(s.x,s.y,70,'#e2b944',.45);this.bark('SYSTÈME','Un groupe de discussion vient de te trouver.');
+  }
   spawnWave(dt){
-    const s=this.s,m=s.elapsed/60;this.timers.spawn-=dt;
-    const interval=Math.max(.08,.46/(1+m*.22))/(this.difficulty.spawn||1);
+    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;
+    const interval=Math.max(.08,.46/(1+m*.22))/((this.difficulty.spawn||1)*pacing.pressure);
     if(this.timers.spawn<=0){
       this.timers.spawn+=interval;let type='normal';const p=this.random();
       if(m>.5&&p<.2)type='sprinter';else if(m>1&&p<.36)type='gas';else if(m>2&&p<.45)type='jealous';else if(m>3&&p<.55)type='tank';else if(m>4&&p<.65)type='explosive';
       if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
     this.timers.pack-=dt;
-    if(this.timers.pack<=0){this.timers.pack=7;this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
+    if(this.timers.pack<=0){this.timers.pack=pacing.recovery||pacing.finale?.1:7;if(!pacing.recovery&&!pacing.finale)this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
+    if(pacing.finale)return;
+    if((s.endless||s.elapsed+this.timers.horde<1140)&&s.elapsed>=120&&this.timers.horde>6&&this.timers.horde-dt<=6)this.announceEncounter('Une horde arrive dans six secondes. Garde une sortie !');
     this.timers.horde-=dt;
     if(this.timers.horde<=0){
-      this.timers.horde=45;const count=18+Math.min(24,Math.floor(m*1.4));
-      this.spawnPack('orangutan',Math.ceil(count/3));this.spawnPack('sprinter',Math.ceil(count/5));this.spawnPack('normal',Math.ceil(count*.5));
-      this.pulse(s.x,s.y,70,'#e2b944',.45);this.bark('SYSTÈME','Un groupe de discussion vient de te trouver.');
+      this.timers.horde=45;this.spawnHorde();
     }
     this.timers.rival-=dt;
     if(this.timers.rival<=0){
@@ -154,6 +210,8 @@ export class Game {
         if(e){this.rivalIndex++;this.timers.rival=this.rivalIndex===1?45:90+this.rivalRandom()*30;}else this.timers.rival=5;
       }else this.timers.rival=10;
     }
+    if((s.endless||s.elapsed+this.timers.travestia<1140)&&this.timers.travestia>5&&this.timers.travestia-dt<=5&&!s.enemies.some(e=>e.type==='travestia'&&!e.dead))this.announceEncounter('Travestia arrive dans cinq secondes. Méfie-toi de sa queue !');
+    if((s.endless||s.elapsed+this.timers.boss<1140)&&this.timers.boss>5&&this.timers.boss-dt<=5)this.announceEncounter('La modération arrive dans cinq secondes. Prépare une sortie !');
     this.timers.travestia-=dt;
     if(this.timers.travestia<=0){const boss=this.spawnEnemy('travestia');this.timers.travestia=boss?240:10;if(boss)this.bark('SYSTÈME','Travestia entre en scène ! Gare à la queue hélicoptère.');}
     this.timers.boss-=dt;if(this.timers.boss<=0){this.timers.boss=180;this.spawnEnemy('matriarch');this.bark('TOMA','La modération est arrivée en personne.');}
@@ -228,7 +286,7 @@ export class Game {
   }
   updateCompanion(dt){
     const s=this.s,g=s.girl;if(!s.companion)return;
-    if(g.hp<=0 && g.down<=0){g.down=12;this.bark('BLONDE IA','Je redémarre. Évite de mourir pendant la mise à jour.');}
+    if(g.hp<=0 && g.down<=0){this.bark('BLONDE IA','Je redémarre. Évite de mourir pendant la mise à jour.');g.down=12;}
     if(g.down>0){g.down=Math.max(0,g.down-dt);if(g.down===0){g.hp=g.maxhp;g.x=s.x-25;g.y=s.y+28;s.shield=Math.max(s.shield,20);this.burst(g.x,g.y,'#ffa1c5',12);}return;}
     const tx=s.x-s.faceX*36,ty=s.y-s.faceY*36+16,dx=tx-g.x,dy=ty-g.y,d=length(dx,dy);
     if(d>500){g.x=tx;g.y=ty;}else if(d>9)this.move(g,dx/Math.max(d,1)*Math.min(d*4,s.stats.speed*1.15)*dt,dy/Math.max(d,1)*Math.min(d*4,s.stats.speed*1.15)*dt,10);
@@ -314,7 +372,7 @@ export class Game {
   }
   updateChests(dt){
     const s=this.s;this.timers.chest-=dt;if(this.timers.chest<=0){this.timers.chest=47;const angle=this.random()*TAU;let x=s.x+Math.cos(angle)*210,y=s.y+Math.sin(angle)*210;for(let i=0;i<10 && this.world.collides(x,y,16);i++){x+=30;y-=25;}s.chests.push({id:this.id++,x,y,open:false,openedAt:0});}
-    for(const c of s.chests)if(!c.open && dist(c,s)<32){c.open=true;c.openedAt=s.elapsed;s.coins+=5;s.hp=Math.min(s.maxhp,s.hp+18);s.shield=Math.min(s.stats.shieldMax,s.shield+12);this.gainXP(10+Math.floor(s.level*.5));this.pulse(c.x,c.y,90,'#f5cd67',.7);this.sound('chest');}
+    for(const c of s.chests)if(!c.open && dist(c,s)<32){c.open=true;c.openedAt=s.elapsed;s.coins+=5;s.hp=Math.min(s.maxhp,s.hp+18);s.shield=Math.max(s.shield,Math.min(s.stats.shieldMax,s.shield+12));this.gainXP(10+Math.floor(s.level*.5));this.pulse(c.x,c.y,90,'#f5cd67',.7);this.sound('chest');}
     s.chests=s.chests.filter(c=>(!c.open || s.elapsed-c.openedAt<8) && dist(c,s)<1600);
   }
   pulse(x,y,r,color,life=.5){this.s.pulses.push({x,y,r:4,maxr:r,life,maxlife:life,color});}
@@ -356,13 +414,29 @@ export class Game {
     const index=this.rivalBarkIndex++,line=RIVAL_BARKS[index%RIVAL_BARKS.length];this.bark(line.who,line.text,true);this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
     if(index%2===0||s.companion)this.pendingRivalReply={at:s.elapsed+2.7,id:rival.id,type:rival.type,index,ally:index%2===1&&s.companion};
   }
-  bark(who,text,priority=false){if(who==='BLONDE IA'&&!this.s.companion)return false;if(!priority&&this.s.elapsed<this.speechUntil)return false;this.emit('bark',{who,text});this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+3.1);return true;}
+  bark(who,text,priority=false){if(who==='BLONDE IA'&&(!this.s.companion||this.s.girl.down>0))return false;if(!priority&&this.s.elapsed<this.speechUntil)return false;this.emit('bark',{who,text});this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+(priority?3.1:Math.max(4.3,text.length*.039)));return true;}
 
   story(dt){
-    const s=this.s;this.timers.bark-=dt;if(this.timers.bark<=0&&s.elapsed>=this.speechUntil){this.timers.bark=18+this.random()*9;const available=BARKS.filter(b=>s.companion || b.who!=='BLONDE IA');if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}}
-    if(s.elapsed<this.speechUntil||s.elapsed<this.nextEvent)return;
-    const props=this.world.getVisible(s.x,s.y,360,360);
-    const prop=props.find(p=>EVENTS[p.type] && !this.eventSeen.has(p.type) && dist(p,s)<Math.max(55,p.w*.6));
-    if(prop){this.eventSeen.add(prop.type);this.nextEvent=s.elapsed+80;this.startDialogue(EVENTS[prop.type]);}
+    const s=this.s;this.timers.bark-=dt;
+    if(s.elapsed<this.speechUntil)return;
+    // Persist chapter flags in the already bounded, saved event set. A late
+    // checkpoint catches up to its current chapter, not several stale speeches.
+    const due=STORY_MILESTONES.filter(m=>s.elapsed>=m.at&&!this.eventSeen.has(`chapter:${m.at}`));
+    if(due.length){
+      for(const m of due)this.eventSeen.add(`chapter:${m.at}`);
+      const line=due.at(-1);this.bark(line.who,line.text);return;
+    }
+    if(s.elapsed>=this.nextEvent){
+      const props=this.world.getVisible(s.x,s.y,360,360);
+      const prop=props.find(p=>WORLD_REMARKS[p.type]&&!this.eventSeen.has(p.type)&&dist(p,s)<Math.max(55,p.w*.6));
+      if(prop){
+        const line=WORLD_REMARKS[prop.type];this.eventSeen.add(prop.type);
+        this.nextEvent=s.elapsed+80;this.bark(line.who,line.text);return;
+      }
+    }
+    if(this.timers.bark<=0){
+      this.timers.bark=18+this.random()*9;const available=contextualBarks(s);
+      if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}
+    }
   }
 }
