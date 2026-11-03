@@ -1006,7 +1006,11 @@ class Game {
     const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
     if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
-    const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1);
+    // Summons already prolong the matriarch fight, so her early boost is smaller.
+    // Reach 2x by 18 min, then cap the extra factor; saved HP stays untouched.
+    const earlyBossHealth=type==='matriarch'?1.35:1.6;
+    const bossDurability=isMajorBoss(type)?earlyBossHealth+(2-earlyBossHealth)*clamp((minutes-3)/15,0,1):1;
+    const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1)*bossDurability;
     const enemy={id:this.id++,type,sex:['travestia','pelican'].includes(type)?null:isRival(type)?'male':'female',x,y,hp,maxhp:hp,r:spec.r,speed:spec.speed*(this.difficulty.speed||1)*(1+Math.min(.35,minutes*.014)),phase:'chase',faceX:0,faceY:1,gasPose:0,windup:0,hitFlash:0,charmed:0,dead:false,cooldown:type==='gas'?2+this.random()*2:0,attack:0,summon:6,crow:0,charge:0,chargeDirX:0,chargeDirY:1,banterCount:0,nextTaunt:0,swipe:0,swipeDirX:0,swipeDirY:1,target:'player',tailTime:0,tailFaceX:1,tailHitPlayer:false,tailHitGirl:false};
     if(type==='pelican')Object.assign(enemy,{peliTime:0,peliDX:1,peliDY:0,peliX:x,peliY:y,peliTravel:0,peliAttackCount:0,peliHitPlayer:false,peliHitGirl:false,peliReplyPending:false,peliBanterIndex:0,peliTauntAt:0,peliReply:'',peliReplyTime:0,peliWalkDistance:0,peliMoving:false});
     if(ANIMALS[type])Object.assign(enemy,{animalTime:0,animalDX:1,animalDY:0,animalX:x,animalY:y,animalTravel:0,animalHit:false});s.enemies.push(enemy);return enemy;
