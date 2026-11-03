@@ -46,3 +46,7 @@ Les ruines, cabanes, autels, épaves et failles hors ligne enrichissent la même
 
 ## Forêts et ville endommagée
 Le monde alterne désormais quartiers urbains et régions boisées connectées. Pins, rochers et vestiges entourent des sentiers praticables; les villes mêlent appartements, garages, entrepôts, commerces et ruines. Les découvertes et le combat continuent sans changer de carte. [Direction, génération et vérification](docs/FORETS-ET-RUINES.md).
+
+## Péli Zodiaque
+
+Un nouveau boss majeur entre en scène après six minutes : un pélican à petite bedaine, veste étoilée et cartes de tarot. Câlin annoncé, cercle du zodiaque avec ouverture et cartes qui reviennent composent ses trois attaques. Les échanges non bloquants jouent sur Toma, Poissons ascendant Sagittaire. Les rencontres restent espacées de Travestia et les anciennes parties sont migrées. [Règles et vérification](docs/PELI-ZODIAQUE.md).

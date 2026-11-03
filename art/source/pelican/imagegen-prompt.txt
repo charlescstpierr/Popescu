@@ -1,0 +1,8 @@
+Built-in image_gen, two passes, 2026-11-03.
+
+Generation references: reference-approved.png (approved pelican concept), existing dist/assets/travestia-poses.png (game style only).
+Production transparent 4-column by 3-row game sprite atlas of Péli Zodiaque, flamboyant anthropomorphic adult male pelican with small rounded feather belly, long orange beak and pink-orange pouch, lavender quiff, purple/gold star-patterned jacket, gold star necklace, purple shorts and scarf, orange web feet. Match established hand-shaded 16-bit style, crisp dark outlines and warm highlights. Twelve separate complete figures, three-quarter right view: four walk phases, idle fan of tarot cards, inviting open-wing hug warning, rushing hug, raised-wing zodiac casting, tarot fan preparation, open-hand tarot throw, winded recovery, comic hit reaction. Consistent scale, complete head and feet; transparent background; no backdrop, ground, labels, grid or watermark.
+
+Cleanup edit reference: initial generated atlas. Preserve all complete poses and identity. Reduce and center complete figures inside equal cells with transparent padding and shared foot baseline. Remove detached flying cards and streaks from throwing pose because gameplay draws exact projectiles separately. Remove detached dash dust and recovery puff. Preserve genuine alpha transparency.
+
+Final source retained unchanged in poses-transparent-source.png. register-atlas.mjs only applies whole-frame translations for matching ground registration; no character repainting or limb assembly.

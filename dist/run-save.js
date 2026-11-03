@@ -2,15 +2,16 @@ import {ANIMALS} from './animals.js';
 // Versioned, validated persistence for the approved save/resume flow.
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
 import {TRAVESTIA_BANTER} from './travestia.js';
+import {PELICAN,PELICAN_BANTER} from './pelican.js';
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=4;
+const VERSION=5;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
 const MODES=['playing','paused','upgrade','dialogue','victory','gameover'];
-const ENEMIES=[...Object.keys(ANIMALS),'travestia','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
+const ENEMIES=[...Object.keys(ANIMALS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const REQUIRED={enemies:'id x y hp maxhp r speed windup hitFlash charmed cooldown attack summon',shots:'x y vx vy life damage r pierce',drops:'x y life value',clouds:'x y vx vy r life',particles:'x y vx vy life maxlife',vehicles:'x y vx vy life damage',pulses:'x y r maxr life maxlife',chests:'id x y openedAt',shockwaves:'x y r prevR maxR life maxlife width damage ownerId'};
 function check(ok){if(!ok)throw new Error('Invalid run save');}
 function object(v){return v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;}
@@ -30,18 +31,23 @@ function physics(v){
 function copy(v){return JSON.parse(JSON.stringify(v,(_k,x)=>{if(typeof x==='number')check(finite(x));return x instanceof Set||x instanceof Map?[...x]:x;}));}
 function validate(snapshot){
  tree(snapshot);
- if(snapshot.version>=1&&snapshot.version<=3&&snapshot.game?.timers){snapshot.game.timers.animal??=12;snapshot.game.timers.animalIndex??=0;}
- if(snapshot.version===3){check(snapshot.game?.s?.enemies?.every(e=>!ANIMALS[e.type]));snapshot.version=VERSION;}
- if(snapshot.version===1){
-  // v1 predates Travestia. Never synthesize missing attack state for a boss.
+ if(Number.isInteger(snapshot.version)&&snapshot.version>=1&&snapshot.version<VERSION){
+  // Old schemas cannot contain a new boss or invent its missing attack state.
   check(object(snapshot.game)&&object(snapshot.game.timers)&&Array.isArray(snapshot.game.s?.enemies));
-  check(snapshot.game.s.enemies.every(e=>e.type!=='travestia'));
-  if(snapshot.game.timers.travestia===undefined)snapshot.game.timers.travestia=240;
-  for(const e of snapshot.game.s.enemies){if(e.tailTime===undefined)e.tailTime=0;if(e.tailFaceX===undefined)e.tailFaceX=1;if(e.tailHitPlayer===undefined)e.tailHitPlayer=false;if(e.tailHitGirl===undefined)e.tailHitGirl=false;}
+  check(snapshot.game.s.enemies.every(e=>object(e)&&e.type!=='pelican'&&!e.phase?.startsWith('peli_')&&!Object.keys(e).some(key=>key.startsWith('peli'))));
+  if(snapshot.game.timers.pelican===undefined)snapshot.game.timers.pelican=360;
+  if(snapshot.version<=3){snapshot.game.timers.animal??=12;snapshot.game.timers.animalIndex??=0;}
+  if(snapshot.version===3)check(snapshot.game.s.enemies.every(e=>!ANIMALS[e.type]));
+  if(snapshot.version===1){
+   // v1 predates Travestia. Never synthesize missing attack state for a boss.
+   check(snapshot.game.s.enemies.every(e=>e.type!=='travestia'));
+   if(snapshot.game.timers.travestia===undefined)snapshot.game.timers.travestia=240;
+   for(const e of snapshot.game.s.enemies){if(e.tailTime===undefined)e.tailTime=0;if(e.tailFaceX===undefined)e.tailFaceX=1;if(e.tailHitPlayer===undefined)e.tailHitPlayer=false;if(e.tailHitGirl===undefined)e.tailHitGirl=false;}
+  }
+  if(snapshot.version===2)check(snapshot.game.s.enemies.every(e=>!e.phase?.startsWith('tail_dash')));
   snapshot.version=VERSION;
  }
- if(snapshot.version===2){check(Array.isArray(snapshot.game?.s?.enemies)&&snapshot.game.s.enemies.every(e=>!e.phase?.startsWith('tail_dash')));snapshot.version=VERSION;}
- check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
+ check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));check(d.timers.pelican>=0);
  for(const key of INTERNAL){if(['viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
@@ -59,10 +65,11 @@ function validate(snapshot){
  check(s.girl.maxhp>0&&s.stunt.duration>0&&s.stunt.progress>=0&&s.stunt.progress<=1);
  check(object(s.upg));for(const [id,rank] of Object.entries(s.upg)){const def=UPGRADES.find(u=>u.id===id);check(def&&integer(rank)&&rank<=def.max);}
  for(const [key,cap] of Object.entries(CAPS)){check(Array.isArray(s[key])&&s[key].length<=cap);for(const item of s[key]){check(object(item));for(const field of (REQUIRED[key]||'').split(' ').filter(Boolean))check(finite(item[field]));}}
- const actorIds=new Set();
+ const actorIds=new Set(),majorBosses=new Set();
  for(const e of s.enemies){
   check(ENEMIES.includes(e.type)&&integer(e.id,1)&&e.id<d.id&&e.maxhp>0&&e.r>0&&!actorIds.has(e.id));actorIds.add(e.id);
-  const template=base.spawnEnemy(e.type,0,0);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
+  if(e.type==='pelican'){check(!majorBosses.has(e.type));majorBosses.add(e.type);}
+  const template=base.spawnEnemy(e.type,0,0);check(template);shape(e,template);check(e.r===template.r&&integer(e.banterCount));
   if(ANIMALS[e.type]){const a=ANIMALS[e.type],limits={chase:0,animal_warning:a.warning,animal_active:a.duration,animal_recover:a.recovery};check(Object.hasOwn(limits,e.phase)&&e.animalTime>=0&&e.animalTime<=limits[e.phase]&&typeof e.animalHit==='boolean'&&Math.abs(Math.hypot(e.animalDX,e.animalDY)-1)<1e-6&&e.animalTravel>=0&&e.animalTravel<=a.reach+1e-6);}
   if(e.type==='travestia'){
    const interrupted=(e.phase==='charmed'&&e.charmed>0)||(e.phase==='suppressed'&&s.airplane.active);
@@ -82,6 +89,26 @@ function validate(snapshot){
    if(e.tailReplyPending!==undefined||e.tailWarning===4.2)check(typeof e.tailReplyPending==='boolean');
    if(e.tailWarning!==undefined||e.phase==='tail_windup')check([1.2,4.2].includes(e.tailWarning));
    if(e.tailReplyPending)check((e.phase==='tail_windup'||interrupted)&&TRAVESTIA_BANTER.some(pair=>pair[1]===e.tailReply));
+  }
+  if(e.type==='pelican'){
+   const interrupted=(e.phase==='charmed'&&e.charmed>0)||(e.phase==='suppressed'&&s.airplane.active);
+   const maxAttackTime=Math.max(PELICAN.hug.warning,PELICAN.hug.duration,PELICAN.zodiac.warning,PELICAN.zodiac.duration,PELICAN.tarot.warning,PELICAN.tarot.duration,PELICAN.hug.recovery);
+   const limits={chase:0,charmed:interrupted?maxAttackTime:0,suppressed:interrupted?maxAttackTime:0,peli_hug_warning:PELICAN.hug.warning,peli_hug:PELICAN.hug.duration,peli_zodiac_warning:PELICAN.zodiac.warning,peli_zodiac:PELICAN.zodiac.duration,peli_tarot_warning:PELICAN.tarot.warning,peli_tarot:PELICAN.tarot.duration,peli_recover:PELICAN.hug.recovery};
+   check(Object.hasOwn(limits,e.phase)&&e.peliTime>=0&&e.peliTime<=limits[e.phase]);
+   if(e.phase.startsWith('peli_'))check(e.peliTime>0);
+   check(Math.abs(Math.hypot(e.peliDX,e.peliDY)-1)<1e-6&&Math.abs(e.peliX)<=1e8&&Math.abs(e.peliY)<=1e8&&e.peliTravel>=0&&e.peliTravel<=PELICAN.hug.speed*PELICAN.hug.duration+1e-6);
+   check(integer(e.peliAttackCount)&&integer(e.peliBanterIndex)&&e.peliTauntAt>=0&&e.peliWalkDistance>=0);
+   if(e.phase.startsWith('peli_')){
+    const kind=['hug','zodiac','tarot'][e.peliAttackCount%3];
+    if(e.phase!=='peli_recover')check(e.phase===`peli_${kind}`||e.phase===`peli_${kind}_warning`);
+    const travelled=e.phase==='peli_hug'||e.phase==='peli_recover'&&e.peliAttackCount%3===0;
+    if(!travelled)check(e.peliTravel===0);
+    check(Math.abs(e.x-e.peliX-e.peliDX*e.peliTravel)<1e-5&&Math.abs(e.y-e.peliY-e.peliDY*e.peliTravel)<1e-5);
+   }
+   check(e.peliReplyTime>=0&&e.peliReplyTime<=PELICAN.replyDelay);
+   if(e.peliReplyPending)check(e.peliReplyTime>0&&PELICAN_BANTER.some(pair=>pair[1]===e.peliReply));
+   else check(e.peliReplyTime===0);
+   check(e.peliReply===''||PELICAN_BANTER.some(pair=>pair[1]===e.peliReply));
   }
   if(e.type==='gas'&&(e.windup>0||e.gasPose>0))check(finite(e.gasDirX)&&Math.abs(e.gasDirX)<=1.001&&finite(e.gasDirY)&&Math.abs(e.gasDirY)<=1.001);
  }
@@ -111,7 +138,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
+ tree(v);check([1,2,3,4,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
 }
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.

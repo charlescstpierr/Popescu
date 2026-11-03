@@ -94,9 +94,9 @@ function syncEngineScreen(){if(!game)return;const mode=game.state.mode;if(mode==
 function showBanter(payload){
   if(!prefs.banter||!payload?.text||screen!=='hud')return;
   setText('banter-name',payload.who||'TOMA');setText('banter-text',payload.text);
-  const rival={'COQ RIVAL':'rival_rooster','BOUC RIVAL':'rival_goat','TRAVESTIA':'travestia'}[payload.who];
+  const rival={'COQ RIVAL':'rival_rooster','BOUC RIVAL':'rival_goat','TRAVESTIA':'travestia','PÉLI ZODIAQUE':'pelican'}[payload.who];
   $('banter-portrait').classList.toggle('hidden',Boolean(rival));$('banter-rival').classList.toggle('hidden',!rival);
-  if(rival){const c=$('banter-rival').getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#252238';c.fillRect(0,0,62,76);if(rival==='travestia'){c.save();c.scale(.55,.55);renderer.actors.drawTravestia(c,{x:56,y:130,phase:'chase',faceX:1},0);c.restore();}const frame=rival==='travestia'?null:renderer.actors.frame('enemy',0,false,rival);if(frame)c.drawImage(frame,38,6,64,80,0,0,62,76);else if(rival!=='travestia'){c.fillStyle='#ffd27c';c.font='bold 28px monospace';c.fillText(rival==='rival_goat'?'B':'C',22,46);}}
+  if(rival){const c=$('banter-rival').getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#252238';c.fillRect(0,0,62,76);const boss=rival==='travestia'||rival==='pelican';if(boss){c.save();c.scale(.55,.55);renderer.actors[rival==='pelican'?'drawPelican':'drawTravestia'](c,{x:56,y:130,phase:'chase',faceX:1},0);c.restore();}const frame=boss?null:renderer.actors.frame('enemy',0,false,rival);if(frame)c.drawImage(frame,38,6,64,80,0,0,62,76);else if(!boss){c.fillStyle='#ffd27c';c.font='bold 28px monospace';c.fillText(rival==='rival_goat'?'B':'C',22,46);}}
   else $('banter-portrait').src=payload.who==='BLONDE IA'?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-v4.svg';
   $('banter').classList.remove('hidden');banterUntil=performance.now()+Math.max(4300,payload.text.length*39);
 }
