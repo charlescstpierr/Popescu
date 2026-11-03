@@ -456,7 +456,7 @@ export class Renderer {
     if(!sprite&&!this.actors.availableFor(actor,kind))return;
     const x=Math.round(actor.x),y=Math.round(actor.y),flip=fx<-.1&&!gas;
     this._shadow(x,y+11,isEnemy?49*scale:isGirl?28:33,isEnemy?13:9);
-    ctx.save();if(isEnemy)ctx.globalAlpha=this.combat.alpha(actor.id,s.elapsed);
+    ctx.save();if(isEnemy)ctx.globalAlpha=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
     const raster=this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);ctx.restore();
     ctx.save();ctx.translate(x,y+10);if(flip)ctx.scale(-1,1);
     if(!raster&&actor.down){ctx.rotate(-Math.PI/2);ctx.globalAlpha=.6;ctx.drawImage(sprite,-34*scale,-45*scale,68*scale,76*scale);}

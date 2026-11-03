@@ -6,13 +6,14 @@ import {Game} from '../dist/engine.js';
 import * as persistence from '../dist/run-save.js';
 import {discoveryPrompt} from '../dist/discoveries.js';
 import * as content from '../dist/content.js';
+import * as opening from '../dist/opening.js';
 
 // Run the real app controller with inert browser surfaces, real engine and storage.
 function app(existingValues){
   const sounds=[];const elements=new Map(),values=existingValues||new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})]]);let queue=Promise.resolve(),confirmed=true;const events={};
   const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(key){this.state.add(key);},remove(key){this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(){},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({})});
   const get=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
-  const context=vm.createContext({...content,...persistence,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
+  const context=vm.createContext({...content,...opening,...persistence,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,get runId(){return runId}};',context);
   return {events,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
@@ -77,4 +78,23 @@ test('New Game after reload credits the saved unfinished run exactly once',async
 
 test('saved menu keeps new-game difficulty selectable without changing resumed difficulty',async()=>{
  const a=app();a.controller.setDifficulty('nightmare');await a.click('play');await a.controller.persistRun();const b=app(a.values);assert.equal(b.get('difficulty-picker').classList.contains('hidden'),false);b.controller.setDifficulty('easy');await b.click('resume-saved');assert.equal(b.game.s.difficulty,'nightmare');assert.ok(b.get('coordinates').textContent.includes(content.DIFFICULTIES.nightmare.label));await b.click('restart');assert.equal(b.game.s.difficulty,'easy');
+});
+
+
+test('first opening checkpoint stores first card before any animation frame',async()=>{
+ const a=app(new Map());await a.click('play');const snapshot=JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot;
+ assert.equal(snapshot.game.s.mode,'dialogue');assert.equal(snapshot.dialogue.lines[0].opening,'fantasy');
+ assert.equal(a.get('next-dialogue').textContent,'AMÉLIORER MA VIE');
+});
+test('opening reload keeps exact card and completion stages one tutorial gorilla',async()=>{
+ const a=app(new Map());await a.click('play');a.click('next-dialogue');await a.controller.persistRun();
+ const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(b.get('dialogue-text').textContent,'IA HORS LIGNE.');
+ b.click('next-dialogue');b.click('next-dialogue');assert.equal(b.game.s.mode,'playing');assert.equal(b.game.s.opening.phase,'move');assert.equal(b.game.s.enemies.length,1);
+ b.controller.frame(performance.now()+50);assert.equal(b.game.s.elapsed,0);
+});
+test('skip opening starts immediately and replay cannot overwrite saved progress',async()=>{
+ const a=app(new Map());await a.click('play');a.click('skip-dialogue');assert.equal(a.game.s.mode,'playing');assert.equal(a.game.s.opening?.phase,'shoot');
+ a.game.s.elapsed=30;await a.click('pause-menu');const before=a.values.get('toma-popescu-run-v1');
+ a.click('story');a.click('next-dialogue');a.click('next-dialogue');assert.ok(a.game);a.click('next-dialogue');
+ assert.equal(a.controller.screen,'menu');assert.equal(a.values.get('toma-popescu-run-v1'),before);
 });
