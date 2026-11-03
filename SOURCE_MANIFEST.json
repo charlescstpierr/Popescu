@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-approved-animals",
+  "version": "1.5-plus-animals-v3-save-compatibility",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -299,8 +299,8 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 17085,
-      "sha256": "74ea743ef2686fb4379c41c3aefc5af024dd7907717750be07e6079ec926f730"
+      "bytes": 17087,
+      "sha256": "5b01b450eea4d71b95b5f47af36f9503c286ce42b5954952adaa25c8027be662"
     },
     {
       "path": "dist/styles.css",
@@ -454,8 +454,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 12096623,
-      "sha256": "ec3668ab4344fad788b26b7f01422897ccbd7f8c01c21fb20a11d1aa555b768b"
+      "bytes": 12096625,
+      "sha256": "0b5d55d06a1db634621aeda6d0e9295f349ab9c86de0998e21256c3a363bd91c"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -568,6 +568,11 @@
       "sha256": "56085e5ca72dc9f25e1781027ed36a800d7a222ca1de1130504c2447f792616f"
     },
     {
+      "path": "tests/fixtures/runstore-v3.json",
+      "bytes": 2077,
+      "sha256": "dc8c215fbe716b8890718ff1075caea3b756fcba2ab7a8a969415922c6e81530"
+    },
+    {
       "path": "tests/hero-art.test.js",
       "bytes": 2242,
       "sha256": "b35c27402041d382400b6737494b8f9000e7900bb4255d6b6b77f398ddd76c9e"
@@ -624,8 +629,8 @@
     },
     {
       "path": "tests/run-save.test.js",
-      "bytes": 9643,
-      "sha256": "0ce2c0d405d3193dabce8677e27994f3a11dfc9be887f97fca2d262bd8a17da6"
+      "bytes": 11178,
+      "sha256": "591c76fc343d32a4d9d6690aa5d1f954e405bcfffabbcd47ec147ccadc16a1a6"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -678,6 +683,6 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "1ebf87a37062308b087545b87073c5fda26e4293",
+  "base_github_commit": "2065b7e6a7b6e8170ff8625bc21ba12687236591",
   "integration_date": "2026-11-03"
 }

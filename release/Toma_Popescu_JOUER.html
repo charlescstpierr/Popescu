@@ -3143,7 +3143,7 @@ function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
+ tree(v);check([1,2,3,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=v.run.snapshot.game.s.coins);return v;
 }
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.

@@ -78,3 +78,11 @@ test('replacement credits the previous snapshot atomically and failed replacemen
 test('enemy collision radii must match their species, not merely be finite',()=>{
  const g=run();g.spawnEnemy('normal',100,100);const snapshot=captureRun(g);snapshot.game.s.enemies[0].r=5000;assert.throws(()=>restoreRun(snapshot));
 });
+test('real v3 RunStore envelope migrates and checkpoints without losing totals or progress',async()=>{
+ const {readFileSync}=await import('node:fs');
+ // Produced by the unchanged pre-animal v3 Game + RunStore, not a relabelled v4 snapshot.
+ const raw=readFileSync(new URL('./fixtures/runstore-v3.json',import.meta.url),'utf8');const original=JSON.parse(raw);assert.equal(original.version,3);assert.equal(original.run.snapshot.version,3);assert.equal(original.run.snapshot.game.timers.animal,undefined);
+ const storage=memory();storage.setItem('toma-popescu-run-v1',raw);const store=new RunStore(storage),read=store.read();assert.equal(read.status,'ready');assert.equal(read.value.version,4);assert.equal(read.value.run.snapshot.version,4);assert.deepEqual(read.value.totals,original.totals);assert.equal(storage.getItem(store.key),raw,'reading does not rewrite or destroy old save');
+ const game=restoreRun(read.value.run.snapshot);assert.equal(game.s.elapsed,123);assert.equal(game.s.hp,67);assert.equal(game.s.kills,7);assert.equal(game.s.coins,11);assert.equal(game.s.enemies[0].type,'travestia');assert.equal(game.timers.animal,12);assert.equal(game.timers.animalIndex,0);
+ assert.equal(store.checkpoint('real-v3-run',game,{credit:true}).ok,true);const saved=JSON.parse(storage.getItem(store.key));assert.equal(saved.version,4);assert.equal(saved.run.snapshot.version,4);assert.deepEqual(saved.totals,original.totals);assert.equal(saved.revision,original.revision+1);assert.equal(new RunStore(storage).read().status,'ready');
+});
