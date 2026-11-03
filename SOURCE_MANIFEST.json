@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-five-power-animations",
+  "version": "1.5-plus-power-animations-ego-de-guerre",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -284,8 +284,8 @@
     },
     {
       "path": "dist/audio.js",
-      "bytes": 21973,
-      "sha256": "34051546fb6b0bb24500385fe746e90d0a4ff1c41e0f0119067fc2b85dcb1764"
+      "bytes": 23787,
+      "sha256": "d5aa40ae06db16737e606980c1d5d518fd6ee1dfb19c7c28d109060e67b25952"
     },
     {
       "path": "dist/biomes.js",
@@ -559,8 +559,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 11515,
-      "sha256": "12a3737606a5ab415173d7c93eeac6157ff5073318f864c7e37af5ffd57b2cab"
+      "bytes": 11596,
+      "sha256": "8ef9dbdd93558f78e74d4167a6e06f81ce5a3590ca800a9c501f44ead50ad906"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -604,8 +604,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14018968,
-      "sha256": "1f1cd5cd72fc807d4fc3876fa647bf47592aba213582a5a4dca33032fbd21d8e"
+      "bytes": 14020793,
+      "sha256": "4866b1c7f6dd6ba134c3a38c48c77a9dfcc373b69af8d39d7355fb6e4cd399bd"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -709,8 +709,8 @@
     },
     {
       "path": "scripts/render-music-preview.mjs",
-      "bytes": 6498,
-      "sha256": "f775cfb89252e781843624e56613aba2081bd8cb1de24a1e383c183bea34a1b3"
+      "bytes": 6599,
+      "sha256": "1bca8a38f6b51048c9031d9ddbd69b725d3d9f3bb96fe9202376e7570b6f40d7"
     },
     {
       "path": "scripts/render-power-preview.mjs",
@@ -754,8 +754,8 @@
     },
     {
       "path": "tests/audio.test.js",
-      "bytes": 12391,
-      "sha256": "a508dcdd086faa0de8d427114aabdb2752e79fd2fb51a93069fcddf984282528"
+      "bytes": 13819,
+      "sha256": "52b7395dcd12db68bb323cd80910c6f45c8f9120e4092a73713e089f8cd3ca85"
     },
     {
       "path": "tests/biomes.test.js",
@@ -983,6 +983,6 @@
       "sha256": "47c3ea1282499bb353023889432ca504b1fbf8bd50833c05e526187f73468e03"
     }
   ],
-  "base_github_commit": "ea7f98cfa40c63731f9dca9fe159908a112eb9f3",
+  "base_github_commit": "8b95b9749df23f3ecc06e92ea2e4ad13aa7a9bfd",
   "integration_date": "2026-11-03"
 }

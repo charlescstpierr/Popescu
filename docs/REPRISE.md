@@ -28,7 +28,7 @@ La Blonde IA suit Toma, tire des cœurs, charme, aide à ramasser et revient apr
 
 La ville contient routes violettes, trottoirs, bâtiments et objets de rue variés. Les carrefours restent praticables. Les événements près des objets ne doivent pas interrompre la partie en boucle.
 
-La musique originale comporte un combat de 32 mesures à 150 BPM et un menu distinct de huit mesures à 104 BPM. Le motif de sept notes revient avec réponses, pont et harmonies. La progression musicale survit aux pauses; cartes et dialogues gardent la musique de combat en la baissant. Les effets synthétiques et les voix audio sont plafonnés à 32 pour préserver la mélodie. `setIntensity`, `setDucked`, `sfx('split')` et `sfx('rooster')` sont déjà reliés au jeu.
+La musique de combat originale « Égo de guerre », choisie par l’utilisateur, comporte 32 mesures à 148 BPM. Le menu distinct conserve ses huit mesures à 104 BPM. La mélodie alterne appels et réponses, avec quatre mesures de respiration instrumentale. La progression musicale survit aux pauses; cartes et dialogues gardent la musique de combat en la baissant. Les effets synthétiques et les voix audio sont plafonnés à 32 pour préserver la mélodie. `setIntensity`, `setDucked`, `sfx('split')` et `sfx('rooster')` sont déjà reliés au jeu.
 
 ## Décision graphique v1.5 à préserver
 

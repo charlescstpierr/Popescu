@@ -1,20 +1,20 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MUSIC_SCORE, CHIP_VOICES, createChipNoise, getMusicStepEvents } from '../dist/audio.js';
+import { MUSIC_SCORE, getMusicVoice, CHIP_WAVES, createChipNoise, getMusicStepEvents } from '../dist/audio.js';
 
 const frequency = note => 440 * 2 ** ((note - 69) / 12);
 const TABLE_SIZE = 2048;
 const pulseCache = new Map();
 
-function pulseTable(duty, harmonics) {
-  const key = `${duty}:${harmonics}`;
+function pulseTable(duty, harmonics, rolloff = 0) {
+  const key = `${duty}:${harmonics}:${rolloff}`;
   if (pulseCache.has(key)) return pulseCache.get(key);
   const table = new Float32Array(TABLE_SIZE);
   let peak = 0;
   for (let i = 0; i < TABLE_SIZE; i++) {
     let value = 0;
-    for (let h = 1; h <= harmonics; h++) value += 4 * Math.sin(Math.PI * h * duty) / (Math.PI * h) * Math.cos(2 * Math.PI * h * i / TABLE_SIZE);
+    for (let h = 1; h <= harmonics; h++) value += 4 * Math.sin(Math.PI * h * duty) / (Math.PI * h) * Math.exp(-rolloff * (h - 1)) * Math.cos(2 * Math.PI * h * i / TABLE_SIZE);
     table[i] = value; peak = Math.max(peak, Math.abs(value));
   }
   for (let i = 0; i < TABLE_SIZE; i++) table[i] /= peak;
@@ -48,10 +48,11 @@ export function renderMusic(scene = 'battle', bars = 16, intensity = 0.65, sampl
   for (let step = 0; step < bars * 16; step++) {
     for (const event of getMusicStepEvents(scene, step, intensity)) {
       events.push({ ...event, time: step * stepLength });
-      const preset = CHIP_VOICES[event.instrument];
+      const preset = getMusicVoice(scene, event.instrument);
       const wave = event.wave || preset.wave;
       const initialFrequency = event.note === undefined ? 0 : frequency(event.note);
-      const table = wave?.startsWith('pulse') ? pulseTable(wave === 'pulse25' ? 0.25 : 0.125, Math.min(32, Math.floor(sampleRate / 2 / initialFrequency))) : null;
+      const pulse = CHIP_WAVES[wave];
+      const table = pulse ? pulseTable(pulse.duty, Math.min(pulse.harmonics, Math.floor(sampleRate / 2 / initialFrequency)), pulse.rolloff) : null;
       const start = Math.round(step * stepLength * sampleRate);
       const length = Math.ceil(event.duration * sampleRate);
       const ratio = event.endNote === undefined ? 1 : frequency(event.endNote) / initialFrequency;
