@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-crowd-performance",
+  "version": "1.5-plus-peli-zodiaque-boss",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -14,13 +14,43 @@
     },
     {
       "path": "README.md",
-      "bytes": 6548,
-      "sha256": "6c351c72c7b764d58651f88f3da0be0ce0086126729e7e8c16cac56aea3ac3c0"
+      "bytes": 7014,
+      "sha256": "e31dea5920bd13268acab8820028f08ed048ed2eb01c6dbd4dd7abcf3dc88d95"
     },
     {
       "path": "art/requirements.txt",
       "bytes": 42,
       "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "art/source/pelican/atlas-metadata.json",
+      "bytes": 3836,
+      "sha256": "3a4270ef2de7741a9750ed396dca7061cb02349aad19ae87e9e4e83cb51f81ff"
+    },
+    {
+      "path": "art/source/pelican/imagegen-prompt.txt",
+      "bytes": 1539,
+      "sha256": "c3c61627194d0dd6f124fa75011e8665566487248c1c3e0f34eeb2149692b8cb"
+    },
+    {
+      "path": "art/source/pelican/poses-transparent-source.png",
+      "bytes": 1543149,
+      "sha256": "899dceb9b5a4122664225f1a3c6bcab4f842269e2a5ec23530e8fea9bf157a17"
+    },
+    {
+      "path": "art/source/pelican/reference-approved.png",
+      "bytes": 2640331,
+      "sha256": "1b2dccecffca74c5a35cb867d19b9f7d19011ed79f689e8f20037a6d1fd4313e"
+    },
+    {
+      "path": "art/source/pelican/register-atlas.mjs",
+      "bytes": 2193,
+      "sha256": "d1a60b4b3ac9fdd1cc12edebfb2ff336bcaf9cf1321d5b4dd9d298427e5538b5"
+    },
+    {
+      "path": "art/source/pelican/registered-preview.png",
+      "bytes": 274809,
+      "sha256": "7269144ae9d83cae72182c6c61f1a1731a6faf6aab91aecf14f2e229c75ebfea"
     },
     {
       "path": "art/source/toma/north.png",
@@ -114,8 +144,8 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 7337,
-      "sha256": "beb444986e0957ac432b61129cec895beb9b126538e045498062a10e3f750df2"
+      "bytes": 7978,
+      "sha256": "4f3790ccb9c1ab73cd222f00e17e147fd693e793abd6bbb6ea204cd4a73cc335"
     },
     {
       "path": "dist/animals.js",
@@ -124,8 +154,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 27060,
-      "sha256": "3b0f1f291062174e94f1c06e6167ad2653309827d8292697219904595b36a890"
+      "bytes": 27128,
+      "sha256": "0d2d5ea116c85237af74248634e9cdb30386642eff7aeabcd9d40e7c5cb5ca98"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -166,6 +196,11 @@
       "path": "dist/assets/orangutan-walk-v3.png",
       "bytes": 172138,
       "sha256": "205dfcab8d50fa319be06b2a70e27ed9f7ec782b43f67cdb47aa22281c8f5ed0"
+    },
+    {
+      "path": "dist/assets/pelican-poses.png",
+      "bytes": 1400510,
+      "sha256": "9d6c2c61f4b01a0a56f26cafd7c30a2b8b319734ae3ce2cf74df08fe9f05f6e8"
     },
     {
       "path": "dist/assets/portrait-blonde-ia.webp",
@@ -259,8 +294,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 43683,
-      "sha256": "742dc527db025ed796b93ce8bb33ce77dbb1177f56fe07d640251ee99038b153"
+      "bytes": 45785,
+      "sha256": "b3b8f2e302333a3339b0a7fd81906f7ddd3683cb6040c0f9cdfc9c5cb64a37d2"
     },
     {
       "path": "dist/hero-art.js",
@@ -288,19 +323,29 @@
       "sha256": "2aceb9f9576e9d617cc845868f8357fab4e8b52da8dc6ffef1546b9a22a1863e"
     },
     {
+      "path": "dist/pelican-art.js",
+      "bytes": 5975,
+      "sha256": "6f639c36b5f740895104384e1e422ae1c5aff5449c21ede7ffec5f74dc46e723"
+    },
+    {
+      "path": "dist/pelican.js",
+      "bytes": 5993,
+      "sha256": "3ef7e3626e5c0b3da4a18e5539dc05f1436666d5c57b65523cb4b37dd1c23854"
+    },
+    {
       "path": "dist/prop-geometry.js",
       "bytes": 791,
       "sha256": "7606fa21312602094101d9825d86dd1abb68dbba33e350a7c856852c6a2cef31"
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 42890,
-      "sha256": "453b5e7203b736ebcac4af94ebb1d3cd61726e5565e600ebb7a7a887fc17ff2f"
+      "bytes": 43552,
+      "sha256": "03f638aa0936486b1a7e6075dbd7da62e4e637e112701b5913a0782454c25244"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 17087,
-      "sha256": "5b01b450eea4d71b95b5f47af36f9503c286ce42b5954952adaa25c8027be662"
+      "bytes": 19409,
+      "sha256": "f52aec3c9b60d59d5225ab52bbc17586e0907a7e7861d3db4f068b67917edac3"
     },
     {
       "path": "dist/styles.css",
@@ -341,6 +386,11 @@
       "path": "docs/GRAPHICS.md",
       "bytes": 3488,
       "sha256": "f46411e68b22af3aa84c19590fb8621db9b35a24429192de19f20f20acc0e7b7"
+    },
+    {
+      "path": "docs/PELI-ZODIAQUE.md",
+      "bytes": 3279,
+      "sha256": "ae55f50aa28585b37dd3ba72ab9006c527bc79388c5a89f0b63db592482cc04c"
     },
     {
       "path": "docs/PERFORMANCE-COLLISIONS.md",
@@ -459,8 +509,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 12097431,
-      "sha256": "bb5d6abcea8688ff35a46577682c55c158a24bed0b513116eb63e955ddd1b517"
+      "bytes": 13982731,
+      "sha256": "73962859043b4307ccfa676dda9a9f20bb6e42d7653810cb3db196a4a258661b"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -469,8 +519,8 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1840,
-      "sha256": "96befc4f9755684fb0583fbd1c301a4ee924617adf8371f7f01eda0a7de49430"
+      "bytes": 1864,
+      "sha256": "40c65407649d948ee66f7d6f3924ec090b10b09838338a785dfd0f90f2084ccf"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -498,14 +548,19 @@
       "sha256": "5417993441f06697fe8fcb42d4c350b8556f6257392d180fd85b776b73de1766"
     },
     {
+      "path": "scripts/inspect-pelican.mjs",
+      "bytes": 6493,
+      "sha256": "9deac1aa2c5c785ab939e14c3e9d4c9e4780c2d51c78f99263ae378807a2622d"
+    },
+    {
       "path": "scripts/inspect-scenery.mjs",
       "bytes": 2056,
       "sha256": "4a38030c7e8466e640cce1c1bef2f2509e5b40e9ad5cc22a0d42d584a65eea2c"
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 6430,
-      "sha256": "e89db3e7f424588a516a0206a28a5d8089cb316dd73ef3ae89aaf02ea6976979"
+      "bytes": 7595,
+      "sha256": "1cb04902ccbc1b0abe0d697bd1481637fa06f21972c0a2c97bc9c32d10471425"
     },
     {
       "path": "scripts/inspect-tail-dash.mjs",
@@ -623,6 +678,16 @@
       "sha256": "893d801e1b2d5f71b47b5af931c1752ea6f0ee34892e3104a61c891963693c6b"
     },
     {
+      "path": "tests/pelican-art.test.js",
+      "bytes": 3289,
+      "sha256": "76eb6c1fc148a2713843664ffcae817007938ebb38aef3fd5dbcedd41c7f87d0"
+    },
+    {
+      "path": "tests/pelican.test.js",
+      "bytes": 8273,
+      "sha256": "adad7ab5001f45b9682dceb196fd6ad342a7390e94252a2714f831d36e44f669"
+    },
+    {
       "path": "tests/progression.test.js",
       "bytes": 2687,
       "sha256": "2ddf8d78ec0f2ba74cdc9f977f571bbf7d39d471fbb90f2331201b73e86c0ab8"
@@ -648,9 +713,14 @@
       "sha256": "ddf61af01c473de95e377cf36d102a4fb7c4de564ae7c85e338b8178520f1b2b"
     },
     {
+      "path": "tests/run-pelican.test.js",
+      "bytes": 14376,
+      "sha256": "0c88e43c36b59a94255cc87b6b84302106b3e6e44f110cc38a321c7d3527cc4b"
+    },
+    {
       "path": "tests/run-save.test.js",
       "bytes": 11178,
-      "sha256": "591c76fc343d32a4d9d6690aa5d1f954e405bcfffabbcd47ec147ccadc16a1a6"
+      "sha256": "5382874afcc311ac1fec9bd0ca63cff0eb29344805660377303890f0a310e859"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -703,6 +773,6 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "812d6ddb012dc4ec3bc26a076955fd5e518bfd6c",
+  "base_github_commit": "2fbd1ffd47196c48925e99ade58fbc9f47a42dce",
   "integration_date": "2026-11-03"
 }

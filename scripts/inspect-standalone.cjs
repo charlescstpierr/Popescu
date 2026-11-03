@@ -29,7 +29,7 @@ const document={hidden:false,getElementById(id){assert(elements.has(id),`missing
 const storage=new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,sound:false})]]);let lock=Promise.resolve();
 const sandbox={console,document,Image,OffscreenCanvas:class{constructor(w,h){return createCanvas(w,h)}},crypto:require('crypto').webcrypto,navigator:{locks:{request(_name,fn){const result=lock.then(fn);lock=result.catch(()=>{});return result;}}},window:{addEventListener(){},confirm(){return true}},ResizeObserver:class{observe(){}},localStorage:{getItem(k){return storage.get(k)??null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},matchMedia(){return{matches:false}},performance,Date,Math,URL,Uint8Array,Float32Array,HTMLInputElement:class{},requestAnimationFrame(){},setTimeout,clearTimeout,setInterval,clearInterval};
 sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbox);
-(async()=>{const q=sandbox.__qa;assert(q);await q.renderer.ready;assert(q.renderer.hero.image,'embedded hero image decoded');for(const k of ['girl','enemy','orangutan','rival_goat','rival_rooster','travestia','travestia_dash'])assert(q.renderer.actors.available(k),`embedded ${k}`);
+(async()=>{const q=sandbox.__qa;assert(q);await q.renderer.ready;assert(q.renderer.hero.image,'embedded hero image decoded');for(const k of ['girl','enemy','orangutan','rival_goat','rival_rooster','travestia','travestia_dash','pelican'])assert(q.renderer.actors.available(k),`embedded ${k}`);
  await elements.get('play').onclick();assert.equal(q.game.s.mode,'playing');q.frame(performance.now()+50);const g=q.game;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;g.s.enemies=[];
  let site;for(let x=-3;x<4;x++)for(let y=-3;y<4;y++){const p=g.world.chunk(x,y).find(p=>p.type==='discovery');if(p)site=p;}
  assert(site);g.s.x=site.x;g.s.y=site.y;g.update(.02);q.updateHud(true);assert.equal(g.s.discovery.count,1);assert.equal(elements.get('discovery-name').textContent,site.name);assert(!elements.get('discovery-status').classList.contains('hidden'));assert(elements.get('discovery-time').textContent.endsWith(' s'));
@@ -37,4 +37,16 @@ sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbo
  const live=q.game;const boss=live.spawnEnemy('travestia',live.s.x+60,live.s.y);assert(boss);live.updateEnemies(.01);assert.equal(boss.phase,'tail_windup');assert((await q.persistRun()).ok);await q.resumeSaved();assert.equal(q.game.s.enemies.find(e=>e.type==='travestia').tailTime,boss.tailTime);q.resume();q.renderer.render(q.game,10);
  let dash=q.game.s.enemies.find(e=>e.type==='travestia');Object.assign(dash,{phase:'chase',tailTime:0,tailReplyPending:false,cooldown:0,tailAttackCount:1});q.game.world.collides=()=>false;q.game.updateEnemies(.01);
  for(const phase of ['tail_dash_windup','tail_dash','tail_dash_recover']){let steps=0;while(dash.phase!==phase&&steps++<1000)q.game.updateEnemies(.01);assert.equal(dash.phase,phase);const state=JSON.stringify(dash);assert((await q.persistRun()).ok);await q.resumeSaved();dash=q.game.s.enemies.find(e=>e.type==='travestia');assert.equal(JSON.stringify(dash),state);q.resume();q.game.world.collides=()=>false;}q.renderer.render(q.game,10);
- writeScreenshotAtomic(elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});
+ // Exercise the newly bundled boss through the real app's save and portrait paths.
+ q.game.s.enemies=[];q.game.s.invulnerable=100;q.game.speechUntil=0;q.game.s.elapsed=361;
+ let peli=q.game.spawnEnemy('pelican',q.game.s.x+100,q.game.s.y);q.game.world.collides=()=>false;q.game.updateEnemies(.01);
+ assert.equal(elements.get('banter-name').textContent,'PÉLI ZODIAQUE');assert(!elements.get('banter-rival').classList.contains('hidden'));
+ for(const [count,kind]of ['hug','zodiac','tarot'].entries()){
+  Object.assign(peli,{phase:'chase',peliTime:0,cooldown:0,peliAttackCount:count});q.game.updateEnemies(.01);
+  for(const phase of [`peli_${kind}_warning`,`peli_${kind}`,'peli_recover']){
+   let steps=0;while((peli.phase!==phase||(phase==='peli_tarot'&&peli.peliTime>.8))&&steps++<1000)q.game.updateEnemies(.01);
+   assert.equal(peli.phase,phase);const state=JSON.stringify(peli);assert((await q.persistRun()).ok);await q.resumeSaved();peli=q.game.s.enemies.find(e=>e.type==='pelican');assert.equal(JSON.stringify(peli),state);q.resume();q.game.world.collides=()=>false;
+  }
+ }
+ q.renderer.render(q.game,361);
+ writeScreenshotAtomic(elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',pelicanPortraitAndAllPhasesSaveResume:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});

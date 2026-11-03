@@ -1,0 +1,284 @@
+{
+  "image": "dist/assets/pelican-poses.png",
+  "columns": 4,
+  "rows": 3,
+  "cell": [
+    362,
+    362
+  ],
+  "anchor": [
+    181,
+    332
+  ],
+  "renderSize": [
+    160,
+    160
+  ],
+  "frames": [
+    {
+      "index": 0,
+      "name": "walk0",
+      "rect": [
+        0,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        195,
+        323
+      ],
+      "translation": [
+        -14,
+        9
+      ]
+    },
+    {
+      "index": 1,
+      "name": "walk1",
+      "rect": [
+        362,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        177,
+        324
+      ],
+      "translation": [
+        4,
+        8
+      ]
+    },
+    {
+      "index": 2,
+      "name": "walk2",
+      "rect": [
+        724,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        180,
+        323
+      ],
+      "translation": [
+        1,
+        9
+      ]
+    },
+    {
+      "index": 3,
+      "name": "walk3",
+      "rect": [
+        1086,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        174,
+        323
+      ],
+      "translation": [
+        7,
+        9
+      ]
+    },
+    {
+      "index": 4,
+      "name": "idle",
+      "rect": [
+        0,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        186,
+        323
+      ],
+      "translation": [
+        -5,
+        9
+      ]
+    },
+    {
+      "index": 5,
+      "name": "hug-warning",
+      "rect": [
+        362,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        181,
+        320
+      ],
+      "translation": [
+        0,
+        12
+      ]
+    },
+    {
+      "index": 6,
+      "name": "hug",
+      "rect": [
+        724,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        185,
+        305
+      ],
+      "translation": [
+        -4,
+        27
+      ]
+    },
+    {
+      "index": 7,
+      "name": "zodiac",
+      "rect": [
+        1086,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        183,
+        320
+      ],
+      "translation": [
+        -2,
+        12
+      ]
+    },
+    {
+      "index": 8,
+      "name": "tarot-warning",
+      "rect": [
+        0,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        184,
+        306
+      ],
+      "translation": [
+        -3,
+        26
+      ]
+    },
+    {
+      "index": 9,
+      "name": "tarot",
+      "rect": [
+        362,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        173,
+        307
+      ],
+      "translation": [
+        8,
+        25
+      ]
+    },
+    {
+      "index": 10,
+      "name": "recover",
+      "rect": [
+        724,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        182,
+        309
+      ],
+      "translation": [
+        -1,
+        23
+      ]
+    },
+    {
+      "index": 11,
+      "name": "hurt",
+      "rect": [
+        1086,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceAnchor": [
+        184,
+        307
+      ],
+      "translation": [
+        -3,
+        25
+      ]
+    }
+  ],
+  "note": "Each frame is one intact whole-body painting. Registration applies whole-cell translation only."
+}
