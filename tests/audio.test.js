@@ -211,3 +211,17 @@ test('audition WAV renders the same hook events into finite, unclipped PCM', () 
   assert.equal(wav.readUInt32LE(40), rendered.samples.length * 2);
   assert.equal(wav.length, 44 + rendered.samples.length * 2);
 });
+
+test('kill cue is brief, throttled under crowds and honors mute and pause',async t=>{
+ const audio=await createAudio(t);audio.setScene('battle');await Promise.resolve();
+ const lead=[...audio._voices].find(voice=>voice.instrument==='lead'),before=audio.context.sources.length;
+ for(let i=0;i<300;i++)audio.sfx('kill');
+ const cue=audio.context.sources.slice(before);
+ assert.ok(cue.length>=2&&cue.length<=3,'a kill has a compact impact and reward tone');
+ assert.ok(Math.max(...cue.map(s=>s.stopTime))-Math.min(...cue.map(s=>s.startTime))<.2);
+ assert.ok(audio._voices.has(lead));assert.ok(audio._voices.size<=32);
+ const count=audio.context.sources.length;audio.context.advance(.1);audio.sfx('kill');assert.equal(audio.context.sources.length,count,'rapid defeats coalesce');
+ audio.context.advance(.1);audio.sfx('kill');assert.ok(audio.context.sources.length>count);
+ audio.setEnabled(false);await Promise.resolve();const muted=audio.context.sources.length;audio.sfx('kill');assert.equal(audio.context.sources.length,muted);
+ audio.setEnabled(true);audio.setScene('paused');await Promise.resolve();audio.sfx('kill');assert.equal(audio._voices.size,0);
+});

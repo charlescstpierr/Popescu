@@ -7,13 +7,14 @@ import * as persistence from '../dist/run-save.js';
 import {discoveryPrompt} from '../dist/discoveries.js';
 import * as content from '../dist/content.js';
 import * as opening from '../dist/opening.js';
+import * as evolutions from '../dist/evolutions.js';
 
 // Run the real app controller with inert browser surfaces, real engine and storage.
 function app(existingValues){
   const sounds=[];const elements=new Map(),values=existingValues||new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})]]);let queue=Promise.resolve(),confirmed=true;const events={};
   const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(key){this.state.add(key);},remove(key){this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(key,value){this[key]=value;},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({})});
   const get=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
-  const context=vm.createContext({...content,...opening,...persistence,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
+  const context=vm.createContext({...content,...opening,...persistence,...evolutions,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,get runId(){return runId}};',context);
   return {events,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
@@ -100,7 +101,49 @@ test('skip opening starts immediately and replay cannot overwrite saved progress
 });
 
 test('one-time rewards are not announced as new permanent powers',async()=>{
- const a=app();await a.click('play');for(const u of content.UPGRADES)a.game.s.upg[u.id]=u.max;
+ const a=app();await a.click('play');for(const u of content.UPGRADES)a.game.s.upg[u.id]=u.max;a.game.s.evolutions={billionaire:true,viralLove:true};
  a.game.gainXP(8);
  for(const card of a.get('upgrade-options').children){assert.equal(card.children[1].children[2].textContent,'RÉCOMPENSE IMMÉDIATE');assert.ok(card['aria-label'].endsWith('Récompense immédiate'));assert.ok(!card['aria-label'].includes('Niveau'));}
+});
+
+
+test('paid reroll commits new cards and balance together and reload keeps them',async()=>{
+ const a=app();await a.click('play');a.game.s.coins=24;a.game.gainXP(8);await a.controller.persistRun();
+ const old=a.game,oldCards=a.game.s.options.map(o=>o.id);const pending=a.click('reroll-upgrades');assert.equal(a.game,old);assert.equal(a.game.s.coins,24);
+ await pending;assert.equal(a.game.s.coins,19);assert.equal(a.game.s.coinsSpent,5);assert.equal(a.game.s.upgradeRerolls,1);assert.notDeepEqual(a.game.s.options.map(o=>o.id),oldCards);
+ const saved=JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot.game.s;assert.deepEqual(saved.options.map(o=>o.id),a.game.s.options.map(o=>o.id));assert.equal(saved.coins,19);
+ const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(b.game.s.coins,19);assert.equal(b.get('reroll-upgrades').textContent,'↻ RELANCER · 10 PIÈCES');
+});
+test('double-click reroll charges once while a failed write keeps old cards and coins',async()=>{
+ const a=app();await a.click('play');a.game.s.coins=24;a.game.gainXP(8);await a.controller.persistRun();
+ await Promise.all([a.click('reroll-upgrades'),a.click('reroll-upgrades')]);assert.equal(a.game.s.coins,19);assert.equal(a.game.s.upgradeRerolls,1);
+ const old=a.game,raw=a.values.get('toma-popescu-run-v1'),write=a.values.set;a.values.set=()=>{throw Error('quota')};await a.click('reroll-upgrades');
+ assert.equal(a.game,old);assert.equal(a.game.s.coins,19);assert.equal(a.game.s.upgradeRerolls,1);assert.equal(a.values.get('toma-popescu-run-v1'),raw);assert.equal(a.get('toast').classList.contains('hidden'),false);
+ a.values.set=write;await a.click('reroll-upgrades');assert.equal(a.game.s.coins,9);assert.equal(a.game.s.upgradeRerolls,2);assert.equal(a.get('reroll-upgrades').disabled,true);
+});
+test('pagehide during paid reroll cannot overwrite the successful purchase with old cards',async()=>{
+ const a=app();await a.click('play');a.game.s.coins=24;a.game.gainXP(8);await a.controller.persistRun();
+ const pending=a.click('reroll-upgrades');a.events.pagehide();await pending;await new Promise(r=>setTimeout(r,0));
+ assert.equal(JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot.game.s.coins,19);
+});
+
+test('an upgrade-card click during reroll cannot consume or replace the pending transaction',async()=>{
+ const a=app();await a.click('play');a.game.s.coins=24;a.game.gainXP(8);await a.controller.persistRun();
+ const old=a.game,card=a.get('upgrade-options').children[0],before=JSON.stringify(old.s.upg);const pending=a.click('reroll-upgrades');card.listeners.click();
+ assert.equal(a.game,old);assert.equal(JSON.stringify(old.s.upg),before);assert.equal(old.s.mode,'upgrade');await pending;
+ assert.equal(a.game.s.mode,'upgrade');assert.equal(a.game.s.coins,19);assert.equal(JSON.stringify(a.game.s.upg),before);
+});
+test('a conflicting tab keeps the newer save and does not charge the stale reroll',async()=>{
+ const a=app();await a.click('play');a.game.s.coins=24;a.game.gainXP(8);await a.controller.persistRun();
+ const b=app(a.values);await b.click('resume-saved');b.game.s.coins=30;await b.controller.persistRun();const raw=a.values.get('toma-popescu-run-v1');
+ await a.click('reroll-upgrades');assert.equal(a.game.s.coins,24);assert.equal(a.game.s.upgradeRerolls,0);assert.equal(a.values.get('toma-popescu-run-v1'),raw);assert.equal(a.get('reroll-upgrades').disabled,true);
+});
+
+test('disabled reroll explains when every available card is already offered',async()=>{
+ const a=app();await a.click('play');for(const u of content.UPGRADES)a.game.s.upg[u.id]=u.max;a.game.s.evolutions={billionaire:true,viralLove:true};a.game.s.coins=24;a.game.gainXP(8);
+ assert.equal(a.get('reroll-upgrades').disabled,true);assert.equal(a.get('reroll-feedback').textContent,'Aucune autre carte disponible.');
+});
+test('existing power tooltip identifies its chosen evolution without adding HUD icons',async()=>{
+ const a=app();await a.click('play');Object.assign(a.game.s.upg,{car:3,money:3});a.game.gainXP(8);a.get('upgrade-options').children[0].listeners.click();
+ const powers=a.get('powers').children;assert.equal(powers.length,2);assert.ok(powers.every(p=>p.title.includes('Lambo de milliardaire')));
 });

@@ -7,14 +7,37 @@ export const PELICAN={
  trigger:260,replyDelay:4.4,cooldown:1.8
 };
 export const PELICAN_BANTER=[
- ['Viens ici mon beau Toma, j’vas te faire ta petite carte du ciel !','FUCKK ! Ma carte du ciel, j’m’en câlisse !'],
- ['Poissons ascendant Sagittaire ? Un p’tit poisson avec une grosse flèche !','YEAHHHHHH ! C’est mon criss de charisme, ça !'],
- ['Viens ici, mon petit Poisson… montre-moi ton côté Sagittaire !','Ta yeule, pélican puant !'],
- ['Viens passer la nuit chez mononcleee, il va gâter ton petit Poisson !','FUCKK ! Garde ton bec loin de mon Poisson !'],
- ['Nos signes s’attirent, Toma. Viens vérifier ça dans mes ailes !','Recule, dents jaunes ! J’te dois pas un câlin !'],
- ['Toma, ton ego est en pleine lune. Moi, j’ai juste une petite bedaine !','Petit obèse ! C’est toi qui caches une planète là-dedans !'],
- ['Poissons ascendant Sagittaire : tu nages loin, mais tu reviens dans mes cartes !','YEAHHHH ! Mon ascendant te dit d’aller chier !']
+  [
+    "Approche, Toma. Mononcle a sorti ses cartes juste pour toi.",
+    "FUCKK ! Rentre tes cartes, j'ai pas pris rendez-vous !"
+  ],
+  [
+    "Poissons ascendant Sagittaire... Ah, t'aimes ça qu'on parle de toi !",
+    "YEAHHHHHH ! Continue ce bout-là !"
+  ],
+  [
+    "Mon petit Poisson se sauve encore ? J't'ai même pas fait ton câlin !",
+    "Ta yeule, pélican puant !"
+  ],
+  [
+    "Viens passer la nuit chez mononcleee, il va gâter ton petit Poisson !",
+    "FUCKK ! J'couche pas dans ton nid !"
+  ],
+  [
+    "J'ai tiré la carte des amoureux. Regarde qui est dessus, Toma.",
+    "Dents jaunes ! Va te brosser le bec !"
+  ],
+  [
+    "Viens sous mon aile. Y'a de la place, j'ai tassé ma bedaine.",
+    "Petit obèse ! Tu bloques toute la rue !"
+  ],
+  [
+    "Tu peux courir, mon Poisson. J'ai ton ascendant pis toute la soirée.",
+    "Va donc chier avec ton horoscope !"
+  ]
 ];
+// Old saves may still have one of these replies waiting to play.
+export const PELICAN_BANTER_LEGACY_REPLIES=["FUCKK ! Ma carte du ciel, j’m’en câlisse !","YEAHHHHHH ! C’est mon criss de charisme, ça !","Ta yeule, pélican puant !","FUCKK ! Garde ton bec loin de mon Poisson !","Recule, dents jaunes ! J’te dois pas un câlin !","Petit obèse ! C’est toi qui caches une planète là-dedans !","YEAHHHH ! Mon ascendant te dit d’aller chier !"];
 export const pelicanLocked=e=>e.type==='pelican'&&e.peliTime>0;
 export function interruptPelican(e,phase='chase'){
  if(e.type!=='pelican')return;

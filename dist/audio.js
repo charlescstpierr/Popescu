@@ -110,7 +110,7 @@ export function getMusicStepEvents(scene, step, intensity = 0.35) {
   return events;
 }
 
-const SFX_GAPS = { shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9 };
+const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9 };
 const IMPORTANT_SFX = new Set(['chest', 'level', 'victory', 'defeat', 'split', 'rooster']);
 
 export class AudioManager {
@@ -391,6 +391,13 @@ export class AudioManager {
       case 'shoot':
         this._tone(84, now, 0.055, 0.04, 'pulse125', 'sfx', 52);
         this._noise(now, 0.025, 0.018, 2300);
+        break;
+      case 'kill':
+        // A dry pixel crack, short low pop and restrained cyan-reward ping.
+        // Routine priority and the shared voice/token caps preserve the melody.
+        this._noise(now, 0.028, 0.035, 1700);
+        this._tone(60, now, 0.065, 0.06, 'triangle', 'sfx', 43);
+        this._tone(91, now + 0.045, 0.075, 0.035, 'sine', 'sfx', 96);
         break;
       case 'heart':
         this._tone(76, now, 0.12, 0.08, 'triangle', 'sfx', 88);

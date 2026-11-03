@@ -16,7 +16,7 @@ test('retained XP opens successive upgrades without another pickup and freezes t
 });
 
 test('exact XP threshold also chains consumable upgrades after all ranks are exhausted',()=>{
-  const g=new Game();for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;
+  const g=new Game();for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;g.s.evolutions={billionaire:true,viralLove:true};
   g.gainXP(27);g.chooseUpgrade('payday');
   assert.equal(g.s.mode,'upgrade');assert.equal(g.s.level,3);assert.equal(g.s.xp,0);assert.equal(g.s.coins,8);
   g.chooseUpgrade('payday');assert.equal(g.s.mode,'playing');assert.equal(g.s.coins,16);
