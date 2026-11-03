@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-travestia-tail-dash",
+  "version": "1.5-plus-travestia-interactive-opening",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -119,8 +119,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 25360,
-      "sha256": "944d0625dfa4f0faf27248d97e38ef698faf4ebb4305ee0aa0a10d8c0337e1de"
+      "bytes": 26988,
+      "sha256": "7f4b444461c9177f249be5dc1ff3620c5737bae55f50b79384234964bab14990"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -146,6 +146,11 @@
       "path": "dist/assets/gorille-femelle.webp",
       "bytes": 12310,
       "sha256": "f852d96895c96b842fcb2322aab88d66a7471e3bc40e68087014106361b144a4"
+    },
+    {
+      "path": "dist/assets/opening-approved.png",
+      "bytes": 2798954,
+      "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
     },
     {
       "path": "dist/assets/orangutan-walk-v3.png",
@@ -264,8 +269,13 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 11016,
-      "sha256": "6b46403f6515b3f953d2aa90349cda785c5d331efb88d26e74f53e6b0ddaad4c"
+      "bytes": 11445,
+      "sha256": "bfdf45f504f03abdeccdbff09f127970f6446ca4114da26f32c9c7a85c68c8f7"
+    },
+    {
+      "path": "dist/opening.js",
+      "bytes": 1772,
+      "sha256": "2aceb9f9576e9d617cc845868f8357fab4e8b52da8dc6ffef1546b9a22a1863e"
     },
     {
       "path": "dist/prop-geometry.js",
@@ -274,18 +284,18 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 42763,
-      "sha256": "a617b44c9d35065a3576b7539a5c7f8105d596653a4ba0adebcd54e1fd559a62"
+      "bytes": 42817,
+      "sha256": "8b020fc56d0a82c52ae36357d944990b537b29c038db0542b1965374d5712aea"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 16182,
-      "sha256": "1819e493e0436abc8a06cf44f67852d60bc9b6c080795891c4cb2b2bc3a07a7c"
+      "bytes": 16372,
+      "sha256": "eca2175eb074a08e40e7d68b8504a76efbfe9b786444990be53ada3b0c224a01"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 23924,
-      "sha256": "58b746c5bf35934510bc5cc76244389ab3baf6400a5d99b768d7f7b7ca9fed11"
+      "bytes": 26191,
+      "sha256": "23fd51596392085c50ceb2b520cc88e303b697391cf654ae1eccb54b7075daff"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -348,6 +358,11 @@
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
     },
     {
+      "path": "docs/QA-OPENING.md",
+      "bytes": 2536,
+      "sha256": "f4729deec1ca2d142885a06e8e482eb551c651f48012688214ec9908c616bbb8"
+    },
+    {
       "path": "docs/QA-REVIEW.md",
       "bytes": 3608,
       "sha256": "c27992ce89e31ad0c45faba872901a36005ec5b1a9dadbed32b87e3752c1a7fd"
@@ -393,19 +408,24 @@
       "sha256": "1fcc2225219e63c0d6c0e7114a939eb57fa472bc12f1d7c92a7f851924678ab3"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-03-interactive-opening.md",
+      "bytes": 2126,
+      "sha256": "ed08b14c09d396c574e56857abdcbff59960e1de373c24dab71101e55c777922"
+    },
+    {
       "path": "package.json",
       "bytes": 129,
       "sha256": "07b478a06661487d0485ce60622bb744bc2f8b4b07c53eafda3d961cf82b1216"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 5750391,
-      "sha256": "7a2940225b4da7c6d573ffd20d28d164fcd1945f3ef08da6602703ad0d8f5c74"
+      "bytes": 9511015,
+      "sha256": "65bb4eb1ecec255cf03c01b39bdc59040d4ee291930f5c8d5a26a011d3bba73b"
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1820,
-      "sha256": "3f8987a113004ea27f6d1ef545a6a58afe8a8f0fdf1b099524ba3b4795a14fef"
+      "bytes": 1830,
+      "sha256": "5c7e6869550513bc3ca957881b0e28e0cc44472904c7de2985735720956d973a"
     },
     {
       "path": "scripts/inspect-discoveries.mjs",
@@ -421,6 +441,11 @@
       "path": "scripts/inspect-hero.mjs",
       "bytes": 8929,
       "sha256": "54e877b6f14616280ab6d8cb711a28a22c4804313333551727df5e8a3f702865"
+    },
+    {
+      "path": "scripts/inspect-opening.mjs",
+      "bytes": 2236,
+      "sha256": "5417993441f06697fe8fcb42d4c350b8556f6257392d180fd85b776b73de1766"
     },
     {
       "path": "scripts/inspect-scenery.mjs",
@@ -464,8 +489,8 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 8478,
-      "sha256": "7244df9e3b598accc816d3084839410574e442d6fdbac65afdb304cece217e16"
+      "bytes": 10084,
+      "sha256": "e5a19cc1b1640464c2e890841aa932f7ce94a497452f1331be6b24bd1066b2b9"
     },
     {
       "path": "tests/audio.test.js",
@@ -511,6 +536,11 @@
       "path": "tests/hero-pose.test.js",
       "bytes": 6120,
       "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
+    },
+    {
+      "path": "tests/opening.test.js",
+      "bytes": 2117,
+      "sha256": "893d801e1b2d5f71b47b5af931c1752ea6f0ee34892e3104a61c891963693c6b"
     },
     {
       "path": "tests/progression.test.js",
@@ -568,5 +598,5 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "cae38c43553f6a5a59a7879a7e7a4120a5b700f6"
+  "base_github_commit": "0a027c92b7ba9351a2a7799c5d2c73ee9abe4ee0"
 }

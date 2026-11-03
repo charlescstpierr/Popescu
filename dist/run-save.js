@@ -81,6 +81,7 @@ function validate(snapshot){
   }
   if(e.type==='gas'&&(e.windup>0||e.gasPose>0))check(finite(e.gasDirX)&&Math.abs(e.gasDirX)<=1.001&&finite(e.gasDirY)&&Math.abs(e.gasDirY)<=1.001);
  }
+ if(s.opening!==undefined){check(object(s.opening)&&['move','shoot','done'].includes(s.opening.phase)&&finite(s.opening.startedAt)&&s.opening.startedAt>=0&&s.opening.startedAt<=s.elapsed);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
  for(const item of s.drops)check(['xp','coin','gem','heal'].includes(item.kind)&&item.value>=0);
