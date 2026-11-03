@@ -1,3 +1,4 @@
+import {propCollisionBounds} from '../dist/prop-geometry.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
@@ -7,7 +8,7 @@ function game(){const g=new Game({seed:42});for(const k of Object.keys(g.timers)
 test('gait distance records accepted world movement rather than held input or time',()=>{
   const g=game();assert.equal(g.s.walkDistance,0);g.update(.05,{x:1,y:0});assert.ok(Math.abs(g.s.walkDistance-7.2)<1e-7);g.update(.05,{x:1,y:0});assert.ok(Math.abs(g.s.walkDistance-14.4)<1e-7);assert.equal(computeHeroPose(g.s).art.frameIndex,1);
   const distance=g.s.walkDistance;g.update(.2);assert.equal(g.s.walkDistance,distance);assert.equal(g.s.walkMoving,false);
-  const building=g.world.getVisible(0,0,1200,1200).find(p=>p.type==='building'&&p.solid);g.s.x=building.x-building.w/2-13;g.s.y=building.y;g.update(.2,{x:1,y:0});assert.equal(g.s.walkDistance,distance);assert.equal(g.s.walkMoving,false);
+  const building=propCollisionBounds(g.world.getVisible(0,0,1200,1200).find(p=>p.type==='building'&&p.solid));g.s.x=building.x-building.w/2-13;g.s.y=building.y;g.update(.2,{x:1,y:0});assert.equal(g.s.walkDistance,distance);assert.equal(g.s.walkMoving,false);
 });
 
 test('gait freezes in every modal mode and starts at phase zero when the split finishes',()=>{

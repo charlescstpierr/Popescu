@@ -1,3 +1,4 @@
+import {propCollisionBounds} from '../dist/prop-geometry.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -22,7 +23,8 @@ test('world keeps origin and crossing streets walkable while buildings collide',
     assert.equal(city.collides(0,n,14), false, `vertical road at ${n}`);
     assert.equal(city.collides(n,0,14), false, `horizontal road at ${n}`);
   }
-  const solid = props.find(p=>p.type==='building' && p.solid);
+  const building = props.find(p=>p.type==='building' && p.solid);
+  const solid = building && propCollisionBounds(building);
   assert.ok(solid, 'nearby district has buildings');
   assert.equal(city.collides(solid.x,solid.y,10),true);
   assert.equal(city.collides(solid.x+solid.w/2+20,solid.y,10),false);
@@ -41,8 +43,10 @@ const overlaps = (a,b,gap=0) => Math.abs(a.x-b.x)<(a.w+b.w)/2+gap && Math.abs(a.
 
 test('districts contain varied curbside clusters rather than one repeated furniture layout', () => {
   const city = new mod.World(42),kinds = new Set(),layouts = new Set();let total=0;
-  for(let x=-2;x<=2;x++)for(let y=-2;y<=2;y++) {
-    const items=city.chunk(x,y).filter(p=>STREET_TYPES.has(p.type));
+  for(let x=-4;x<=4;x++)for(let y=-4;y<=4;y++) {
+    const props=city.chunk(x,y);
+    if(props.some(p=>p.biome==='forest'))continue; // Forest districts have their own vegetation contract.
+    const items=props.filter(p=>STREET_TYPES.has(p.type));
     assert.ok(items.length>=7, `inhabited chunk ${x},${y}: ${items.length} new objects`);
     assert.ok(items.length<=18, 'street dressing has a finite density');
     for(const p of items)kinds.add(p.type);

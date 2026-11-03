@@ -1,3 +1,4 @@
+import {propCollisionBounds} from '../dist/prop-geometry.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -198,7 +199,7 @@ function runUntilSplit(g,limit=19){for(let t=0;t<limit&&!(g.s.stunt?.active);t+=
 
 test('split stunts require actual sustained running and never start while idle or pushing a wall', () => {
   const idle=quietRun(game());assert.ok(idle.s.stunt);tick(idle,25);assert.equal(idle.s.stunt.count,0);
-  const blocked=quietRun(game());const p=blocked.world.getVisible(0,0,1200,1200).find(p=>p.type==='building'&&p.solid);blocked.s.x=p.x-p.w/2-13;blocked.s.y=p.y;tick(blocked,22,{x:1,y:0});assert.equal(blocked.s.stunt.count,0);
+  const blocked=quietRun(game());const p=propCollisionBounds(blocked.world.getVisible(0,0,1200,1200).find(p=>p.type==='building'&&p.solid));blocked.s.x=p.x-p.w/2-13;blocked.s.y=p.y;tick(blocked,22,{x:1,y:0});assert.equal(blocked.s.stunt.count,0);
   const running=quietRun(game());const stunt=runUntilSplit(running);assert.equal(stunt.kind,'split');assert.equal(stunt.active,true);assert.ok(running.s.elapsed>=12&&running.s.elapsed<=18.1);assert.equal(stunt.count,1);
 });
 
