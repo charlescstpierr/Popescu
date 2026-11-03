@@ -1,0 +1,290 @@
+{
+  "image": "dist/assets/travestia-poses.png",
+  "width": 1448,
+  "height": 1086,
+  "columns": 4,
+  "rows": 3,
+  "cell": [
+    362,
+    362
+  ],
+  "anchor": [
+    181,
+    332
+  ],
+  "renderSize": [
+    144,
+    144
+  ],
+  "renderAnchor": [
+    72,
+    132
+  ],
+  "note": "Every cell is a single complete pose. Original art is unchanged except imagegen background extraction and whole-cell vertical translation. Render anchor differs from exact scaled anchor by less than 0.07 px.",
+  "frames": [
+    {
+      "index": 0,
+      "name": "run0",
+      "rect": [
+        0,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        322
+      ],
+      "translation": [
+        0,
+        10
+      ]
+    },
+    {
+      "index": 1,
+      "name": "run1",
+      "rect": [
+        362,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        321
+      ],
+      "translation": [
+        0,
+        11
+      ]
+    },
+    {
+      "index": 2,
+      "name": "run2",
+      "rect": [
+        724,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        321
+      ],
+      "translation": [
+        0,
+        11
+      ]
+    },
+    {
+      "index": 3,
+      "name": "run3",
+      "rect": [
+        1086,
+        0,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        318
+      ],
+      "translation": [
+        0,
+        14
+      ]
+    },
+    {
+      "index": 4,
+      "name": "idle",
+      "rect": [
+        0,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        312
+      ],
+      "translation": [
+        0,
+        20
+      ]
+    },
+    {
+      "index": 5,
+      "name": "turn",
+      "rect": [
+        362,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        311
+      ],
+      "translation": [
+        0,
+        21
+      ]
+    },
+    {
+      "index": 6,
+      "name": "windup",
+      "rect": [
+        724,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        311
+      ],
+      "translation": [
+        0,
+        21
+      ]
+    },
+    {
+      "index": 7,
+      "name": "spin0",
+      "rect": [
+        1086,
+        362,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        311
+      ],
+      "translation": [
+        0,
+        21
+      ]
+    },
+    {
+      "index": 8,
+      "name": "spin1",
+      "rect": [
+        0,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        315
+      ],
+      "translation": [
+        0,
+        17
+      ]
+    },
+    {
+      "index": 9,
+      "name": "spin2",
+      "rect": [
+        362,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        318
+      ],
+      "translation": [
+        0,
+        14
+      ]
+    },
+    {
+      "index": 10,
+      "name": "recover",
+      "rect": [
+        724,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        316
+      ],
+      "translation": [
+        0,
+        16
+      ]
+    },
+    {
+      "index": 11,
+      "name": "hurt",
+      "rect": [
+        1086,
+        724,
+        362,
+        362
+      ],
+      "anchor": [
+        181,
+        332
+      ],
+      "sourceFoot": [
+        181,
+        318
+      ],
+      "translation": [
+        0,
+        14
+      ]
+    }
+  ]
+}

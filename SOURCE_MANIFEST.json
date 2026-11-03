@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-forests-discoveries-resume",
+  "version": "1.5-plus-travestia-tail-dash",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -53,14 +53,74 @@
       "sha256": "6ac892360c137083eab071559a3ab37c95d04f63e304a5cb96a3ac2d66f18692"
     },
     {
+      "path": "art/source/travestia/atlas-metadata.json",
+      "bytes": 3982,
+      "sha256": "1f06683c4800564fbcfcc3d7bbf1ea60d9f58ae1e027cd57a96593e1e37c9d3b"
+    },
+    {
+      "path": "art/source/travestia/imagegen-prompt.txt",
+      "bytes": 1076,
+      "sha256": "cedef53175e21eaba846196a51536e79a3e578ff18d4e78c20de8570f7cb0e17"
+    },
+    {
+      "path": "art/source/travestia/poses-transparent-source.png",
+      "bytes": 1778625,
+      "sha256": "084a13fd7c4212ad9950a63329cf674c988ef3b0c4aeb5711c02fb2def6133d9"
+    },
+    {
+      "path": "art/source/travestia/reference-approved.png",
+      "bytes": 2030721,
+      "sha256": "30fc39be00ea172fb5ca296edb6e6ccf3de1ebd6723684078a0037bb806c3471"
+    },
+    {
+      "path": "art/source/travestia/register-atlas.mjs",
+      "bytes": 2423,
+      "sha256": "d49160e0232344c8d2421e058b240cf39d7d1ddc81c6f8d4ff6535c77df4a081"
+    },
+    {
+      "path": "art/source/travestia-dash/README.md",
+      "bytes": 1559,
+      "sha256": "2547a9a6b66b2a7cea87dba750631e9b5049940ac3bbc1c5763ce345d28ff1ef"
+    },
+    {
+      "path": "art/source/travestia-dash/atlas-metadata.json",
+      "bytes": 8265,
+      "sha256": "1291ca4ad882f957f7b2fceaf7be661d527cc3897e2c09bf2156019dc1c058d9"
+    },
+    {
+      "path": "art/source/travestia-dash/identity-approved.png",
+      "bytes": 2030721,
+      "sha256": "30fc39be00ea172fb5ca296edb6e6ccf3de1ebd6723684078a0037bb806c3471"
+    },
+    {
+      "path": "art/source/travestia-dash/imagegen-prompt.txt",
+      "bytes": 2956,
+      "sha256": "f80f799d2f6439d9470ea254043d7b2a60e58dacbfe947583a707ca83832c1a3"
+    },
+    {
+      "path": "art/source/travestia-dash/poses-transparent-source.png",
+      "bytes": 1375350,
+      "sha256": "e45cfafd6227178f24b3d6de64e6ae57a2edc91d80be3390e0a1c37e1a118be3"
+    },
+    {
+      "path": "art/source/travestia-dash/reference-approved.png",
+      "bytes": 2232968,
+      "sha256": "7921277d12afd1791adc99cb99385e7ea197cf2d959826caee0dea0d14974d9b"
+    },
+    {
+      "path": "art/source/travestia-dash/register-atlas.mjs",
+      "bytes": 4865,
+      "sha256": "2e1c52f3b3ba3090eb93a8a751a5ce48c584a8f90217ca66407ad7268df84e24"
+    },
+    {
       "path": "dist/actor-art.js",
-      "bytes": 5839,
-      "sha256": "8bb152682c7fde49ec43da079ca44ba3d238b01099c0ed69f761c9cf9c3c1737"
+      "bytes": 6749,
+      "sha256": "763df655634777a9e032c5d0b6db02a867f6bf902e9f0566fcbb4c1c47836437"
     },
     {
       "path": "dist/app.js",
-      "bytes": 25154,
-      "sha256": "f91f638ccae1aefcee58fa5382975323261f4d90874f5be96ab1e581920be520"
+      "bytes": 25360,
+      "sha256": "944d0625dfa4f0faf27248d97e38ef698faf4ebb4305ee0aa0a10d8c0337e1de"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -138,6 +198,16 @@
       "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
     },
     {
+      "path": "dist/assets/travestia-dash.png",
+      "bytes": 184441,
+      "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
+    },
+    {
+      "path": "dist/assets/travestia-poses.png",
+      "bytes": 1623797,
+      "sha256": "4ac27a4c475a56b61004044ac4ed05d92a164edd6763f960139a43308c218eea"
+    },
+    {
       "path": "dist/audio.js",
       "bytes": 21588,
       "sha256": "faf46d2e47da1c0644aa29d9baf0133b08821bbda840c0ca3dd8af41d2d6b5b0"
@@ -174,8 +244,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 36863,
-      "sha256": "347f8d6041ac2f02c1e3308d9bf97d531b84db08799cabe9c3a965a67226ada5"
+      "bytes": 37775,
+      "sha256": "d4f96c3f8aa8e72591ff75ed19391411da667d8c21a5a9b793805d3623060ec6"
     },
     {
       "path": "dist/hero-art.js",
@@ -204,18 +274,28 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 40166,
-      "sha256": "97b870b62f30dd90d0086d58b557fdd9e90768c6a7b69c8faa2fa7b0cbfe85e2"
+      "bytes": 42763,
+      "sha256": "a617b44c9d35065a3576b7539a5c7f8105d596653a4ba0adebcd54e1fd559a62"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 13461,
-      "sha256": "f7dd989c2b53ef00d9dbffed56cd9df6745b008b2fa669669de902ff9d11a44f"
+      "bytes": 16182,
+      "sha256": "1819e493e0436abc8a06cf44f67852d60bc9b6c080795891c4cb2b2bc3a07a7c"
     },
     {
       "path": "dist/styles.css",
       "bytes": 23924,
       "sha256": "58b746c5bf35934510bc5cc76244389ab3baf6400a5d99b768d7f7b7ca9fed11"
+    },
+    {
+      "path": "dist/travestia-dash.js",
+      "bytes": 2116,
+      "sha256": "94bd139e90bbc0de58bc26f4486fe5adbd066705966675896e54d1a86ddfad52"
+    },
+    {
+      "path": "dist/travestia.js",
+      "bytes": 3146,
+      "sha256": "33126f32641ed1cdc1c6f0ab0c33bd455943b354d7fc592f33831618aea5fe07"
     },
     {
       "path": "dist/world.js",
@@ -273,6 +353,16 @@
       "sha256": "c27992ce89e31ad0c45faba872901a36005ec5b1a9dadbed32b87e3752c1a7fd"
     },
     {
+      "path": "docs/QA-TAIL-DASH.md",
+      "bytes": 2723,
+      "sha256": "9e60352f1a1f587208412888eccc30942f1edab0ee1df14da2ab50d2059e4ba3"
+    },
+    {
+      "path": "docs/QA-TRAVESTIA.md",
+      "bytes": 2913,
+      "sha256": "d57c5323cb2ece2a02eadccee52c5176ccc3e21990521ebbd960fb2c3b5c7af8"
+    },
+    {
       "path": "docs/QA-V1.3.md",
       "bytes": 3077,
       "sha256": "4a6fcffbde204e7e1bda18980f9e7b64dea84e8c45959eb6751db6a5d3a75bac"
@@ -294,8 +384,13 @@
     },
     {
       "path": "docs/RUN-SAVE-INTEGRATION.md",
-      "bytes": 4263,
-      "sha256": "7e9afec917ad9933bfb71ab1dd4dad98b9e61e727bc9b3eda175a7f0769a021e"
+      "bytes": 5375,
+      "sha256": "f4b2f4357bdc022aff2954e3b6b7b90fe0c9dd2493b4a28461cb23fd74880d8e"
+    },
+    {
+      "path": "docs/TRAVESTIA-SAVE-CONTRACT.md",
+      "bytes": 2557,
+      "sha256": "1fcc2225219e63c0d6c0e7114a939eb57fa472bc12f1d7c92a7f851924678ab3"
     },
     {
       "path": "package.json",
@@ -304,13 +399,13 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 3326628,
-      "sha256": "60cbeccdafd2fb0954f91491ed7c44787b8b4e2f6ff9e99625fd9481fc28e7db"
+      "bytes": 5750391,
+      "sha256": "7a2940225b4da7c6d573ffd20d28d164fcd1945f3ef08da6602703ad0d8f5c74"
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1791,
-      "sha256": "50dad05ba861b0695999fcc17284b21c13f0e991eaa8d462432690aa2edb5ba4"
+      "bytes": 1820,
+      "sha256": "3f8987a113004ea27f6d1ef545a6a58afe8a8f0fdf1b099524ba3b4795a14fef"
     },
     {
       "path": "scripts/inspect-discoveries.mjs",
@@ -334,8 +429,18 @@
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 4434,
-      "sha256": "c29f282b1e5dd7742f2851a94de4d4c4ee02bce6591ff9f0ffef072e9103e927"
+      "bytes": 5521,
+      "sha256": "0f28c44556d121bd7d546939ab5cf173a09939341e7d5e18a01d8ca52bdd39a8"
+    },
+    {
+      "path": "scripts/inspect-tail-dash.mjs",
+      "bytes": 3024,
+      "sha256": "bc33c947e3a663026175978c924f9533c8b1f9741fb5fd7901c3589e2118b03e"
+    },
+    {
+      "path": "scripts/inspect-travestia.mjs",
+      "bytes": 2625,
+      "sha256": "0f1600d4271a87d9615a43d39f75326140ff1d339520b4de70b6d5cabd367a7a"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -433,9 +538,29 @@
       "sha256": "0ce2c0d405d3193dabce8677e27994f3a11dfc9be887f97fca2d262bd8a17da6"
     },
     {
+      "path": "tests/run-travestia.test.js",
+      "bytes": 4640,
+      "sha256": "d4b4faae5aa50b271991d78afff06971b378cc992f433e4057d5ab57ab5012d2"
+    },
+    {
       "path": "tests/scenery-art.test.js",
       "bytes": 1916,
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
+    },
+    {
+      "path": "tests/travestia-art.test.js",
+      "bytes": 1201,
+      "sha256": "f60630880156a7e4ba56b5e883009c2afef0d8de0fd67b7548cb28b27e2a6835"
+    },
+    {
+      "path": "tests/travestia-dash.test.js",
+      "bytes": 3938,
+      "sha256": "34914e4bcb2aa31f78b1c8b58974c65c8fd8f0828f37540b364595a24bd7f977"
+    },
+    {
+      "path": "tests/travestia.test.js",
+      "bytes": 4138,
+      "sha256": "e67e2a88805fa2b053d5399255f488b0bbc431c5e1b30ba16f4dd175e101f8f4"
     },
     {
       "path": "tests/world.test.js",
@@ -443,5 +568,5 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "cc38f2a1e6ec7bf749c09dd1cbb55d54578ea789"
+  "base_github_commit": "cae38c43553f6a5a59a7879a7e7a4120a5b700f6"
 }
