@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-combined-powers-xp-pursuit-alerts-hardening",
+  "version": "1.5-plus-boss-trophies",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -179,8 +179,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 29821,
-      "sha256": "c493b4f3937b9223314517c37b3dddfd36b7cc5aaebbc5f26b6a86b3ef481ee6"
+      "bytes": 34301,
+      "sha256": "5177565cbd01b95b77a89fca0ff67954785956e96a35e20d724452bae64b5df1"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -298,6 +298,11 @@
       "sha256": "cc51f069a47e9c7f3743620247e2dedb2e7a367f5bfffb5d7a48511f38d16451"
     },
     {
+      "path": "dist/boss-trophies.js",
+      "bytes": 4232,
+      "sha256": "2ec1d61cd813e0f826d4ab0e3254387a8b3d66dc46d94e10b1769f6416a4b701"
+    },
+    {
       "path": "dist/city-art.js",
       "bytes": 52544,
       "sha256": "cafb0fbaf3ebeb0271e85a88c48dc042231ef31179eab3194c4c3e5649e16ae8"
@@ -329,8 +334,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 55767,
-      "sha256": "c83056bd569afb8780b063482672ccc7f9466521f462ffe05e0f753ac06f9376"
+      "bytes": 56947,
+      "sha256": "3070072929f0ce051bfd233c6262b4ae09dea01c0a367235e7903c1d6b33b408"
     },
     {
       "path": "dist/evolutions.js",
@@ -354,8 +359,8 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 11914,
-      "sha256": "ace5bf29b4f032862c0d6e2e59a986f5a23c50cd1c1c3f77d541f378c89cbf4f"
+      "bytes": 12909,
+      "sha256": "4c3d5ffe09bf1a74c858b50146a0af785dc7f307710457f295797d8ee493dc6f"
     },
     {
       "path": "dist/opening.js",
@@ -384,18 +389,18 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 51525,
-      "sha256": "5aaca9d84298fbda6ce73abd95c76650133ad49ef5c72ef911d22f9d7a108001"
+      "bytes": 51949,
+      "sha256": "f20a1dfba1716fc89a0016b8de9b8ed39688ea6fabeac4a30783a2913be9b33e"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 22972,
-      "sha256": "069535ecb2b097e1785c1dfa12fcc3f3e8b971fe879570892f1c79a251a011bd"
+      "bytes": 26843,
+      "sha256": "5160a3a3406311258f074e45f70a0b1692e0ccefa336ffb69b0db4ff8f7fe092"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 27587,
-      "sha256": "9bf76db9a2ecd5233bae49f7fb25d2946dcde858b19be5c3667fe0f7e2228621"
+      "bytes": 31758,
+      "sha256": "a975712d1fec2464b8bb7189c0a312efe6faff0001ad2b7fcee4f45f6ec8d075"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -406,6 +411,16 @@
       "path": "dist/travestia.js",
       "bytes": 3378,
       "sha256": "0ccc505adc7a1d52dbab2e14b41012a9cba5fbad3c7cd79f6ac93b00db3f6edd"
+    },
+    {
+      "path": "dist/trophy-art.js",
+      "bytes": 3904,
+      "sha256": "e824bc55ec5f0e9537ec85d4591c5667fca7cf4be52fee0f69645f32cf050569"
+    },
+    {
+      "path": "dist/trophy-effects.js",
+      "bytes": 6064,
+      "sha256": "8d863c8b4e729ade5393e3bf62f22f6225266a9cdc37604a9ea3880d9d603778"
     },
     {
       "path": "dist/world.js",
@@ -421,6 +436,11 @@
       "path": "docs/BOSS-RESISTANCE.md",
       "bytes": 7041,
       "sha256": "bdd73810af2e1ef2aa140221defbb778f576436215af37bf778468e3d7e32ca4"
+    },
+    {
+      "path": "docs/BOSS-TROPHIES-DESIGN.md",
+      "bytes": 8184,
+      "sha256": "2864518e8f3aafe5ae82b0bd904dd9cf1b9e21d35e31c452e0c8a377c877afc3"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -486,6 +506,11 @@
       "path": "docs/QA-BOSS-PURSUIT.md",
       "bytes": 6689,
       "sha256": "dacbcca4c82f54ccd98cc63bab3d692761956f9feb822795281ecd619aa41635"
+    },
+    {
+      "path": "docs/QA-BOSS-TROPHIES.md",
+      "bytes": 6603,
+      "sha256": "368dff3f5995195e33aa3dca18167f8e70f4535b90948142d7cffd6e2cfc7ae9"
     },
     {
       "path": "docs/QA-COMBINED-NOV3.md",
@@ -608,6 +633,11 @@
       "sha256": "e22f949142d8023e2155afa1caa751fa06d5b19fd25bd8a7fe658bb0c9f5ca39"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-03-boss-trophies.md",
+      "bytes": 4156,
+      "sha256": "e802b0a9a2008012090cabf7ca966711c93795bcf4c6928aa861e138e268ccc6"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-03-five-power-animations.md",
       "bytes": 2311,
       "sha256": "eaf23b68fa68aedf66c51a71205523f3281454ab31141861fd1dae82ea1115e5"
@@ -624,8 +654,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14040539,
-      "sha256": "c5f199720f0a427f94aaf857c69009e60ad7770d058b99cef2495e2d862ec172"
+      "bytes": 14070202,
+      "sha256": "bc49bff3b1c3b562d1fe972f1f55b4d8b2adddf12f0383ff7a57cfe636e085d5"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -639,8 +669,8 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 1913,
-      "sha256": "461b266c5545a7888acd94c374095355e1e8e18c19885fb5a20e8a25a6495265"
+      "bytes": 1959,
+      "sha256": "d0cf230936c0a411473f421d0dd8ab2659fa089c81d8707714e6972f8aa619cd"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -718,6 +748,16 @@
       "sha256": "0f1600d4271a87d9615a43d39f75326140ff1d339520b4de70b6d5cabd367a7a"
     },
     {
+      "path": "scripts/inspect-trophies.mjs",
+      "bytes": 7083,
+      "sha256": "9551940f2fb281623cf53d260f28a77f4ba4299b1efd9c271214bf1b2c67ff59"
+    },
+    {
+      "path": "scripts/inspect-trophy-art.mjs",
+      "bytes": 2251,
+      "sha256": "24c990cc5186843f7134b288537edc24ee3e3afc4da475f607101db222d72885"
+    },
+    {
       "path": "scripts/pack-actors.py",
       "bytes": 2396,
       "sha256": "1c037ef3e8a5dbeacdc6adef4165f5f5fb02a1d6a65d28eaff2b070fb6a026a2"
@@ -783,6 +823,16 @@
       "sha256": "7793bbd7e999ddf5dafcbf43b9b9cca4ab95be6a9f0062fe0e6c44c89c4a4dbd"
     },
     {
+      "path": "scripts/verify-trophy-balance.mjs",
+      "bytes": 8625,
+      "sha256": "a6d05711177ad43330fd0854ca8bfcd28ae20b1498bc9308f5c7990bedc8b4a6"
+    },
+    {
+      "path": "scripts/verify-trophy-soak.mjs",
+      "bytes": 2366,
+      "sha256": "4a6af003ca339ddc155658451677b2c1074e51c14db34cfc5f08d91aec531660"
+    },
+    {
       "path": "tests/animals.test.js",
       "bytes": 4034,
       "sha256": "a697ee4a81dc1f6117212c29c092f9da464591eba1c3939be33432323fc414b9"
@@ -804,18 +854,18 @@
     },
     {
       "path": "tests/boss-arrivals.test.js",
-      "bytes": 3375,
-      "sha256": "23da4d5caea7b904b385cead241cd96bd739f06c42d88bd5011bbf12d476beaf"
+      "bytes": 3464,
+      "sha256": "24d4d02d2355da0c7da6d1207101fcf97b0cdc4d53dc6aafa06881394e38eff3"
     },
     {
       "path": "tests/boss-director.test.js",
       "bytes": 11885,
-      "sha256": "a8155f779e933a5e79c03a6932aaf5e01d7d2dfa87680b4597532a6e0ae3bdfa"
+      "sha256": "d69523e5eed9409871b9b44637b72ddf6d2e12425817e8b6529c14f2999921e8"
     },
     {
       "path": "tests/boss-durability.test.js",
       "bytes": 4770,
-      "sha256": "217dfd391fdeaea72a3503b4f73e1f87123910985f5b190c00da9b365fb9d6b2"
+      "sha256": "fbbf2f8dbc3e8f06ab14921655ac8ecafd9b99a01e3acfa3ca4e1d94ee610e16"
     },
     {
       "path": "tests/boss-hardening.test.js",
@@ -826,6 +876,11 @@
       "path": "tests/boss-pursuit.test.js",
       "bytes": 6563,
       "sha256": "d2412d470ba6b4c1229aa0c0918b2845c8296ca2456a71a3255f6f9c6429ec53"
+    },
+    {
+      "path": "tests/boss-trophies.test.js",
+      "bytes": 4987,
+      "sha256": "96345aa13250a9d7a2cbbcdd85d4229765507febd0fe659927540b2dc12d9e7d"
     },
     {
       "path": "tests/combined-candidate.test.js",
@@ -881,6 +936,11 @@
       "path": "tests/fixtures/runstore-v7-xp.json",
       "bytes": 1921,
       "sha256": "fd128bb994fe1f81f157da970f0b5e777a3d67467d08ad27903c63b1a970cb62"
+    },
+    {
+      "path": "tests/fixtures/runstore-v8.json",
+      "bytes": 2313,
+      "sha256": "b87952f643c10cb64718c5a53829783e0cff912753c6c6235cd6c2d410426ea4"
     },
     {
       "path": "tests/helpers/boss-combat.js",
@@ -985,12 +1045,12 @@
     {
       "path": "tests/run-pelican.test.js",
       "bytes": 14534,
-      "sha256": "d74c71f7b6c415166e207f4960a099498929cdb0941625d9d895ee00746b1022"
+      "sha256": "6ed87814cce65c6abf321f328507c40785c0de099231b067d4e67e8bd8d0d8ba"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11178,
-      "sha256": "eab00457bfda72b8e2f5d16b63122a775c46ab5c9a2d8982856410494b0348e0"
+      "sha256": "85ef59aa3828eb6e680f852c4574780b5c86ea7650326e4c621debd7088d6d8f"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -1033,6 +1093,31 @@
       "sha256": "d160e1764a9b086178ba822c691ae08278103cd54507e3069e2207fb458705e5"
     },
     {
+      "path": "tests/trophy-art.test.js",
+      "bytes": 1830,
+      "sha256": "b8dd033c9f62b85be8209985b48d4f4bba386654315d44767a7c7e81fe58e183"
+    },
+    {
+      "path": "tests/trophy-effects.test.js",
+      "bytes": 9640,
+      "sha256": "26d851cbe40d3c632da7370578a7ed003b1f4242cd0acad872a509c4ea9040e0"
+    },
+    {
+      "path": "tests/trophy-engine.test.js",
+      "bytes": 3007,
+      "sha256": "b69adbcbee09593956887abba421aca95bea8e3cf477e379e491c9ac8716247d"
+    },
+    {
+      "path": "tests/trophy-save.test.js",
+      "bytes": 7872,
+      "sha256": "fef3e9c2c7fffd533f991c9b974e645a78db431bf0306310da0340c69b7ab56c"
+    },
+    {
+      "path": "tests/trophy-ui.test.js",
+      "bytes": 6274,
+      "sha256": "873664a2dd20e6c58da2908095b3b808e39f3234874aedd9b721fbe3e4d12901"
+    },
+    {
       "path": "tests/upgrade-rewards.test.js",
       "bytes": 1677,
       "sha256": "4f113fc5c268fa3c5c847c3bfc684215ec8a51d27eee1c0696362ae0212237d3"
@@ -1058,6 +1143,6 @@
       "sha256": "cccef205f93a7e2a3d061f2ed36c2dc80b4c6b9195b681e4fe02f49601ba5a54"
     }
   ],
-  "base_github_commit": "b89ebc0495f4f77730445757ffbe66f841f8caa5",
+  "base_github_commit": "b154dd78cd0b423a277ba3297d12e3d04a256686",
   "integration_date": "2026-11-03"
 }

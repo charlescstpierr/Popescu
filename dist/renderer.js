@@ -1,3 +1,5 @@
+import {drawTrophyIcon,drawTrophyGround,drawTrophyForeground} from './trophy-art.js';
+import {BOSS_TROPHIES,chestTrophyEligible} from './boss-trophies.js';
 import {drawAnimalWarning} from './animals.js';
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
 import {propDepth} from './prop-geometry.js';
@@ -688,6 +690,7 @@ this._shadow(x,y+7,40,8);
     // Old checkpoints can contain legacy power rings. Do not replay them as
     // travelling attacks: truth damages at once and airplane is defensive.
     for(const p of s.pulses||[]){if(p.color==='#c9a8ff'||p.color==='#8adce6')continue;const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    drawTrophyGround(ctx,s,this.reducedEffects);
     this.powers.drawGround(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.airplane?.active) {
       const a=s.airplane,r=a.r||95,x=a.x??s.x,y=a.y??s.y;
@@ -714,7 +717,7 @@ this._shadow(x,y+7,40,8);
     for(const item of items){
       if(item.kind==='defeat')this._defeatImpact(item.data,s);
       else if(item.kind==='prop')this._prop(item.data);
-      else if(item.kind==='chest')this._chest(item.data);
+      else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {
         const a=item.data,moving=item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
@@ -731,6 +734,7 @@ this._shadow(x,y+7,40,8);
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
+    drawTrophyForeground(ctx,s,this.reducedEffects);
     this._shield(s);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.

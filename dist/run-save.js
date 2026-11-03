@@ -1,3 +1,4 @@
+import {createTrophyState,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
 import {compactDrops} from './drops.js';
 import {BOSS_TYPES,BOSS_SCHEDULE,createBossDirector} from './boss-director.js';
@@ -9,11 +10,11 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=8;
+const VERSION=9;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
-const MODES=['playing','paused','upgrade','dialogue','victory','gameover'];
+const MODES=['playing','paused','upgrade','dialogue','trophy','victory','gameover'];
 const ENEMIES=[...Object.keys(ANIMALS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const REQUIRED={enemies:'id x y hp maxhp r speed windup hitFlash charmed cooldown attack summon',shots:'x y vx vy life damage r pierce',drops:'x y life value',clouds:'x y vx vy r life',particles:'x y vx vy life maxlife',vehicles:'x y vx vy life damage',pulses:'x y r maxr life maxlife',chests:'id x y openedAt',shockwaves:'x y r prevR maxR life maxlife width damage ownerId'};
 function check(ok){if(!ok)throw new Error('Invalid run save');}
@@ -32,6 +33,50 @@ function physics(v){
  }
 }
 function copy(v){return JSON.parse(JSON.stringify(v,(_k,x)=>{if(typeof x==='number')check(finite(x));return x instanceof Set||x instanceof Map?[...x]:x;}));}
+const TROPHY_PAIRS={pelican:['tarot','ascendant'],travestia:['panache','star'],matriarch:['fanclub','badge']};
+const TROPHY_CLOCKS={tarot:8,ascendant:12,panache:10,star:8,fanclub:18};
+const TROPHY_GORILLAS=['normal','sprinter','gas','tank','jealous','explosive'];
+function validateTrophies(s,nextId){
+ const t=s.trophies;check(object(t)&&object(t.chosen)&&object(t.cooldowns));
+ const chosen=Object.entries(t.chosen);check(chosen.length<=3);
+ for(const [type,id] of chosen)check(Object.hasOwn(TROPHY_PAIRS,type)&&TROPHY_PAIRS[type].includes(id));
+ const owns=id=>Object.values(t.chosen).includes(id);
+ const bounded=(n,max)=>finite(n)&&n>=0&&n<=max;
+ const validId=id=>integer(id,1)&&id<nextId;
+ for(const [id,max] of Object.entries(TROPHY_CLOCKS))check(bounded(t.cooldowns[id],max)&&(owns(id)||t.cooldowns[id]===0));
+ check(Object.keys(t.cooldowns).length===Object.keys(TROPHY_CLOCKS).length);
+ check(bounded(t.starLife,2)&&(owns('star')||t.starLife===0));
+ const chestIds=new Set(),bossIds=new Set();
+ for(const c of s.chests){
+  check(validId(c.id)&&!chestIds.has(c.id));chestIds.add(c.id);
+  if(c.bossType!==undefined||c.bossId!==undefined){
+   check(Object.hasOwn(TROPHY_PAIRS,c.bossType)&&validId(c.bossId)&&c.bossId<c.id&&!bossIds.has(c.bossId));bossIds.add(c.bossId);
+   const defeated=s.enemies.find(e=>e.id===c.bossId);
+   if(defeated)check(defeated.type===c.bossType&&defeated.dead===true&&defeated.rewarded===true&&defeated.hp<=0);
+  }
+  if(c.open)check(c.openedAt>=0&&c.openedAt<=s.elapsed);
+ }
+ check(Array.isArray(t.pending)&&t.pending.length<=3);const pendingTypes=new Set(),pendingChests=new Set();
+ for(const p of t.pending){
+  check(object(p)&&Object.hasOwn(TROPHY_PAIRS,p.bossType)&&!Object.hasOwn(t.chosen,p.bossType)&&!pendingTypes.has(p.bossType)&&!pendingChests.has(p.chestId)&&validId(p.chestId)&&validId(p.bossId));
+  const chest=s.chests.find(c=>c.id===p.chestId);check(chest&&chest.open===true&&chest.bossType===p.bossType&&chest.bossId===p.bossId);
+  pendingTypes.add(p.bossType);pendingChests.add(p.chestId);
+ }
+ if(s.mode==='trophy')check(t.pending.length>0&&s.hp>0&&(s.endless||s.elapsed<1200));
+ const direction=a=>finite(a.dx)&&finite(a.dy)&&Math.abs(Math.hypot(a.dx,a.dy)-1)<1e-6;
+ const position=a=>finite(a.x)&&finite(a.y)&&Math.abs(a.x)<=1e8&&Math.abs(a.y)<=1e8;
+ const hits=(ids,max)=>Array.isArray(ids)&&ids.length<=max&&new Set(ids).size===ids.length&&ids.every(validId);
+ if(t.tarot!==null){
+  const a=t.tarot;check(owns('tarot')&&object(a)&&position(a)&&direction(a)&&bounded(a.age,1.6)&&finite(a.originX)&&finite(a.originY)&&Math.abs(a.originX)<=1e8&&Math.abs(a.originY)<=1e8&&hits(a.hitOut,3)&&hits(a.hitBack,3)&&new Set([...a.hitOut,...a.hitBack]).size<=3);
+  if(a.age<.8)check(a.hitBack.length===0);
+  const distance=220*(a.age<=.8?a.age:1.6-a.age)/.8;
+  check(Math.abs(a.x-a.originX-a.dx*distance)<1e-5&&Math.abs(a.y-a.originY-a.dy*distance)<1e-5);
+ }
+ if(t.panache!==null){const a=t.panache;check(owns('panache')&&object(a)&&position(a)&&direction(a)&&bounded(a.life,.35)&&hits(a.hitIds,300));}
+ if(t.feedback!==null){const f=t.feedback;check(object(f)&&owns(f.id)&&bounded(f.life,.8)&&bounded(f.amount,20));}
+ check(s.enemies.filter(e=>e.trophyCharmLife>0).length<=2);
+ for(const e of s.enemies)if(e.trophyCharmLife!==undefined){check(bounded(e.trophyCharmLife,2.5));if(e.trophyCharmLife>0)check(owns('fanclub')&&TROPHY_GORILLAS.includes(e.type)&&e.charmed>0);}
+}
 function validate(snapshot){
  tree(snapshot);
  if(Number.isInteger(snapshot.version)&&snapshot.version>=1&&snapshot.version<VERSION){
@@ -52,7 +97,11 @@ function validate(snapshot){
   }
   if(snapshot.version<7){snapshot.game.s.coinsSpent=0;snapshot.game.s.upgradeRerolls=0;snapshot.game.s.evolutions={};}
   // Facing and input in older saves do not prove actual, unblocked movement.
-  snapshot.game.s.travelX=0;snapshot.game.s.travelY=0;
+  if(snapshot.version<8){snapshot.game.s.travelX=0;snapshot.game.s.travelY=0;}
+  // Trophy state and boss provenance did not exist in any earlier schema.
+  snapshot.game.s.trophies=createTrophyState();
+  for(const c of snapshot.game.s.chests||[]){delete c.bossType;delete c.bossId;}
+  for(const e of snapshot.game.s.enemies)delete e.trophyCharmLife;
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -142,6 +191,7 @@ function validate(snapshot){
  check(s.drops.filter(item=>item.compact===true).length<=1);
  for(const c of s.chests)check(typeof c.open==='boolean');for(const wave of s.shockwaves)check(typeof wave.hitPlayer==='boolean'&&typeof wave.hitGirl==='boolean');
  for(const option of s.options)check([...EVOLUTIONS.map(u=>u.id),...UPGRADES.map(u=>u.id),'recovery','payday','barrier'].includes(option.id)&&typeof option.name==='string'&&typeof option.desc==='string');
+ validateTrophies(s,d.id);
  if(s.mode==='upgrade')check(s.options.length>0);if(s.mode==='gameover')check(s.hp===0);if(s.mode==='victory')check(s.elapsed>=1200&&!s.endless);
  if(s.mode==='dialogue'){const ui=snapshot.dialogue;check(object(ui)&&Array.isArray(ui.lines)&&ui.lines.length>0&&ui.lines.length<=100&&integer(ui.index)&&ui.index<ui.lines.length);for(const line of ui.lines)check(object(line)&&typeof line.who==='string'&&typeof line.text==='string');}else check(snapshot.dialogue===null);
  return snapshot;
@@ -152,7 +202,7 @@ export function captureRun(game,dialogue=null){
  // Terminal events return before the engine's usual end-of-step capacity trim.
  // Apply that same policy to the detached checkpoint, never to live state.
  snapshot.game.s.drops=compactDrops(snapshot.game.s,game.world);
- for(const [key,cap] of Object.entries(CAPS))if(!['options','drops'].includes(key)&&snapshot.game.s[key]?.length>cap)snapshot.game.s[key]=snapshot.game.s[key].slice(-cap);
+ for(const [key,cap] of Object.entries(CAPS))if(!['options','drops'].includes(key)&&snapshot.game.s[key]?.length>cap)snapshot.game.s[key]=key==='chests'?trimTrophyChests(snapshot.game.s,cap):snapshot.game.s[key].slice(-cap);
  validate(snapshot);check(JSON.stringify(snapshot).length<=MAX_BYTES);return snapshot;
 }
 export function restoreRun(snapshot,{onEvent=()=>{}}={}){
@@ -163,7 +213,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,6,7,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
+ tree(v);check([1,2,3,4,5,6,7,8,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
   const accumulated=old?{...old.totals}:totals(copy(legacy));
