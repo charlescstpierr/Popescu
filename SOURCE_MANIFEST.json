@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-boss-durability",
+  "version": "1.5-plus-approved-upgrades-save-performance",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -21,6 +21,31 @@
       "path": "art/requirements.txt",
       "bytes": 42,
       "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "art/source/orangutan-bra/README.md",
+      "bytes": 1870,
+      "sha256": "481bca21eacb7e9e616eb3e51b1f7166d116ce2be3db9de622658d98bc60643e"
+    },
+    {
+      "path": "art/source/orangutan-bra/atlas-metadata.json",
+      "bytes": 3963,
+      "sha256": "c3234b81e6a421a051bf6aeffe7aa125b53f8fa59d3a2ce65b94c3d24f124c32"
+    },
+    {
+      "path": "art/source/orangutan-bra/imagegen-prompt.txt",
+      "bytes": 1621,
+      "sha256": "c098b605a9437be2af4fad90f51bc74c0c2c25693a8e1abc0d4b0361a0f07dc8"
+    },
+    {
+      "path": "art/source/orangutan-bra/poses-transparent-source.png",
+      "bytes": 1639978,
+      "sha256": "24674f462de47ad8450bf5d850032de1c9edc7f078b4e6e76c1eb105c7c642d6"
+    },
+    {
+      "path": "art/source/orangutan-bra/register-atlas.mjs",
+      "bytes": 2619,
+      "sha256": "cf28cc428ccbeac656286807e71a8dccfd34109c2a9fc9dd1184d932f9b54ac0"
     },
     {
       "path": "art/source/pelican/atlas-metadata.json",
@@ -83,31 +108,6 @@
       "sha256": "6ac892360c137083eab071559a3ab37c95d04f63e304a5cb96a3ac2d66f18692"
     },
     {
-      "path": "art/source/travestia/atlas-metadata.json",
-      "bytes": 3982,
-      "sha256": "1f06683c4800564fbcfcc3d7bbf1ea60d9f58ae1e027cd57a96593e1e37c9d3b"
-    },
-    {
-      "path": "art/source/travestia/imagegen-prompt.txt",
-      "bytes": 1076,
-      "sha256": "cedef53175e21eaba846196a51536e79a3e578ff18d4e78c20de8570f7cb0e17"
-    },
-    {
-      "path": "art/source/travestia/poses-transparent-source.png",
-      "bytes": 1778625,
-      "sha256": "084a13fd7c4212ad9950a63329cf674c988ef3b0c4aeb5711c02fb2def6133d9"
-    },
-    {
-      "path": "art/source/travestia/reference-approved.png",
-      "bytes": 2030721,
-      "sha256": "30fc39be00ea172fb5ca296edb6e6ccf3de1ebd6723684078a0037bb806c3471"
-    },
-    {
-      "path": "art/source/travestia/register-atlas.mjs",
-      "bytes": 2423,
-      "sha256": "d49160e0232344c8d2421e058b240cf39d7d1ddc81c6f8d4ff6535c77df4a081"
-    },
-    {
       "path": "art/source/travestia-dash/README.md",
       "bytes": 1559,
       "sha256": "2547a9a6b66b2a7cea87dba750631e9b5049940ac3bbc1c5763ce345d28ff1ef"
@@ -143,6 +143,31 @@
       "sha256": "2e1c52f3b3ba3090eb93a8a751a5ce48c584a8f90217ca66407ad7268df84e24"
     },
     {
+      "path": "art/source/travestia/atlas-metadata.json",
+      "bytes": 3982,
+      "sha256": "1f06683c4800564fbcfcc3d7bbf1ea60d9f58ae1e027cd57a96593e1e37c9d3b"
+    },
+    {
+      "path": "art/source/travestia/imagegen-prompt.txt",
+      "bytes": 1076,
+      "sha256": "cedef53175e21eaba846196a51536e79a3e578ff18d4e78c20de8570f7cb0e17"
+    },
+    {
+      "path": "art/source/travestia/poses-transparent-source.png",
+      "bytes": 1778625,
+      "sha256": "084a13fd7c4212ad9950a63329cf674c988ef3b0c4aeb5711c02fb2def6133d9"
+    },
+    {
+      "path": "art/source/travestia/reference-approved.png",
+      "bytes": 2030721,
+      "sha256": "30fc39be00ea172fb5ca296edb6e6ccf3de1ebd6723684078a0037bb806c3471"
+    },
+    {
+      "path": "art/source/travestia/register-atlas.mjs",
+      "bytes": 2423,
+      "sha256": "d49160e0232344c8d2421e058b240cf39d7d1ddc81c6f8d4ff6535c77df4a081"
+    },
+    {
       "path": "dist/actor-art.js",
       "bytes": 7978,
       "sha256": "4f3790ccb9c1ab73cd222f00e17e147fd693e793abd6bbb6ea204cd4a73cc335"
@@ -154,8 +179,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 27128,
-      "sha256": "0d2d5ea116c85237af74248634e9cdb30386642eff7aeabcd9d40e7c5cb5ca98"
+      "bytes": 29644,
+      "sha256": "71ae9fb2bc450ff3006c8bf1ccf7e812e552e344074119d02861354865f9144a"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -194,8 +219,8 @@
     },
     {
       "path": "dist/assets/orangutan-walk-v3.png",
-      "bytes": 172138,
-      "sha256": "205dfcab8d50fa319be06b2a70e27ed9f7ec782b43f67cdb47aa22281c8f5ed0"
+      "bytes": 176008,
+      "sha256": "584b18fb91860df181d957ec36bf97b49cb132b7bfb029d23035281606899413"
     },
     {
       "path": "dist/assets/pelican-poses.png",
@@ -259,8 +284,8 @@
     },
     {
       "path": "dist/audio.js",
-      "bytes": 21588,
-      "sha256": "faf46d2e47da1c0644aa29d9baf0133b08821bbda840c0ca3dd8af41d2d6b5b0"
+      "bytes": 21973,
+      "sha256": "34051546fb6b0bb24500385fe746e90d0a4ff1c41e0f0119067fc2b85dcb1764"
     },
     {
       "path": "dist/biomes.js",
@@ -279,13 +304,13 @@
     },
     {
       "path": "dist/combat-art.js",
-      "bytes": 3398,
-      "sha256": "707371109e7508ff6b241ef9d01b4d54449dc2a2b24a82ff44c28a95249623d6"
+      "bytes": 4413,
+      "sha256": "77ab45e1d0376a64cf937a011b742bd815c4d242fd771fa49366604cbc60837b"
     },
     {
       "path": "dist/content.js",
-      "bytes": 23340,
-      "sha256": "f572629cee54064b42b3dadb0c76f7832e731059036fb9d69dff1cee59562eb5"
+      "bytes": 23698,
+      "sha256": "672089d77cd8d0e397b51f60130b5d34099a843ac6a8ab270742d88c6a0cd04a"
     },
     {
       "path": "dist/discoveries.js",
@@ -298,9 +323,19 @@
       "sha256": "94e68953fc4f5da8051c52fb45b548cc59434fe39f121a59fb2b3e65d5c1d3df"
     },
     {
+      "path": "dist/drops.js",
+      "bytes": 2455,
+      "sha256": "1fbdf7db7a07365f62fc94c18fc692d5627c9c445c6999912b4bb6859cf73c74"
+    },
+    {
       "path": "dist/engine.js",
-      "bytes": 46006,
-      "sha256": "838e68d957377f6b7a12a1b368217d013654404b61248dc7c27e54463e2c1d91"
+      "bytes": 48769,
+      "sha256": "2e22c66295495d01877eaa009a67a251935a52d713995c0291a53eabc2abe6d6"
+    },
+    {
+      "path": "dist/evolutions.js",
+      "bytes": 1848,
+      "sha256": "a4196fdf6576059fca8954a2c79c08734881087eb382a619b8611e34a96dba38"
     },
     {
       "path": "dist/hero-art.js",
@@ -319,13 +354,13 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 11445,
-      "sha256": "bfdf45f504f03abdeccdbff09f127970f6446ca4114da26f32c9c7a85c68c8f7"
+      "bytes": 11914,
+      "sha256": "ace5bf29b4f032862c0d6e2e59a986f5a23c50cd1c1c3f77d541f378c89cbf4f"
     },
     {
       "path": "dist/opening.js",
-      "bytes": 1772,
-      "sha256": "2aceb9f9576e9d617cc845868f8357fab4e8b52da8dc6ffef1546b9a22a1863e"
+      "bytes": 1879,
+      "sha256": "2775fc10caa28eda677726c178f10fb873259d37758ccf83b74cdb46f967f741"
     },
     {
       "path": "dist/pelican-art.js",
@@ -334,8 +369,8 @@
     },
     {
       "path": "dist/pelican.js",
-      "bytes": 5993,
-      "sha256": "3ef7e3626e5c0b3da4a18e5539dc05f1436666d5c57b65523cb4b37dd1c23854"
+      "bytes": 6447,
+      "sha256": "260e26decca1ebd032b248c75f6aa145b2f6bba81d2a6b86bae17ceaa036808d"
     },
     {
       "path": "dist/prop-geometry.js",
@@ -344,18 +379,18 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 43552,
-      "sha256": "03f638aa0936486b1a7e6075dbd7da62e4e637e112701b5913a0782454c25244"
+      "bytes": 46842,
+      "sha256": "ad9d96f87853ba2952f16a31406a00145bd66103e22f06ef7a9b33c8833ab89f"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 20457,
-      "sha256": "b7b1b924915f6e1ee8c6a702359fff84d791312fee5a683e2be6efa17708ad15"
+      "bytes": 22564,
+      "sha256": "f5fb6377bc848646329d93b3c39c35b15f872cb611c72f33e9907d76a826676e"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 26191,
-      "sha256": "23fd51596392085c50ceb2b520cc88e303b697391cf654ae1eccb54b7075daff"
+      "bytes": 27587,
+      "sha256": "9bf76db9a2ecd5233bae49f7fb25d2946dcde858b19be5c3667fe0f7e2228621"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -364,8 +399,8 @@
     },
     {
       "path": "dist/travestia.js",
-      "bytes": 3146,
-      "sha256": "33126f32641ed1cdc1c6f0ab0c33bd455943b354d7fc592f33831618aea5fe07"
+      "bytes": 3378,
+      "sha256": "0ccc505adc7a1d52dbab2e14b41012a9cba5fbad3c7cd79f6ac93b00db3f6edd"
     },
     {
       "path": "dist/world.js",
@@ -401,6 +436,11 @@
       "path": "docs/GRAPHICS.md",
       "bytes": 3488,
       "sha256": "f46411e68b22af3aa84c19590fb8621db9b35a24429192de19f20f20acc0e7b7"
+    },
+    {
+      "path": "docs/ORANGS-OUTANS-ROSES.md",
+      "bytes": 2619,
+      "sha256": "6d877fbf4331b1144dc639d3e892fdc75e90e5a86ff2cbf80b2a046a6e87a363"
     },
     {
       "path": "docs/PELI-ZODIAQUE.md",
@@ -443,6 +483,16 @@
       "sha256": "a85e3b20a8f3e744f79fc78f9e872c43e7a6e58d1eff1803fff7e8e182abca0b"
     },
     {
+      "path": "docs/QA-DIALOGUE.md",
+      "bytes": 1579,
+      "sha256": "7ac503c58e4b333392b4eed81bc7a7799e9ccd63af522243443f32611bdc3716"
+    },
+    {
+      "path": "docs/QA-EVOLUTIONS.md",
+      "bytes": 2768,
+      "sha256": "bf874e722e1dfccde9ff1291c6ac7d56fd65f62ce58cb768c53433e25ef7c3d3"
+    },
+    {
       "path": "docs/QA-GRAPHICS.md",
       "bytes": 2038,
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
@@ -456,6 +506,11 @@
       "path": "docs/QA-OPENING.md",
       "bytes": 2536,
       "sha256": "f4729deec1ca2d142885a06e8e482eb551c651f48012688214ec9908c616bbb8"
+    },
+    {
+      "path": "docs/QA-REBUILD-2026-11-03.md",
+      "bytes": 2992,
+      "sha256": "a032b602412305a237e2f7e229e6acc6004daf9056b3053236af683e2d6f6cdc"
     },
     {
       "path": "docs/QA-REVIEW.md",
@@ -513,6 +568,16 @@
       "sha256": "1fcc2225219e63c0d6c0e7114a939eb57fa472bc12f1d7c92a7f851924678ab3"
     },
     {
+      "path": "docs/XP-CONSERVATION.md",
+      "bytes": 2118,
+      "sha256": "8b91ec90478e524263f42b4f903de8f60b6ec284b02838c2ab4a6d257b319cce"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-11-03-approved-upgrades.md",
+      "bytes": 1613,
+      "sha256": "e22f949142d8023e2155afa1caa751fa06d5b19fd25bd8a7fe658bb0c9f5ca39"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-03-interactive-opening.md",
       "bytes": 2126,
       "sha256": "ed08b14c09d396c574e56857abdcbff59960e1de373c24dab71101e55c777922"
@@ -524,8 +589,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 13985798,
-      "sha256": "888d5e74ff2c146f0d1e6c6cc28284d7a91aa6ce5059cca745029ec2c023195d"
+      "bytes": 14010553,
+      "sha256": "b33eeee2ac54e955b2af4091298ef93d1dc7da6f688d93975ba2af004ce20b4b"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -533,9 +598,14 @@
       "sha256": "86e56b9a66f4acb86de00b5464feb6ee24b4f5b32b9e439d9a89d56698e407d1"
     },
     {
+      "path": "scripts/benchmark-saves.mjs",
+      "bytes": 1905,
+      "sha256": "b16d89c59c635a0aa43500e9036006457010d3217db6f0ec387a2baf449d22f2"
+    },
+    {
       "path": "scripts/export-standalone.py",
-      "bytes": 1880,
-      "sha256": "d0d75c430c1bf37b49fc60c64407f8bdedb5b93a624c16d1c5cde32bc4a08588"
+      "bytes": 1901,
+      "sha256": "c478edaa38bce5cd98a6fd0b3bdf1e465eaba3c7d7002f135ef6f69c72a58550"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -543,9 +613,19 @@
       "sha256": "4e3c5b3f82f14a693ae6c34fff935ce6132f93de942c900da620ff59bd399bed"
     },
     {
+      "path": "scripts/inspect-defeats.mjs",
+      "bytes": 6691,
+      "sha256": "f6cfef794296b9cf8e3f0b217c9c5f4932f6c6e8d130ea2e233978ad2f0f1533"
+    },
+    {
       "path": "scripts/inspect-discoveries.mjs",
       "bytes": 2090,
       "sha256": "7871a86ca4a821b11360f38bdc2531b2733a0855f00563e6888851121493915f"
+    },
+    {
+      "path": "scripts/inspect-evolutions.mjs",
+      "bytes": 2249,
+      "sha256": "e3212ddf033471cd90dd8465b273420551703960ac2c5481a6a323bef59680c9"
     },
     {
       "path": "scripts/inspect-graphics.mjs",
@@ -561,6 +641,11 @@
       "path": "scripts/inspect-opening.mjs",
       "bytes": 2236,
       "sha256": "5417993441f06697fe8fcb42d4c350b8556f6257392d180fd85b776b73de1766"
+    },
+    {
+      "path": "scripts/inspect-orangutan.mjs",
+      "bytes": 2884,
+      "sha256": "e25c8b7514845b9a1755c2555953fb56bca0785cb5126e59fc4781acb46d15da"
     },
     {
       "path": "scripts/inspect-pelican.mjs",
@@ -634,13 +719,13 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 10556,
-      "sha256": "35b1023d45f538290deb937b63fbd9009f19b68cad9fdaa7e0c20edb9bda96fa"
+      "bytes": 14906,
+      "sha256": "2e30e99a64ea34f8d3c3e998562928937012996a59c7156f164688115d6aa9c9"
     },
     {
       "path": "tests/audio.test.js",
-      "bytes": 11233,
-      "sha256": "75af5db91f4809e62cad7cb7398368668cfc6b10d828f1351e8159bb0692a7d8"
+      "bytes": 12391,
+      "sha256": "a508dcdd086faa0de8d427114aabdb2752e79fd2fb51a93069fcddf984282528"
     },
     {
       "path": "tests/biomes.test.js",
@@ -649,23 +734,33 @@
     },
     {
       "path": "tests/boss-arrivals.test.js",
-      "bytes": 3306,
-      "sha256": "ed5681990d8aa5fc7c7432b727a4cc9ec83ea9fa113d09673cef6880c484db95"
+      "bytes": 3355,
+      "sha256": "4184f6598d5ba8dc27e6a309aa5816b11184bff8e8e072f3e8bf61bf3aa91b21"
     },
     {
       "path": "tests/boss-director.test.js",
       "bytes": 11885,
-      "sha256": "ff24eca10bfa8ddf53b0e023cc82e5d9002fc73b8de41e3420d991d30e220d2f"
+      "sha256": "2022f4bd471334780c3f4a13d6161c5455a455789dd116588de67131b445028c"
     },
     {
       "path": "tests/boss-durability.test.js",
       "bytes": 4753,
-      "sha256": "420fac09b4e2fb154ce5d44092fdbcec00827948fb1494a220c57d593fd6f944"
+      "sha256": "877a0d27d47550083b42d07d034ae10c15ef9d1f01e4851a2db660798f603581"
     },
     {
       "path": "tests/crowd-performance.test.js",
       "bytes": 772,
       "sha256": "f185e60082c4965dffe82071dc85e52f320739d38aaf2876d611781370fa8d9a"
+    },
+    {
+      "path": "tests/defeat-effects.test.js",
+      "bytes": 5825,
+      "sha256": "671d8e24c48bbb4cd2d6672862ef582344c835c73c4e4cea5d28aad6d87b8151"
+    },
+    {
+      "path": "tests/dialogue-compatibility.test.js",
+      "bytes": 2584,
+      "sha256": "e34fecbb3e98464419712ac4143370645d130aafe91c900c64b69c0e3954014c"
     },
     {
       "path": "tests/discoveries.test.js",
@@ -679,8 +774,13 @@
     },
     {
       "path": "tests/engine.test.js",
-      "bytes": 27891,
-      "sha256": "56085e5ca72dc9f25e1781027ed36a800d7a222ca1de1130504c2447f792616f"
+      "bytes": 27940,
+      "sha256": "3523a5ab3179ef961e442038102624212fab66e484c0ddc337607f14a473950a"
+    },
+    {
+      "path": "tests/evolutions.test.js",
+      "bytes": 6255,
+      "sha256": "53300b96ea56af1079caae6b765b7ddca8240d492435c33ade328ed7ccb57a02"
     },
     {
       "path": "tests/fixtures/runstore-v3.json",
@@ -728,6 +828,11 @@
       "sha256": "893d801e1b2d5f71b47b5af931c1752ea6f0ee34892e3104a61c891963693c6b"
     },
     {
+      "path": "tests/orangutan-art.test.js",
+      "bytes": 2949,
+      "sha256": "99fac9674f8f3fbbbc02bfc75e5c93f203b246f3b63e5c9452fb2fcc9cf8fccb"
+    },
+    {
       "path": "tests/pelican-art.test.js",
       "bytes": 3289,
       "sha256": "76eb6c1fc148a2713843664ffcae817007938ebb38aef3fd5dbcedd41c7f87d0"
@@ -739,8 +844,8 @@
     },
     {
       "path": "tests/progression.test.js",
-      "bytes": 2687,
-      "sha256": "2ddf8d78ec0f2ba74cdc9f977f571bbf7d39d471fbb90f2331201b73e86c0ab8"
+      "bytes": 2736,
+      "sha256": "7371e8a4da4fcec6f3706f240883af4ea226e9483fb8e4a06c2abe700c531b8c"
     },
     {
       "path": "tests/prop-geometry.test.js",
@@ -765,17 +870,22 @@
     {
       "path": "tests/run-pelican.test.js",
       "bytes": 14534,
-      "sha256": "8573174bcf641e19db25d0d2fb7806aae6560ddb746367e23f2aeacff28fb7d9"
+      "sha256": "a4992c0e33c87298bd116b18f9a57bc9f437a674182986afc833bcd9c88df2d1"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11178,
-      "sha256": "9d03ff8c8393212938bd0108902b6b2c72015401b19739da010455d86fd8d404"
+      "sha256": "e26b90a707cfdec6f5d39fd9f2abc0fdb32a3c69e43f65e37dd3f4fd94251864"
     },
     {
       "path": "tests/run-travestia.test.js",
       "bytes": 4697,
       "sha256": "a1f2b8a8e6206384c82a68a2f65b89de65f1c70dbdc155820ab8b885b891ae70"
+    },
+    {
+      "path": "tests/save-performance.test.js",
+      "bytes": 3258,
+      "sha256": "e09d36f11e6e19aee94ec1fd91ae19b3bdac09d3d13ae4efbe8c84e91397f149"
     },
     {
       "path": "tests/scenery-art.test.js",
@@ -804,8 +914,8 @@
     },
     {
       "path": "tests/travestia.test.js",
-      "bytes": 4198,
-      "sha256": "46c1f4a3247fd9fc199ca542909fd0ce198c89b8a4dfd9f4ee48d68464474815"
+      "bytes": 4210,
+      "sha256": "d160e1764a9b086178ba822c691ae08278103cd54507e3069e2207fb458705e5"
     },
     {
       "path": "tests/upgrade-rewards.test.js",
@@ -821,8 +931,13 @@
       "path": "tests/world.test.js",
       "bytes": 4155,
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
+    },
+    {
+      "path": "tests/xp-conservation.test.js",
+      "bytes": 5722,
+      "sha256": "47c3ea1282499bb353023889432ca504b1fbf8bd50833c05e526187f73468e03"
     }
   ],
-  "base_github_commit": "6a43534e98416631796bf58b18f0143313433c29",
+  "base_github_commit": "993b19b9ef6e6469441f76bf06d80ba4b769b127",
   "integration_date": "2026-11-03"
 }
