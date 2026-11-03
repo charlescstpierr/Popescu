@@ -2,11 +2,20 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),path=req
 const inputPath=path.resolve(__dirname,'../release/Toma_Popescu_JOUER.html');
 const outputPath=path.resolve(process.argv[2]||'/tmp/toma-combined-standalone.png');
 const inputStat=fs.statSync(inputPath);
-const outputStat=fs.existsSync(outputPath)?fs.statSync(outputPath):null;
+let outputStat=null;
+try {outputStat=fs.lstatSync(outputPath);} catch(error) {if(error.code!=='ENOENT')throw error;}
 if(path.extname(outputPath).toLowerCase()!=='.png'||outputPath===inputPath||
- (outputStat&&outputStat.dev===inputStat.dev&&outputStat.ino===inputStat.ino)) {
+ (outputStat&&(outputStat.isSymbolicLink()||(outputStat.dev===inputStat.dev&&outputStat.ino===inputStat.ino)))) {
  console.error('Refusing unsafe screenshot output: choose a separate .png file, never the standalone HTML.');
  process.exit(1);
+}
+function writeScreenshotAtomic(bytes) {
+ const tmp=fs.mkdtempSync(path.join(path.dirname(outputPath),'.toma-screenshot-'));
+ try {
+  const staged=path.join(tmp,'output.png');
+  fs.writeFileSync(staged,bytes,{flag:'wx'});
+  fs.renameSync(staged,outputPath);
+ } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 }
 const {createCanvas,Image}=require('@napi-rs/canvas');
 const html=fs.readFileSync(path.join(__dirname,'../release/Toma_Popescu_JOUER.html'),'utf8');
@@ -28,4 +37,4 @@ sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbo
  const live=q.game;const boss=live.spawnEnemy('travestia',live.s.x+60,live.s.y);assert(boss);live.updateEnemies(.01);assert.equal(boss.phase,'tail_windup');assert((await q.persistRun()).ok);await q.resumeSaved();assert.equal(q.game.s.enemies.find(e=>e.type==='travestia').tailTime,boss.tailTime);q.resume();q.renderer.render(q.game,10);
  let dash=q.game.s.enemies.find(e=>e.type==='travestia');Object.assign(dash,{phase:'chase',tailTime:0,tailReplyPending:false,cooldown:0,tailAttackCount:1});q.game.world.collides=()=>false;q.game.updateEnemies(.01);
  for(const phase of ['tail_dash_windup','tail_dash','tail_dash_recover']){let steps=0;while(dash.phase!==phase&&steps++<1000)q.game.updateEnemies(.01);assert.equal(dash.phase,phase);const state=JSON.stringify(dash);assert((await q.persistRun()).ok);await q.resumeSaved();dash=q.game.s.enemies.find(e=>e.type==='travestia');assert.equal(JSON.stringify(dash),state);q.resume();q.game.world.collides=()=>false;}q.renderer.render(q.game,10);
- fs.writeFileSync(outputPath,elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});
+ writeScreenshotAtomic(elements.get('world').toBuffer('image/png'));console.log(JSON.stringify({syntax:'pass',boot:'pass',embeddedImages:'pass',start:'pass',discoveryActivation:'pass',hudNameAndCountdown:'pass',renderReadOnly:'pass',pauseResume:'pass',saveResumeDiscoveryState:'pass',bossArtAndWarningRecovery:'pass',tailDashAllPhasesSaveResume:'pass',actualBrowser:false,physicalTouch:false}));})().catch(e=>{console.error(e);process.exitCode=1});

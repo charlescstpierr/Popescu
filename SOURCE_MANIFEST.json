@@ -479,8 +479,8 @@
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 6043,
-      "sha256": "a424a53fd181e947f159445907d69be44bdd8cce40af9deed3af8bad8f22024c"
+      "bytes": 6430,
+      "sha256": "e89db3e7f424588a516a0206a28a5d8089cb316dd73ef3ae89aaf02ea6976979"
     },
     {
       "path": "scripts/inspect-tail-dash.mjs",
@@ -614,8 +614,8 @@
     },
     {
       "path": "tests/standalone-output-safety.test.js",
-      "bytes": 1601,
-      "sha256": "d77c255f65b4ffbb6404115a5d3f3f12ccb5042c96e045d5acc80ec171a4be77"
+      "bytes": 3035,
+      "sha256": "9f01037e79e30c3d147ba5ddd750ab2b143f251d080ef24049f4b9a8daa779cc"
     },
     {
       "path": "tests/story.test.js",
