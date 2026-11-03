@@ -1,57 +1,58 @@
-# Boss plus résistants
+# Boss vraiment plus résistants
 
-## Réglage
+## Pourquoi reprendre le réglage
 
-Seuls les PV calculés à l'apparition des trois boss majeurs changent.
+La première hausse de PV laissait les configurations offensives avancées éliminer les boss en 5,7 à 7,1 secondes. En parallèle, les cœurs de la compagne rendaient les boss impossibles à viser pendant de longues périodes et interrompaient presque toutes leurs attaques. Ajouter seulement des PV aurait surtout rallongé cette attente.
 
-- Jusqu'à 3 minutes : PV de la matriarche ×1,35; Travestia et Péli ×1,60.
-- De 3 à 18 minutes : progression linéaire vers ×2 pour chacun.
-- Après 18 minutes : le multiplicateur supplémentaire reste à ×2. L'ancienne progression du mode infini continue normalement.
+Ce réglage renforce les trois boss majeurs et leur permet de jouer leurs attaques existantes. Il ne change aucun dessin, rayon de dégâts, annonce, délai de préparation ou dégât d'attaque. Le Mode avion conserve son interruption défensive. Les ennemis ordinaires et les rivaux ne changent pas.
 
-La matriarche reçoit une hausse initiale plus modérée, car ses renforts détournent déjà les tirs. Ses invocations, les préparations et dégâts des attaques, le charme, les armes, les difficultés, les récompenses et les ennemis ordinaires restent inchangés. Le calendrier aléatoire conserve un seul boss majeur à la fois.
+## PV et charme
 
-Exemples de PV dans une nouvelle rencontre :
+Les PV de base et leur progression existante sont multipliés, pour les nouvelles apparitions seulement :
 
-| Moment | Matriarche | Travestia | Péli |
-| --- | ---: | ---: | ---: |
-| 3 minutes, avant | 696,7 | 812,6 | 908,2 |
-| 3 minutes, après | 940,5 | 1 300,2 | 1 453,1 |
-| 18 minutes, avant | 1 623,2 | 1 475,6 | 1 649,2 |
-| 18 minutes, après | 3 246,3 | 2 951,2 | 3 298,4 |
+- Jusqu'à 3 minutes : ×1,8 pour la matriarche, ×2,4 pour Travestia et Péli. Le réglage précédent était ×1,35 / ×1,60.
+- De 3 à 18 minutes : progression linéaire vers ×8. Le réglage précédent plafonnait à ×2.
+- Après 18 minutes : le facteur supplémentaire reste à ×8. Seule l'ancienne progression du mode infini continue.
 
-## Mesures de combat
+À 18 minutes, chaque boss possède donc quatre fois les PV du réglage précédent. La première matriarche reçoit une hausse plus mesurée à cause de ses renforts.
 
-`node scripts/verify-boss-durability.mjs` exécute les véritables armes, projectiles, collisions, déplacements et attaques du moteur à 60 Hz. Un contrôleur tourne autour du boss en corrigeant sa distance. La matriarche conserve ses renforts. Il n'y a ni invulnérabilité artificielle, ni terrain, ni vagues ambiantes. Les configurations d'améliorations sont fixées et documentées dans `tests/helpers/boss-combat.js`; ce ne sont pas des statistiques de progression moyenne des joueurs.
+Un cœur qui charme un boss l'interrompt toujours, mais pour 0,7 à 1,2 seconde selon le rang de Charisme. Il déclenche aussi 10 secondes de résistance aux nouvelles interruptions par charme, décomptées dès ce premier impact. Pendant cette résistance, les cœurs continuent d'infliger leurs dégâts normaux. Il n'y a ni invulnérabilité du boss ni plafond artificiel des dégâts. Les attaques et la visée évitent toujours une cible actuellement charmée, mais cette fenêtre est courte. Le charme des ennemis ordinaires reste inchangé, de 2,5 à 7 secondes. La description de Charisme signale la résistance des boss aux charmes répétés.
 
-Temps jusqu'à une véritable défaite du boss, difficulté normale, en secondes :
+## Mesures réelles du moteur
+
+`node scripts/verify-boss-durability.mjs ../version-precedente` compare les deux moteurs avec les mêmes armes, projectiles, collisions, déplacements et attaques à 60 Hz. La référence utilisée ici est le commit `6f57f62`, avant ce deuxième réglage. Sans chemin de référence, le script vérifie les combats actuels mais ne prétend pas mesurer l'ancien charme.
+
+Le contrôleur tourne autour du boss en corrigeant sa distance. La matriarche conserve ses renforts. Aucune invulnérabilité artificielle, aucun soin artificiel et aucun dégât de test ne sont utilisés dans ces combats. L'arène exclut le terrain et les vagues ambiantes. Les configurations fixes sont documentées dans `tests/helpers/boss-combat.js`; elles ne représentent pas une progression moyenne mesurée chez des joueurs.
+
+Temps jusqu'à une vraie défaite, difficulté normale, graine 914, en secondes :
 
 | Configuration | Matriarche avant → après | Travestia avant → après | Péli avant → après |
 | --- | ---: | ---: | ---: |
-| Début équilibré, 3 min | 12,0 → 15,9 | 14,7 → 21,8 | 14,7 → 23,6 |
-| Offensif intermédiaire, 10 min | 5,1 → 9,3 | 4,5 → 7,9 | 5,6 → 10,2 |
-| Offensif avancé, 18 min | 3,0 → 6,2 | 2,8 → 5,7 | 3,6 → 7,1 |
-| Compagne et contrôle, 18 min | 35,2 → 52,4 | 34,1 → 63,8 | 34,7 → 59,0 |
+| Début équilibré, 3 min | 15,9 → 21,1 | 21,8 → 32,6 | 23,6 → 36,3 |
+| Offensif intermédiaire, 10 min | 9,3 → 24,1 | 7,9 → 24,8 | 10,2 → 27,6 |
+| Offensif avancé, 18 min | 6,2 → 25,3 | 5,7 → 24,2 | 7,1 → 26,8 |
+| Compagne et contrôle, 18 min | 52,4 → 46,7 | 63,8 → 40,1 | 59,0 → 45,8 |
+| Compagne intermédiaire, 10 min | 67,3 → 45,0 | 85,6 → 45,5 | 104,4 → 50,3 |
+| Deux évolutions, 18 min | 51,4 → 26,0 | 35,4 → 23,7 | 52,3 → 26,7 |
+| Charme rang 5, 18 min | 89,9 → 36,9 | 81,8 → 35,7 | 90,8 → 39,8 |
 
-Les 48 scénarios (trois boss, quatre configurations, quatre difficultés) se terminent par une défaite du boss sans mort du joueur contrôlé. Cela démontre une augmentation mesurée de durée dans ces scénarios, pas une garantie de facilité ou de difficulté pour un joueur humain.
+Les 288 scénarios actuels, huit configurations × trois boss × quatre difficultés × trois graines, aboutissent tous à une vraie défaite du boss sans mort du joueur contrôlé. Travestia exécute sa rotation et sa charge; Péli atteint ses cartes de tarot dans chaque scénario. Les configurations offensives avancées durent 24,2 à 27,1 secondes; les configurations avec compagne et évolutions restent entre 20,7 et 51,1 secondes. Un ancien scénario avec compagne n'avait pas abouti à une défaite au plafond de 120 secondes; le rapport le signale au lieu d'inventer un ratio.
 
-Le charme existant empêche de viser les ennemis charmés : les configurations centrées sur la compagne peuvent donc déjà être beaucoup plus lentes. Avec le réglage retenu, ces cas durent de 46,6 à 81,7 secondes dans les quatre difficultés, contre 30,0 à 53,0 secondes avant. Ce comportement n'a pas été changé implicitement.
+La compagne ne rallonge plus les combats en neutralisant presque tout. Dans l'exemple avancé normal, Travestia passe de 56,1 à 3,6 secondes charmée et complète deux cycles d'attaque. La durée totale baisse, mais la fenêtre où le boss peut agir augmente fortement. Ces mesures ne prouvent pas un taux de victoire humain ou une hausse universelle de difficulté pour chaque joueur.
 
-Le contrôle extrême sans aucune amélioration à 3 minutes donne 77,6 secondes pour la matriarche avec ses renforts (50,9 avant), 40,4 pour Travestia (25,3 avant) et 45,1 pour Péli (28,7 avant). Ces combats restent possibles dans le scénario, mais la matriarche est plus longue avec le fusil de départ seul. Une première proposition de hausse ×2 à ×3 a été écartée après avoir mesuré 132 secondes pour ce cas et jusqu'à 110 secondes avec la compagne.
+Le cas volontairement extrême du fusil de départ sans amélioration, à 3 minutes en normal, dure 117,2 secondes pour la matriarche avec ses renforts, 60,2 pour Travestia et 67,6 pour Péli. Tous sont battus sans invulnérabilité artificielle. La matriarche peut donc rester longue si le joueur n'a pris aucune amélioration.
 
 ## Sauvegardes et limites
 
-La version de sauvegarde reste v6. Un boss déjà présent conserve exactement ses PV restants et ses PV maximum : aucun soin, recalcul ou doublement à la reprise. Les nouvelles rencontres bénéficient du réglage. Les sauvegardes v3/v5 passent toujours par la migration existante du calendrier.
+La version intégrée utilise la sauvegarde v8 pour conserver la direction réelle du déplacement; les sauvegardes v7 sont migrées sans perdre leurs évolutions ni leurs dépenses. `bossCharmResistance` est un champ optionnel borné entre 0 et 10 secondes, réservé aux boss. Les anciennes sauvegardes qui n'ont pas ce champ restent valides; aucune conversion de PV ni nouveau champ obligatoire n'est injecté à la reprise. Un boss déjà présent conserve exactement ses PV restants, ses PV maximum et son charme en cours. Une nouvelle résistance est sauvegardée exactement, survit aux reprises répétées et reste figée en pause. Les migrations v3/v5/v6 existantes restent couvertes par la suite générale.
 
-Aucune image, animation, feuille de style, logique de rendu ou limite de population ne change. Le calcul supplémentaire intervient à l'apparition, pas dans la boucle de dégâts. Les plafonds restent à 300 ennemis et un boss majeur. Le HTML autonome est régénéré.
+La victoire reste liée à la survie à 20 minutes, même lorsqu'un boss est encore vivant. L'infini demeure optionnel. Le calendrier garde un seul boss majeur à la fois et le plafond de 300 ennemis. Le calcul de PV intervient à l'apparition; la résistance ajoute au plus un compteur actif pour le boss. Aucun nouveau parcours de la population ou effet graphique n'est ajouté.
 
 ## Vérification
 
-- `npm test` : 396 tests réussis, dont 47 contrôles de résistance supplémentaires.
-- Tests de combat réel, armes de départ, contrôle par la compagne, ennemis ordinaires, première attaque des boss, reprise d'un boss blessé, reprise répétée et progression bornée en infini.
-- `node scripts/verify-boss-durability.mjs` : 48 comparaisons avant/après et trois cas sans amélioration. Résultats détaillés dans `proof/boss-durability/comparison.json`.
-- `node scripts/inspect-standalone.cjs proof/boss-durability/standalone.png` : démarrage du HTML final, images embarquées, pauses, reprise, phases des boss et calendrier aléatoire réussis avec adaptateur DOM/Canvas natif.
+- Suite complète, contrôles ciblés du charme, des attaques existantes, des anciens boss blessés, de la pause et des reprises répétées.
+- 288 combats actuels comparés aux mêmes scénarios de la version précédente, plus trois cas sans amélioration : `proof/boss-hardening/comparison.json`.
+- Revue indépendante : 288 scénarios supplémentaires avec les graines 1/914/99173, sans défaite du joueur; des cœurs réussissant à chaque image pendant 60 secondes permettent encore six cycles d'attaque complets à Travestia et à Péli. Les captures/reprises pendant ces attaques restent valides.
+- HTML autonome régénéré et vérifié avec l'adaptateur DOM/Canvas natif.
 
-Les scénarios contrôlés et Canvas natif ne remplacent pas une partie humaine dans la horde, un navigateur réel ou un essai tactile/performance sur téléphone physique.
-- `node scripts/verify-boss-arrivals.mjs` : quatre parcours de 25 minutes, victoire à 20 minutes puis infini, 38 reprises par difficulté, 8–9 boss rencontrés et plafond de 300 ennemis respecté. Survie et défaites après 30 secondes sont contrôlées dans ce test du calendrier, distinct des mesures de combat ci-dessus.
-- `node scripts/verify-crowd-equivalence.mjs ../random-boss-arrivals .` : 4 320 pas exactement identiques à PV de comparaison fixés; vérifie que le changement n'altère pas les mécaniques existantes.
-- `node scripts/benchmark-crowd.mjs` : scène de 300 ennemis, cinq parcours après échauffement, empreinte finale identique. Moyenne native avant/après 1,19/1,14 ms, p95 moyen 1,61/1,69 ms. Ces petites variations ne prouvent ni gain ni régression de performance; ce n'est pas une mesure de navigateur ou téléphone.
+Ces arènes et vérifications natives ne remplacent pas une partie humaine dans la horde ni un essai tactile/performance sur téléphone physique. Les contrôles du calendrier et de performance utilisent une survie contrôlée séparée; ils ne servent jamais de preuve de difficulté des combats.

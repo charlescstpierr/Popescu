@@ -147,3 +147,121 @@ test('existing power tooltip identifies its chosen evolution without adding HUD 
  const a=app();await a.click('play');Object.assign(a.game.s.upg,{car:3,money:3});a.game.gainXP(8);a.get('upgrade-options').children[0].listeners.click();
  const powers=a.get('powers').children;assert.equal(powers.length,2);assert.ok(powers.every(p=>p.title.includes('Lambo de milliardaire')));
 });
+
+for(const banter of [false,true])for(const reduced of [false,true]){
+ const label=`banter ${banter?'on':'off'}, reduced effects ${reduced?'on':'off'}`;
+ test(`encounter warnings remain visible with ${label}`,async()=>{
+  const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
+  const g=a.game;g.s.elapsed=150;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;
+  a.click('banter-close');g.bark('SYSTÈME','Une blague facultative.',true);
+  assert.equal(a.get('banter').classList.contains('hidden'),!banter,'ordinary system remarks follow the banter preference');
+  a.click('banter-close');g.reactToCrow();
+  assert.equal(a.get('banter').classList.contains('hidden'),!banter,'priority jokes still follow the banter preference');
+  a.click('banter-close');g.timers.horde=6.01;g.spawnWave(.02);
+  assert.equal(a.get('banter').classList.contains('hidden'),false,'horde warning must be visible');
+  assert.match(a.get('banter-text').textContent,/horde.*six secondes/i);
+  assert.equal(a.get('banter-name').textContent,'SYSTÈME');
+  assert.equal(a.get('app').classList.contains('reduced-fx'),reduced);
+  assert.equal(g.s.mode,'playing');
+ });
+ test(`finale warnings remain visible with ${label}`,async()=>{
+  const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
+  const g=a.game;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;
+  for(const [time,notice] of [[1130.01,/Dernière minute/],[1140.01,/dernier direct/],[1154.01,/dernier rival/],[1174.01,/Dernière vague dans/],[1180.01,/Dernière vague !/]]){
+   a.click('banter-close');g.s.elapsed=time;g.spawnWave(.02);
+   assert.equal(a.get('banter').classList.contains('hidden'),false,`finale warning at ${time} must be visible`);
+   assert.match(a.get('banter-text').textContent,notice);
+  }
+ });
+ test(`every boss warning and arrival remains visible with ${label}`,async()=>{
+  for(const type of ['matriarch','travestia','pelican']){
+   const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
+   const g=a.game;g.s.elapsed=300;Object.assign(g.bossDirector,{nextType:type,bag:['matriarch','travestia','pelican'].filter(other=>other!==type),remaining:5.01,warned:false});
+   a.click('banter-close');g.updateBossArrivals(.02);
+   assert.equal(a.get('banter').classList.contains('hidden'),false,`${type} warning must be visible`);
+   assert.match(a.get('banter-text').textContent,/cinq secondes/);
+   a.click('banter-close');g.s.elapsed+=5;g.updateBossArrivals(5);
+   assert.equal(a.get('banter').classList.contains('hidden'),false,`${type} arrival must be visible`);
+   assert.match(a.get('banter-text').textContent,/entre en scène/);
+   assert.equal(g.s.enemies.length,1);assert.equal(g.s.enemies[0].type,type);
+  }
+ });
+}
+
+test('muted encounter warnings survive preference changes, pause and saved-run resume',async()=>{
+ const a=app();await a.click('play');a.click('pause');a.click('settings-open');
+ a.get('banter-setting').onchange({target:{checked:false}});
+ a.get('reduced-fx').onchange({target:{checked:true}});
+ a.click('settings-back');a.click('resume');
+ const g=a.game;g.s.elapsed=300;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;
+ Object.assign(g.bossDirector,{remaining:5.01,warned:false});
+ a.click('pause');const before=persistence.captureRun(g);g.update(.05);
+ assert.deepEqual(persistence.captureRun(g),before,'pause freezes encounter clocks');
+ assert.equal(a.get('banter').classList.contains('hidden'),true);
+ await a.controller.persistRun();const b=app(a.values);await b.click('resume-saved');
+ assert.equal(b.controller.screen,'pause-screen');assert.equal(b.get('banter-setting').checked,false);
+ b.controller.frame(performance.now()+50);assert.equal(b.get('banter').classList.contains('hidden'),true);
+ b.click('resume');b.game.update(.02);
+ assert.equal(b.get('banter').classList.contains('hidden'),false);
+ assert.match(b.get('banter-text').textContent,/arrive.*cinq secondes/);
+ assert.equal(b.game.s.reducedEffects,true);
+ b.click('banter-close');b.game.bark('TOMA','Une autre blague.',true);
+ assert.equal(b.get('banter').classList.contains('hidden'),true);
+});
+
+for(const banter of [false,true])for(const reduced of [false,true])for(const reload of [false,true]){
+ test(`an announced encounter returns after ${reload?'saved reload':'pause'} with banter ${banter} and reduced effects ${reduced}`,async()=>{
+  for(const encounter of ['matriarch','travestia','pelican','horde']){
+   const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
+   const g=a.game;g.s.elapsed=300;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;
+   if(encounter==='horde')g.timers.horde=6.01;
+   else Object.assign(g.bossDirector,{nextType:encounter,bag:['matriarch','travestia','pelican'].filter(other=>other!==encounter),remaining:5.01,warned:false});
+   g.spawnWave(.02);assert.equal(a.get('banter').classList.contains('hidden'),false);
+   g.s.elapsed+=2.5;g.spawnWave(2.5);const timers=JSON.stringify(g.timers),director=JSON.stringify(g.bossDirector);
+   a.click('pause');assert.equal(a.get('banter').classList.contains('hidden'),true);
+   let b=a;if(reload){await a.controller.persistRun();b=app(a.values);await b.click('resume-saved');}
+   b.controller.frame(performance.now()+60000);
+   assert.equal(b.get('banter').classList.contains('hidden'),true);
+   b.click('resume');
+   assert.equal(b.get('banter').classList.contains('hidden'),false,`${encounter} warning must return on resume`);
+   assert.match(b.get('banter-text').textContent,encounter==='horde'?/horde.*4 s/i:/arrive.*3 s/i,'warning uses the remaining simulation time');
+   assert.equal(JSON.stringify(b.game.timers),timers);assert.equal(JSON.stringify(b.game.bossDirector),director);
+   assert.equal(b.get('app').classList.contains('reduced-fx'),reduced);
+  }
+ });
+}
+
+test('resume never repeats optional jokes or invents a countdown after the encounter arrived',async()=>{
+ const a=app();await a.click('play');a.game.s.elapsed=300;
+ a.game.bark('TOMA','Une blague passée.',true);a.click('pause');a.click('resume');
+ assert.equal(a.get('banter').classList.contains('hidden'),true,'optional joke is not replayed');
+ Object.assign(a.game.bossDirector,{remaining:5.01,warned:false});a.game.updateBossArrivals(.02);
+ a.game.s.elapsed+=5;a.game.updateBossArrivals(5);a.click('pause');a.click('resume');
+ assert.equal(a.get('banter').classList.contains('hidden'),true,'arrived boss does not get a new countdown');
+});
+
+test('announced finale countdown returns from a saved pause with remaining time',async()=>{
+ for(const [warningAt,pattern] of [[1130,/Dernière minute.*8 s/],[1154,/rival.*4 s/],[1174,/vague.*4 s/]]){
+  const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter:false,reduced:true})]]));await a.click('play');
+  const g=a.game;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;g.s.elapsed=warningAt+.01;g.spawnWave(.02);
+  g.s.elapsed+=2.5;a.click('pause');await a.controller.persistRun();const b=app(a.values);await b.click('resume-saved');b.click('resume');
+  assert.equal(b.get('banter').classList.contains('hidden'),false);assert.match(b.get('banter-text').textContent,pattern);
+ }
+});
+
+for(const banter of [false,true])for(const reduced of [false,true]){
+ test(`overlapping live encounter notices remain together with banter ${banter} and reduced effects ${reduced}`,async()=>{
+  for(const type of ['matriarch','travestia','pelican'])for(const [remaining,warned,expected] of [[5.01,false,/cinq secondes/],[3,true,/3 s/],[.01,true,/entre en scène/]]){
+   const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
+   const g=a.game;g.s.elapsed=300;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;g.timers.horde=6.01;
+   Object.assign(g.bossDirector,{nextType:type,bag:['matriarch','travestia','pelican'].filter(other=>other!==type),remaining,warned});
+   g.spawnWave(.02);
+   assert.equal(a.get('banter').classList.contains('hidden'),false);
+   const text=a.get('banter-text').textContent;
+   assert.match(text,/horde.*(?:six secondes|6 s)/i,'the horde warning is not overwritten');
+   assert.match(text,expected,'the boss warning or arrival remains visible too');
+   assert.equal((text.match(/horde/gi)||[]).length,1,'the same pending warning is not duplicated');
+   assert.equal(a.get('app').classList.contains('reduced-fx'),reduced);
+  }
+ });
+}

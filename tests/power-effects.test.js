@@ -14,7 +14,7 @@ test('each approved power acquisition produces its own cue only after a valid ch
   assert.equal(g.powerEffects[0].rank,1);assert.equal(g.powerEffects[0].start,0);
   assert(g.powerEffects[0].life<=1);assert.equal(g.chooseUpgrade(power),false);assert.equal(g.powerEffects.length,1);
  }
- const g=new Game({seed:42});choose(g,'money');assert.deepEqual(g.powerEffects,[],'unapproved powers are unchanged');
+ const g=new Game({seed:42});choose(g,'money');assert.equal(g.powerEffects[0].power,'money','remaining power sheet is now approved');
 });
 
 test('truth impacts immediately and leaves one simultaneous burst, never a travelling damage ring',()=>{

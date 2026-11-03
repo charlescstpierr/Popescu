@@ -76,3 +76,25 @@ test('regular warnings do not promise encounters that the finale will suppress',
  const {g,events}=quiet(1139);g.timers.horde=6.01;g.bossDirector.remaining=5.01;g.spawnWave(.02);assert.equal(events.filter(([t])=>t==='bark').length,0);
  g.s.endless=true;g.timers.horde=6.01;g.spawnWave(.02);assert.ok(events.some(([t,p])=>t==='bark'&&p.text.includes('six secondes')));
 });
+
+test('restored warning text combines pending threats without changing clocks or replaying suppressed arrivals',()=>{
+ const {g}=quiet(300);g.timers.horde=3.1;Object.assign(g.bossDirector,{remaining:2.2,warned:true});
+ const before=captureRun(g),warning=g.pendingEncounterWarning();
+ assert.match(warning,/arrive dans environ 3 s/);assert.match(warning,/horde arrive dans environ 4 s/);
+ assert.deepEqual(captureRun(g),before);
+ g.s.elapsed=1139;assert.equal(g.pendingEncounterWarning(),'');
+ g.s.endless=true;assert.match(g.pendingEncounterWarning(),/horde/);
+});
+
+test('a pending capped boss uses imminent wording instead of claiming zero seconds',()=>{
+ const {g}=quiet(300);Object.assign(g.bossDirector,{remaining:0,warned:true,retryIn:1});
+ assert.match(g.pendingEncounterWarning(),/arrive bientôt/);assert.doesNotMatch(g.pendingEncounterWarning(),/0 s/);
+ g.spawnEnemy(g.bossDirector.nextType,500,0);assert.equal(g.pendingEncounterWarning(),'');
+});
+
+test('late saves do not invent missed finale warnings or repeat completed finale countdowns',()=>{
+ const {g}=quiet(1175);assert.equal(g.pendingEncounterWarning(),'');
+ g.eventSeen.add('finale:1174');assert.match(g.pendingEncounterWarning(),/vague.*5 s/);
+ g.s.elapsed=1180;assert.equal(g.pendingEncounterWarning(),'');
+ g.s.elapsed=1175;g.s.endless=true;assert.equal(g.pendingEncounterWarning(),'');
+});

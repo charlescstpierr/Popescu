@@ -12,9 +12,9 @@ for(const difficulty of Object.keys(DIFFICULTIES))for(const build of BOSS_BUILDS
   const after=bossFight(Game,{difficulty,build,type});
   assert.ok(before.defeated&&after.defeated,'actual weapon hits must defeat the boss, not despawn it');
   assert.equal(after.playerDied,false,'the circling player has no artificial invulnerability');
-  assert.ok(after.time>=before.time*(build.at>=600?1.5:1.25),`${before.time}s -> ${after.time}s`);
-  assert.ok(after.time<=before.time*2.6,`bounded increase: ${before.time}s -> ${after.time}s`);
-  assert.ok(after.time<=35,'fixed early/mid/late offense builds must not become a grind');
+  assert.ok(after.time>=before.time*(build.at>=1080?3:build.at>=600?2:1.25),`${before.time}s -> ${after.time}s`);
+  assert.ok(after.time<=before.time*4.7,`bounded increase: ${before.time}s -> ${after.time}s`);
+  assert.ok(after.time<=45,'fixed early/mid/late offense builds must not become a grind');
  });
 }
 for(const type of BOSS_TYPES)test(`${type}: a control-heavy companion build can still finish across all difficulties`,()=>{
@@ -26,9 +26,9 @@ for(const type of BOSS_TYPES)test(`${type}: a control-heavy companion build can 
 for(const type of BOSS_TYPES)test(`${type}: the first boss is beatable with the starter gun alone`,()=>{
  const build={name:'starter',at:180,upg:{}};
  const before=bossFight(Game,{type,build,baselineHealth:true,maxTime:90,distance:160});
- const result=bossFight(Game,{type,build,maxTime:90,distance:160});
+ const result=bossFight(Game,{type,build,maxTime:130,distance:160});
  assert.ok(result.defeated);assert.ok(result.time>=before.time*1.25,`${before.time}s -> ${result.time}s`);
- assert.ok(result.time<=(type==='matriarch'?85:50),`${result.time}s including the matriarch's summoned enemies`);
+ assert.ok(result.time<=(type==='matriarch'?125:75),`${result.time}s including the matriarch's summoned enemies`);
 });
 test('late-game bosses survive their first attack instead of dying during the warning',()=>{
  const travestia=bossFight(Game,{type:'travestia',build:BOSS_BUILDS[2]});
@@ -53,13 +53,13 @@ test('ordinary enemies and rivals keep their health and weapon damage',()=>{
   g.hurt(e,18);assert.ok(Math.abs(e.hp-(hp-18))<1e-9,type);
  }
 });
-test('wounded bosses in existing v6 saves resume without healing or changing remaining health',()=>{
+test('wounded bosses in existing v7 saves resume without healing or changing remaining health',()=>{
  for(const type of BOSS_TYPES){
   const g=new Game();g.s.elapsed=180;const e=g.spawnEnemy(type,100,0);
   // Existing pre-balance values deliberately do not use the new spawn maximum.
   const previousMax={matriarch:696.685,travestia:812.6,pelican:908.2}[type];
   e.maxhp=previousMax;e.hp=previousMax*.37;
-  const snapshot=captureRun(g);assert.equal(snapshot.version,7);
+  const snapshot=captureRun(g);assert.equal(snapshot.version,8);
   const resumed=restoreRun(snapshot);assert.deepEqual(captureRun(resumed),snapshot);
   assert.equal(resumed.s.enemies[0].hp,e.hp);assert.equal(resumed.s.enemies[0].maxhp,e.maxhp);
   resumed.hurt(resumed.s.enemies[0],e.hp+1);assert.equal(resumed.s.kills,1);

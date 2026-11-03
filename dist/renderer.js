@@ -5,6 +5,7 @@ import {drawDiscovery} from './discovery-art.js';
 import {TRAVESTIA} from './travestia.js';
 import {drawPelicanGround,drawPelicanCards} from './pelican-art.js';
 import {HeroArt} from './hero-art.js';
+import {computeHeroPose} from './hero-pose.js';
 import {CombatArt} from './combat-art.js';
 import {PowerArt} from './power-art.js';
 import {ActorArt} from './actor-art.js';
@@ -349,7 +350,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.heroPowerStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -412,7 +413,19 @@ export class Renderer {
     if(!moving){line(ctx,'#383145',x-6,y-15,x+5,y-7,1);line(ctx,'#41354b',x+1,y-18,x-1,y-10,1);rect(ctx,'#66576c',x+7,y-2,7,1);}
   }
   _bike(p,chopper=false) {
-    const ctx=this.ctx,x=p.x,y=p.y;this._shadow(x,y+7,40,8);
+    const ctx=this.ctx,x=p.x,y=p.y;
+    if(chopper){
+      const vx=p.vx??640,vy=p.vy??0,len=Math.max(1,Math.hypot(vx,vy)),dx=vx/len,dy=vy/len;
+      this._shadow(x,y+8,54,9,.25);ctx.save();ctx.globalAlpha=.9;
+      if(!this.reducedEffects)for(let i=0;i<3;i++){const side=(i-1)*7;line(ctx,'#71eeff',x-dx*31-dy*side,y-dy*31+dx*side-8,x-dx*52-dy*side,y-dy*52+dx*side-8,2);}
+      ctx.translate(Math.round(x),Math.round(y));if(dx<0)ctx.scale(-1,1);
+      for(const wheel of [-19,20]){ring(ctx,'#71eeff',wheel,3,10,.22,2,0,1);ring(ctx,'#285a79',wheel,3,6,.35,1,0,1);}
+      for(const [a,b,c,d]of [[-19,3,-7,-13],[-7,-13,9,3],[9,3,-19,3],[20,3,11,-23],[11,-23,18,-23],[-5,-12,9,-12],[-12,-17,-2,-17],[-14,9,9,9]])line(ctx,'#71eeff',a,b,c,d,2);
+      rect(ctx,'#376c7e',-10,-6,18,13);for(let n=0;n<3;n++)line(ctx,'#94eaf0',-9,-4+n*4,6,-4+n*4,1);line(ctx,'#71eeff',-15,10,10,10,3);line(ctx,'#c5fcff',-17,-16,-5,-16,4);line(ctx,'#71eeff',18,1,11,-23,3);poly(ctx,'#337f91',[[-8,-17],[-2,-22],[9,-21],[15,-14],[9,-9],[-5,-10]]);line(ctx,'#c5fcff',-2,-16,8,-16,2);rect(ctx,'#c5fcff',12,-20,5,3);
+      if(!this.reducedEffects)for(let y=-21;y<11;y+=7)line(ctx,'#3b8eac',-7,y,9,y,1);
+      ctx.restore();return;
+    }
+this._shadow(x,y+7,40,8);
     [-14,14].forEach(v=>{oval(ctx,C.ink,x+v-7,y-3,15,17);oval(ctx,'#726078',x+v-5,y-1,11,13);oval(ctx,'#252237',x+v-4,y,9,11);line(ctx,'#9b8b9d',x+v,y+5,x+v+4,y+1,1);});
     line(ctx,C.ink,x-14,y+5,x-3,y-12,4);line(ctx,C.ink,x-3,y-12,x+10,y+5,4);line(ctx,'#5fbbcf',x-14,y+5,x-3,y-12,2);line(ctx,'#5fbbcf',x-3,y-12,x+10,y+5,2);line(ctx,'#6ed7df',x-14,y+5,x+10,y+5,2);line(ctx,'#6ed7df',x-3,y-12,x+10,y-12,2);line(ctx,'#798ead',x+14,y+5,x+8,y-18,2);
     rect(ctx,C.ink,x-7,y-15,11,4);line(ctx,'#d2c7d3',x+8,y-18,x+16,y-18,2);
@@ -501,8 +514,41 @@ export class Renderer {
     }
     ctx.restore();
   }
+  _heroPowerStamp(s,color){
+    if(!this.hero.image)return null;
+    const pose=computeHeroPose(s),art=pose.art,f=art.frame,anchor=art.anchor||[65,111],t=art.transform,key=`${f.x}:${f.y}:${art.mirror}:${t.a}:${t.b}:${t.c}:${t.d}:${color}`;
+    if(this.heroPowerStamps.has(key))return this.heroPowerStamps.get(key);
+    const canvas=makeCanvas(144,128);if(!canvas)return null;
+    const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
+    c.save();c.translate(72,111);c.transform(t.a,t.b,t.c,t.d,0,0);if(art.mirror)c.scale(-1,1);c.drawImage(this.hero.image,f.x,f.y,f.w,f.h,-anchor[0],-anchor[1],f.w,f.h);c.restore();
+    c.globalCompositeOperation='source-in';c.fillStyle=color;c.fillRect(0,0,144,128);
+    if(this.heroPowerStamps.size>=24)this.heroPowerStamps.delete(this.heroPowerStamps.keys().next().value);
+    this.heroPowerStamps.set(key,canvas);return canvas;
+  }
+  _heroPowerUnderlay(s){
+    if(this.reducedEffects||s.mode==='gameover')return;
+    const ctx=this.ctx,ground=computeHeroPose(s).art.ground;
+    if(s.upg?.speed>0&&s.walkMoving&&!s.stunt?.active){
+      const d=Math.hypot(s.moveX,s.moveY)||1,dx=s.moveX/d,dy=s.moveY/d,stamp=this._heroPowerStamp(s,C.gold);
+      ctx.save();
+      if(stamp)for(let n=2;n>=1;n--){ctx.globalAlpha=n===2?.09:.18;ctx.drawImage(stamp,Math.round(ground.x-dx*n*13)-72,Math.round(ground.y-dy*n*13)-111);}
+      ctx.globalAlpha=.7;for(let n=1;n<=2;n++){const x=s.x-dx*n*16,y=s.y-dy*n*16+7;line(ctx,C.gold,x-dx*5-dy*3,y-dy*5+dx*3,x,y,2);line(ctx,C.gold,x-dx*5+dy*3,y-dy*5-dx*3,x,y,2);}ctx.restore();
+    }
+    if(s.upg?.filter>0){
+      const gas=(s.clouds||[]).some(p=>(p.arm||0)<=0&&Math.hypot(p.x-s.x,p.y-s.y)<(p.r||0)+16);
+      if(gas){const stamp=this._heroPowerStamp(s,'#c4ffc8');if(stamp){ctx.save();ctx.globalAlpha=.6;for(const[dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]])ctx.drawImage(stamp,Math.round(ground.x)-72+dx,Math.round(ground.y)-111+dy);ctx.restore();}}
+      if(s.walkMoving){ctx.save();ctx.globalAlpha=.4;const d=Math.hypot(s.moveX,s.moveY)||1,dx=s.moveX/d,dy=s.moveY/d;for(let n=1;n<=2;n++)line(ctx,'#c4ffc8',s.x-dx*n*13-2,s.y-dy*n*13+8,s.x-dx*n*13+2,s.y-dy*n*13+8,2);ctx.restore();}
+    }
+  }
+  _shield(s){
+    if(!(s.shield>0))return;const ctx=this.ctx;
+    ctx.save();ctx.globalAlpha=this.reducedEffects?.65:.48;
+    if(this.reducedEffects){for(let n=0;n<3;n++)rect(ctx,'#84eaff',s.x-8+n*6,s.y+15,4,2);}
+    else{const ratio=Math.min(1,s.shield/Math.max(s.shield,s.stats?.shieldMax||0,1));for(let n=0;n<3;n++)for(let a=n*TAU/3+.18;a<n*TAU/3+.18+1.72*ratio;a+=.13)rect(ctx,'#84eaff',s.x+Math.cos(a)*35,s.y-35+Math.sin(a)*38,2,3);}
+    ctx.restore();
+  }
   _actor(actor,kind,phase,s) {
-    if(kind==='hero'){this._shadow(Math.round(actor.x),Math.round(actor.y)+11,34,9);if(this.hero.draw(this.ctx,s,this.time,this.reducedEffects))return;}
+    if(kind==='hero'){this._heroPowerUnderlay(s);this._shadow(Math.round(actor.x),Math.round(actor.y)+11,34,9);if(this.hero.draw(this.ctx,s,this.time,this.reducedEffects))return;}
     const ctx=this.ctx,isEnemy=kind==='enemy',isGirl=kind==='girl';
     const type=actor.type||'normal',gas=isEnemy&&(actor.gasPose||0)>0;
     const fx=actor.faceX??s.faceX??1,fy=actor.faceY??s.faceY??0,back=gas||fy<-.45;
@@ -614,7 +660,7 @@ export class Renderer {
 
   _shot(p,s) {
     const ctx=this.ctx;
-    if(p.kind==='heart'){if(p.viral&&p.hitIds?.size){line(ctx,'#f58cbe',p.linkX,p.linkY,p.x,p.y,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
+    if(p.kind==='heart'){if(p.viral&&p.hitIds?.size&&!this.reducedEffects){const dx=p.x-p.linkX,dy=p.y-p.linkY,d=Math.hypot(dx,dy)||1;for(let n=0;n<Math.min(d,260);n+=10)line(ctx,'#f58cbe',p.linkX+dx*n/d,p.linkY+dy*n/d,p.linkX+dx*Math.min(n+4,d)/d,p.linkY+dy*Math.min(n+4,d)/d,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
     if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
@@ -685,7 +731,7 @@ export class Renderer {
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
-    if(s.shield>0){ctx.save();ctx.globalAlpha=.42+.15*Math.sin(this.time*4);ring(ctx,'#84eaff',s.x,s.y-6,27,.15,2,this.time*.2);sparkle(ctx,s.x+24*Math.cos(this.time),s.y-6+15*Math.sin(this.time),'#bdf4ff',2);ctx.restore();}
+    this._shield(s);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}

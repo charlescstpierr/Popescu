@@ -93,9 +93,15 @@ async function resumeSaved(){
 }
 function mainMenu(){clearTimeout(autoTimer);game=null;runId=null;runPersistence=false;recoveryPending=false;flushRequested=false;savedRecord=runStore.read();if(savedRecord.status==='ready'){best=savedRecord.value.totals.best;lifetime=savedRecord.value.totals.lifetime;lifetimeCoins=savedRecord.value.totals.coins;}show('menu');updateRecordMenu();updateResumeMenu();}
 function onGameEvent(type,payload){if(['dialogue','upgrade','victory','gameover'].includes(type))requestSave();if(type==='sound'){const name=typeof payload==='string'?payload:payload?.name;if(!['level','victory','defeat'].includes(name))sound(name);return;}if(type==='bark'){showBanter(payload);return;}if(type==='dialogue'){openDialogue(Array.isArray(payload)?payload:payload?.lines||[],()=>{game?.finishDialogue();syncEngineScreen();});return;}if(type==='upgrade'){renderUpgrades(Array.isArray(payload)?payload:payload?.options||game?.state.options||[]);return;}if(type==='victory'||type==='gameover'){renderResult(type==='victory');return;}if(type==='wave'){setText('wave',payload?.text||String(payload));$('wave').classList.remove('hidden');setTimeout(()=>$('wave').classList.add('hidden'),3000);}}
-function syncEngineScreen(){if(!game)return;const mode=game.state.mode;if(mode==='playing')show('hud');else if(mode==='upgrade'&&screen!=='upgrades')renderUpgrades(game.state.options);else if(mode==='paused')show('pause-screen');else if(mode==='victory'||mode==='gameover')renderResult(mode==='victory');}
+function syncEngineScreen(){
+ if(!game)return;const mode=game.state.mode;
+ if(mode==='playing'){
+  const returning=screen!=='hud';show('hud');
+  if(returning){const warning=game.pendingEncounterWarning();if(warning)game.announceEncounter(warning);}
+ }else if(mode==='upgrade'&&screen!=='upgrades')renderUpgrades(game.state.options);else if(mode==='paused')show('pause-screen');else if(mode==='victory'||mode==='gameover')renderResult(mode==='victory');
+}
 function showBanter(payload){
-  if(!prefs.banter||!payload?.text||screen!=='hud')return;
+  if(!payload?.text||screen!=='hud'||(!prefs.banter&&payload.encounter!==true))return;
   setText('banter-name',payload.who||'TOMA');setText('banter-text',payload.text);
   const rival={'COQ RIVAL':'rival_rooster','BOUC RIVAL':'rival_goat','TRAVESTIA':'travestia','PÉLI ZODIAQUE':'pelican'}[payload.who];
   $('banter-portrait').classList.toggle('hidden',Boolean(rival));$('banter-rival').classList.toggle('hidden',!rival);

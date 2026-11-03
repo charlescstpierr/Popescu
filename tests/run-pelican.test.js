@@ -23,7 +23,7 @@ test('pelican initializes every persistable attack field alongside the shared bo
  assert.ok(g.bossDirector.remaining>=150&&g.bossDirector.remaining<=210);
  for(const key of fields)assert.ok(Object.hasOwn(e,key),key);
  assert.equal(e.peliX,123);assert.equal(e.peliY,-45);assert.equal(e.peliDX,1);assert.equal(e.peliDY,0);
- assert.equal(captureRun(g).version,7);
+ assert.equal(captureRun(g).version,8);
 });
 for(const [name,time] of [['peli_hug_warning',.7],['peli_hug',.4],['peli_zodiac_warning',.9],['peli_zodiac',.7],['peli_tarot_warning',.6],['peli_tarot',.6],['peli_recover',.5]])test(`${name} resumes exactly without restarting or skipping the attack`,()=>{
  const {g,e}=setup();phase(g,e,name,time);
@@ -93,7 +93,7 @@ for(const version of [1,2,3,4])test(`v${version} migrates into the shared boss s
  if(version<=3){delete old.game.timers.animal;delete old.game.timers.animalIndex;}
  if(version===1){delete old.game.timers.travestia;for(const enemy of old.game.s.enemies)for(const key of ['tailTime','tailFaceX','tailHitPlayer','tailHitGirl'])delete enemy[key];}
  const original=structuredClone(old),copy=restoreRun(old),saved=captureRun(copy);
- assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,7);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
+ assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,8);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
  assert.equal(copy.s.elapsed,123);assert.equal(copy.s.hp,67);assert.equal(copy.s.kills,7);assert.equal(copy.s.coins,11);
  assert.deepEqual([...copy.discoveryCooldowns],[['site',250]]);assert.equal(copy.discoveryContact,'site');assert.ok(copy.eventSeen.has('phone'));
 });
@@ -108,9 +108,9 @@ test('v4 store envelope upgrades atomically and keeps cumulative credits intact'
  assert.ok(originalStore.begin('legacy-v4',g,{best:100,lifetime:20,coins:30}).ok);assert.ok(originalStore.checkpoint('legacy-v4',g,{credit:true}).ok);
  const old=JSON.parse(storage.getItem(originalStore.key));old.version=4;old.run.snapshot.version=4;delete old.run.snapshot.game.timers.pelican;
  const raw=JSON.stringify(old);storage.setItem(originalStore.key,raw);const store=new RunStore(storage),read=store.read();
- assert.equal(read.status,'ready');assert.equal(read.value.version,7);assert.equal(read.value.run.snapshot.version,7);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
+ assert.equal(read.status,'ready');assert.equal(read.value.version,8);assert.equal(read.value.run.snapshot.version,8);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
  const copy=restoreRun(read.value.run.snapshot);assert.ok(store.checkpoint('legacy-v4',copy,{credit:true}).ok);
- const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,7);assert.equal(written.run.snapshot.version,7);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
+ const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,8);assert.equal(written.run.snapshot.version,8);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
 });
 test('real pre-animal v3 envelope retains its Travestia state and both scheduler migrations',()=>{
  const raw=readFileSync(new URL('./fixtures/runstore-v3.json',import.meta.url),'utf8'),old=JSON.parse(raw),storage=memory();storage.setItem('toma-popescu-run-v1',raw);

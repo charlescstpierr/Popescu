@@ -26,7 +26,7 @@ export function compactDrops(state,world){
   for(let i=kept.length-1;i>=0;i--)if(kept[i].kind==='xp'){absorb(kept[i]);kept.splice(i,1);}
  }
  if(packet&&distance(packet,state)>=MAX_DISTANCE){
-  const position=reachablePickupPosition(state,world);
+  const position=reachablePickupPosition(state,world,packet);
   if(position){packet.x=position.x;packet.y=position.y;}
  }
  const budget=DROP_CAP-(packet?1:0);
@@ -35,16 +35,21 @@ export function compactDrops(state,world){
  return kept;
 }
 
-function reachablePickupPosition(state,world){
+function reachablePickupPosition(state,world,packet){
  if(!world)return null;
  const girl=state.companion&&state.girl.down<=0?state.girl:null;
- let dx=girl?state.x-girl.x:-state.faceX,dy=girl?state.y-girl.y:-state.faceY;
+ // Aim and companion position must never turn a bank behind the runner
+ // into a reward directly ahead. Old saves have no trustworthy travel yet.
+ const hasTravel=Math.hypot(state.travelX,state.travelY)>0;
+ let dx=hasTravel?-state.travelX:packet.x-state.x,dy=hasTravel?-state.travelY:packet.y-state.y;
  if(!Math.hypot(dx,dy)){dx=0;dy=1;}
  const angle=Math.atan2(dy,dx),radius=Math.max(120,state.stats.magnet+48);
  // Check a player-width corridor, not just an empty endpoint: a crystal on
  // the other side of a warehouse would still be inaccessible. Search is
  // deterministic and bounded; keep the old packet if every route is blocked.
- for(let i=0;i<32;i++){
+ // Search the trailing half-circle once actual movement is known. If only
+ // forward routes are clear, preserve the old bank and retry on a later step.
+ for(let i=0;i<(hasTravel?17:32);i++){
   const offset=i===0?0:(i%2?1:-1)*Math.ceil(i/2)*Math.PI/16;
   const x=state.x+Math.cos(angle+offset)*radius,y=state.y+Math.sin(angle+offset)*radius;
   if(girl&&distance({x,y},girl)<=state.stats.magnet+24)continue;
