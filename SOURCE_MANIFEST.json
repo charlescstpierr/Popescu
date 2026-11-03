@@ -1,0 +1,346 @@
+{
+  "version": "1.5",
+  "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 80,
+      "sha256": "1aaec666dbde0e1eebeae8219f27ceb6cf96b3585094418b267eeb66a0e43da0"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 4494,
+      "sha256": "1f0b439a66360cf3a24be7a10ac7662ec0044cac7ce3fa28590f2c8417bdcada"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5655,
+      "sha256": "4db3cc33ed1fac35761dd3772156747a0a620f0c7f75e1d55072c8df001436b0"
+    },
+    {
+      "path": "art/requirements.txt",
+      "bytes": 42,
+      "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "art/source/toma/north.png",
+      "bytes": 1273556,
+      "sha256": "b0ebd07aed463ba83664861cb1d5d83879f7f2a42a5179700238c26e03e5091d"
+    },
+    {
+      "path": "art/source/toma/northeast.png",
+      "bytes": 1266661,
+      "sha256": "dde23e6411efdea7707203c64dbf0e7a1bd1346c3002cd4610af333a162dd986"
+    },
+    {
+      "path": "art/source/toma/run-east.png",
+      "bytes": 1101413,
+      "sha256": "ca792442e7131feab55d3fe09cd2a90ac8c3f9b18389103391564eed0cf6a074"
+    },
+    {
+      "path": "art/source/toma/south.png",
+      "bytes": 1248302,
+      "sha256": "46b9ff1be0b8d32607ddd1a143015fa938b2f299fd2efea34e1fef123c784325"
+    },
+    {
+      "path": "art/source/toma/southeast.png",
+      "bytes": 1452732,
+      "sha256": "8dfbd7bec8acc091574da051150117078564f0b8082e5b275decd47908623781"
+    },
+    {
+      "path": "art/source/toma/split-east.png",
+      "bytes": 1843231,
+      "sha256": "6ac892360c137083eab071559a3ab37c95d04f63e304a5cb96a3ac2d66f18692"
+    },
+    {
+      "path": "dist/actor-art.js",
+      "bytes": 5839,
+      "sha256": "8bb152682c7fde49ec43da079ca44ba3d238b01099c0ed69f761c9cf9c3c1737"
+    },
+    {
+      "path": "dist/app.js",
+      "bytes": 18012,
+      "sha256": "26a7f14320bf78ffa3137b1a238811dd792e0498c9ea46ab88c33567ec660bbb"
+    },
+    {
+      "path": "dist/assets/actors-v2.json",
+      "bytes": 981,
+      "sha256": "fa142a4df0a45a98844aba855a60dc886013ab9f4c6a10a725f433cb77e0a9c4"
+    },
+    {
+      "path": "dist/assets/couverture-personnages.webp",
+      "bytes": 42970,
+      "sha256": "d904e391efa4bbe0ee3ca76a6200e8b87cd21d89b97cd7cf22095a66131e30c9"
+    },
+    {
+      "path": "dist/assets/girl-walk-v2.png",
+      "bytes": 122964,
+      "sha256": "ff2ae27f40de80560cc57f4914c1c9c95b3363827dc2bf5232e8064c9a6c118e"
+    },
+    {
+      "path": "dist/assets/gorilla-walk-v2.png",
+      "bytes": 179140,
+      "sha256": "0fb2ddab9e2c0c3d05089387bd8e7ffd420ef74c64258801a8ae12ce8cc39960"
+    },
+    {
+      "path": "dist/assets/gorille-femelle.webp",
+      "bytes": 12310,
+      "sha256": "f852d96895c96b842fcb2322aab88d66a7471e3bc40e68087014106361b144a4"
+    },
+    {
+      "path": "dist/assets/orangutan-walk-v3.png",
+      "bytes": 172138,
+      "sha256": "205dfcab8d50fa319be06b2a70e27ed9f7ec782b43f67cdb47aa22281c8f5ed0"
+    },
+    {
+      "path": "dist/assets/portrait-blonde-ia.webp",
+      "bytes": 16712,
+      "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "dist/assets/portrait-toma-v4.svg",
+      "bytes": 90606,
+      "sha256": "822c95ad35cb691c926ee1768d7a7cd2c76ed51050540e46b948252f401e71c4"
+    },
+    {
+      "path": "dist/assets/portrait-toma.webp",
+      "bytes": 23468,
+      "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
+    },
+    {
+      "path": "dist/assets/rival_goat-walk-v3.png",
+      "bytes": 128805,
+      "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "dist/assets/rival_rooster-walk-v3.png",
+      "bytes": 176876,
+      "sha256": "96c70ca6c7514fbcaca6df30ecb29643d4a2d03e88c4483c932d41916387ab04"
+    },
+    {
+      "path": "dist/assets/scene-gorilles.webp",
+      "bytes": 62564,
+      "sha256": "79bfe0ac58f5cc2936fc8fa8f642fa21749d382b8f60aa3ee0246501ccfb1981"
+    },
+    {
+      "path": "dist/assets/toma-torso-rig-v3.png",
+      "bytes": 79424,
+      "sha256": "5d9fd819e16e18860c7d1fb80746728c4753b33c513852aca9fc09cca31e7145"
+    },
+    {
+      "path": "dist/assets/toma-walk-v2.png",
+      "bytes": 140878,
+      "sha256": "9f57ee08161463778b950bc306cef753e461f986a1e431e006402f740fa9d69d"
+    },
+    {
+      "path": "dist/assets/toma-whole-v5.png",
+      "bytes": 425084,
+      "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
+    },
+    {
+      "path": "dist/audio.js",
+      "bytes": 21588,
+      "sha256": "faf46d2e47da1c0644aa29d9baf0133b08821bbda840c0ca3dd8af41d2d6b5b0"
+    },
+    {
+      "path": "dist/city-art.js",
+      "bytes": 42089,
+      "sha256": "ea7b64e560cd458d98566682f04eff2ba5328495955c9a85bfcb656a259dfefa"
+    },
+    {
+      "path": "dist/combat-art.js",
+      "bytes": 3398,
+      "sha256": "707371109e7508ff6b241ef9d01b4d54449dc2a2b24a82ff44c28a95249623d6"
+    },
+    {
+      "path": "dist/content.js",
+      "bytes": 20805,
+      "sha256": "a55ccc69e6cc06ece172a822827b24540beb8a89381d629adab3bdffee943231"
+    },
+    {
+      "path": "dist/engine.js",
+      "bytes": 34421,
+      "sha256": "095d6b1490ee0abde4aeda3ddd773bc658dfda64c8f6edbc439e458e20013eb3"
+    },
+    {
+      "path": "dist/hero-art.js",
+      "bytes": 3454,
+      "sha256": "b9e9944287282070f9a077dc7472b6f15216c5b6dbdf14ea43a72838a207f65d"
+    },
+    {
+      "path": "dist/hero-frames.js",
+      "bytes": 63380,
+      "sha256": "3fc5e7e10eed4c3f448baef204be0ae470dfe840c11be91af8e0de9cc389678b"
+    },
+    {
+      "path": "dist/hero-pose.js",
+      "bytes": 5238,
+      "sha256": "19b78535ec59ab5641bf599e9c5c2f30e775deddd9b206d62641d2107b5de749"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 10139,
+      "sha256": "0fbce1db0ac5fc732583011b86752bbe473dc7c3846405999f6791791d4fc691"
+    },
+    {
+      "path": "dist/renderer.js",
+      "bytes": 40025,
+      "sha256": "6e8b5254a00004863d70d7903028b4e6ef2d48b3074068420b5fbc61942e02df"
+    },
+    {
+      "path": "dist/styles.css",
+      "bytes": 22377,
+      "sha256": "ffddddea1e015a941b88d23274b38ea9d1f0d9f3ff5f3365402980eeb33d3ed7"
+    },
+    {
+      "path": "dist/world.js",
+      "bytes": 5050,
+      "sha256": "ec365bb4e8852475380ba158cbb9f3e7444a939ce3a5f507dd642f04630e6820"
+    },
+    {
+      "path": "docs/CONTRACT.md",
+      "bytes": 8164,
+      "sha256": "109436cd5a482c99e2ba4583bdef72598427a0a973ea096461c4bd261a7aeba1"
+    },
+    {
+      "path": "docs/GRAPHICS.md",
+      "bytes": 3488,
+      "sha256": "f46411e68b22af3aa84c19590fb8621db9b35a24429192de19f20f20acc0e7b7"
+    },
+    {
+      "path": "docs/PLAN-TOMA-APPROUVE.md",
+      "bytes": 3031,
+      "sha256": "81bc1a9438cc351b93eb57d66e25e9e40f7cd44b6cad97cf71ecbc73fcb3d683"
+    },
+    {
+      "path": "docs/PLAN-TOMA-MOUVEMENT.md",
+      "bytes": 1797,
+      "sha256": "7cfff865170585b1defef6adce29658aaec0f13b50723804d14bd22303d5947f"
+    },
+    {
+      "path": "docs/PLAN.md",
+      "bytes": 1942,
+      "sha256": "d39a94e696eb6434222b3da6328b20c30d165e84e36823289769b26968fc9e0d"
+    },
+    {
+      "path": "docs/QA-CONTENT.md",
+      "bytes": 2910,
+      "sha256": "a85e3b20a8f3e744f79fc78f9e872c43e7a6e58d1eff1803fff7e8e182abca0b"
+    },
+    {
+      "path": "docs/QA-GRAPHICS.md",
+      "bytes": 2038,
+      "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
+    },
+    {
+      "path": "docs/QA-REVIEW.md",
+      "bytes": 3608,
+      "sha256": "c27992ce89e31ad0c45faba872901a36005ec5b1a9dadbed32b87e3752c1a7fd"
+    },
+    {
+      "path": "docs/QA-V1.3.md",
+      "bytes": 3077,
+      "sha256": "4a6fcffbde204e7e1bda18980f9e7b64dea84e8c45959eb6751db6a5d3a75bac"
+    },
+    {
+      "path": "docs/QA-V1.4.md",
+      "bytes": 3694,
+      "sha256": "ee55c5868683dded0f954528925606d9ac89601fb57830e6404d0df196fd02be"
+    },
+    {
+      "path": "docs/QA-V1.5.md",
+      "bytes": 3593,
+      "sha256": "a19eb67e2538b91729276af6a02ab743bf0c4402959d75f73c32efc64682dffc"
+    },
+    {
+      "path": "docs/REPRISE.md",
+      "bytes": 11515,
+      "sha256": "12a3737606a5ab415173d7c93eeac6157ff5073318f864c7e37af5ffd57b2cab"
+    },
+    {
+      "path": "package.json",
+      "bytes": 129,
+      "sha256": "07b478a06661487d0485ce60622bb744bc2f8b4b07c53eafda3d961cf82b1216"
+    },
+    {
+      "path": "release/Toma_Popescu_JOUER.html",
+      "bytes": 3280980,
+      "sha256": "ad03bf76bdb690be81cb73c45275c673628f72a0f9ed1e538a922413cd71ba00"
+    },
+    {
+      "path": "scripts/export-standalone.py",
+      "bytes": 1725,
+      "sha256": "0059b8c23658c1f271cc1b7c4c247f399d609a8dea1d1b20783b5103a402b76b"
+    },
+    {
+      "path": "scripts/inspect-graphics.mjs",
+      "bytes": 8322,
+      "sha256": "a3dcc15f2130ab1cdf252415b490227502894a722baf74452a4f6e11b99a4ecc"
+    },
+    {
+      "path": "scripts/inspect-hero.mjs",
+      "bytes": 8929,
+      "sha256": "54e877b6f14616280ab6d8cb711a28a22c4804313333551727df5e8a3f702865"
+    },
+    {
+      "path": "scripts/pack-actors.py",
+      "bytes": 2396,
+      "sha256": "1c037ef3e8a5dbeacdc6adef4165f5f5fb02a1d6a65d28eaff2b070fb6a026a2"
+    },
+    {
+      "path": "scripts/pack-hero-approved.py",
+      "bytes": 6793,
+      "sha256": "eb37f0cfc62a5a8dcae0c786f49c8cf0629d337c33a05e9399b838853be17e34"
+    },
+    {
+      "path": "scripts/prepare-hero-whole.py",
+      "bytes": 7845,
+      "sha256": "687e567771098423e3d566c92c979ec1a5364798e365caf82c908ff571da8f7c"
+    },
+    {
+      "path": "scripts/render-music-preview.mjs",
+      "bytes": 6498,
+      "sha256": "f775cfb89252e781843624e56613aba2081bd8cb1de24a1e383c183bea34a1b3"
+    },
+    {
+      "path": "tests/audio.test.js",
+      "bytes": 11233,
+      "sha256": "75af5db91f4809e62cad7cb7398368668cfc6b10d828f1351e8159bb0692a7d8"
+    },
+    {
+      "path": "tests/engine.test.js",
+      "bytes": 27752,
+      "sha256": "72eda25699f6394b2f6e7ad0775e8bcf25e16b159113d09e5d3fffeba9bcc1b2"
+    },
+    {
+      "path": "tests/hero-art.test.js",
+      "bytes": 2242,
+      "sha256": "b35c27402041d382400b6737494b8f9000e7900bb4255d6b6b77f398ddd76c9e"
+    },
+    {
+      "path": "tests/hero-contact.test.js",
+      "bytes": 2765,
+      "sha256": "50c95f819c5f679c5038986c017fbcba7ea5dd2c883c7107cd303fcd3088b8d9"
+    },
+    {
+      "path": "tests/hero-gait.test.js",
+      "bytes": 1661,
+      "sha256": "4e3593bbaa9c537d5162cc0d16203346e4c3d7bbc237b89d8fe67e38b8f20272"
+    },
+    {
+      "path": "tests/hero-pose.test.js",
+      "bytes": 6120,
+      "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
+    },
+    {
+      "path": "tests/rooster-reaction.test.js",
+      "bytes": 2037,
+      "sha256": "4c9f5c39596fcca1e376d6b52373f0fea9c0972af7999e49b479d75d1c85c984"
+    },
+    {
+      "path": "tests/world.test.js",
+      "bytes": 3901,
+      "sha256": "f7fc0cc09bfcef2903b532f7d53f092f3f6116c1beb836c4606bea09272746d3"
+    }
+  ]
+}
