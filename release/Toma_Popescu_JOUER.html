@@ -4293,6 +4293,20 @@ function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetim
 function validateRecord(v){
  tree(v);check([1,2,3,4,5,6,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
+function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
+  const accumulated=old?{...old.totals}:totals(copy(legacy));
+  if(old){
+   if(previous)check(previous.id===old.run.id);
+   const source=previous?validate(copy(previous.snapshot)):old.run.snapshot,s=source.game.s;
+   check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);
+   accumulated.best=Math.max(accumulated.best,s.elapsed);accumulated.lifetime+=s.kills-old.run.creditedKills;accumulated.coins+=totalEarnedCoins(s)-old.run.creditedCoins;
+  }
+  return {totals:accumulated,run:{id,snapshot:snapshot(),creditedKills:0,creditedCoins:0}};
+ });}
+function checkpointRecord(store,id,snapshot,{credit=false}={}){return store.transaction(old=>{
+ if(!old||old.run.id!==id)throw Error('conflict');const captured=snapshot(),s=captured.game.s;check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);const next={totals:{...old.totals},run:{...old.run,snapshot:captured}};
+ if(credit){next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=totalEarnedCoins(s)-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=totalEarnedCoins(s);}return next;
+ });}
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.
 // Browser integration uses LockedRunStore below for cross-tab serialization.
@@ -4303,20 +4317,9 @@ class RunStore {
  const expected=this.revision;const current=this.read();if(!['empty','ready'].includes(current.status))return {ok:false,reason:current.status};if(expected!==null&&expected!==this.revision){this.revision=expected;return {ok:false,reason:'conflict'};}
  try{const next=change(current.value);next.version=VERSION;next.revision=this.revision+1;validateRecord(next);const raw=JSON.stringify(next);check(raw.length<=MAX_BYTES);this.storage.setItem(this.key,raw);this.revision=next.revision;return {ok:true,value:next};}catch(e){return {ok:false,reason:e.message==='conflict'?'conflict':'write-failed'};}
  }
- begin(id,game,legacy={best:0,lifetime:0,coins:0},dialogue=null,previous=null){return this.transaction(old=>{
-  const accumulated=old?{...old.totals}:totals(copy(legacy));
-  if(old){
-   if(previous)check(previous.id===old.run.id);
-   const source=previous?validate(copy(previous.snapshot)):old.run.snapshot,s=source.game.s;
-   check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);
-   accumulated.best=Math.max(accumulated.best,s.elapsed);accumulated.lifetime+=s.kills-old.run.creditedKills;accumulated.coins+=totalEarnedCoins(s)-old.run.creditedCoins;
-  }
-  return {totals:accumulated,run:{id,snapshot:captureRun(game,dialogue),creditedKills:0,creditedCoins:0}};
- });}
- checkpoint(id,game,{credit=false,dialogue=null}={}){return this.transaction(old=>{
- if(!old||old.run.id!==id)throw Error('conflict');const s=game.s;check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);const next={totals:{...old.totals},run:{...old.run,snapshot:captureRun(game,dialogue)}};
- if(credit){next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=totalEarnedCoins(s)-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=totalEarnedCoins(s);}return next;
- });}
+ begin(id,game,legacy,dialogue=null,previous=null){return beginRecord(this,id,()=>captureRun(game,dialogue),legacy,previous);}
+ checkpoint(id,game,options={}){return checkpointRecord(this,id,()=>captureRun(game,options.dialogue??null),options);}
+
 }
 class Autosave {
  constructor(write,now=()=>Date.now(),interval=5000){this.write=write;this.now=now;this.interval=interval;this.last=-Infinity;this.result=null;}
@@ -4331,11 +4334,14 @@ class LockedRunStore {
  async write(method,args){
   if(typeof this.locks?.request!=='function')return {ok:false,reason:'locking-unavailable'};
   try{
-   // Freeze the requested checkpoint before awaiting a lock or any other task.
+   // Freeze and validate once before waiting. Restoring a throwaway Game and
+   // recapturing it here repeated two full validations every five seconds.
    const dialogue=method==='begin'?args[3]:args[2]?.dialogue;
-   const frozen=[args[0],restoreRun(captureRun(args[1],dialogue))];
-   if(args[2]!==undefined)frozen[2]=copy(args[2]);if(args[3]!==undefined)frozen[3]=copy(args[3]);if(args[4]!==undefined)frozen[4]=copy(args[4]);
-   return await this.locks.request(this.store.key,()=>this.store[method](...frozen));
+   const snapshot=captureRun(args[1],dialogue),options=args[2]===undefined?undefined:copy(args[2]);
+   const previous=args[4]===undefined?undefined:copy(args[4]);
+   return await this.locks.request(this.store.key,()=>method==='begin'
+    ?beginRecord(this.store,args[0],()=>snapshot,options,previous)
+    :checkpointRecord(this.store,args[0],()=>snapshot,options));
   }catch{return {ok:false,reason:'unavailable'};}
  }
  begin(...args){return this.write('begin',args);}
