@@ -24,7 +24,7 @@ const STREET_CLUSTERS=[
 const STREET_SLOTS=[[174,205],[177,279],[208,320],[218,148],[311,134],[362,137],[406,171],[412,246],[409,390],[366,410],[220,421],[104,382],[151,326],[215,209],[212,274],[155,171]];
 
 export class World {
-  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; this.collisionBounds = new WeakMap(); }
+  constructor(seed = 42) { this.seed = seed | 0; this.chunks = new Map(); this.chunkSize = SIZE; this.collisionBounds = new WeakMap(); this.collisionRegion = null; }
   chunk(cx, cy) {
     const key = `${cx},${cy}`;
     const cached = this.chunks.get(key);
@@ -115,6 +115,8 @@ export class World {
     return props;
   }
   update(x, y) {
+    // A single derived neighborhood never keeps evicted geometry alive.
+    this.collisionRegion = null;
     const cx = Math.floor(x / SIZE), cy = Math.floor(y / SIZE);
     for (const key of this.chunks.keys()) { const [a,b] = key.split(',').map(Number); if (Math.abs(a-cx)>4 || Math.abs(b-cy)>4) this.chunks.delete(key); }
     for(let a=cx-2;a<=cx+2;a++) for(let b=cy-2;b<=cy+2;b++) this.chunk(a,b);
@@ -132,16 +134,24 @@ export class World {
   collides(x,y,r=0) {
     const minx=Math.floor((x-r-110)/SIZE),maxx=Math.floor((x+r+110)/SIZE);
     const miny=Math.floor((y-r-110)/SIZE),maxy=Math.floor((y+r+110)/SIZE);
-    for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) {
-      const props=this.chunk(a,b);
-      // Props are static for the lifetime of a generated chunk. Weak keys let
-      // eviction release these derived footprints along with the prop array.
-      let solids=this.collisionBounds.get(props);
-      if(!solids){solids=props.filter(p=>p.solid).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
-      for(const bounds of solids){
-        const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
-        if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
+    let region=this.collisionRegion;
+    if(!region||region.minx!==minx||region.maxx!==maxx||region.miny!==miny||region.maxy!==maxy){
+      const bounds=[];
+      for(let a=minx;a<=maxx;a++) for(let b=miny;b<=maxy;b++) {
+        const props=this.chunk(a,b);
+        // Props are static for the lifetime of a generated chunk. Weak keys let
+        // eviction release these derived footprints along with the prop array.
+        let solids=this.collisionBounds.get(props);
+        if(!solids){solids=props.filter(p=>p.solid).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
+        for(const solid of solids)bounds.push(solid);
       }
+      region=this.collisionRegion={minx,maxx,miny,maxy,bounds};
+    }
+    // Crowd pushes often test the same chunk neighborhood several times. Reuse
+    // its ordered footprints; only the original circle/rectangle math varies.
+    for(const bounds of region.bounds){
+      const dx=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),dy=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
+      if (dx*dx+dy*dy<r*r || (dx===0 && dy===0)) return true;
     }
     return false;
   }

@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-animals-v3-save-compatibility",
+  "version": "1.5-plus-crowd-performance",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -259,8 +259,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 43465,
-      "sha256": "faec814425b9ed37e223b53cb156a7e4868ca931d1cc9d7d8976aafe3f0ebf10"
+      "bytes": 43683,
+      "sha256": "742dc527db025ed796b93ce8bb33ce77dbb1177f56fe07d640251ee99038b153"
     },
     {
       "path": "dist/hero-art.js",
@@ -319,8 +319,8 @@
     },
     {
       "path": "dist/world.js",
-      "bytes": 8185,
-      "sha256": "ed9e447113d5dc11f9ccd9f55b53d53e81bf3eda9adcc67d54d1273f652e8da9"
+      "bytes": 8773,
+      "sha256": "48c2c99f5ffbf24839a24679fbe3492585bf76cfbac9492b8531726c0563c570"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -346,6 +346,11 @@
       "path": "docs/PERFORMANCE-COLLISIONS.md",
       "bytes": 3901,
       "sha256": "220f9a70aa43869853befc59289f02cf38d3836bdf9f8270f5941c141941604b"
+    },
+    {
+      "path": "docs/PERFORMANCE-CROWD.md",
+      "bytes": 3732,
+      "sha256": "696608fd9bb0f5632b8423859275587a304194c9bb1e7b30911d2ef16e6ce33b"
     },
     {
       "path": "docs/PLAN-TOMA-APPROUVE.md",
@@ -454,8 +459,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 12096625,
-      "sha256": "0b5d55d06a1db634621aeda6d0e9295f349ab9c86de0998e21256c3a363bd91c"
+      "bytes": 12097431,
+      "sha256": "bb5d6abcea8688ff35a46577682c55c158a24bed0b513116eb63e955ddd1b517"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -533,6 +538,16 @@
       "sha256": "f775cfb89252e781843624e56613aba2081bd8cb1de24a1e383c183bea34a1b3"
     },
     {
+      "path": "scripts/verify-crowd-equivalence.mjs",
+      "bytes": 2822,
+      "sha256": "81b7e8d4f2bbda8feba9813759417ecea2902423daceb3cc9af40efbc69d2cb7"
+    },
+    {
+      "path": "scripts/verify-crowd-render.mjs",
+      "bytes": 2069,
+      "sha256": "ab8a581c9787b728dac8881af6ed7ef772ab87ee3771e85d0438df2d0d465b8c"
+    },
+    {
       "path": "tests/animals.test.js",
       "bytes": 4034,
       "sha256": "a697ee4a81dc1f6117212c29c092f9da464591eba1c3939be33432323fc414b9"
@@ -551,6 +566,11 @@
       "path": "tests/biomes.test.js",
       "bytes": 2492,
       "sha256": "c6b16907c8f523f97ae9af6c3a5270be69fbc4e91b49ab2df7f327ec09bd530a"
+    },
+    {
+      "path": "tests/crowd-performance.test.js",
+      "bytes": 772,
+      "sha256": "f185e60082c4965dffe82071dc85e52f320739d38aaf2876d611781370fa8d9a"
     },
     {
       "path": "tests/discoveries.test.js",
@@ -674,8 +694,8 @@
     },
     {
       "path": "tests/world-performance.test.js",
-      "bytes": 1518,
-      "sha256": "b12c65ccad0d980e48753eb230041e11855d6719c4dc888c090457034e5bbaf8"
+      "bytes": 2478,
+      "sha256": "b7b227c87508e05d31c1daab4f824be672df4200202d9c6bdb0e5d3029187bc7"
     },
     {
       "path": "tests/world.test.js",
@@ -683,6 +703,6 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "2065b7e6a7b6e8170ff8625bc21ba12687236591",
+  "base_github_commit": "812d6ddb012dc4ec3bc26a076955fd5e518bfd6c",
   "integration_date": "2026-11-03"
 }
