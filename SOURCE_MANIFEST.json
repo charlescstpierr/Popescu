@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-random-boss-arrivals",
+  "version": "1.5-plus-boss-durability",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -14,8 +14,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 7742,
-      "sha256": "cf86789c7c00adce2671e057fe24127048a535ec8dd7a9ff8fd8fe5c84e03aa3"
+      "bytes": 8110,
+      "sha256": "22b0dc3a39ba763917d1aae111fdcc2523900b78a47c2733c4d4af501cd3bc3e"
     },
     {
       "path": "art/requirements.txt",
@@ -299,8 +299,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 45665,
-      "sha256": "0df8f4967e6c0768351e14e7054836433c4b061859083e8d3d6fe081f0394cd2"
+      "bytes": 46006,
+      "sha256": "838e68d957377f6b7a12a1b368217d013654404b61248dc7c27e54463e2c1d91"
     },
     {
       "path": "dist/hero-art.js",
@@ -376,6 +376,11 @@
       "path": "docs/BOSS-ALEATOIRES.md",
       "bytes": 3805,
       "sha256": "47fabe3e5f1aff01481f2159f4527e1a086627427678c4c7de7dfaef1d49f10c"
+    },
+    {
+      "path": "docs/BOSS-RESISTANCE.md",
+      "bytes": 5508,
+      "sha256": "a58885f8e329aa2ba64ba28ddbd962fd8f46d81b5ffe2bfc777c716330323914"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -519,8 +524,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 13985457,
-      "sha256": "11da78dc79b7aeae72b79cfe94fb74af156e6963444e52cab36e60e6ec58eb72"
+      "bytes": 13985798,
+      "sha256": "888d5e74ff2c146f0d1e6c6cc28284d7a91aa6ce5059cca745029ec2c023195d"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -608,6 +613,11 @@
       "sha256": "692003fe66b0cea64cfc30f15fd2d27ea851aa1cc44774595ba98ae06ddbcd7c"
     },
     {
+      "path": "scripts/verify-boss-durability.mjs",
+      "bytes": 1699,
+      "sha256": "2bc13fe99536b4a8838eb768334eccefbbd9f5bbf3d55ef585ad957ca4fbaee3"
+    },
+    {
       "path": "scripts/verify-crowd-equivalence.mjs",
       "bytes": 2822,
       "sha256": "81b7e8d4f2bbda8feba9813759417ecea2902423daceb3cc9af40efbc69d2cb7"
@@ -648,6 +658,11 @@
       "sha256": "ff24eca10bfa8ddf53b0e023cc82e5d9002fc73b8de41e3420d991d30e220d2f"
     },
     {
+      "path": "tests/boss-durability.test.js",
+      "bytes": 4753,
+      "sha256": "420fac09b4e2fb154ce5d44092fdbcec00827948fb1494a220c57d593fd6f944"
+    },
+    {
       "path": "tests/crowd-performance.test.js",
       "bytes": 772,
       "sha256": "f185e60082c4965dffe82071dc85e52f320739d38aaf2876d611781370fa8d9a"
@@ -676,6 +691,11 @@
       "path": "tests/fixtures/runstore-v5.json",
       "bytes": 2889,
       "sha256": "c78851ab3631a560d21f787b20d3dc7b7b8786972367d3f002380d44a8ed9ef8"
+    },
+    {
+      "path": "tests/helpers/boss-combat.js",
+      "bytes": 2601,
+      "sha256": "eff88283768e83e0cfa907208fe3addf5fb07b66fea7c716f5eea60b1b6d1dfe"
     },
     {
       "path": "tests/hero-art.test.js",
@@ -803,6 +823,6 @@
       "sha256": "b0836cac3ebd64c03375900c96da4ee0c38ceb37e589cea20313a6a01fc939e6"
     }
   ],
-  "base_github_commit": "9dfdae8f3e550d22caca71135c98f05017dc8f4b",
+  "base_github_commit": "6a43534e98416631796bf58b18f0143313433c29",
   "integration_date": "2026-11-03"
 }

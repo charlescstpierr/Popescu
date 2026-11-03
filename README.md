@@ -57,3 +57,7 @@ Un boss majeur rejoint les rencontres aléatoires : un pélican à petite bedain
 Péli, Travestia et la matriarche partagent un seul calendrier : première rencontre entre 2 min 30 et 3 min 30, puis une pause aléatoire de 1 min 35 à 2 min 45 après chaque défaite. Leur ordre est mélangé par groupes de trois, avec chaque boss une fois par groupe et aucune répétition immédiate. Une annonce précède l'arrivée de cinq secondes. Le dernier direct garde un boss vivant ou fait venir le prochain déjà tiré au sort. La victoire reste à vingt minutes.
 
 La sauvegarde v6 garde le prochain boss, le délai et le tirage aléatoire exacts. Reprendre une partie ne relance pas le hasard. [Détails et vérification](docs/BOSS-ALEATOIRES.md).
+
+## Boss plus résistants
+
+Les nouveaux boss ont davantage de PV : +35 % pour la matriarche au début, +60 % pour Travestia et Péli, puis une hausse progressive jusqu'au double à 18 minutes. Les attaques annoncées et les ennemis ordinaires ne changent pas. Un boss déjà sauvegardé conserve ses PV exacts. [Réglage, mesures et limites](docs/BOSS-RESISTANCE.md).
