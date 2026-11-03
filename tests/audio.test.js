@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import * as audioModule from '../dist/audio.js';
 import { renderMusic, encodeWav } from '../scripts/render-music-preview.mjs';
 
@@ -56,30 +57,54 @@ const leadBar = (scene, bar) => Array.from({ length: 16 }, (_, at) =>
   (audioModule.getMusicStepEvents?.(scene, bar * 16 + at, 0.5) || [])
     .filter(event => event.instrument === 'lead').map(event => [at, event.note])).flat();
 
-test('battle has a repeated seven-note hook, answers, and a distinct slower menu arrangement', () => {
-  assert.equal(typeof audioModule.getMusicStepEvents, 'function', 'composition events must be shared by playback and preview');
-  assert.equal(audioModule.MUSIC_SCORE.battle.bpm, 150);
-  assert.equal(audioModule.MUSIC_SCORE.battle.bars, 32);
-  assert.ok(audioModule.MUSIC_SCORE.menu.bpm < 120);
-  assert.equal(leadBar('battle', 0).length, 7);
-  assert.deepEqual(leadBar('battle', 0), leadBar('battle', 2), 'the hook returns unchanged');
-  assert.notDeepEqual(leadBar('battle', 0), leadBar('battle', 1), 'the next bar answers the hook');
-  assert.deepEqual(leadBar('menu', 0).map(([at, note]) => [at, note + 12]), leadBar('battle', 0), 'menu retains the brand hook');
+const jsonHash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+
+test('battle plays the selected Égo de guerre composition exactly', () => {
+  assert.deepEqual(audioModule.MUSIC_SCORE.battle, { title: 'Égo de guerre', bpm: 148, bars: 32 });
+  // Fingerprints captured from the actual choice 1 audition before integration.
+  for (const [intensity, expected] of [
+    [0, '8f94b1314140ce797bc988e8c61276dbaf1a66c412d23e7dc1269f0013f1f056'],
+    [0.8, '59f54a85fa740353b4b34a0265f9a99497db7de21cd7ded3a8c708b72bbed27e'],
+    [1, '59f54a85fa740353b4b34a0265f9a99497db7de21cd7ded3a8c708b72bbed27e'],
+  ]) assert.equal(jsonHash(Array.from({ length: 512 }, (_, step) => audioModule.getMusicStepEvents('battle', step, intensity))), expected);
+  assert.equal(typeof audioModule.getMusicVoice, 'function');
+  const instruments = ['lead', 'harmony', 'bass', 'riff', 'stab', 'arp', 'kick', 'snare', 'snareBody', 'hat', 'tom'];
+  const voices = Object.fromEntries(instruments.map(name => [name, audioModule.getMusicVoice('battle', name)]));
+  assert.equal(jsonHash(voices), '144fbb21e8711e41c01c2a909adee5e91c869fe0ff775f0561a946dddda7083a');
 });
 
-test('32-bar score adds a bridge and later harmony; intensity changes layers without rewriting the tune', () => {
-  assert.equal(typeof audioModule.getMusicStepEvents, 'function');
+test('selected battle score includes instrumental breathing space and bounded accents', () => {
   const events = (bar, intensity) => Array.from({ length: 16 }, (_, at) => audioModule.getMusicStepEvents('battle', bar * 16 + at, intensity)).flat();
-  assert.notDeepEqual(leadBar('battle', 0), leadBar('battle', 8), 'eight-bar bridge has another phrase');
-  assert.ok(!events(0, 0.5).some(event => event.instrument === 'harmony'));
-  assert.ok(events(16, 0.5).some(event => event.instrument === 'harmony'));
-  assert.ok(events(0, 1).length > events(0, 0).length, 'higher intensity layers percussion and arpeggios');
+  assert.notDeepEqual(leadBar('battle', 0), leadBar('battle', 8));
+  assert.ok(events(0, 1).length > events(0, 0).length);
   assert.deepEqual(events(0, 0).filter(event => event.instrument === 'lead'), events(0, 1).filter(event => event.instrument === 'lead'));
-  for (let step = 0; step < 512; step++) for (const event of audioModule.getMusicStepEvents('battle', step, 1)) {
-    assert.ok(Number.isFinite(event.duration) && event.duration > 0);
-    assert.ok(Number.isFinite(event.level) && event.level > 0 && event.level < 0.3);
-    if (event.note !== undefined) assert.ok(event.note >= 24 && event.note <= 100);
+  assert.equal(Array.from({ length: 32 }, (_, bar) => leadBar('battle', bar)).filter(notes => !notes.length).length, 4);
+  let pending = [], maximum = 0;
+  const dt = 60 / 148 / 4;
+  for (let step = 0; step < 1024; step++) {
+    const now = step * dt;
+    pending = pending.filter(end => end > now);
+    for (const event of audioModule.getMusicStepEvents('battle', step, 1)) {
+      assert.ok(Number.isFinite(event.duration) && event.duration > 0);
+      assert.ok(Number.isFinite(event.level) && event.level > 0 && event.level <= 0.2);
+      if (event.note !== undefined) assert.ok(event.note >= 24 && event.note <= 76);
+      pending.push(now + event.duration + 0.012);
+    }
+    maximum = Math.max(maximum, pending.length);
   }
+  assert.ok(maximum <= 8, 'music leaves substantial voice capacity for combat cues');
+});
+
+test('menu score and instrument definitions remain unchanged', () => {
+  assert.deepEqual(audioModule.MUSIC_SCORE.menu, { title: 'Miroir, mon beau miroir', bpm: 104, bars: 8 });
+  assert.equal(jsonHash(Array.from({ length: 128 }, (_, step) => audioModule.getMusicStepEvents('menu', step, 0.8))), '068fd4b0b5b03b1b3aa6911b9d9c70060bd59afa7a1703b6090228b0b6b0d70c');
+  assert.equal(jsonHash(audioModule.CHIP_VOICES), 'ea7857ce95eb082780d5451666d3965006b9d216052f381a661a8f07ff3e7124');
+});
+
+test('rendered battle preview matches the user-selected WAV byte for byte', () => {
+  const rendered = renderMusic('battle', 32, 0.8);
+  const hash = createHash('sha256').update(encodeWav(rendered.samples, rendered.sampleRate)).digest('hex');
+  assert.equal(hash, '6630679ac441760b6851f9987d318d8583ec021be73b1da86df6079176637a61');
 });
 
 test('AudioContext stays lazy, unlock is idempotent, and pulse timbres are created', async t => {
@@ -200,7 +225,7 @@ test('rooster crow has four separated pitch syllables, stays under the lead and 
 
 test('audition WAV renders the same hook events into finite, unclipped PCM', () => {
   const rendered = renderMusic('battle', 1, 0.6, 11025);
-  assert.equal(rendered.duration, 1.6);
+  assert.equal(rendered.duration, 240 / audioModule.MUSIC_SCORE.battle.bpm);
   assert.deepEqual(rendered.events.filter(event => event.instrument === 'lead').map(event => event.note), leadBar('battle', 0).map(([, note]) => note));
   assert.ok(rendered.samples.every(Number.isFinite));
   assert.ok(rendered.peak > 0.8 && rendered.peak <= 0.861);

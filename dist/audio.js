@@ -1,4 +1,4 @@
-// Original score, "Égo en cavale". Playback and the WAV preview use these same notes.
+// Original scores. Battle uses the selected "Égo de guerre" audition, unchanged.
 const MIDI = (note) => 440 * 2 ** ((note - 69) / 12);
 const clamp01 = value => Math.min(1, Math.max(0, value));
 const MAX_VOICES = 32;
@@ -8,7 +8,7 @@ const STEP_MS = 40;
 
 export const MUSIC_SCORE = Object.freeze({
   menu: { title: 'Miroir, mon beau miroir', bpm: 104, bars: 8 },
-  battle: { title: 'Égo en cavale', bpm: 150, bars: 32 },
+  battle: { title: 'Égo de guerre', bpm: 148, bars: 32 },
 });
 
 // [sixteenth-note position, MIDI note, length in sixteenth notes].
@@ -24,18 +24,7 @@ const MAIN = [
   [[0, 81, 2], [3, 76, 1], [4, 79, 2], [6, 76, 2], [8, 72, 2], [11, 74, 1], [12, 76, 3]],
   [[0, 75, 2], [3, 78, 1], [4, 81, 2], [6, 78, 2], [8, 75, 2], [11, 71, 1], [12, 75, 2], [15, 71, 0.8]],
 ];
-const BRIDGE = [
-  [[0, 71, 3], [4, 74, 1], [6, 76, 2], [8, 79, 3], [12, 76, 2], [15, 74, 0.8]],
-  [[0, 72, 3], [4, 76, 1], [6, 79, 2], [8, 83, 3], [12, 81, 2], [15, 79, 0.8]],
-  [[0, 74, 3], [4, 79, 1], [6, 83, 2], [8, 86, 3], [12, 83, 2], [15, 79, 0.8]],
-  [[0, 78, 3], [4, 81, 1], [6, 78, 2], [8, 76, 3], [12, 74, 3]],
-  [[0, 76, 2], [3, 81, 1], [4, 79, 2], [6, 76, 2], [8, 72, 3], [12, 76, 3]],
-  [[0, 79, 2], [3, 83, 1], [4, 79, 2], [6, 76, 2], [8, 71, 3], [12, 76, 3]],
-  [[0, 72, 2], [3, 76, 1], [4, 79, 2], [6, 83, 2], [8, 84, 2], [11, 83, 1], [12, 79, 3]],
-  [[0, 78, 2], [3, 81, 1], [4, 87, 2], [6, 83, 2], [8, 81, 2], [11, 78, 1], [12, 75, 2], [15, 71, 0.8]],
-];
 const BATTLE_CHORDS = [[40, 43, 47], [36, 40, 43], [43, 47, 50], [38, 42, 45], [40, 43, 47], [36, 40, 43], [33, 36, 40], [35, 39, 42]];
-const BRIDGE_CHORDS = [BATTLE_CHORDS[0], BATTLE_CHORDS[1], BATTLE_CHORDS[2], BATTLE_CHORDS[3], BATTLE_CHORDS[6], BATTLE_CHORDS[0], BATTLE_CHORDS[1], BATTLE_CHORDS[7]];
 const MENU_CHORDS = [BATTLE_CHORDS[2], BATTLE_CHORDS[1], BATTLE_CHORDS[0], BATTLE_CHORDS[3], BATTLE_CHORDS[2], BATTLE_CHORDS[1], BATTLE_CHORDS[6], BATTLE_CHORDS[7]];
 const BASS_RHYTHM = [[0, 0, 2.6], [3, 0, 0.8], [6, 7, 1.5], [8, 12, 2.4], [11, 7, 0.8], [14, 0, 1.5]];
 
@@ -54,6 +43,32 @@ export const CHIP_VOICES = Object.freeze({
   tom: { wave: 'triangle', attack: 0.001, decay: 0.03, sustain: 0.2, release: 0.025, priority: 3 },
 });
 
+// The original SFX pulse waves stay byte-for-byte equivalent. The selected
+// battle track has its own presets so menu timbres do not change.
+export const CHIP_WAVES = {
+  pulse25: { duty: 0.25, harmonics: 32, rolloff: 0 },
+  pulse125: { duty: 0.125, harmonics: 32, rolloff: 0 },
+  ironPulse: { duty: 0.25, harmonics: 16, rolloff: 0.12 },
+  roundPulse: { duty: 0.5, harmonics: 12, rolloff: 0.18 },
+};
+const BATTLE_VOICES = {
+  lead: { wave: 'ironPulse', attack: .009, decay: .035, sustain: .52, release: .035, priority: 6, vibrato: 3 },
+  harmony: { wave: 'triangle', attack: .012, decay: .035, sustain: .42, release: .035, priority: 2 },
+  bass: { wave: 'triangle', attack: .003, decay: .03, sustain: .62, release: .02, priority: 5 },
+  riff: { wave: 'roundPulse', attack: .004, decay: .025, sustain: .4, release: .02, priority: 3 },
+  stab: { wave: 'ironPulse', attack: .006, decay: .035, sustain: .28, release: .025, priority: 2 },
+  arp: { wave: 'triangle', attack: .006, decay: .035, sustain: .24, release: .02, priority: 1 },
+  kick: { wave: 'sine', attack: .002, decay: .045, sustain: .23, release: .045, priority: 4 },
+  snare: { noise: true, cutoff: 1250, priority: 4 },
+  snareBody: { wave: 'triangle', attack: .002, decay: .025, sustain: .2, release: .025, priority: 3 },
+  hat: { noise: true, cutoff: 4600, priority: 1 },
+  tom: { wave: 'triangle', attack: .003, decay: .04, sustain: .2, release: .03, priority: 3 },
+};
+
+export function getMusicVoice(scene, instrument) {
+  return (scene === 'battle' ? BATTLE_VOICES : CHIP_VOICES)[instrument];
+}
+
 export function createChipNoise(length, sampleRate = 44100) {
   const samples = new Float32Array(length);
   const hold = Math.max(1, Math.round(sampleRate / 11025));
@@ -68,45 +83,78 @@ export function createChipNoise(length, sampleRate = 44100) {
   return samples;
 }
 
+const ROOTS = [40, 40, 36, 38, 40, 43, 36, 35];
+const CALL = [
+ [[0,64,1.5],[2,64,1.5],[6,71,2],[9,74,2],[12,71,3]],
+ [[0,67,3],[4,64,2],[8,62,2],[11,64,3]],
+ [[0,67,1.5],[2,67,1.5],[6,72,2],[9,71,2],[12,67,3]],
+ [[0,69,3],[4,66,2],[8,64,2],[11,62,3]],
+ [[0,64,1.5],[2,64,1.5],[6,71,2],[9,76,2],[12,74,3]],
+ [[0,74,3],[4,71,2],[8,67,2],[11,71,3]],
+ [[0,72,3],[5,71,2],[8,67,2],[12,64,2]],
+ [[0,66,2],[4,63,2],[8,59,3],[13,63,2]],
+];
+const REPLY = [
+ [[0,76,4],[6,74,2],[10,71,4]],
+ [[2,67,3],[6,71,3],[12,64,2]],
+ [[0,72,4],[6,76,2],[10,72,4]],
+ [[2,74,3],[6,69,3],[12,66,2]],
+ [[0,71,3],[4,76,2],[8,74,2],[12,71,3]],
+ [[0,67,3],[5,71,2],[9,74,4]],
+ [[0,72,3],[4,67,2],[8,64,4]],
+ [[0,71,2],[4,66,2],[8,63,3],[13,59,2]],
+];
+function getBattleStepEvents(step, intensity) {
+ const tick=Math.max(0,Math.floor(Number.isFinite(step)?step:0))%512;
+ const bar=Math.floor(tick/16),at=tick%16,part=Math.floor(bar/8),p=bar%8,root=ROOTS[p],dt=60/148/4;
+ const breakbeat=bar>=16&&bar<20, final=part===3, events=[];
+ const add=(instrument,note,beats,level,extra={})=>events.push({instrument,...(note===null?{}:{note}),duration:beats*dt,level,...extra});
+ const phrase=breakbeat?[]:(part===1||part===2?REPLY:CALL)[p];
+ for(const [position,note,duration]of phrase)if(at===position){
+  add('lead',note,duration*.9,.092);
+  if(final&&position===0)add('harmony',note-12,duration*.86,.033);
+ }
+ // Thick eighth-note bass chugs carry the combat without a constant high lead.
+ if(at%2===0&&(!breakbeat||at%4===0)){
+  const offset=at===6||at===14?7:at===12&&p%2===1?12:0;
+  add('bass',root+offset,breakbeat?2.4:1.3,at%8===0?.14:.11);
+  if(!breakbeat&&at!==4&&at!==12)add('riff',root+12+offset,1.05,.047);
+ }
+ if(!breakbeat&&(at===4||at===12))for(const pitch of [root+12,root+19])add('stab',pitch,1.5,.035);
+ if((part===1||part===2)&&at===14)add('arp',root+31,1.2,.024);
+ if(at===0||at===8||!breakbeat&&at===6||final&&at===11)add('kick',48,1.5,.19,{endNote:25});
+ if(at===4||at===12){add('snare',null,1.05,.076);add('snareBody',51,.8,.065,{endNote:39});}
+ if(at%4===2||!breakbeat&&intensity>.7&&at%8===0)add('hat',null,.25,.012);
+ if(p===7&&at===14)add('tom',55,1.1,.08,{endNote:42});
+ if(p===7&&at===15)add('tom',49,.8,.075,{endNote:36});
+ // A short swaggering brass answer at the turnaround, low enough to stay comic.
+ if(p===7&&part%2===1&&at===10)add('stab',59,1.1,.06,{endNote:57});
+ return events;
+}
+
 export function getMusicStepEvents(scene, step, intensity = 0.35) {
-  const battle = scene === 'battle';
-  const score = MUSIC_SCORE[battle ? 'battle' : 'menu'];
-  const tick = Math.floor(Math.max(0, Number(step) || 0)) % (score.bars * 16);
-  const bar = Math.floor(tick / 16), at = tick % 16, section = Math.floor(bar / 8);
   const energy = Number.isFinite(intensity) ? clamp01(intensity) : 0.35;
-  const length = 60 / score.bpm / 4;
-  const bridge = battle && section === 1;
-  const chord = (battle ? (bridge ? BRIDGE_CHORDS : BATTLE_CHORDS) : MENU_CHORDS)[bar % 8];
-  const phrase = (bridge ? BRIDGE : MAIN)[bar % 8];
+  const position = Math.floor(Math.max(0, Number(step) || 0));
+  if (scene === 'battle') return getBattleStepEvents(position, energy);
+  const tick = (Number.isFinite(position) ? position : 0) % (MUSIC_SCORE.menu.bars * 16);
+  const bar = Math.floor(tick / 16), at = tick % 16;
+  const length = 60 / MUSIC_SCORE.menu.bpm / 4;
+  const chord = MENU_CHORDS[bar % 8];
   const events = [];
   const add = (instrument, note, duration, level, extra = {}) => events.push({ instrument, ...(note === null ? {} : { note }), duration, level, ...extra });
-  for (const [position, pitch, beats] of phrase) if (position === at) {
-    const note = pitch - (battle ? 0 : 12);
-    add('lead', note, length * beats * 0.94, battle ? 0.135 : 0.11, { wave: bridge || !battle ? 'pulse125' : 'pulse25' });
-    if (battle && section >= 2 && at % 4 === 0) {
-      const third = ({ 0: 4, 2: 4, 3: 3, 4: 3, 6: 3, 7: 4, 9: 3, 11: 3 })[note % 12] || 3;
-      add('harmony', note + third, length * beats * 0.86, section === 3 ? 0.037 : 0.028, { pan: 0.12 });
-    }
+  for (const [position, pitch, beats] of MAIN[bar % 8]) if (position === at) {
+    add('lead', pitch - 12, length * beats * 0.94, 0.11, { wave: 'pulse125' });
   }
-  for (const [position, offset, beats] of BASS_RHYTHM) if (position === at && (battle || ![3, 11].includes(at))) {
-    add('bass', chord[0] + offset + (battle ? 0 : 12), length * beats, at === 0 ? 0.17 : 0.135);
-    if (battle && (at === 0 || at === 8)) add('bassClick', chord[0] + offset + 12, 0.045, 0.026);
+  for (const [position, offset, beats] of BASS_RHYTHM) if (position === at && ![3, 11].includes(at)) {
+    add('bass', chord[0] + offset + 12, length * beats, at === 0 ? 0.17 : 0.135);
   }
-  const arpOn = battle ? (at % 4 === 2 || energy >= 0.35 && at % 2 === 0 || energy >= 0.75 && at % 2 === 1) : at % 4 === 2;
-  if (arpOn) add('arp', chord[[0, 1, 2, 1, 0, 2, 1, 2][Math.floor(at / 2) % 8]] + 24, length * 0.64, battle ? 0.027 : 0.023, { pan: at % 4 ? -0.14 : 0.14 });
-  if (battle && !bridge && (at === 2 || at === 10)) for (const note of chord) add('stab', note + 24, length * 0.9, 0.021, { pan: -0.08 });
-  if (at === 0 || at === 8 || battle && (at === 6 || energy > 0.6 && at === 11)) add('kick', 49, 0.13, battle ? 0.19 : 0.11, { endNote: 25 });
-  if (at === 12 || at === 4 && (!bridge || energy > 0.6)) {
-    add('snare', null, 0.13, battle ? 0.105 : 0.045);
-    add('snareBody', 52, 0.08, battle ? 0.065 : 0.035, { endNote: 39 });
+  if (at % 4 === 2) add('arp', chord[[0, 1, 2, 1, 0, 2, 1, 2][Math.floor(at / 2) % 8]] + 24, length * 0.64, 0.023, { pan: at % 4 ? -0.14 : 0.14 });
+  if (at === 0 || at === 8) add('kick', 49, 0.13, 0.11, { endNote: 25 });
+  if (at === 4 || at === 12) {
+    add('snare', null, 0.13, 0.045);
+    add('snareBody', 52, 0.08, 0.035, { endNote: 39 });
   }
-  if (battle ? at % 2 === 0 || energy > 0.7 : at % 4 === 2) add(at === 14 ? 'openHat' : 'hat', null, at === 14 ? 0.085 : 0.026, battle ? 0.022 : 0.013, { pan: 0.1 });
-  if (battle && bar % 8 === 7 && at >= 12) {
-    if (at === 14) add('snare', null, 0.065, 0.075);
-    if (at === 13 || at === 15) add('tom', at === 13 ? 57 : 50, 0.1, 0.105, { endNote: at === 13 ? 45 : 38 });
-  }
-  // A low two-note brass wink at the 16-bar turnaround, not another lead to follow.
-  if (battle && bar % 16 === 15 && (at === 10 || at === 11)) add('stab', at === 10 ? 59 : 63, 0.07, 0.055);
+  if (at % 4 === 2) add(at === 14 ? 'openHat' : 'hat', null, at === 14 ? 0.085 : 0.026, 0.013, { pan: 0.1 });
   return events;
 }
 
@@ -158,10 +206,12 @@ export class AudioManager {
         this._master.connect(this.context.destination);
         this._noiseBuffer = this.context.createBuffer(1, this.context.sampleRate, this.context.sampleRate);
         this._noiseBuffer.getChannelData(0).set(createChipNoise(this.context.sampleRate, this.context.sampleRate));
-        for (const [name, duty] of [['pulse25', 0.25], ['pulse125', 0.125]]) {
+        for (const [name, { duty, harmonics, rolloff }] of Object.entries(CHIP_WAVES)) {
           if (!this.context.createPeriodicWave) continue;
-          const real = new Float32Array(33), imag = new Float32Array(33);
-          for (let harmonic = 1; harmonic < 33; harmonic++) real[harmonic] = 4 * Math.sin(Math.PI * harmonic * duty) / (Math.PI * harmonic);
+          const real = new Float32Array(harmonics + 1), imag = new Float32Array(harmonics + 1);
+          for (let harmonic = 1; harmonic <= harmonics; harmonic++) {
+            real[harmonic] = 4 * Math.sin(Math.PI * harmonic * duty) / (Math.PI * harmonic) * Math.exp(-rolloff * (harmonic - 1));
+          }
           this._pulseWaves.set(name, this.context.createPeriodicWave(real, imag));
         }
       } catch {
@@ -302,7 +352,7 @@ export class AudioManager {
     const gain = ctx.createGain();
     const wave = this._pulseWaves.get(type);
     if (wave) source.setPeriodicWave(wave);
-    else source.type = type.startsWith('pulse') ? 'square' : type;
+    else source.type = type.startsWith('pulse') ? 'square' : CHIP_WAVES[type] ? 'triangle' : type;
     source.frequency.setValueAtTime(MIDI(note), start);
     if (endNote !== null) source.frequency.exponentialRampToValueAtTime(MIDI(endNote), start + duration);
     const attack = Math.min(options.attack ?? 0.003, duration * 0.2);
@@ -360,7 +410,7 @@ export class AudioManager {
 
   _musicStep(step, time) {
     for (const event of getMusicStepEvents(this._musicScene, step, this.intensity)) {
-      const preset = CHIP_VOICES[event.instrument];
+      const preset = getMusicVoice(this._musicScene, event.instrument);
       const options = { ...preset, ...event };
       if (preset.noise) this._noise(time, event.duration, event.level, preset.cutoff, 'music', false, options);
       else this._tone(event.note, time, event.duration, event.level, event.wave || preset.wave, 'music', event.endNote ?? null, options);
