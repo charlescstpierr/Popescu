@@ -50,7 +50,7 @@ test('a build scene needs the actual upgrade and its callback needs completed re
 });
 test('v11 saves gain an empty scene cursor without losing reading or replay data',()=>{
  const {g}=fixture();g.bark('TOMA','Ancienne phrase encore à lire.');const old=captureRun(g);old.version=11;delete old.game.speech.scene;for(const line of [old.game.speech.active,...old.game.speech.queue])if(line)delete line.sceneId;
- const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,12);
+ const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,13);
 });
 
 test('every story line restores the same cursor, remainder and final completion',()=>{
