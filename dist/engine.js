@@ -1,10 +1,10 @@
 import {lethalDamageCause} from './run-history.js';
-import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech} from './speech.js';
+import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled} from './speech.js';
 import {charlesActive,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills} from './evolutions.js';
-import {compactDrops} from './drops.js';
+import {compactDrops,pickupAttraction} from './drops.js';
 import {BOSS_SCHEDULE,createBossDirector,scheduleNextBoss,isMajorBoss} from './boss-director.js';
 import {pelicanLocked,updatePelican,interruptPelican} from './pelican.js';
 import {ANIMALS,animalLocked,updateAnimal,interruptAnimal} from './animals.js';
@@ -12,7 +12,7 @@ import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim } from './hero-pose.js';
-import { UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
+import { companionLevel, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 const TAU=Math.PI*2;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -34,7 +34,7 @@ export class Game {
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
-    this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.speech=createSpeech();this.recalculate();this.world.update(0,0);
+    this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.speech=createSpeech();this.banterEnabled=true;this.recalculate();this.world.update(0,0);
   }
   random(){let x=this.rng;x^=x<<13;x^=x>>>17;x^=x<<5;this.rng=x|0;return (x>>>0)/4294967296;}
   stuntRandom(){this.stuntRng=(Math.imul(this.stuntRng,1664525)+1013904223)>>>0;return this.stuntRng/4294967296;}
@@ -44,6 +44,7 @@ export class Game {
   flushSpeech(){flushSpeech(this);}
   presentSpeech(){presentSpeech(this);}
   dismissSpeech(){dismissSpeech(this);}
+  setBanterEnabled(enabled){setSpeechEnabled(this,enabled);}
   clearSpeech(){this.speech=createSpeech();this.speechUntil=this.s.elapsed;}
   urgentSpeech(who,text,encounter=true){return enqueueSpeech(this,who,text,{urgent:true,encounter,scope:charlesActive(this.s)?'charles':'survival'});}
   rank(id){return this.s.upg[id]||0;}
@@ -77,8 +78,9 @@ export class Game {
     const def=UPGRADES.find(u=>u.id===id);if(!def)return false;if(def && this.rank(id)>=(def.max||5))return false;
     const previousHp=s.hp,previousShield=s.shield;
     s.upg[id]=this.rank(id)+1;
+    if(STORY_BUILD_IDS.includes(id)&&!STORY_BUILD_IDS.some(key=>this.eventSeen.has(`build-choice:${key}`)))this.eventSeen.add(`build-choice:${id}`);
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
-    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA','Je suis avec toi. On avance ensemble.');}}
+    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;s.girl.walkMoving=false;s.girl.supportFlash=0;if(this.rank(id)===4)s.girl.shieldClock=8;if(this.rank(id)===5)s.girl.droneClock=2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA',"Copie locale prête. J'peux encore tirer, même sans Internet.");}}
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
@@ -444,12 +446,21 @@ export class Game {
   }
   updateCompanion(dt){
     const s=this.s,g=s.girl;if(!s.companion)return;
+    const level=companionLevel(this.rank('girlfriend'));
+    g.walkMoving=false;g.supportFlash=Math.max(0,(g.supportFlash||0)-dt);
     if(g.hp<=0 && g.down<=0){this.bark('BLONDE IA','Je redémarre. Évite de mourir pendant la mise à jour.');g.down=12;}
-    if(g.down>0){g.down=Math.max(0,g.down-dt);if(g.down===0){g.hp=g.maxhp;g.x=s.x-25;g.y=s.y+28;s.shield=Math.max(s.shield,20);this.burst(g.x,g.y,'#ffa1c5',12);}return;}
-    const tx=s.x-s.faceX*36,ty=s.y-s.faceY*36+16,dx=tx-g.x,dy=ty-g.y,d=length(dx,dy);
-    if(d>500){g.x=tx;g.y=ty;}else if(d>9)this.move(g,dx/Math.max(d,1)*Math.min(d*4,s.stats.speed*1.15)*dt,dy/Math.max(d,1)*Math.min(d*4,s.stats.speed*1.15)*dt,10);
+    if(g.down>0){g.supportFlash=0;g.down=Math.max(0,g.down-dt);if(g.down===0){g.hp=g.maxhp;g.x=s.x-25;g.y=s.y+28;s.shield=Math.max(s.shield,20);this.burst(g.x,g.y,'#ffa1c5',12);}return;}
+    let tx=s.x-s.faceX*36,ty=s.y-s.faceY*36+16;
+    // A short, collision-aware retreat is not a dash or an invincibility window.
+    const threat=level.evade?this.nearest(g.x,g.y,level.evade):null;
+    if(threat&&dist(g,s)<120){const away=dist(g,threat)||1;tx=g.x+(g.x-threat.x)/away*70;ty=g.y+(g.y-threat.y)/away*70;const leash=length(tx-s.x,ty-s.y);if(leash>120){tx=s.x+(tx-s.x)/leash*120;ty=s.y+(ty-s.y)/leash*120;}}
+    const dx=tx-g.x,dy=ty-g.y,d=length(dx,dy),ox=g.x,oy=g.y;
+    if(d>500){g.x=tx;g.y=ty;}
+    else if(d>9){this.move(g,dx/Math.max(d,1)*Math.min(d*4,s.stats.speed*level.followSpeed)*dt,dy/Math.max(d,1)*Math.min(d*4,s.stats.speed*level.followSpeed)*dt,10);const walked=length(g.x-ox,g.y-oy);if(walked>.001){g.walkDistance=((g.walkDistance||0)+walked)%100000;g.walkMoving=true;g.faceX=(g.x-ox)/walked;g.faceY=(g.y-oy)/walked;}}
     g.shoot-=dt;const target=this.nearest(g.x,g.y,440);
     if(target && g.shoot<=0){g.shoot=1.25/(1+.22*this.rank('girlfriend'));this.shoot(g.x,g.y,target,'heart',13+8*this.rank('girlfriend'),240);this.sound('heart');}
+    if(level.shield){g.shieldClock=Math.max(0,(g.shieldClock??level.shieldPeriod)-dt);if(g.shieldClock<1e-8&&dist(g,s)<=160){g.shieldClock=level.shieldPeriod;const amount=Math.max(0,Math.min(level.shield,s.stats.shieldMax-s.shield));if(amount>0){s.shield+=amount;g.supportFlash=.6;}}}
+    if(level.droneDamage){g.droneClock=Math.max(0,(g.droneClock??level.dronePeriod)-dt);if(target&&g.droneClock<1e-8){g.droneClock=level.dronePeriod;for(const side of [-1,1]){if(s.shots.length>=CAP.shots)break;this.shoot(g.x+side*21,g.y-25,target,'heart',level.droneDamage,260);s.shots.at(-1).drone=true;}}}
   }
   weapons(dt){
     const s=this.s;s.shotClock-=dt;const target=this.nearest(s.x,s.y,s.stats.range);
@@ -485,7 +496,7 @@ export class Game {
     for(const e of this.combatTargets()){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
     // Boss hearts retain full damage. Brief interrupts plus recovery let the
     // existing warned attacks finish without long untargetable charm windows.
-    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(e.type!=='charles' && p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
+    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(e.type!=='charles' && p.kind==='heart' && !p.drone && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
     s.shots=s.shots.filter(p=>p.life>0);
   }
   hurt(e,damage){if(e.type==='charles'){hitCharles(this,e,damage);return;}if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
@@ -537,8 +548,8 @@ export class Game {
     s.shockwaves=s.shockwaves.filter(w=>w.life>0);
   }
   updateDrops(dt){
-    const s=this.s,g=s.girl,collected=new Set();let girlCollected=false;s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;let target=s;let distance=dist(d,s);if(s.companion && g.down<=0 && dist(d,g)<distance){target=g;distance=dist(d,g);}
-      if(distance<s.stats.magnet&&distance>0){const speed=130+Math.max(0,s.stats.magnet-distance)*4,pull=Math.min(distance,speed*dt);if(pull>0&&this.rank('magnet'))this.powerEffect('magnet','attract',d.x,d.y,0,{tx:target.x,ty:target.y});d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
+    const s=this.s,g=s.girl,collected=new Set();let girlCollected=false;s.drops=compactDrops(s,this.world);for(const d of s.drops){if(!d.compact)d.life-=dt;const attraction=pickupAttraction(s,d),{target,reach}=attraction;let distance=attraction.distance;
+      if(distance<reach&&distance>0){const speed=130+Math.max(0,reach-distance)*4,pull=Math.min(distance,speed*dt);if(pull>0&&this.rank('magnet'))this.powerEffect('magnet','attract',d.x,d.y,0,{tx:target.x,ty:target.y});d.x+=(target.x-d.x)/distance*pull;d.y+=(target.y-d.y)/distance*pull;distance=dist(d,target);}
       if(distance<22){collected.add(d);if(target===g)girlCollected=true;if(d.kind==='xp'){this.gainXP(d.value);this.sound('collect');}else if(d.kind==='heal'){s.hp=Math.min(s.maxhp,s.hp+d.value);if(s.companion)g.hp=Math.min(g.maxhp,g.hp+d.value*.5);this.burst(d.x,d.y,'#8eddab',6);this.sound('collect');}else if(d.kind==='coin'){s.coins+=d.value;const from=s.hp;s.hp=Math.min(s.maxhp,s.hp+this.rank('money')*.75);if(s.hp>from)this.powerEffect('money','heal',s.x,s.y,0,{amount:s.hp-from});this.sound('coin');}else if(d.kind==='gem'){s.gems+=d.value;s.hp=Math.min(s.maxhp,s.hp+4);this.sound('coin');}}
     }s.drops=s.drops.filter(d=>!collected.has(d));s.drops=compactDrops(s,this.world);if(girlCollected)this.powerEffect('girlfriend','collect',g.x,g.y);
   }
@@ -571,12 +582,15 @@ export class Game {
     }
     const running=moved>=dt*28&&length(s.moveX,s.moveY)>.35;
     this.runStreak=running?this.runStreak+dt:0;if(running)this.stuntCharge+=dt;
-    if(!stunt.active&&this.stuntCharge>=this.stuntWait&&this.runStreak>=2.5&&s.elapsed>=this.speechUntil){
+    if(!stunt.active&&(!this.banterEnabled||!this.speech.scene)&&this.stuntCharge>=this.stuntWait&&this.runStreak>=2.5&&s.elapsed>=this.speechUntil){
       const index=stunt.count++,d=length(s.moveX,s.moveY)||1;
       stunt.active=true;stunt.time=0;stunt.progress=0;stunt.faceX=s.moveX/d;stunt.faceY=s.moveY/d;
       this.stuntCharge=0;this.stuntWait=22+this.stuntRandom()*13;this.speechUntil=s.elapsed+3.2;
-      if(STUNT_BARKS.length){const line=STUNT_BARKS[index%STUNT_BARKS.length];this.bark(line.who,line.text,true);}
-      this.pendingStuntReply={at:this.speechUntil+.2,index};this.speechUntil=this.pendingStuntReply.at;this.sound('split');
+      if(STUNT_BARKS.length){const line=STUNT_BARKS[index%STUNT_BARKS.length];
+        const lines=s.companion&&s.girl.down<=0?[line,line.reply]:[line];
+        beginSpeechScene(this,`stunt:${line.id}`,lines);
+      }
+      this.sound('split');
     }
   }
   reactToCrow(){
@@ -592,23 +606,36 @@ export class Game {
       if(reply.ally){if(s.companion&&s.girl.down<=0&&s.enemies.some(e=>e.id===reply.id&&!e.dead)){const line=RIVAL_COMPANION_REPLIES[reply.index%RIVAL_COMPANION_REPLIES.length];if(line)this.bark(line.who,line.text,true,{actorId:reply.id});}}
       else if(s.enemies.some(e=>e.id===reply.id&&!e.dead)){const lines=RIVAL_REPLIES[reply.type]||[],text=lines[reply.index%lines.length];if(text)this.bark(reply.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text,true,{actorId:reply.id});}
     }
-    if(s.elapsed<this.speechUntil||s.elapsed-this.lastRivalBark<10||!RIVAL_BARKS.length)return;
+    if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil||s.elapsed-this.lastRivalBark<10||!RIVAL_BARKS.length)return;
     const rival=s.enemies.find(e=>!e.dead&&e.sex==='male'&&isRival(e.type)&&e.charmed<=0&&e.banterCount<2&&(e.banterCount===0||dist(e,s)<330&&s.elapsed>=e.nextTaunt));
     if(!rival)return;
-    const index=this.rivalBarkIndex++,line=RIVAL_BARKS[index%RIVAL_BARKS.length];this.bark(line.who,line.text,true,{actorId:rival.id});this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
-    if(index%2===0||s.companion){this.pendingRivalReply={at:this.speechUntil+.2,id:rival.id,type:rival.type,index,ally:index%2===1&&s.companion};this.speechUntil=this.pendingRivalReply.at;}
+    const line=RIVAL_BARKS[this.rivalBarkIndex%RIVAL_BARKS.length];
+    const reply={who:rival.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text:line.replies[rival.type]};
+    if(beginSpeechScene(this,`rival:${line.id}`,[line,reply],{actorId:rival.id})){
+      this.rivalBarkIndex++;this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
+    }
   }
   bark(who,text,priority=false,options={}){this.flushSpeech();if(!priority&&this.s.elapsed<this.speechUntil)return false;return enqueueSpeech(this,who,text,{queue:priority,scope:charlesActive(this.s)?'charles':'survival',...options});}
 
   story(dt){
-    const s=this.s;this.timers.bark-=dt;
-    if(s.elapsed<this.speechUntil)return;
+    this.flushSpeech();const s=this.s;this.timers.bark-=dt;
+    if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil)return;
     // Persist chapter flags in the already bounded, saved event set. A late
     // checkpoint catches up to its current chapter, not several stale speeches.
     const due=STORY_MILESTONES.filter(m=>s.elapsed>=m.at&&!this.eventSeen.has(`chapter:${m.at}`));
     if(due.length){
       for(const m of due)this.eventSeen.add(`chapter:${m.at}`);
-      const line=due.at(-1);this.bark(line.who,line.text);return;
+      const line=storyMilestoneLine(due.at(-1),this.eventSeen);this.bark(line.who,line.text);return;
+    }
+    // Optional scenes stop during the final minute. They remain eligible after
+    // an interruption, and callbacks are earned only by complete reading.
+    if(s.elapsed>=20&&(s.elapsed<1130||s.endless)){
+      const unseen=id=>!this.eventSeen.has(`scene:${id}`)&&!this.eventSeen.has(`skip:${id}`);
+      let scene=s.companion&&s.girl.down<=0&&unseen('companion-local')?'companion-local':null;
+      if(!scene&&s.enemies.filter(e=>!e.dead).length>=12&&unseen('first-horde'))scene='first-horde';
+      const build=STORY_BUILD_IDS.find(id=>this.eventSeen.has(`build-choice:${id}`))||STORY_BUILD_IDS.find(id=>this.rank(id)>0);
+      if(!scene&&build&&this.rank(build)>0&&unseen(`build-${build}`))scene=`build-${build}`;
+      if(scene&&beginSpeechScene(this,scene,STORY_SCENES[scene],{remember:true}))return;
     }
     if(s.elapsed>=this.nextEvent){
       const props=this.world.getVisible(s.x,s.y,360,360);

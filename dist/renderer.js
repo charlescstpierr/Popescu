@@ -1,3 +1,5 @@
+import {pickupAttraction} from './drops.js';
+import {CompanionArt} from './companion-art.js';
 import {CharlesArt} from './charles-art.js';
 import {charlesProp,drawCharlesGround,drawCharlesForeground} from './charles-effects.js';
 import {drawTrophyIcon,drawTrophyGround,drawTrophyForeground} from './trophy-art.js';
@@ -354,7 +356,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.charles=new CharlesArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready,this.charles.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.heroPowerStamps=new Map();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.companion=new CompanionArt();this.charles=new CharlesArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready,this.charles.ready,this.companion.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.heroPowerStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -435,7 +437,7 @@ this._shadow(x,y+7,40,8);
     rect(ctx,C.ink,x-7,y-15,11,4);line(ctx,'#d2c7d3',x+8,y-18,x+16,y-18,2);
     if(chopper){oval(ctx,'#d63a82',x-1,y-11,14,8);rect(ctx,'#c0bbc8',x-6,y+6,18,3);rect(ctx,C.goldLight,x+11,y-15,5,3);}
   }
-  _prop(p) { if(p.type==='discovery'){drawDiscovery(this.ctx,p,this.time,this.reducedEffects);return;}this.city.drawProp(this.ctx,p,this.seed,this.time,this.reducedEffects); }
+  _prop(p,focus=null) { if(p.type==='discovery'){drawDiscovery(this.ctx,p,this.time,this.reducedEffects);return;}this.city.drawProp(this.ctx,p,this.seed,this.time,this.reducedEffects,focus); }
 
   _chest(p) {
     const ctx=this.ctx,x=Math.round(p.x),y=Math.round(p.y),open=p.open;
@@ -469,10 +471,8 @@ this._shadow(x,y+7,40,8);
     if(p.kind==='xp'){
       let drewTrail=false;
       if(trail&&!this.reducedEffects&&state){
-        let target=state;const girl=state.girl;
-        if(state.companion&&girl&&girl.down<=0&&(p.x-girl.x)**2+(p.y-girl.y)**2<(p.x-state.x)**2+(p.y-state.y)**2)target=girl;
-        const dx=p.x-target.x,dy=p.y-target.y,distance=Math.hypot(dx,dy);
-        if(distance>22&&distance<(state.stats?.magnet||0)){
+        const {target,reach,distance}=pickupAttraction(state,p),dx=p.x-target.x,dy=p.y-target.y;
+        if(distance>22&&distance<reach){
           drewTrail=true;ctx.save();ctx.globalAlpha=.8;ctx.fillStyle='#75e7f2';
           for(let i=1;i<=4;i++)ctx.fillRect(Math.round(x+dx/distance*i*6),Math.round(y+dy/distance*i*6),3,2);
           ctx.restore();
@@ -563,7 +563,7 @@ this._shadow(x,y+7,40,8);
     const x=Math.round(actor.x),y=Math.round(actor.y),flip=fx<-.1&&!gas;
     this._shadow(x,y+11,isEnemy?49*scale:isGirl?28:33,isEnemy?13:9);
     ctx.save();if(isEnemy)ctx.globalAlpha=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
-    const raster=this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);ctx.restore();
+    const raster=kind==='girl'&&this.companion.draw(ctx,actor,s,this.time,this.reducedEffects)||this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);ctx.restore();
     ctx.save();ctx.translate(x,y+10);if(flip)ctx.scale(-1,1);
     if(!raster&&actor.down){ctx.rotate(-Math.PI/2);ctx.globalAlpha=.6;ctx.drawImage(sprite,-34*scale,-45*scale,68*scale,76*scale);}
     else if(!raster){if(!isEnemy&&!isGirl&&(s.invulnerable||0)>0&&Math.floor(this.time*14)%2)ctx.globalAlpha=.58;ctx.drawImage(sprite,-34*scale,-71*scale,68*scale,76*scale);}
@@ -664,7 +664,7 @@ this._shadow(x,y+7,40,8);
 
   _shot(p,s) {
     const ctx=this.ctx;
-    if(p.kind==='heart'){if(p.viral&&p.hitIds?.size&&!this.reducedEffects){const dx=p.x-p.linkX,dy=p.y-p.linkY,d=Math.hypot(dx,dy)||1;for(let n=0;n<Math.min(d,260);n+=10)line(ctx,'#f58cbe',p.linkX+dx*n/d,p.linkY+dy*n/d,p.linkX+dx*Math.min(n+4,d)/d,p.linkY+dy*Math.min(n+4,d)/d,2);}heart(ctx,p.x-5,p.y-5,C.pink,.75);return;}
+    if(p.kind==='heart'){if(p.viral&&p.hitIds?.size&&!this.reducedEffects){const dx=p.x-p.linkX,dy=p.y-p.linkY,d=Math.hypot(dx,dy)||1;for(let n=0;n<Math.min(d,260);n+=10)line(ctx,'#f58cbe',p.linkX+dx*n/d,p.linkY+dy*n/d,p.linkX+dx*Math.min(n+4,d)/d,p.linkY+dy*Math.min(n+4,d)/d,2);}heart(ctx,p.x-(p.drone?3:5),p.y-(p.drone?3:5),p.drone?'#7be9ff':C.pink,p.drone?.45:.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
     if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
@@ -684,7 +684,8 @@ this._shadow(x,y+7,40,8);
     const camera={x:s.x||0,y:(s.y||0)-charlesInset},ox=Math.round(w/2-camera.x),oy=Math.round(h*.48-camera.y);
     ctx.save();ctx.translate(ox,oy);
     this._drawGround(camera,seed);
-    const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>charlesProp(p,destroyed));
+    const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>charlesProp(p,destroyed)).filter(p=>this.city.isPropVisible(p,camera,w,h));
+    this.city.drawRiverLandings(ctx,props);
     const enemies=s.enemies||[],shots=s.shots||[],clouds=s.clouds||[],drops=s.drops||[],particles=s.particles||[];
     // Lamps cast local pools on pavement before any object or actor is painted.
     for(const p of props)if(p.type==='lamp'){
@@ -723,7 +724,7 @@ this._shadow(x,y+7,40,8);
     for(const item of items){
       if(item.kind==='charles')this.charles.draw(ctx,item.data,item.data.elapsed,this.reducedEffects);
       else if(item.kind==='defeat')this._defeatImpact(item.data,s);
-      else if(item.kind==='prop')this._prop(item.data);
+      else if(item.kind==='prop')this._prop(item.data,s);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {

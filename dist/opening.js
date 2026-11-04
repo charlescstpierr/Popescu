@@ -3,21 +3,21 @@ export const OPENING = [
   {
     "who": "TOMA",
     "opening": "fantasy",
-    "text": "Check mon char ! Pis ma villa ! YEAHHHHHH !",
-    "reply": "T'as tout généré. Même les clés dans ta main.",
+    "text": "Chuck Norris a une légende. Moi, j'ai la preuve en photo.",
+    "reply": "Photo générée : char, villa, abdos. Même les clés.",
     "action": "AMÉLIORER MA VIE"
   },
   {
     "who": "SYSTÈME",
     "opening": "offline",
     "text": "IA HORS LIGNE.",
-    "reply": "Toma : Rallume ça, tabarnak !",
+    "reply": "Tes créations sortent de la photo. Elles n'attendent plus tes ordres.",
     "action": "SORTIR DE LA PHOTO"
   },
   {
     "who": "TOMA",
     "opening": "street",
-    "text": "FUCKK ! Il est où, mon char ?!",
+    "text": "FUCKK ! Mes créations me poursuivent ! Mon char fait quoi ?!",
     "reply": "Survis 20 minutes. Bouge, Toma tire tout seul.",
     "action": "C'EST PARTI"
   }

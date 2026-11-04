@@ -13,7 +13,7 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=11;
+const VERSION=12;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['speech','bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
@@ -102,15 +102,31 @@ function validateCharles(s,nextId,world){
 }
 function validateSpeech(s,nextActorId,now){
  check(object(s)&&integer(s.nextId,1)&&Array.isArray(s.queue)&&s.queue.length<=SPEECH_QUEUE_LIMIT);
- const ids=new Set();check(s.queue.every(object));
+ check(s.scene===null||object(s.scene));
+ if(s.scene){
+  const scene=s.scene;
+  check(typeof scene.id==='string'&&/^[a-z0-9:-]{1,80}$/.test(scene.id));
+  check(Array.isArray(scene.lines)&&scene.lines.length>=1&&scene.lines.length<=4&&integer(scene.index)&&scene.index<scene.lines.length);
+  check(scene.actorId===null||integer(scene.actorId,1)&&scene.actorId<nextActorId);
+  check(['survival','charles'].includes(scene.scope)&&typeof scene.remember==='boolean'&&typeof scene.companion==='boolean');
+  for(const line of scene.lines)check(object(line)&&typeof line.who==='string'&&line.who.length>0&&line.who.length<=80&&typeof line.text==='string'&&line.text.length>0&&line.text.length<=2000);
+  check(scene.companion===scene.lines.some(line=>line.who==='BLONDE IA'));
+ }
+ const ids=new Set();check(s.queue.every(object));let sceneLines=0;
  for(const line of [s.active,...s.queue]){if(line===null){check(s.active===null);continue;}
   check(object(line)&&integer(line.id,1)&&line.id<s.nextId&&!ids.has(line.id));ids.add(line.id);
   check(typeof line.who==='string'&&line.who.length>0&&line.who.length<=80&&typeof line.text==='string'&&line.text.length>0&&line.text.length<=2000);
   check(typeof line.encounter==='boolean'&&['survival','charles'].includes(line.scope));
+  check(line.sceneId===null||typeof line.sceneId==='string');
+  if(line.sceneId!==null){
+   const scene=s.scene;check(scene&&line.sceneId===scene.id&&line.actorId===scene.actorId&&line.scope===scene.scope&&!line.encounter);
+   check(line.who===scene.lines[scene.index].who&&line.text===scene.lines[scene.index].text);sceneLines++;
+  }
   check(line.actorId===null||integer(line.actorId,1)&&line.actorId<nextActorId);
   check(finite(line.remaining)&&line.remaining>0&&line.remaining<=speechDuration(line.text));
   check(finite(line.until)&&line.until>=0&&line.until<=now+speechDuration(line.text)+1e-6);
  }
+ check(sceneLines===(s.scene?1:0));
 }
 function validate(snapshot){
  tree(snapshot);
@@ -139,6 +155,10 @@ function validate(snapshot){
    for(const e of snapshot.game.s.enemies)delete e.trophyCharmLife;}
   if(snapshot.version<10)snapshot.game.s.charles=null;
   if(snapshot.version<11)snapshot.game.speech=createSpeech();
+  if(snapshot.version<12){
+   const speech=snapshot.game.speech;check(object(speech)&&Array.isArray(speech.queue));speech.scene=null;
+   for(const line of [speech.active,...speech.queue])if(line!==null){check(object(line));line.sceneId=null;}
+  }
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -170,6 +190,11 @@ function validate(snapshot){
  check(integer(s.stunt.count));
  const travel=Math.hypot(s.travelX,s.travelY);check(travel===0||Math.abs(travel-1)<1e-6);
  check(s.girl.maxhp>0&&s.stunt.duration>0&&s.stunt.progress>=0&&s.stunt.progress<=1);
+ // Optional fields preserve older checkpoints without resetting their combat state.
+ for(const [field,max] of Object.entries({walkDistance:100000,shieldClock:8,droneClock:2,supportFlash:.6}))if(s.girl[field]!==undefined)check(finite(s.girl[field])&&s.girl[field]>=0&&s.girl[field]<=max);
+ if(s.girl.walkMoving!==undefined)check(typeof s.girl.walkMoving==='boolean');
+ for(const field of ['faceX','faceY'])if(s.girl[field]!==undefined)check(finite(s.girl[field])&&Math.abs(s.girl[field])<=1);
+
  check(object(s.upg));for(const [id,rank] of Object.entries(s.upg)){const def=UPGRADES.find(u=>u.id===id);check(def&&integer(rank)&&rank<=def.max);}
  for(const [key,cap] of Object.entries(CAPS)){check(Array.isArray(s[key])&&s[key].length<=cap);for(const item of s[key]){check(object(item));for(const field of (REQUIRED[key]||'').split(' ').filter(Boolean))check(finite(item[field]));}}
  const actorIds=new Set(),majorBosses=new Set();
@@ -224,6 +249,7 @@ function validate(snapshot){
  if(s.deathCause!==undefined){check(s.mode==='gameover'&&s.hp===0);validateDeathCause(s.deathCause,s.elapsed,d.id);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
+ for(const shot of s.shots)if(shot.drone!==undefined)check(shot.drone===true&&shot.kind==='heart'&&s.upg.girlfriend===5&&shot.damage===6&&shot.pierce===0);
  for(const shot of s.shots)if(shot.viral!==undefined){check(shot.viral===true&&shot.kind==='heart'&&s.evolutions.viralLove===true&&shot.hitIds.length<3&&new Set(shot.hitIds).size===shot.hitIds.length&&finite(shot.linkX)&&finite(shot.linkY)&&Math.abs(shot.linkX)<=1e8&&Math.abs(shot.linkY)<=1e8&&shot.pierce===0);}
  for(const car of s.vehicles)if(car.billSalvos!==undefined||car.billClock!==undefined){check(car.kind==='car'&&s.evolutions.billionaire===true&&integer(car.billSalvos)&&car.billSalvos<=2&&finite(car.billClock)&&car.billClock>=0&&car.billClock<=.8&&(car.billSalvos>0||car.billClock===0));}
  for(const item of s.drops){check(['xp','coin','gem','heal'].includes(item.kind)&&item.value>=0);if(item.compact!==undefined)check(typeof item.compact==='boolean'&&item.kind==='xp');}
@@ -253,7 +279,7 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,6,7,8,9,10,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);if(v.replay===undefined)v.replay=createReplayState(v.totals.best);else validateReplayState(v.replay);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
+ tree(v);check(Number.isInteger(v.version)&&v.version>=1&&v.version<=VERSION&&integer(v.revision,1));totals(v.totals);if(v.replay===undefined)v.replay=createReplayState(v.totals.best);else validateReplayState(v.replay);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
   const accumulated=old?{...old.totals}:totals(copy(legacy)),replay=old?copy(old.replay):createReplayState(accumulated.best);

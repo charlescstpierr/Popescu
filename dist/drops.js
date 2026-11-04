@@ -1,8 +1,17 @@
+import {companionLevel} from './content.js';
 // Old crystals are folded into one physical pickup, never credited remotely.
 export const DROP_CAP=260;
 export const XP_LIFETIME=38;
 const MAX_DISTANCE=1800;
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+
+// Shared by collection and its visual trail, including the ally-only bonus band.
+export function pickupAttraction(state,drop){
+ const base=state.stats?.magnet||0,girl=state.girl;
+ let target=state,reach=base,d=distance(drop,state);
+ if(state.companion&&girl&&girl.down<=0){const gd=distance(drop,girl),gr=base+companionLevel(state.upg?.girlfriend).pickupBonus;if(gd<d||d>=base&&gd<gr){target=girl;reach=gr;d=gd;}}
+ return {target,reach,distance:d};
+}
 
 export function compactDrops(state,world){
  const kept=[];
@@ -52,7 +61,7 @@ function reachablePickupPosition(state,world,packet){
  for(let i=0;i<(hasTravel?17:32);i++){
   const offset=i===0?0:(i%2?1:-1)*Math.ceil(i/2)*Math.PI/16;
   const x=state.x+Math.cos(angle+offset)*radius,y=state.y+Math.sin(angle+offset)*radius;
-  if(girl&&distance({x,y},girl)<=state.stats.magnet+24)continue;
+  if(girl&&distance({x,y},girl)<=state.stats.magnet+companionLevel(state.upg?.girlfriend).pickupBonus+24)continue;
   let clear=true;
   const steps=Math.ceil(radius/6);
   for(let j=0;j<=steps;j++)if(world.collides(state.x+(x-state.x)*j/steps,state.y+(y-state.y)*j/steps,13)){clear=false;break;}

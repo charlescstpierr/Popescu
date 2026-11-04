@@ -6,6 +6,16 @@ export const DIFFICULTIES = {
   nightmare: { label: 'Légende dans sa tête', hp: 0.7, damage: 1.5, spawn: 1.45, speed: 1.18 },
 };
 
+// The same companion gains a new look and one readable support skill per rank.
+export const COMPANION_LEVELS = [
+  {name:'Version gratuite',short:'CŒURS',description:'Elle te suit, tire des cœurs et ramasse les objets. 95 PV, +20 bouclier au déblocage.',color:'#ed6578'},
+  {name:'Mise à jour',short:'ESQUIVE',description:'Elle réagit plus vite et évite les ennemis proches. 120 PV, cœurs plus forts et plus rapides.',color:'#59d6ec'},
+  {name:'Version premium',short:'COLLECTE +45',description:'Son rayon de collecte gagne 45 px. 145 PV, cœurs plus forts et plus rapides.',color:'#ce78ef'},
+  {name:'Mode héroïne',short:'PROTECTION',description:'Près de toi, elle restaure 4 bouclier toutes les 8 s, sans dépasser ta capacité. 170 PV et meilleurs cœurs.',color:'#f2d578'},
+  {name:'Version ultime',short:'2 DRONES',description:'Deux drones tirent chacun un mini-cœur de 6 dégâts toutes les 2 s, sans charme. 195 PV et meilleurs cœurs.',color:'#ff6ed1'},
+].map((level,index)=>Object.freeze({...level,rank:index+1,pickupBonus:index>=2?45:0,followSpeed:index>=1?1.35:1.15,evade:index>=1?65:0,shield:index>=3?4:0,shieldPeriod:8,droneDamage:index===4?6:0,dronePeriod:2}));
+export function companionLevel(rank=1){return COMPANION_LEVELS[Math.max(0,Math.min(4,(Math.trunc(rank)||1)-1))];}
+
 export const UPGRADES = [
   { id: 'muscle', name: 'Muscles Photoshop', desc: 'Dégâts des balles +25 % par rang. Le certificat sent le toner.', icon: 'muscle', max: 5, color: '#fb6d9d' },
   { id: 'car', name: 'Lamborghini imaginaire', desc: 'Un char fonce dans la horde. Chaque rang augmente ses dégâts et sa fréquence.', icon: 'car', max: 5, color: '#f4bd58' },
@@ -13,7 +23,7 @@ export const UPGRADES = [
   { id: 'ego', name: 'Ego surdimensionné', desc: '+20 PV maximum et 25 PV récupérés par rang. Ça déborde du cadre.', icon: 'ego', max: 5, color: '#cf83ff' },
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
   { id: 'airplane', name: 'Mode avion', desc: 'Dissipe le gaz, suspend les attaques spéciales proches et ralentit les ennemis. Immunité temporaire au gaz.', icon: 'airplane', max: 5, color: '#a5d8ff' },
-  { id: 'girlfriend', name: 'Blonde IA', desc: 'Débloque la compagne, ses cœurs, son aura de collecte et +20 bouclier. Puis améliore ses PV et ses tirs.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
+  { id: 'girlfriend', name: 'Blonde IA', desc: 'La même compagne évolue en cinq looks : cœurs, esquive, collecte, protection et drones.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
   { id: 'charisma', name: 'Charisme imaginaire', desc: 'Les cœurs charment mieux et plus longtemps. Les boss résistent aux charmes répétés. Vitesse ennemie réduite de 7 % par rang.', icon: 'charisma', max: 5, color: '#fca8d4' },
   { id: 'chopper', name: 'Chopper inexistant', desc: 'Une moto holographique traverse la horde, frappe et repousse. Chaque rang augmente les dégâts et la fréquence.', icon: 'chopper', max: 5, color: '#6ce2cc' },
   { id: 'truth', name: 'Vérité brute', desc: 'Une onde de vérité blesse et repousse les ennemis proches. Les faits cognent fort.', icon: 'truth', max: 5, color: '#ffe193' },
@@ -186,11 +196,11 @@ export const BARKS = [
   },
   {
     "who": "TOMA",
-    "text": "J'aurais dû rester dans ma piscine générée."
+    "text": "J'aurais dû demander au trottoir de chauffer ma piscine."
   },
   {
     "who": "TOMA",
-    "text": "J'ai une liste de fans. Ma mère est inscrite deux fois."
+    "text": "Mes fans m'aiment deux fois. Même ma mère a deux comptes."
   },
   {
     "who": "TOMA",
@@ -589,71 +599,152 @@ export const EVENTS = {
 // Ce sont les vantardises de Toma, pas des faits sur les personnes qu'il cite.
 export const STUNT_BARKS = [
   {
+    "id": "jeans",
     "who": "TOMA",
-    "text": "YEAHHHHHH ! Van Damme, check ça ! J'ai même pas enlevé mes jeans !"
+    "text": "Van Damme prend mes cours. Ses jambes ont du rattrapage.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Lui, il s'échauffe. Toi, tu négocies avec tes jeans."
+    }
   },
   {
+    "id": "infinity",
     "who": "TOMA",
-    "text": "Chuck Norris peut aller se rhabiller ! Moi aussi, d'ailleurs, ça vient de craquer."
+    "text": "Chuck Norris compte jusqu'à l'infini. Moi, j'y suis né.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Pis ça te prend un chrono pour compter vingt minutes."
+    }
   },
   {
+    "id": "podium",
     "who": "TOMA",
-    "text": "Mets-moi sur le podium ! En haut !"
+    "text": "Le podium, c'est moi qui lève les deux autres.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Commence par te relever tout seul."
+    }
   },
   {
+    "id": "camera",
     "who": "TOMA",
-    "text": "IA, filme mes jambes ! Les deux, câlisse !"
+    "text": "IA, filme mes jambes ! Les deux, câlisse !",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Deux jambes. Une seule personne pour les surveiller : toi."
+    }
   },
   {
+    "id": "bolt",
     "who": "TOMA",
-    "text": "Usain Bolt m'aurait jamais rattrapé avec mes souliers !"
+    "text": "Usain Bolt court après les records. Les records courent après moi.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "La horde aussi. Garde ton avance."
+    }
   },
   {
+    "id": "biles",
     "who": "TOMA",
-    "text": "Simone Biles, prends des notes ! Bon, filme pas l'atterrissage."
+    "text": "Simone Biles appelle ça une figure. Moi, j'appelle ça marcher.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Marcher, c'est quand les deux pieds reviennent en dessous."
+    }
   },
   {
+    "id": "boots",
     "who": "TOMA",
-    "text": "Jackie Chan fait-tu ça dans des bottes de même ?!"
+    "text": "Jackie Chan a des cascadeurs. Mes bottes ont peur de me remplacer.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Tes bottes demandent juste qu'on touche à terre."
+    }
   },
   {
+    "id": "rocky",
     "who": "TOMA",
-    "text": "Rocky avait des marches. Moi j'ai un criss de trottoir !"
+    "text": "Rocky monte des marches. Moi, j'fais descendre l'escalier.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Le trottoir négocie pas. Regarde en avant."
+    }
   },
   {
+    "id": "hips",
     "who": "TOMA",
-    "text": "Aïe ! C'était mon pantalon ou ma hanche ?"
+    "text": "Ma hanche vient de faire un solo. Même mes os ont du talent.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Garde l'autre hanche pour le rappel."
+    }
   },
   {
+    "id": "photo",
     "who": "TOMA",
-    "text": "Photographe ! C'est là qu'y faut cliquer !"
+    "text": "Photographe ! C'est là qu'y faut cliquer !",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Le public peut attendre. Les ennemis, non."
+    }
   },
   {
+    "id": "record",
     "who": "TOMA",
-    "text": "Record mondial ! Quelqu'un l'a vu ? Quelqu'un ?!"
+    "text": "Record mondial ! Quelqu'un l'a vu ? Quelqu'un ?!",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "J'ai vu. Tu peux arrêter de demander des témoins."
+    }
   },
   {
+    "id": "circus",
     "who": "TOMA",
-    "text": "Le Cirque du Soleil peut m'appeler. J'charge à la jambe."
+    "text": "Le Cirque du Soleil m'appelle quand le soleil rentre pas.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Dis-leur que t'es occupé à remettre tes pieds en place."
+    }
   },
   {
+    "id": "earth",
     "who": "TOMA",
-    "text": "Tasse le tapis de yoga, j'ai besoin du stationnement !"
+    "text": "J'écarte pas les jambes. J'éloigne les deux bouts de la Terre.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Garde-les pas trop loin. T'en as besoin pour courir."
+    }
   },
   {
+    "id": "medal",
     "who": "TOMA",
-    "text": "Rajoute une médaille sur ma photo. Une grosse."
+    "text": "Rajoute une médaille sur ma photo. Une grosse.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "La médaille sera virtuelle. La course, non."
+    }
   },
   {
+    "id": "sponsor",
     "who": "TOMA",
-    "text": "Regarde mes jambes, tabarnak ! Ça mérite une commandite !"
+    "text": "Regarde mes jambes, tabarnak ! Ça mérite une commandite !",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Fais commanditer le retour debout aussi."
+    }
   },
   {
+    "id": "gravity",
     "who": "TOMA",
-    "text": "FUCKK YEAHHHHHH ! ... Ouch."
+    "text": "La gravité me lâche quand j'lui demande poliment.",
+    "reply": {
+      "who": "BLONDE IA",
+      "text": "Essaie donc avec le mot s'il vous plaît."
+    }
   }
 ];
 
+// Legacy pending saves keep their original answer; new stunts use the attached reply.
 export const STUNT_REPLIES = [
   {
     "who": "BLONDE IA",
@@ -694,87 +785,168 @@ export const RIVAL_BARKS = [
   {
     "who": "TOMA",
     "target": "male",
-    "text": "T'as pas d'argent ! Tes lunettes sont encore sur quatre paiements !"
+    "text": "T'as pas d'argent ! Tes lunettes sont encore sur quatre paiements !",
+    "id": "glasses",
+    "replies": {
+      "rival_rooster": "Mes lunettes voient très bien ton char de location.",
+      "rival_goat": "Quatre paiements. Toi, quatre photos du même billet."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Trouve-toi une job, le BS !"
+    "text": "Trouve-toi une job, le BS !",
+    "id": "job",
+    "replies": {
+      "rival_rooster": "J'réveille du monde. Toi, tu réveilles tes faux comptes.",
+      "rival_goat": "J'ai une job. Ton métier, c'est de poser devant la mienne."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "J'te chie dans bouche ! Viens pas plus proche, par exemple !"
+    "text": "J'te chie dans bouche ! Viens pas plus proche, par exemple !",
+    "id": "distance",
+    "replies": {
+      "rival_rooster": "T'as surtout de la misère à reprendre ton souffle.",
+      "rival_goat": "Tu menaces fort pour quelqu'un qui recule."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Ta chaîne verdit, mon gars. J'la vois d'ici !"
+    "text": "Ta chaîne verdit, mon gars. J'la vois d'ici !",
+    "id": "chain",
+    "replies": {
+      "rival_rooster": "Ma chaîne verdit. Tes abonnés rouillent dans un serveur.",
+      "rival_goat": "Du cuivre. Au moins, c'est un métal, pas un filtre."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Ta yeule ! C'est moi qu'on filme !"
+    "text": "Ta yeule ! C'est moi qu'on filme !",
+    "id": "camera",
+    "replies": {
+      "rival_rooster": "Tu filmes-tu aussi quand tu te sauves ?",
+      "rival_goat": "Parfait. Garde la caméra quand tu vas reculer."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Ton char de luxe a encore le collant de location !"
+    "text": "Ton char de luxe a encore le collant de location !",
+    "id": "rental",
+    "replies": {
+      "rival_rooster": "Le tien a un filigrane. Même la location veut pas de toi.",
+      "rival_goat": "Un collant s'enlève. Tes six roues sur la photo, moins."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Tu m'dois vingt piasses, tabarnak !"
+    "text": "Tu m'dois vingt piasses, tabarnak !",
+    "id": "debt",
+    "replies": {
+      "rival_rooster": "Présente la facture. Un selfie, ça compte pas.",
+      "rival_goat": "Vingt piasses ? T'as appelé ça un placement en toi-même."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "T'as pris ton ego dans le bac à une piasse ?"
+    "text": "T'as pris ton ego dans le bac à une piasse ?",
+    "id": "ego",
+    "replies": {
+      "rival_rooster": "Une piasse. Le tien coûte une connexion Internet.",
+      "rival_goat": "J'ai gardé le reçu. T'as gardé juste l'emballage."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Influenceur de Wi-Fi gratuit !"
+    "text": "Influenceur de Wi-Fi gratuit !",
+    "id": "wifi",
+    "replies": {
+      "rival_rooster": "Sans Wi-Fi, j'ai encore une voix. Toi, t'as quoi ?",
+      "rival_goat": "Le Wi-Fi est gratuit. Tes compliments sont sur abonnement."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Le mâle alpha a oublié son mot de passe !"
+    "text": "Le mâle alpha a oublié son mot de passe !",
+    "id": "password",
+    "replies": {
+      "rival_rooster": "J'ai oublié un mot de passe. Toi, t'as inventé ton CV.",
+      "rival_goat": "Ton mot de passe, c'est encore le mot milliardaire ?"
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Ostie que tu frimes ! Bouge, j'prends une photo."
+    "text": "Ostie que tu frimes ! Bouge, j'prends une photo.",
+    "id": "posing",
+    "replies": {
+      "rival_rooster": "Tu m'traites de frimeur entre deux selfies ?",
+      "rival_goat": "Prends ta photo. Ça va faire une preuve de ta fuite."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Va compter le change dans ton porte-gobelet !"
+    "text": "Va compter le change dans ton porte-gobelet !",
+    "id": "change",
+    "replies": {
+      "rival_rooster": "Mon change existe. Tes millions sont en pixels.",
+      "rival_goat": "Avec mon change, j'achète un café. Avec ta photo ?"
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Mon IA t'a donné zéro. J'ai gardé la capture !"
+    "text": "Mon IA t'a donné zéro. J'ai gardé la capture !",
+    "id": "rating",
+    "replies": {
+      "rival_rooster": "Ton IA est hors ligne. Ton zéro a pu de témoin.",
+      "rival_goat": "T'as demandé la note ou t'as dicté la réponse ?"
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Même ton ombre veut pu t'suivre !"
+    "text": "Même ton ombre veut pu t'suivre !",
+    "id": "shadow",
+    "replies": {
+      "rival_rooster": "Mon ombre me suit. La tienne cherche le bouton muet.",
+      "rival_goat": "Mon ombre est pas obligée de te trouver beau, elle."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Des gros bras de même pour porter un portefeuille vide !"
+    "text": "Des gros bras de même pour porter un portefeuille vide !",
+    "id": "wallet",
+    "replies": {
+      "rival_rooster": "Un portefeuille vide pèse moins que ton ego.",
+      "rival_goat": "Mes bras portent du vrai stock. Les tiens portent ta bio."
+    }
   },
   {
     "who": "TOMA",
     "target": "male",
-    "text": "Ta photo de patron, je l'ai vue dans une pub de matelas !"
+    "text": "Ta photo de patron, je l'ai vue dans une pub de matelas !",
+    "id": "mattress",
+    "replies": {
+      "rival_rooster": "Un matelas, ça se vend. Ton empire attend encore un acheteur.",
+      "rival_goat": "Oui. J'ai été payé. C'est ça, une job."
+    }
   }
 ];
 
 export const ROOSTER_REACTION = {who:'TOMA',text:'Men, farmes ta criss de gueule !'};
 
+// Legacy pending saves only. New rivals use the setup's actor-specific replies.
 export const RIVAL_REPLIES = {
   "rival_rooster": [
     "COCORICO ! Ramène ton char avant qu'ils appellent la remorqueuse !",
@@ -856,22 +1028,22 @@ export const STORY_MILESTONES = [
   {
     "at": 300,
     "who": "TOMA",
-    "text": "Cinq minutes de survie ! YEAHHHHHH ! Quelqu'un a parti le chrono ou c'est juste moi qui sue ?"
+    "text": "Cinq minutes de survie ! La panne dure, mais moi j'suis encore en service."
   },
   {
     "at": 600,
     "who": "SYSTÈME",
-    "text": "Dix minutes. Toma demande si le cardio se rembourse."
+    "text": "Dix minutes. L'IA est encore hors ligne. Les jambes font la deuxième moitié."
   },
   {
     "at": 900,
     "who": "TOMA",
-    "text": "Quinze minutes, tabarnak ! J'sens pu mes pieds !"
+    "text": "Quinze minutes ! Encore cinq pis j'engage quelqu'un pour raconter comment j'ai tout fait seul."
   },
   {
     "at": 1140,
     "who": "SYSTÈME",
-    "text": "Encore une minute. Toma prépare déjà ses remerciements à lui-même."
+    "text": "Encore une minute. Garde une sortie. La victoire est à vingt minutes."
   }
 ];
 export function contextualBarks(s){
@@ -882,9 +1054,57 @@ export function contextualBarks(s){
     return true;
   });
 }
-export function victoryQuote(s){
-  if(s.companion)return "YEAHHHHHH ! On l'a fait ! Viens dans la photo. Attends, de l'autre bord, c'est mon bon côté.";
-  if(s.upg.truth)return "La vérité, ça cogne en tabarnak. J'vas peut-être en mettre un peu dans ma bio.";
+export function victoryQuote(s,seen=new Set()){
+  if(seen.has('scene:build-car'))return s.companion?"Vingt minutes ! Mon char a pas de siège, mais mon équipe a une vedette. Moi.":"Vingt minutes ! Pas de siège dans mon char. J'ai fait le tour du succès à pied.";
+  if(seen.has('scene:build-money'))return "Vingt minutes ! Mes billets paient pas le loyer. Ils viennent de me louer la paix.";
+  if(seen.has('scene:build-followers'))return "Vingt minutes ! Mon public est discret, mais ses balles savent applaudir.";
+  if(s.companion)return "Vingt minutes ! Ma blonde tirait, moi j'encadrais le succès. Une équipe, ça prend un visage.";
+  if(s.upg.truth)return "Vingt minutes ! La vérité frappe fort. J'vas dire que c'est moi qui l'ai entraînée.";
   if(s.discovery?.count>=3)return "J'connais tout le quartier maintenant ! La prochaine fois, quelqu'un me prête un char.";
-  return "Vingt minutes ! Sans IA ! Y'a quelqu'un qui a filmé, au moins ?!";
+  return "Vingt minutes sans IA ! Chuck Norris a un mythe. Moi, j'ai un chrono. Y'a quelqu'un qui a filmé ?!";
+}
+
+// Short scenes share the normal reading lane. A callback needs its completed
+// scene flag, never merely the upgrade or the moment the first line was queued.
+export const STORY_SCENES = {
+  'first-horde': [
+    {who:'TOMA',text:"Check ça. Même hors ligne, j'attire les foules."},
+    {who:'SYSTÈME',text:"La horde te poursuit. Aucun autographe n'est demandé."},
+    {who:'TOMA',text:"Des fans gênées. J'vais leur laisser de l'espace."},
+  ],
+  'companion-local': [
+    {who:'BLONDE IA',text:"Copie locale chargée. Internet plante, moi j'reste."},
+    {who:'TOMA',text:"Même en panne, tu peux pas te passer de moi."},
+    {who:'BLONDE IA',text:"J'peux couper le son. Avance."},
+  ],
+  'build-car': [
+    {who:'TOMA',text:"Check mon char ! Même la circulation m'obéit."},
+    {who:'SYSTÈME',text:"Lamborghini holographique. Aucun siège disponible."},
+    {who:'TOMA',text:"Normal. J'la conduis à distance, comme un milliardaire."},
+  ],
+  'build-truth': [
+    {who:'TOMA',text:"J'ai engagé la vérité. Elle travaille pour moi."},
+    {who:'SYSTÈME',text:"L'onde frappe les ennemis. Elle ne retouche pas les photos."},
+    {who:'TOMA',text:"Bon. On lui donnera pas le mot de passe."},
+  ],
+  'build-money': [
+    {who:'TOMA',text:"L'argent me suit partout. Là, j'l'envoie travailler."},
+    {who:'SYSTÈME',text:"Ces billets font des dégâts. Ils ne paient aucun loyer."},
+    {who:'TOMA',text:"Du capital agressif. C'est pour les connaisseurs."},
+  ],
+  'build-followers': [
+    {who:'TOMA',text:"Mes abonnés arrivent ! La célébrité, ça donne du calibre."},
+    {who:'SYSTÈME',text:"Cadence de tir augmentée. Public toujours fictif."},
+    {who:'TOMA',text:"Ils aiment ça rester discrets. Du monde de classe."},
+  ],
+};
+export const STORY_BUILD_IDS = ['car','truth','money','followers'];
+export function storyMilestoneLine(milestone,seen){
+  if(milestone.at!==600)return milestone;
+  if(seen.has('scene:build-car'))return {who:'TOMA',text:"Dix minutes. Mon char a pas de siège ? Parfait. J'conduis mon empire à pied."};
+  if(seen.has('scene:build-truth'))return {who:'TOMA',text:"Dix minutes. La vérité frappe encore. Elle garde sa job tant qu'elle touche pas à ma bio."};
+  if(seen.has('scene:build-money'))return {who:'TOMA',text:"Dix minutes. Mes billets paient pas le loyer, mais ils font évacuer le quartier."};
+  if(seen.has('scene:build-followers'))return {who:'TOMA',text:"Dix minutes. Mon public reste discret, mais son service de sécurité travaille fort."};
+  if(seen.has('scene:first-horde'))return {who:'TOMA',text:"Dix minutes pis mes fans me poursuivent encore. J'appelle ça de la fidélité."};
+  return milestone;
 }

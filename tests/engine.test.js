@@ -160,10 +160,13 @@ test('the opening has twice the regular population and introduces orangutan pack
 });
 
 test('large mixed hordes arrive near twenty seconds and return after forty-five seconds', () => {
-  const events=[];const g=game({onEvent:(type,payload)=>events.push({type,payload})});g.timers.rival=999;g.s.shotClock=999;g.s.maxhp=g.s.hp=10000;
-  tick(g,21);assert.equal(events.filter(e=>e.type==='bark'&&e.payload.who==='SYSTÈME'&&e.payload.text.includes('discussion')).length,1);
+  const g=game(),arrivals=[],spawnHorde=g.spawnHorde.bind(g);g.spawnHorde=()=>{arrivals.push(g.s.elapsed);spawnHorde();};g.timers.rival=999;g.s.shotClock=999;g.s.maxhp=g.s.hp=10000;
+  // Optional banter can wait or be omitted while another speaker is reading.
+  // Verify the actual horde schedule and enemies, not an incidental joke count.
+  tick(g,21);assert.equal(arrivals.length,1);assert.ok(Math.abs(arrivals[0]-20)<.06);
   assert.ok(g.s.enemies.length>=45);assert.ok(g.s.enemies.some(e=>e.type==='orangutan'));
-  g.s.enemies=[];tick(g,46);assert.equal(events.filter(e=>e.type==='bark'&&e.payload.who==='SYSTÈME'&&e.payload.text.includes('discussion')).length,2);
+  g.s.enemies=[];tick(g,46);assert.equal(arrivals.length,2);assert.ok(Math.abs(arrivals[1]-arrivals[0]-45)<.06);
+  assert.ok(g.s.enemies.some(e=>e.type==='orangutan'));
 });
 
 test('female orangutans are a distinct long-arm species with a committed dodgeable swipe', () => {

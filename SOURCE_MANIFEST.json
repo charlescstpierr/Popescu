@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-trophies-charles-replay-dialogue",
+  "version": "1.5-plus-varied-city-story-companion-fixes",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -56,6 +56,21 @@
       "path": "art/source/charles/register-atlas.mjs",
       "bytes": 2480,
       "sha256": "861636fcfe4290b9733b17aae0ada3673a521ffa55d375ddc2afaf9359afc348"
+    },
+    {
+      "path": "art/source/companion/README.md",
+      "bytes": 2106,
+      "sha256": "76989be70368a366b8225f13be26bbd2fde9dc0820dfb5fbc431ca39015a8d06"
+    },
+    {
+      "path": "art/source/companion/levels-rear-run-source.png",
+      "bytes": 2040720,
+      "sha256": "97c161cd0015224bc1b67c8c7dbf2d6674b0e5e9db00e48757a500593180bb49"
+    },
+    {
+      "path": "art/source/companion/levels-whole-source.png",
+      "bytes": 1874526,
+      "sha256": "5d6cacd3f7f89cdb994cd2d0a4e8eb6413343f295cc6c0349e16a740c471099d"
     },
     {
       "path": "art/source/orangutan-bra/README.md",
@@ -214,8 +229,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 37835,
-      "sha256": "5d292a344aad71a51c02be5eae1118ea316bb23bd625794a3ab161471a3ac5fd"
+      "bytes": 39141,
+      "sha256": "55ca7dc9041f569fb11c7df5e0c4e80c6b970adc1a4f8c2ec48da4a4032a33e9"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -231,6 +246,36 @@
       "path": "dist/assets/charles-whole-v1.png",
       "bytes": 103638,
       "sha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583"
+    },
+    {
+      "path": "dist/assets/companion-levels-whole.png",
+      "bytes": 573149,
+      "sha256": "0c555ef01472de438dc2999c523533ed170cd80155951aff59e3f5bf13e61917"
+    },
+    {
+      "path": "dist/assets/companion-portrait-1.png",
+      "bytes": 13468,
+      "sha256": "9d87f121c42b89a86c46a0bb0f21db00d61ccb2df8810622d98cbc835289c5da"
+    },
+    {
+      "path": "dist/assets/companion-portrait-2.png",
+      "bytes": 12226,
+      "sha256": "be0b543820aca9f2e0968159e3819f6c65846164113de1540d585151cbc61605"
+    },
+    {
+      "path": "dist/assets/companion-portrait-3.png",
+      "bytes": 17382,
+      "sha256": "c52c74a1b32142e91b13e73ee76bdb9609897a959d3cbd74ccbe83019e991c71"
+    },
+    {
+      "path": "dist/assets/companion-portrait-4.png",
+      "bytes": 15734,
+      "sha256": "c712f5a3d516d4cd56492b94d35763d2eedf90c8cf69e7e0e481362966f3e754"
+    },
+    {
+      "path": "dist/assets/companion-portrait-5.png",
+      "bytes": 18253,
+      "sha256": "2f483d8b7d7c506778d94e05f967a8ffd2eb7aca0834e6ea5e41c60aa73a0a57"
     },
     {
       "path": "dist/assets/couverture-personnages.webp",
@@ -329,8 +374,8 @@
     },
     {
       "path": "dist/biomes.js",
-      "bytes": 507,
-      "sha256": "bfc6fd9f73eace8c76ba1cf862bb6092b95d56a48f5c8cd30753263c32dc4b55"
+      "bytes": 1007,
+      "sha256": "152245c6f515f5f961b34ced1d8bf91f02ce9e85b790ec82d3df3ee1501b95c2"
     },
     {
       "path": "dist/boss-director.js",
@@ -354,13 +399,13 @@
     },
     {
       "path": "dist/charles.js",
-      "bytes": 8277,
-      "sha256": "a6fc08eae70339f283fc75205fac2101e038930693d3aed53722c63235ba98d9"
+      "bytes": 8270,
+      "sha256": "166178a8056a3f11faba7b0e394db0fbe1bd5d7d21ba66e36e036a00c3885542"
     },
     {
       "path": "dist/city-art.js",
-      "bytes": 52544,
-      "sha256": "cafb0fbaf3ebeb0271e85a88c48dc042231ef31179eab3194c4c3e5649e16ae8"
+      "bytes": 60707,
+      "sha256": "71aa99b0d44e3a8b95f23828352653717ddf5f9c7d989d4281d8ca10a67dbcbe"
     },
     {
       "path": "dist/combat-art.js",
@@ -368,9 +413,14 @@
       "sha256": "77ab45e1d0376a64cf937a011b742bd815c4d242fd771fa49366604cbc60837b"
     },
     {
+      "path": "dist/companion-art.js",
+      "bytes": 3297,
+      "sha256": "0d14f3b2adc7fbb2af037979de1bcf202cfa358afe7b510515e228eb7c3d92c7"
+    },
+    {
       "path": "dist/content.js",
-      "bytes": 23742,
-      "sha256": "fadc7e33c751645091095722f77e193777e4808156b55fe9c0b1ce618eecf14a"
+      "bytes": 33764,
+      "sha256": "156573691f02cf63fc1d511a1c9d0be1e4afe4152a3ec7eb2cc5edd7f5cd330c"
     },
     {
       "path": "dist/discoveries.js",
@@ -384,13 +434,13 @@
     },
     {
       "path": "dist/drops.js",
-      "bytes": 2864,
-      "sha256": "74092118aa9c9836a618b53fc5dfeae8044326a99b9851be26c23c1382227927"
+      "bytes": 3412,
+      "sha256": "9f2ec9a1156b13ea449b70f56e87b6faea0ff7fcb1b8813b286baeea42bdb9c4"
     },
     {
       "path": "dist/engine.js",
-      "bytes": 59700,
-      "sha256": "fe9f74cde04b25f6d31e18721d6bd9b904e827595d2ed2c681b27fedc3c8a3ee"
+      "bytes": 62485,
+      "sha256": "7b10206b7b77d902ad76fef246719ca3f1821d82fa2bdcda8f02ec6fd3b343db"
     },
     {
       "path": "dist/evolutions.js",
@@ -414,13 +464,13 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 14628,
-      "sha256": "79acc28c40d8c6166d977b40a7d731d65b756a711b6b1a0ce65c13dd4628a389"
+      "bytes": 14805,
+      "sha256": "fbcb6fc438b5528849f35d116be9592df16325550a526f54203b6f98fa9722bc"
     },
     {
       "path": "dist/opening.js",
-      "bytes": 1879,
-      "sha256": "2775fc10caa28eda677726c178f10fb873259d37758ccf83b74cdb46f967f741"
+      "bytes": 1969,
+      "sha256": "24af39be47312d71ad46400ad4570766fc8a762e28273aadefec4e11dc760258"
     },
     {
       "path": "dist/pelican-art.js",
@@ -444,8 +494,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 52938,
-      "sha256": "6951515100c9dfb7447600b8968f35ec0ac8bc13f738f5941938ee493552143b"
+      "bytes": 53161,
+      "sha256": "96a7cc835437b6426c0d06c0fa6061dcbad1ef5fb9062f88eaf5fd333b3065d3"
     },
     {
       "path": "dist/run-history.js",
@@ -454,18 +504,18 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 31020,
-      "sha256": "967b1f57894ff0faa67fbabf5ca6985ac849b5b8e1cd5bb13ff3108205de675d"
+      "bytes": 33087,
+      "sha256": "838b3012d9503daabf55cf75b8d45d7632787e297355241594a1b381ffe1ab09"
     },
     {
       "path": "dist/speech.js",
-      "bytes": 2556,
-      "sha256": "57ed61fba7538f032305ae7f2c4823dd1a84218e18b2fbb4c65151166fe77824"
+      "bytes": 5295,
+      "sha256": "da7caee709fe5e48414c637d208af4faa9f8f1ffe14db325068ad40397699eb1"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 35487,
-      "sha256": "218d4eaee49420e8c2e1bcb3f4541635f1769eb50f86d58eaa38f51cf69733ac"
+      "bytes": 35523,
+      "sha256": "900ad0d95cf35506e20205835f585ab93531b6f6cdb14d7114d0453256fe8feb"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -593,9 +643,19 @@
       "sha256": "6b888bebae4064f37aca02ac3c5169c9f38b05513fbe0feebfb08906007088e1"
     },
     {
+      "path": "docs/QA-CITY-STORY-INTEGRATION.md",
+      "bytes": 2630,
+      "sha256": "9b6b8d5d970a6ed8f6dfde87d9f9f67813b31b7f043946247c65df26effbea93"
+    },
+    {
       "path": "docs/QA-COMBINED-NOV3.md",
       "bytes": 3934,
       "sha256": "0fe9b1e42afdc4d5e7a1b71de5450cb44f476417fb155343f58c8ec5f5a430fb"
+    },
+    {
+      "path": "docs/QA-COMPANION-LEVELS.md",
+      "bytes": 4482,
+      "sha256": "6b9682fbb333fb7d9930645ed3a2f4429fff74bc17d45815afa7181b7e1bfa13"
     },
     {
       "path": "docs/QA-CONTENT.md",
@@ -638,6 +698,11 @@
       "sha256": "a032b602412305a237e2f7e229e6acc6004daf9056b3053236af683e2d6f6cdc"
     },
     {
+      "path": "docs/QA-RELEASE-INTEGRATION.md",
+      "bytes": 3650,
+      "sha256": "b0d8c9d5c22585749ac5ff8e31b351cbaa2995e85fbbcf59745856919e7eeae1"
+    },
+    {
       "path": "docs/QA-REMAINING-POWER-ANIMATIONS.md",
       "bytes": 5481,
       "sha256": "8b818f9a72071079c81d3d3165eecffc0e80d11a7cb5773c66304da7158d5d8c"
@@ -663,6 +728,11 @@
       "sha256": "241ef8e644694669a7f7a295c37c59b0ca988626dc8cae549e89ee1c013e4768"
     },
     {
+      "path": "docs/QA-STORY-CONVERSATIONS.md",
+      "bytes": 4041,
+      "sha256": "98ec18ac19f93426276ef1fa143141f9cc392c5687b73a008fda90879a8708b8"
+    },
+    {
       "path": "docs/QA-TAIL-DASH.md",
       "bytes": 2723,
       "sha256": "9e60352f1a1f587208412888eccc30942f1edab0ee1df14da2ab50d2059e4ba3"
@@ -686,6 +756,11 @@
       "path": "docs/QA-V1.5.md",
       "bytes": 3593,
       "sha256": "a19eb67e2538b91729276af6a02ab743bf0c4402959d75f73c32efc64682dffc"
+    },
+    {
+      "path": "docs/QA-VARIED-CITY.md",
+      "bytes": 3445,
+      "sha256": "c4b7bcc21e00f1d3f23b0fb8b464f389f24086f2fcd9e393fd8645324b86bb48"
     },
     {
       "path": "docs/QA-XP-DIRECTION.md",
@@ -944,8 +1019,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14252671,
-      "sha256": "cf8b1510e645dd7c8efb94a2de8b89c718764e91fb51b5ad48bd1c2cde1dda95"
+      "bytes": 15173963,
+      "sha256": "82c067c8dd1d088e39edca512989f5e82c3a55e03f35f34631fd824159a1b9c2"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -964,8 +1039,8 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 2024,
-      "sha256": "9fffa7a0e6413d1d471b7bd9ff83d5d5f0e9bdbef9b3e598518d8b7dec567bb9"
+      "bytes": 2040,
+      "sha256": "8e16fbd077a8c93068ad2beb1ad39227949204dbd28116993cdd70259a5bdee6"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -976,6 +1051,21 @@
       "path": "scripts/inspect-charles.mjs",
       "bytes": 5063,
       "sha256": "c46c57d3f29351e1d3a6a60f1cdfcfb283e57ae6faa3c7abb0697470b3945ce1"
+    },
+    {
+      "path": "scripts/inspect-companion-art.mjs",
+      "bytes": 1162,
+      "sha256": "46557a25e0680bb367078d6fd86b7b59f4bcd0499cda3dfba8a77be0ec435f7b"
+    },
+    {
+      "path": "scripts/inspect-companion-standalone.cjs",
+      "bytes": 5402,
+      "sha256": "b4bcbca04cbfea234b4c9186902a78c1495470f421a90c1fcc71efd5141fd2d2"
+    },
+    {
+      "path": "scripts/inspect-companion.mjs",
+      "bytes": 2985,
+      "sha256": "dd35b0eee48b2333418456267ae87b7aa4b3af3cfd2e54aeebe9e4268b5a3041"
     },
     {
       "path": "scripts/inspect-defeats.mjs",
@@ -1038,6 +1128,11 @@
       "sha256": "3d275f77bef343b88b5aa241acee2e460eca6706e6573ad31f5e3cb0836ba716"
     },
     {
+      "path": "scripts/inspect-story.mjs",
+      "bytes": 3284,
+      "sha256": "812515709ea6158f8c662da891bed726a3abdee8f97dee794a1527f5b38e6af6"
+    },
+    {
       "path": "scripts/inspect-tail-dash.mjs",
       "bytes": 3024,
       "sha256": "bc33c947e3a663026175978c924f9533c8b1f9741fb5fd7901c3589e2118b03e"
@@ -1058,6 +1153,11 @@
       "sha256": "24c990cc5186843f7134b288537edc24ee3e3afc4da475f607101db222d72885"
     },
     {
+      "path": "scripts/inspect-varied-city.mjs",
+      "bytes": 3973,
+      "sha256": "727239eea75c9fa729b5703f956a1f6eec5fdb5279714d8ca317f18963db75cc"
+    },
+    {
       "path": "scripts/pack-actors.py",
       "bytes": 2396,
       "sha256": "1c037ef3e8a5dbeacdc6adef4165f5f5fb02a1d6a65d28eaff2b070fb6a026a2"
@@ -1066,6 +1166,11 @@
       "path": "scripts/pack-hero-approved.py",
       "bytes": 6793,
       "sha256": "eb37f0cfc62a5a8dcae0c786f49c8cf0629d337c33a05e9399b838853be17e34"
+    },
+    {
+      "path": "scripts/prepare-companion-art.py",
+      "bytes": 2826,
+      "sha256": "80650a5464acabdd3727149f431d9c628155801ea8362ef6ffd6aab5e2628dcc"
     },
     {
       "path": "scripts/prepare-hero-whole.py",
@@ -1139,8 +1244,8 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 23604,
-      "sha256": "49db837b9945a6a01adff4b67e52a0820227042de554e3d903740a9eb1b70d35"
+      "bytes": 26431,
+      "sha256": "af2dbfd1ac3532e9a7ae1b796feca8146be722b8d3ce45737bd5b40e4210ee97"
     },
     {
       "path": "tests/audio.test.js",
@@ -1155,17 +1260,17 @@
     {
       "path": "tests/boss-arrivals.test.js",
       "bytes": 3478,
-      "sha256": "ae342f40c167c35d32d705e405b6d221c39e0e43dc83cb1b94f028d7215c603b"
+      "sha256": "70c76522383a9ef69b2a634d3eda25f1a6ac08aec2f0ea475383ed4787c6376d"
     },
     {
       "path": "tests/boss-director.test.js",
       "bytes": 11888,
-      "sha256": "96a40e96354cc633e0bc5f743eeebadbfa8a75c7bdb6a1a5da5549980fe7624f"
+      "sha256": "ef6fb34cb87e0978e0902fa1b897890b76b219d8c6160d930c543545aa6f14c5"
     },
     {
       "path": "tests/boss-durability.test.js",
       "bytes": 4771,
-      "sha256": "471bcc023c9219ea412cd84a9731085c1d0e103fc9e92e3c63e0a6b9f1bd322f"
+      "sha256": "c9619d8079b0a741748107e75be27b1c094efc77b70da0749b5dfe25c8246ada"
     },
     {
       "path": "tests/boss-hardening.test.js",
@@ -1215,17 +1320,27 @@
     {
       "path": "tests/charles-save.test.js",
       "bytes": 1450,
-      "sha256": "99f4e4931599c4e82d9520f11f53cd6a89e8c63af1bc7a5a63dd92629a51c5ac"
+      "sha256": "da8a7a5775570fb91f6e7171abfa612ccda34a3d9a29b071a4609e8ac9153e37"
     },
     {
       "path": "tests/charles-ui.test.js",
-      "bytes": 11853,
-      "sha256": "591a71368a690c63adf1d4f620b525a8a7bf95dae8682f512ef555060dae6893"
+      "bytes": 18808,
+      "sha256": "c3b47e29cd878b986e20c34352edd97cd04a4be018437e6dd1ee47eb27106ff6"
     },
     {
       "path": "tests/combined-candidate.test.js",
       "bytes": 1719,
       "sha256": "f8074276bbba32b4bcf6425319f68134f48c6e80cc0ca3bef97ed404673ab517"
+    },
+    {
+      "path": "tests/companion-art.test.js",
+      "bytes": 4148,
+      "sha256": "bac11c24433dde58dd67babe10e29722444a9cb5ef0e7b8eeb92cd258541fbe7"
+    },
+    {
+      "path": "tests/companion-levels.test.js",
+      "bytes": 7158,
+      "sha256": "72eb420ac346c317e47085ca098122c740016a88e6460e9a1d66b164997d470d"
     },
     {
       "path": "tests/crowd-performance.test.js",
@@ -1264,13 +1379,18 @@
     },
     {
       "path": "tests/engine.test.js",
-      "bytes": 28053,
-      "sha256": "6bc36cf89061781cbc62743d7a4a175a6fed314e5ef1962efbc83e14dbc3492a"
+      "bytes": 28211,
+      "sha256": "244ec55fe9d1fda76a7e3fc31fa33cd661eed7b90e20ba43445bf75020079ca3"
     },
     {
       "path": "tests/evolutions.test.js",
       "bytes": 6255,
       "sha256": "53300b96ea56af1079caae6b765b7ddca8240d492435c33ade328ed7ccb57a02"
+    },
+    {
+      "path": "tests/fixtures/runstore-v11.json",
+      "bytes": 3128,
+      "sha256": "a2150aa1602626b0d06380ae6e8eaf34a5bb1f8db03d66f89f456d76e34b915c"
     },
     {
       "path": "tests/fixtures/runstore-v3.json",
@@ -1291,6 +1411,11 @@
       "path": "tests/fixtures/runstore-v8.json",
       "bytes": 2313,
       "sha256": "b87952f643c10cb64718c5a53829783e0cff912753c6c6235cd6c2d410426ea4"
+    },
+    {
+      "path": "tests/fixtures/varied-city-legacy-world.json",
+      "bytes": 719,
+      "sha256": "bb42baea2547d7112cceb6a157de49aa99af522a9e5184ce8254a7eed90f679c"
     },
     {
       "path": "tests/helpers/boss-combat.js",
@@ -1380,7 +1505,12 @@
     {
       "path": "tests/replay-dialogue-integration.test.js",
       "bytes": 4547,
-      "sha256": "62577f8b3c6311585434440842cf812c4867fe4f661d766a27b7623efa56b635"
+      "sha256": "b18b744738f6c4e7fc3424b76f895c4b5f61584ffc920175c319d2b486996ab8"
+    },
+    {
+      "path": "tests/result-record-races.test.js",
+      "bytes": 6851,
+      "sha256": "641ae278949647b7d7134f7dc0f6a20b9345c47055b2018a92bdeee94ecf5302"
     },
     {
       "path": "tests/rooster-reaction.test.js",
@@ -1405,17 +1535,22 @@
     {
       "path": "tests/run-pelican.test.js",
       "bytes": 14540,
-      "sha256": "a8f607496987a4424cfc9259492fa8194f8955d8779f4fb00c3b86486189b8be"
+      "sha256": "1b0ec3724eb6b91be1117b2f2a8951961c43d71ce10792cf30df00d28ccaecb7"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11182,
-      "sha256": "60aac59311ce8f82fcd759ac085738ab4029e82a106396929b8997802d7babfa"
+      "sha256": "a2cff0a88c6b16c70fe4c229f579ac74849b2ecb8bb61042e392cd6950fde3b5"
     },
     {
       "path": "tests/run-travestia.test.js",
       "bytes": 4715,
       "sha256": "b61963d992b62bef977ebd6901dc4c8d7656b42b008899b41a2d483730bd1787"
+    },
+    {
+      "path": "tests/runstore-v11.test.js",
+      "bytes": 3420,
+      "sha256": "23a249555dd49e4d8ae2858dd03150d3c9ccc754ed70532bd6136e6d507517b9"
     },
     {
       "path": "tests/save-performance.test.js",
@@ -1431,6 +1566,11 @@
       "path": "tests/standalone-output-safety.test.js",
       "bytes": 3035,
       "sha256": "9f01037e79e30c3d147ba5ddd750ab2b143f251d080ef24049f4b9a8daa779cc"
+    },
+    {
+      "path": "tests/story-conversations.test.js",
+      "bytes": 11387,
+      "sha256": "45437820983e7041bdef6605a25f518b919317d3460f36ee3c613e8835c94d57"
     },
     {
       "path": "tests/story.test.js",
@@ -1470,7 +1610,7 @@
     {
       "path": "tests/trophy-save.test.js",
       "bytes": 7876,
-      "sha256": "dc8c36acfecb4e5a470247a513eade9edd99e4097dd834395f0c5c80163cf1ed"
+      "sha256": "58610a8c276ff9f90bccf056831f29a9d9e8dc08b5acaa1c9e29dde0e14add46"
     },
     {
       "path": "tests/trophy-ui.test.js",
@@ -1481,6 +1621,11 @@
       "path": "tests/upgrade-rewards.test.js",
       "bytes": 1677,
       "sha256": "4f113fc5c268fa3c5c847c3bfc684215ec8a51d27eee1c0696362ae0212237d3"
+    },
+    {
+      "path": "tests/varied-city.test.js",
+      "bytes": 5522,
+      "sha256": "d77fb9b0a1b4b0479d9e4bae017a7edba01eb63550cf9bdff7858b944479680d"
     },
     {
       "path": "tests/world-performance.test.js",
@@ -1503,6 +1648,6 @@
       "sha256": "82fe5fd9d6cf92803270d4ee9185acdfde7fc0f37b633863c087c90d03425c10"
     }
   ],
-  "base_github_commit": "e25fb766ec051035aa09a22d5e32eb4500ba9472",
+  "base_github_commit": "08b1c3f6d25a177bcf1378a998feb39a7c186df2",
   "integration_date": "2026-11-04"
 }

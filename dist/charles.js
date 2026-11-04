@@ -1,14 +1,14 @@
 // Optional post-victory encounter. Its clock never changes the survival record.
 export const CHARLES={hitsToTransform:18,maxDestroyed:64,waveWidth:18,gapHalfAngle:.52,phases:{intro:8,hover:2.4,shock_warning:2.6,shockwave:1.8,cape_warning:2.2,cape_spin:.85,recover:2,descend:1.25,bend:1.5,scream:1.25,burst:1.4,empowered:2.2,complete:0}};
 export const CHARLES_LINES=[
- {who:'TOMA',text:'Charles ? T’as même pas l’intelligence pour comprendre mon génie.'},
- {who:'CHARLES',text:'J’ai surtout compris pourquoi ta Lamborghini a six roues sur la photo.'},
- {who:'TOMA',text:'C’est un modèle exclusif. Faut être intelligent pour le connaître.'},
- {who:'CHARLES',text:'Et tes six doigts ? C’est aussi un modèle exclusif ?'},
- {who:'TOMA',text:'Mes photos sont réelles. Tout le monde me croit !'},
- {who:'CHARLES',text:'Je les vois toutes, Toma. Même l’IA demande de ne pas être identifiée.'},
- {who:'TOMA',text:'T’es juste jaloux de mon quotient intellectuel.'},
- {who:'CHARLES',text:'Le seul quotient ici, c’est ton ego divisé par les preuves.'}
+ {who:'TOMA',text:"Vingt minutes, Charles. Chuck Norris demande mon programme d'entraînement."},
+ {who:'CHARLES',text:"Ton programme ? J'ai surtout la photo de ton char à six roues."},
+ {who:'TOMA',text:"Deux roues de plus. Deux fois plus exclusif. Fais le calcul."},
+ {who:'CHARLES',text:"J'ai compté tes doigts aussi. Six. Même fournisseur ?"},
+ {who:'TOMA',text:"Une main de génie. Ça prend du surplus pour compter mes millions."},
+ {who:'CHARLES',text:"Tes millions sont sur la photo. Comme la villa. Comme les clés."},
+ {who:'TOMA',text:"J'ai survécu pour vrai, moi. Ça, tu peux pas l'effacer."},
+ {who:'CHARLES',text:"Ça, c'est vrai. Le reste, on va le regarder sans filtre."}
 ];
 export function charlesActive(s){return Boolean(s.charles&&s.charles.phase!=='complete'&&!s.endless);}
 const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
