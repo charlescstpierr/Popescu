@@ -179,6 +179,12 @@ function validate(snapshot){
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
  check(d.viewport.width>=240&&d.viewport.width<=1600&&d.viewport.height>=320&&d.viewport.height<=1600);check(Array.isArray(d.eventSeen)&&d.eventSeen.length<=100&&d.eventSeen.every(x=>typeof x==='string'));
+ // Optional in v13: preserve the exact measured layout for deterministic replay.
+ // Old snapshots have no masks; the app refreshes them before its next attempt.
+ if(Object.hasOwn(d.viewport,'occlusions')){
+  const rects=d.viewport.occlusions;check(Array.isArray(rects)&&rects.length<=24);
+  for(const r of rects)check(object(r)&&Object.keys(r).length===4&&['x','y','width','height'].every(k=>finite(r[k]))&&r.x>=0&&r.y>=0&&r.width>0&&r.height>0&&r.x+r.width<=d.viewport.width&&r.y+r.height<=d.viewport.height);
+ }
  for(const key of ['pendingStuntReply','pendingRivalReply']){const p=d[key];check(p===null||object(p)&&finite(p.at)&&integer(p.index));if(key==='pendingRivalReply'&&p)check(integer(p.id,1)&&['rival_rooster','rival_goat'].includes(p.type)&&typeof p.ally==='boolean');}
  validateSpeech(d.speech,d.id,s.elapsed+(s.charles?.elapsed||0));
  check(Array.isArray(d.discoveryCooldowns)&&d.discoveryCooldowns.length<=256);

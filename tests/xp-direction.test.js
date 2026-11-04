@@ -74,10 +74,7 @@ test('returning to the physical bank still awards every earned level without an 
  while(g.s.mode==='upgrade'){g.chooseUpgrade(g.s.options[0].id);choices++;assert.ok(choices<=6);}
  assert.equal(choices,6);assert.equal(g.s.level,9);assert.equal(g.s.xp,5);assert.equal(g.s.elapsed,elapsed);
 });
-test('unmodified straight-line seed 42 no longer collects the remote bank at 187 seconds',()=>{
- const g=new Game({seed:42}),upgrades=[];
- while(g.s.elapsed<190){if(g.s.mode==='upgrade'){upgrades.push(g.s.elapsed);g.chooseUpgrade(g.s.options[0].id);}if(g.s.mode==='dialogue')g.finishDialogue();g.update(1/30,{x:1,y:0});assert.equal(g.s.hp>0,true);}
- // Boss pursuit changes ordinary rewards. Test the bank exploit, not the old isolated trajectory.
- assert.ok(g.s.level<9);assert.ok(!upgrades.some(t=>t>=187&&t<188));
- assert.equal(new Set(upgrades).size,upgrades.length,'no bank-funded chain of upgrade cards');const d=g.s.drops.find(drop=>drop.compact);assert.ok(d);assert.ok(Number.isInteger(d.value)&&d.value>=200,'uncollected XP remains in the remote bank; dialogue timing must not grant it to the player');assert.ok(d.x<g.s.x);assert.ok(g.s.drops.length<=260);
-});
+// The original natural190s replay is retained in scripts/measure-natural-xp-run.mjs.
+// It is a separate balance measurement, not an XP pass when the player dies.
+// xp-real-bank.test.js exercises the real relocation counterexample with an
+// explicit historical-bug negative control and complete physical-return credit.

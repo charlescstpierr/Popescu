@@ -1,4 +1,4 @@
-import {buildingGeometry} from './prop-geometry.js';
+import {buildingGeometry,propForegroundBounds} from './prop-geometry.js';
 import {biomeForChunk,riverSection} from './biomes.js';
 import {drawRiverTile} from './river-art.js';
 /* Original, deterministic pixel city. All positions are world coordinates. */
@@ -619,11 +619,8 @@ export class CityArt {
     if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed);if(!item)return;
     // Fade only foreground architecture/canopies that cover the player. The
     // underlying collider and depth stay unchanged; there is no hidden corridor.
-    const tall=['building','pine','tree','billboard','foodcart','vending','trophy','mirror','phone'].includes(p.type);
-    const foot=p.type==='building'?p.y+p.h/2:p.y+10;
-    const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112;
-    const halfWidth=p.type==='pine'||p.type==='tree'?48:p.w/2+18;
-    const obscures=tall&&focus&&focus.y+10<foot&&focus.y>top&&focus.y-64<foot&&Math.abs(focus.x-p.x)<halfWidth+16;
+    const cover=propForegroundBounds(p);
+    const obscures=cover&&focus&&focus.y+10<cover.foot&&focus.y>cover.top&&focus.y-64<cover.foot&&Math.abs(focus.x-p.x)<cover.halfWidth+16;
     if(obscures){ctx.save();ctx.globalAlpha=.34;}
     ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
     if(obscures)ctx.restore();

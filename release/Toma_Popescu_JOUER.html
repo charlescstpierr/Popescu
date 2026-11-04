@@ -1591,7 +1591,17 @@ function propDepth(p){
   return p.y+(p.type==='car'?(p.h||30)/2:10);
 }
 
-modules["./prop-geometry.js"]={buildingGeometry,propCollisionBounds,propDepth};
+// Conservative foreground extents used for player fading and animal introductions.
+// They describe tall painted cover, separately from its ground collision footprint.
+function propForegroundBounds(p){
+ if(!['building','pine','tree','billboard','foodcart','vending','trophy','mirror','phone'].includes(p.type))return null;
+ const foot=p.type==='building'?p.y+p.h/2:p.y+10;
+ const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112;
+ const halfWidth=p.type==='pine'||p.type==='tree'?48:p.w/2+18;
+ return {left:p.x-halfWidth,right:p.x+halfWidth,top,foot,halfWidth};
+}
+
+modules["./prop-geometry.js"]={buildingGeometry,propCollisionBounds,propDepth,propForegroundBounds};
 })();
 (()=>{
 const { propCollisionBounds }=modules['./prop-geometry.js'];
@@ -1933,8 +1943,67 @@ function travestiaFrame(e,time=0){
 modules["./travestia.js"]={TRAVESTIA_BANTER,TRAVESTIA_BANTER_LEGACY_REPLIES,TRAVESTIA,tailLocked,updateTravestia,travestiaFrame};
 })();
 (()=>{
+const {propForegroundBounds}=modules['./prop-geometry.js'];
 // Locked, readable attacks: all hazards use the same dimensions as their warnings.
 const ANIMALS={ostrich:{hp:32,speed:58,r:18,warning:.8,duration:.7,recovery:1.1,reach:190,width:22,damage:11},paparazzi:{hp:48,speed:36,r:18,warning:1.1,duration:.22,recovery:2,reach:155,width:.5,damage:12},moose:{hp:105,speed:33,r:25,warning:1.2,duration:.75,recovery:1.5,reach:225,width:30,damage:20},disco_chicken:{hp:42,speed:49,r:17,warning:1,duration:1,recovery:1.5,reach:70,width:70,damage:13}};
+// These are the existing atlas draw cells, shared with ActorArt without resizing.
+const ANIMAL_FRAMES=Object.freeze(Object.fromEntries(Object.keys(ANIMALS).map(type=>{
+ const size=type==='moose'?104:type==='ostrich'?98:80;
+ return [type,Object.freeze({size,left:-size/2,top:-size*.94,anchorY:10})];
+})));
+function animalFitsViewport(game,e){
+ const f=ANIMAL_FRAMES[e.type],v=game.viewport,dx=e.x-game.s.x,dy=e.y-game.s.y;
+ // One pixel covers the renderer's rounded camera and actor translations.
+ return Math.abs(dx)+f.size/2+1<=v.width/2&&dy+f.anchorY+f.top-1>=-v.height*.48&&dy+f.anchorY+f.top+f.size+1<=v.height*.52;
+}
+function findAnimalEntry(game,type,preferred,introduction=false){
+ const s=game.s,v=game.viewport,r=ANIMALS[type].r;
+ const moving=introduction&&s.walkMoving&&Math.hypot(s.travelX,s.travelY)>.08;
+ const angle=moving?Math.atan2(s.travelY,s.travelX):Math.atan2(preferred.y-s.y,preferred.x-s.x);
+ const frame=ANIMAL_FRAMES[type];
+ // Only the first four encounters start visibly in the periphery. A 24px inset
+ // survives ordinary camera movement between frames; 120px leaves ample room
+ // beyond contact radii, including the smallest supported 240x320 viewport.
+ const w=introduction?v.width/2-frame.size/2-24:v.width/2+r+24;
+ const top=introduction?v.height*.48+frame.anchorY+frame.top-24:v.height*.48+r+24;
+ const bottom=introduction?v.height*.52-frame.anchorY-frame.top-frame.size-24:v.height*.52+r+24;
+ // The first tour should not introduce an animal behind a roof or canopy. Read
+ // static cover once per attempt; subsequent random arrivals keep normal rules.
+ const covers=introduction?game.world.getVisible(s.x,s.y,v.width+256,v.height+256).filter(p=>!game.world.destroyed.has(p.id)).map(propForegroundBounds).filter(Boolean):[];
+ const crowd=introduction?s.enemies.filter(e=>!e.dead).map(e=>({x:e.x,y:e.y,half:Math.max(48,e.r*2),height:Math.max(100,e.r*5)})):[];
+ if(introduction){
+  if(s.companion&&s.girl.down<=0)crowd.push({x:s.girl.x,y:s.girl.y,half:48,height:100});
+  for(const car of s.vehicles)crowd.push({x:car.x,y:car.y,half:80,height:100});
+ }
+ // Keep the first sampled direction when it works. Search a bounded fan instead
+ // of pushing a blocked animal farther behind the same building.
+ // Try the outer periphery first, then at most three inner rings when HUD
+ // panels cover it. The 120px separation remains mandatory on every ring.
+ const rings=introduction?[1,.82,.64,.46]:[1];
+ for(const ring of rings)for(let i=0;i<32;i++){
+  const offset=i===0?0:(i%2?1:-1)*Math.ceil(i/2)*Math.PI/16;
+  const dx=Math.cos(angle+offset),dy=Math.sin(angle+offset);
+  const distance=ring*Math.min(w/Math.max(1e-9,Math.abs(dx)),(dy<0?top:bottom)/Math.max(1e-9,Math.abs(dy)));
+  if(introduction&&distance<120)continue;
+  const x=s.x+dx*distance,y=s.y+dy*distance,steps=Math.ceil(distance/8);
+  if(introduction){
+   const left=v.width/2+x-s.x-frame.size/2,top=v.height*.48+y-s.y+frame.anchorY+frame.top;
+   if((v.occlusions||[]).some(b=>left+frame.size>b.x-6&&left<b.x+b.width+6&&top+frame.size>b.y-6&&top<b.y+b.height+6))continue;
+  }
+  if(introduction&&crowd.some(e=>Math.abs(e.x-x)<e.half+frame.size/2&&e.y+24>y+frame.anchorY+frame.top&&e.y-e.height<y+frame.anchorY+frame.top+frame.size))continue;
+  for(let step=0;step<=steps;step++){
+   const remaining=distance*(1-step/steps),p={type,x:s.x+dx*remaining,y:s.y+dy*remaining};
+   // Samples are at most 8px apart; the extra 4px conservatively covers the
+   // continuous swept chase footprint between them, including thin obstacles.
+   if(game.world.collides(p.x,p.y,r*.64+4))break;
+   if(animalFitsViewport(game,p)){
+    if(covers.some(b=>b.foot>p.y+frame.anchorY&&p.x+frame.size/2>b.left&&p.x-frame.size/2<b.right&&p.y+frame.anchorY+frame.top+frame.size>b.top&&p.y+frame.anchorY+frame.top<b.foot))break;
+    if(remaining<=150)return {x,y};
+   }
+  }
+ }
+ return null;
+}
 const animalLocked=e=>Boolean(ANIMALS[e.type]&&e.phase!=='chase');
 function interruptAnimal(e){if(ANIMALS[e.type]){e.phase='chase';e.animalTime=0;e.cooldown=Math.max(e.cooldown,1.5);}}
 function beginAnimalAttack(e,target){const d=Math.hypot(target.x-e.x,target.y-e.y);e.animalDX=d?(target.x-e.x)/d:1;e.animalDY=d?(target.y-e.y)/d:0;e.animalX=e.x;e.animalY=e.y;e.animalTravel=0;e.animalHit=false;e.phase='animal_warning';e.animalTime=ANIMALS[e.type].warning;}
@@ -1943,7 +2012,7 @@ function segmentDistance(p,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,q=dx*dx+dy*dy,t=
 function updateAnimal(game,e,dt,suppressed){
  const a=ANIMALS[e.type],s=game.s;
  if(suppressed||e.charmed>0){e.phase='chase';e.animalTime=0;e.cooldown=Math.max(e.cooldown,1.5);return;}
- if(e.phase==='chase'){if(e.cooldown<=0&&Math.hypot(s.x-e.x,s.y-e.y)<(e.type==='disco_chicken'?115:220))beginAnimalAttack(e,s);return;}
+ if(e.phase==='chase'){if(e.cooldown<=0&&animalFitsViewport(game,e)&&Math.hypot(s.x-e.x,s.y-e.y)<(e.type==='disco_chicken'?115:220))beginAnimalAttack(e,s);return;}
  e.faceX=e.animalDX;e.faceY=e.animalDY;e.animalTime=Math.max(0,e.animalTime-dt);
  if(e.phase==='animal_warning'){if(e.animalTime===0){e.phase='animal_active';e.animalTime=a.duration;}return;}
  if(e.phase==='animal_recover'){if(!e.animalTime){e.phase='chase';e.cooldown=1.4;}return;}
@@ -1966,7 +2035,7 @@ function drawAnimalWarning(ctx,e){
  ctx.fill();ctx.stroke();ctx.setLineDash([]);if(warning){ctx.fillStyle=color;ctx.font='bold 18px sans-serif';ctx.fillText('!',-4,-28);}ctx.restore();
 }
 
-modules["./animals.js"]={ANIMALS,animalLocked,interruptAnimal,beginAnimalAttack,updateAnimal,drawAnimalWarning};
+modules["./animals.js"]={ANIMALS,ANIMAL_FRAMES,animalFitsViewport,findAnimalEntry,animalLocked,interruptAnimal,beginAnimalAttack,updateAnimal,drawAnimalWarning};
 })();
 (()=>{
 // A single major boss owns three short, bounded attacks. Simulation and drawing
@@ -2512,7 +2581,7 @@ const {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills}=module
 const {compactDrops,pickupAttraction}=modules['./drops.js'];
 const {BOSS_SCHEDULE,createBossDirector,scheduleNextBoss,isMajorBoss}=modules['./boss-director.js'];
 const {pelicanLocked,updatePelican,interruptPelican}=modules['./pelican.js'];
-const {ANIMALS,animalLocked,updateAnimal,interruptAnimal}=modules['./animals.js'];
+const {ANIMALS,animalLocked,updateAnimal,interruptAnimal,findAnimalEntry}=modules['./animals.js'];
 const { DISCOVERIES, DISCOVERY_COOLDOWN }=modules['./discoveries.js'];
 const { tailLocked, updateTravestia }=modules['./travestia.js'];
 const { World }=modules['./world.js'];
@@ -2554,6 +2623,17 @@ class Game {
   urgentSpeech(who,text,encounter=true){return enqueueSpeech(this,who,text,{urgent:true,encounter,scope:charlesActive(this.s)?'charles':'survival'});}
   rank(id){return this.s.upg[id]||0;}
   setViewport(width,height){this.viewport={width:clamp(Number(width)||390,240,1600),height:clamp(Number(height)||844,320,1600)};}
+  // DOM-free, saved input: callers provide measured canvas-relative HUD bounds.
+  // Resizing clears stale bounds; legacy/headless runs can omit them entirely.
+  setViewportOcclusions(rectangles){
+    const v=this.viewport,rects=[];
+    for(const r of (Array.isArray(rectangles)?rectangles:[]).slice(0,24)){
+      if(!r||!['x','y','width','height'].every(k=>Number.isFinite(r[k]))||r.width<=0||r.height<=0)continue;
+      const x=clamp(r.x,0,v.width),y=clamp(r.y,0,v.height),right=clamp(r.x+r.width,0,v.width),bottom=clamp(r.y+r.height,0,v.height);
+      if(right>x&&bottom>y)rects.push({x,y,width:right-x,height:bottom-y});
+    }
+    v.occlusions=rects;
+  }
   pause(){if(this.s.mode==='playing')this.s.mode='paused';}
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
   startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
@@ -2698,9 +2778,9 @@ class Game {
     if(this.world.blocksAxisMove(entity.x+dx,entity.y,dy,r,true))dy=0;
     this.move(entity,dx,dy,r);
   }
-  spawnEnemy(type,x,y){
+  spawnEnemy(type,x,y,animalIntroduction=false){
     const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
-    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
+    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));if(ANIMALS[type]){const entry=findAnimalEntry(this,type,{x,y},animalIntroduction);if(!entry)return null;({x,y}=entry);}else for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     // Several attack cycles must survive developed offensive builds. Summons
     // justify a gentler first matriarch; only newly spawned bosses gain HP.
@@ -2810,12 +2890,12 @@ class Game {
       if(animalDue){
         const types=Object.keys(ANIMALS),rng=this.rng;
         this.rng=(this.seed^Math.imul(this.timers.animalIndex+1,1640531527))|0;
-        const animal=this.spawnEnemy(types[this.timers.animalIndex%types.length]);this.rng=rng;
+        const animal=this.spawnEnemy(types[this.timers.animalIndex%types.length],undefined,undefined,this.timers.animalIndex<4);this.rng=rng;
         if(animal){
           this.timers.animalIndex++;
           // Introduce each species calmly, then follow normal arrival pressure.
           this.timers.animal=this.timers.animalIndex<4?6:Math.max(1.8,interval*10);
-        }
+        }else this.spawnEnemy(type); // Keep the ordinary slot while an entry is blocked.
       }else if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
     this.timers.pack-=dt;
@@ -3340,7 +3420,7 @@ class CompanionArt {
 modules["./companion-art.js"]={COMPANION_ART,companionRank,companionFrame,CompanionArt};
 })();
 (()=>{
-const {ANIMALS}=modules['./animals.js'];
+const {ANIMALS,ANIMAL_FRAMES}=modules['./animals.js'];
 const {travestiaFrame}=modules['./travestia.js'];
 const {PELICAN_ART,pelicanFrame}=modules['./pelican-art.js'];
 // Raster actor atlases share one light direction and one registered foot baseline.
@@ -3425,7 +3505,7 @@ class ActorArt {
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
-    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,size=actor.type==='moose'?104:actor.type==='ostrich'?98:80,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+10);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,-size/2,-size*.94,size,size);ctx.restore();return true;}
+    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,frame.left,frame.top,size,size);ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
@@ -3511,7 +3591,7 @@ class HeroArt {
 modules["./hero-art.js"]={HeroArt};
 })();
 (()=>{
-const {buildingGeometry}=modules['./prop-geometry.js'];
+const {buildingGeometry,propForegroundBounds}=modules['./prop-geometry.js'];
 const {biomeForChunk,riverSection}=modules['./biomes.js'];
 const {drawRiverTile}=modules['./river-art.js'];
 /* Original, deterministic pixel city. All positions are world coordinates. */
@@ -4132,11 +4212,8 @@ class CityArt {
     if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed);if(!item)return;
     // Fade only foreground architecture/canopies that cover the player. The
     // underlying collider and depth stay unchanged; there is no hidden corridor.
-    const tall=['building','pine','tree','billboard','foodcart','vending','trophy','mirror','phone'].includes(p.type);
-    const foot=p.type==='building'?p.y+p.h/2:p.y+10;
-    const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112;
-    const halfWidth=p.type==='pine'||p.type==='tree'?48:p.w/2+18;
-    const obscures=tall&&focus&&focus.y+10<foot&&focus.y>top&&focus.y-64<foot&&Math.abs(focus.x-p.x)<halfWidth+16;
+    const cover=propForegroundBounds(p);
+    const obscures=cover&&focus&&focus.y+10<cover.foot&&focus.y>cover.top&&focus.y-64<cover.foot&&Math.abs(focus.x-p.x)<cover.halfWidth+16;
     if(obscures){ctx.save();ctx.globalAlpha=.34;}
     ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
     if(obscures)ctx.restore();
@@ -6208,6 +6285,12 @@ function validate(snapshot){
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
  check(d.viewport.width>=240&&d.viewport.width<=1600&&d.viewport.height>=320&&d.viewport.height<=1600);check(Array.isArray(d.eventSeen)&&d.eventSeen.length<=100&&d.eventSeen.every(x=>typeof x==='string'));
+ // Optional in v13: preserve the exact measured layout for deterministic replay.
+ // Old snapshots have no masks; the app refreshes them before its next attempt.
+ if(Object.hasOwn(d.viewport,'occlusions')){
+  const rects=d.viewport.occlusions;check(Array.isArray(rects)&&rects.length<=24);
+  for(const r of rects)check(object(r)&&Object.keys(r).length===4&&['x','y','width','height'].every(k=>finite(r[k]))&&r.x>=0&&r.y>=0&&r.width>0&&r.height>0&&r.x+r.width<=d.viewport.width&&r.y+r.height<=d.viewport.height);
+ }
  for(const key of ['pendingStuntReply','pendingRivalReply']){const p=d[key];check(p===null||object(p)&&finite(p.at)&&integer(p.index));if(key==='pendingRivalReply'&&p)check(integer(p.id,1)&&['rival_rooster','rival_goat'].includes(p.type)&&typeof p.ally==='boolean');}
  validateSpeech(d.speech,d.id,s.elapsed+(s.charles?.elapsed||0));
  check(Array.isArray(d.discoveryCooldowns)&&d.discoveryCooldowns.length<=256);
@@ -6715,7 +6798,26 @@ $('banter-close').onclick=()=>{if(banterSpeechId!==null)game?.dismissSpeech();ba
 for(const button of document.querySelectorAll('.sound-button'))button.onclick=toggleSound;
 for(const button of document.querySelectorAll('[data-difficulty]'))button.onclick=()=>{setDifficulty(button.dataset.difficulty);sound();};
 $('sound-setting').onchange=e=>{prefs.sound=e.target.checked;audio.unlock();syncPrefs();save();};$('volume').oninput=e=>{prefs.volume=Number(e.target.value);syncPrefs();save();};$('reduced-fx').onchange=e=>{prefs.reduced=e.target.checked;if(game)game.state.reducedEffects=prefs.reduced;syncPrefs();save();};$('banter-setting').onchange=e=>{prefs.banter=e.target.checked;syncPrefs();save();};
-function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement))game.update(dt,movement);}if(!transitionBusy&&!recoveryPending&&runPersistence){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
+// Measure only before a due first-tour attempt. Bounds are simulation inputs,
+// not renderer state, and include the joystick at its actual dragged location.
+function refreshAnimalEntryOcclusions(dt){
+ if(game.timers.animalIndex>=4||game.timers.animal>dt||game.timers.spawn>dt)return;
+ const c=canvas.getBoundingClientRect();if(!(c.width>0&&c.height>0))return;
+ const sx=game.viewport.width/c.width,sy=game.viewport.height/c.height,rects=[];
+ const selector='.hud-head,.xp-track,#powers,.wallet,.bottom-hud,#joystick,#opening-help,#banter,#wave,#discovery-status,#offscreen .target-arrow,#trophy-toast,#toast,#control-hint,#coordinates';
+ for(const el of document.querySelectorAll(selector)){
+  if(el.getClientRects&&el.getClientRects().length===0)continue;
+  const r=el.getBoundingClientRect();if(!(r.width>0&&r.height>0))continue;
+  const box={x:(r.left-c.left)*sx,y:(r.top-c.top)*sy,width:r.width*sx,height:r.height*sy};
+  if(rects.length<24)rects.push(box);
+  else{ // Keep an overflow conservative instead of silently dropping a panel.
+   const last=rects[23],right=Math.max(last.x+last.width,box.x+box.width),bottom=Math.max(last.y+last.height,box.y+box.height);
+   last.x=Math.min(last.x,box.x);last.y=Math.min(last.y,box.y);last.width=right-last.x;last.height=bottom-last.y;
+  }
+ }
+ game.setViewportOcclusions(rects);
+}
+function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
 setDifficulty(difficulty);syncPrefs();updateRecordMenu();updateResumeMenu();requestAnimationFrame(frame);
 window.addEventListener('pagehide',()=>{cancelAssetWait();if(game)autosave.flush();});
 window.addEventListener('error',e=>{console.error('Toma runtime:',e.message);$('loading').classList.add('hidden');});

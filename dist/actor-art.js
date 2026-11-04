@@ -1,4 +1,4 @@
-import {ANIMALS} from './animals.js';
+import {ANIMALS,ANIMAL_FRAMES} from './animals.js';
 import {travestiaFrame} from './travestia.js';
 import {PELICAN_ART,pelicanFrame} from './pelican-art.js';
 // Raster actor atlases share one light direction and one registered foot baseline.
@@ -83,7 +83,7 @@ export class ActorArt {
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
-    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,size=actor.type==='moose'?104:actor.type==='ostrich'?98:80,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+10);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,-size/2,-size*.94,size,size);ctx.restore();return true;}
+    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,frame.left,frame.top,size,size);ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
