@@ -2,7 +2,7 @@ import {carLevel} from './lamborghini.js';
 import {TROPHIES,BOSS_TROPHIES,trophyChoices} from './boss-trophies.js';
 import {drawTrophyIcon,drawTrophyPortrait} from './trophy-art.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
-import {OPENING,openingStage,beginTutorial,updateTutorial,tutorialText} from './opening.js';
+import {OPENING,openingStage,positionNewRun,beginTutorial,updateTutorial,tutorialText} from './opening.js';
 import {discoveryPrompt} from './discoveries.js';
 import {LockedRunStore,restoreRun,captureRun,Autosave} from './run-save.js';
 import {Game} from './engine.js';
@@ -76,7 +76,7 @@ async function start(){
   const old=game?.s|| (savedRecord.status==='ready'?savedRecord.value.run.snapshot.game.s:null);
   if(old&&!['gameover','victory'].includes(old.mode)&&!window.confirm('Commencer une nouvelle partie remplacera la partie sauvegardée. Continuer ?'))return;
   const previous=game&&runPersistence?{id:runId,snapshot:captureRun(game,dialogueSnapshot())}:null;
-  audio.unlock();const next=new Game({difficulty,seed:(Date.now()>>>0),onEvent:onGameEvent});next.setViewport(width,height);next.s.reducedEffects=prefs.reduced;
+  audio.unlock();const next=new Game({difficulty,seed:(Date.now()>>>0),onEvent:onGameEvent});positionNewRun(next);next.setViewport(width,height);next.s.reducedEffects=prefs.reduced;
   const needsOpening=!stored.introSeen;if(needsOpening)next.s.mode='dialogue';
   const nextId=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;const begun=await runStore.begin(nextId,next,{best,lifetime,coins:lifetimeCoins},needsOpening?{lines:OPENING,index:0}:null,previous);
   if(!begun.ok&&!window.confirm('La sauvegarde est indisponible. Jouer quand même sans conserver cette partie ni ses records ?')){showSaveError(begun.reason);return;}
