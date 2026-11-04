@@ -1,0 +1,29 @@
+{
+  "source": "Unmodified replay/dialogue runtime supplied by parent, before scenery-only change",
+  "bounds": [
+    -4,
+    4
+  ],
+  "hashes": [
+    {
+      "seed": -1,
+      "sha256": "db4709ebf34ac34c34ec5bde851088a39b30a329da6197addde5e93dec7b3549"
+    },
+    {
+      "seed": 0,
+      "sha256": "c610cc1dcd66c2bdd3d39087445ecb3d90ef980c01f4cc22656588a23a97840b"
+    },
+    {
+      "seed": 1,
+      "sha256": "9c221c46f7171de9c933013d49dad4de774c0367863e612dcbe8cf1888805dbf"
+    },
+    {
+      "seed": 42,
+      "sha256": "bd130303e7d691e8a2932386e0a31cdb1020af89cefa1cb20d87ceb8a7027020"
+    },
+    {
+      "seed": 831,
+      "sha256": "2c65c42e4c17483dfbe3dcbb2075988398c92e9df7713c440eaf3a751a1ec3be"
+    }
+  ]
+}

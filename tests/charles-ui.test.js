@@ -19,7 +19,7 @@ function app(existingValues){
   for(const match of readFileSync(new URL('../dist/index.html',import.meta.url),'utf8').matchAll(/<[^>]+id="([^"]+)"[^>]*>/g)){const cls=match[0].match(/class="([^"]*)"/);for(const name of cls?.[1].split(/\s+/)||[])get(match[1]).classList.add(name);}
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get activeElement(){return document.activeElement},get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,renderTrophies,syncEngineScreen,updateHud,onGameEvent,showBanter,get runId(){return runId}};',context);
-  return {events,charlesPortraits,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick?.(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
+  return {holdLock(){let release;const held=new Promise(resolve=>release=resolve);queue=queue.then(()=>held);return release;},events,charlesPortraits,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick?.(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
 }
 
 
@@ -115,4 +115,93 @@ test('managed dialogue remains visible after a wall-clock jump while simulation 
 test('saved active dialogue returns on resume rather than leaving a blank reserved interval',async()=>{
  const a=app();await a.click('play');a.game.bark('TOMA','Je conserve cette phrase après la sauvegarde.',true);a.click('pause');await a.controller.persistRun();
  const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(visible(b,'banter'),true);assert.match(b.get('banter-text').textContent,/conserve cette phrase/);
+});
+
+test('banter setting suspends an actual story and resumes the same visible line',async()=>{
+ const a=app();await a.click('play');a.game.s.elapsed=30;a.game.s.upg.car=1;a.game.timers.bark=1000;a.game.world.getVisible=()=>[];a.game.story(.01);
+ const first=a.get('banter-text').textContent;assert.equal(a.game.speech.scene.id,'build-car');a.game.s.elapsed+=1;const remaining=a.game.speech.active.until-a.game.s.elapsed;
+ a.click('pause');a.get('banter-setting').onchange({target:{checked:false}});a.click('resume');assert.equal(a.game.banterEnabled,false);assert.equal(visible(a,'banter'),false);
+ a.game.s.elapsed+=100;a.game.story(.01);assert.equal(a.game.eventSeen.has('scene:build-car'),false);
+ a.click('pause');a.get('banter-setting').onchange({target:{checked:true}});a.click('resume');assert.equal(visible(a,'banter'),true);assert.equal(a.get('banter-text').textContent,first);assert.ok(Math.abs(a.game.speech.active.remaining-remaining)<1e-6);
+});
+test('saved banter preference is applied before a resumed scene can consume reading time',async()=>{
+ const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter:false,reduced:true})]]));await a.click('play');assert.equal(a.game.banterEnabled,false);a.game.s.elapsed=30;a.game.s.upg.car=1;a.game.story(.01);assert.equal(a.game.speech.scene,null);
+ a.game.announceEncounter('Attention, une horde arrive !');assert.equal(visible(a,'banter'),true);assert.match(a.get('banter-text').textContent,/horde/);
+});
+
+for(const competing of ['endless','meet-charles','retry','result-menu']){
+ test(`pending results menu blocks ${competing} until its save completes`,async()=>{
+  const a=app();await victory(a);const current=a.game,id=a.controller.runId,revision=JSON.parse(a.values.get('toma-popescu-run-v1')).revision;let competingAction;
+  const release=a.holdLock(),pending=a.click('result-menu');
+  try{
+   await new Promise(resolve=>setTimeout(resolve,0));
+   competingAction=a.click(competing);await Promise.resolve();
+   assert.equal(a.controller.screen,'results','the pending menu transition owns navigation');
+   assert.equal(a.game,current);assert.equal(a.controller.runId,id);
+   assert.equal(a.game.s.endless,false);assert.equal(a.game.s.charles,null);
+  }finally{release();await pending;await competingAction;}
+  assert.equal(JSON.parse(a.values.get('toma-popescu-run-v1')).revision,revision+1,'only one Menu checkpoint is written');
+  assert.equal(a.controller.screen,'menu');assert.equal(a.game,null);
+  await a.click('play');assert.equal(a.controller.screen,'hud','the completed transition releases its gate');
+ });
+}
+
+test('stale results handlers cannot exit endless play or interrupt a Charles confirmation',async()=>{
+ const a=app();await victory(a);a.click('endless');const current=a.game;
+ await a.click('result-menu');assert.equal(a.controller.screen,'hud');assert.equal(a.game,current);
+ await a.controller.persistRun();a.click('pause');await a.click('pause-menu');
+ await victory(a);a.click('meet-charles');a.click('endless');
+ assert.equal(a.controller.screen,'charles-confirm');assert.equal(a.game.s.endless,false);
+ await a.click('result-menu');assert.equal(a.controller.screen,'charles-confirm');
+});
+
+test('failed results menu save releases navigation without duplicating totals',async()=>{
+ const a=app();await a.click('play');Object.assign(a.game.s,{mode:'victory',elapsed:1200,kills:10,coins:5});await a.controller.renderResult(true);
+ const originalSet=a.values.set.bind(a.values);a.values.set=()=>{throw Error('quota');};
+ const release=a.holdLock(),pending=a.click('result-menu');
+ try{
+  await new Promise(resolve=>setTimeout(resolve,0));a.click('endless');
+  assert.equal(a.controller.screen,'results');assert.equal(a.game.s.endless,false);
+ }finally{release();await pending;a.values.set=originalSet;}
+ assert.equal(a.controller.screen,'menu');assert.equal(a.game,null);
+ assert.equal(a.get('toast').classList.contains('hidden'),false,'write failure remains visible');
+ assert.equal(a.saved().lifetime,10);assert.equal(a.saved().coins,5);
+ await a.click('play');assert.equal(a.controller.screen,'hud');
+ assert.equal(a.saved().lifetime,10);assert.equal(a.saved().coins,5);
+});
+
+test('results menu stays serialized behind the initial result save and pagehide flush',async()=>{
+ const a=app();await a.click('play');Object.assign(a.game.s,{mode:'victory',elapsed:1200,kills:80,coins:32});
+ const release=a.holdLock(),initial=a.controller.renderResult(true),pending=a.click('result-menu');let secondMenu;
+ try{
+  a.events.pagehide();a.click('endless');secondMenu=a.click('result-menu');await Promise.resolve();
+  assert.equal(a.controller.screen,'results');assert.equal(a.game.s.endless,false);
+ }finally{release();await initial;await pending;await secondMenu;await new Promise(resolve=>setTimeout(resolve,0));}
+ assert.equal(a.controller.screen,'menu');assert.equal(a.game,null);
+ const saved=JSON.parse(a.values.get('toma-popescu-run-v1'));
+ assert.equal(saved.totals.lifetime,80);assert.equal(saved.totals.coins,32);
+ assert.equal(saved.replay.history.filter(result=>result.mode==='survival'&&result.outcome==='victory').length,1);
+});
+
+test('endless retains a pending upgrade and rejects stale results navigation',async()=>{
+ const a=app();await a.click('play');a.game.gainXP(8);const options=a.game.s.options.map(option=>option.id);
+ Object.assign(a.game.s,{mode:'victory',elapsed:1200});await a.controller.renderResult(true);
+ a.click('endless');assert.equal(a.controller.screen,'upgrades');assert.equal(a.game.s.mode,'upgrade');
+ a.click('endless');await a.click('result-menu');
+ assert.equal(a.controller.screen,'upgrades');assert.equal(a.game.s.endless,true);
+ assert.deepEqual(a.game.s.options.map(option=>option.id),options);
+});
+
+test('real v11 saved run remains visible and playable through the current controller',async()=>{
+ const raw=readFileSync(new URL('./fixtures/runstore-v11.json',import.meta.url),'utf8');
+ const values=new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})],['toma-popescu-run-v1',raw]]);
+ const a=app(values);assert.equal(a.get('saved-run').classList.contains('hidden'),false);
+ assert.equal(values.get('toma-popescu-run-v1'),raw,'opening the menu does not rewrite the old save');
+ await a.click('resume-saved');assert.equal(a.controller.screen,'pause-screen');assert.equal(a.game.s.elapsed,123);
+ a.click('resume');assert.equal(a.controller.screen,'hud');assert.equal(a.game.s.mode,'playing');
+ assert.equal(a.game.s.trophies.chosen.travestia,'star');assert.equal(a.game.s.kills,17);
+ assert.equal((await a.controller.persistRun()).ok,true);
+ const saved=JSON.parse(values.get('toma-popescu-run-v1'));
+ assert.equal(saved.version,persistence.captureRun(a.game).version);assert.equal(saved.run.snapshot.version,saved.version);
+ assert.deepEqual(saved.totals,{best:1200,lifetime:97,coins:41});
 });

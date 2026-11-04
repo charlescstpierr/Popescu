@@ -265,3 +265,48 @@ for(const banter of [false,true])for(const reduced of [false,true]){
   }
  });
 }
+
+test('companion cards describe the next rank and the HUD displays current support',async()=>{
+ const a=app();await a.click('play');
+ for(let rank=1;rank<=5;rank++){
+  a.game.s.mode='playing';a.game.gainXP(a.game.s.xpNeed);a.game.s.options=[content.UPGRADES.find(u=>u.id==='girlfriend')];a.game.emit('upgrade',a.game.s.options);
+  const button=a.get('upgrade-options').children[0];assert.equal(button.children[0].src,`assets/companion-portrait-${rank}.png`);assert.match(button.children[1].children[1].textContent,new RegExp(['95 PV','ennemis proches','45 px','4 bouclier','Deux drones'][rank-1]));
+  button.listeners.click();await Promise.resolve();if(a.game.s.mode==='dialogue')a.click('skip-dialogue');a.controller.frame(performance.now()+60);
+  assert.match(a.get('companion-status').textContent,new RegExp(`NIV. ${rank}/5`));
+ }
+ a.game.s.girl.down=7;a.controller.frame(performance.now()+360);assert.match(a.get('companion-status').textContent,/RETOUR 7 s/);
+});
+
+test('holding Escape keeps a paused run frozen until a fresh press',async()=>{
+ const a=app();await a.click('play');
+ const escape=repeat=>a.events.keydown({key:'Escape',repeat,target:{}});
+ escape(false);assert.equal(a.controller.screen,'pause-screen');
+ const elapsed=a.game.s.elapsed,hp=a.game.s.hp;
+ for(let i=1;i<=5;i++){
+  escape(true);a.controller.frame(performance.now()+i*1000);
+  assert.equal(a.controller.screen,'pause-screen');
+  assert.equal(a.game.s.mode,'paused');assert.equal(a.game.s.elapsed,elapsed);assert.equal(a.game.s.hp,hp);
+ }
+ a.events.keyup({key:'Escape'});escape(false);
+ assert.equal(a.controller.screen,'hud');assert.equal(a.game.s.mode,'playing');
+ escape(true);assert.equal(a.controller.screen,'hud','the resumed run does not pause on the same held press');
+ a.events.keyup({key:'Escape'});escape(false);assert.equal(a.controller.screen,'pause-screen');
+});
+
+test('Escape held while leaving settings cannot also leave pause',async()=>{
+ const a=app();await a.click('play');a.click('pause');a.click('settings-open');
+ assert.equal(a.controller.screen,'settings');
+ a.events.keydown({key:'Escape',repeat:false,target:{}});assert.equal(a.controller.screen,'pause-screen');
+ for(let i=0;i<4;i++){
+  a.events.keydown({key:'Escape',repeat:true,target:{}});
+  assert.equal(a.controller.screen,'pause-screen');assert.equal(a.game.s.mode,'paused');
+ }
+});
+
+test('Escape held while skipping a dialogue cannot toggle the next screen',async()=>{
+ const a=app();await a.click('play');a.game.startDialogue([{who:'TOMA',text:'Une réplique à passer.'}]);
+ assert.equal(a.controller.screen,'dialogue');
+ a.events.keydown({key:'Escape',repeat:false,target:{}});assert.equal(a.controller.screen,'hud');
+ a.events.keydown({key:'Escape',repeat:true,target:{}});
+ assert.equal(a.controller.screen,'hud');assert.equal(a.game.s.mode,'playing');
+});

@@ -1,5 +1,5 @@
 import {buildingGeometry} from './prop-geometry.js';
-import {biomeForChunk} from './biomes.js';
+import {biomeForChunk,riverSection} from './biomes.js';
 /* Original, deterministic pixel city. All positions are world coordinates. */
 const INK='#100e20', TAU=Math.PI*2;
 const PALETTES=[
@@ -61,9 +61,114 @@ export class CityArt {
     for(let i=0;i<1500;i++){const x=random()*256,y=random()*256;R(c,['#677161','#3b5447','#788368','#695b5c','#34423e'][i%5],x,y,i%8===0?3:1,1);}
     for(let i=0;i<36;i++){const x=random()*256,y=random()*256,wx=((tx*256+x)%512+512)%512,wy=((ty*256+y)%512+512)%512;if(Math.min(wx,512-wx,wy,512-wy)<80)continue;L(c,'#4c6654',x,y,x-2,y-5,1);L(c,'#78906a',x+2,y,x+3,y-4,1);if(i%5===0){R(c,'#9b759e',x,y-6,2,2);R(c,'#c0a0ab',x+1,y-7,1,1);}}
   }
+  _riverTile(c,tx,ty,seed){
+    const wx=tx*256,wy=ty*256;
+    const first=Math.ceil((wx-110-1024)/4096),last=Math.floor((wx+366-1024)/4096);
+    for(let lane=first;lane<=last;lane++){
+      // Soft banks and a pale gravel bed make this explicitly shallow water.
+      for(let row=0;row<256;row+=2){
+        const y=wy+row,{x,halfWidth:w}=riverSection(lane,y),local=x-wx;
+        R(c,'#354c46',local-w-12,row,w*2+24,2);
+        R(c,'#7b8070',local-w-7,row,w*2+14,2);
+        R(c,'#44696b',local-w,row,w*2,2);
+        R(c,'#34565f',local-w+9,row,w*2-18,2);
+        R(c,'#3e6269',local-w+20,row,w*2-34,2);
+      }
+      // Globally anchored accents repeat seamlessly across cached tiles.
+      for(let y=Math.floor((wy-12)/12)*12;y<wy+268;y+=12){
+        const a=riverSection(lane,y),x=a.x-wx,random=rng(Math.floor(hash(lane,y,seed+201)*4294967295));
+        for(let i=0;i<5;i++){
+          const px=x-a.halfWidth+5+random()*(a.halfWidth*2-12),py=y-wy+random()*8;
+          R(c,i%2?'#6e9290':'#82a5a0',px,py,3+random()*8,1);
+          if(i===0){O(c,'#6e8580',px,py+4,6,3);R(c,'#a8aaa0',px+1,py+4,3,1);}
+        }
+        for(const side of [-1,1]){
+          const bx=x+side*(a.halfWidth+5),by=y-wy;
+          O(c,'#3d4c50',bx-4,by+1,10,5);O(c,'#8b8881',bx-4,by-1,9,5);R(c,'#b0a593',bx-2,by-1,4,1);
+          if(Math.floor(y/12)%3===0){L(c,'#89915f',bx+side*9,by+3,bx+side*8,by-6,1);L(c,'#647e54',bx+side*12,by+4,bx+side*14,by-3,1);}
+        }
+      }
+      // Flat stepping stones mark the shallow ford between each bridge. They
+      // remain ground detail, not new obstacles in a restored world.
+      for(let fy=Math.ceil((wy-20-256)/512)*512+256;fy<wy+276;fy+=512){
+        const a=riverSection(lane,fy);
+        for(let i=0;i<7;i++){
+          const x=a.x-wx-a.halfWidth+7+i*(a.halfWidth*2-14)/6,y=fy-wy+(i%2)*4;
+          O(c,'#294a55',x-5,y+2,11,7);O(c,'#879493',x-5,y,10,6);R(c,'#b4b3a5',x-3,y,5,1);
+        }
+      }
+      // Low, open parapets leave both banks and the ford legible. They are
+      // baked into ground, never drawn over actors or combat warnings.
+      for(let by=Math.ceil((wy-76)/512)*512;by<=wy+332;by+=512){
+        const x=1024+lane*4096-wx,y=by-wy;
+        R(c,'#1f303e',x-78,y-61,156,126);
+        R(c,'#605d6c',x-78,y-58,156,116);
+        for(let yy=-54;yy<58;yy+=14)for(let xx=-76;xx<77;xx+=24){
+          R(c,'#777080',x+xx,y+yy,22,12);R(c,'#a49398',x+xx,y+yy,22,1);
+        }
+        for(const side of [-1,1]){
+          const yy=y+side*58;R(c,'#302c40',x-65,yy-3,130,6);R(c,'#b4a4a1',x-65,yy-4,130,2);
+          for(const end of [-1,1]){R(c,'#393443',x+end*70-5,yy-7,10,12);R(c,'#9d8c91',x+end*70-4,yy-8,8,11);R(c,'#d1b8ad',x+end*70-4,yy-8,8,2);}
+        }
+      }
+    }
+  }
+  drawRiverLandings(c,props){
+    for(const p of props){
+      if(p.type!=='discovery')continue;
+      const lane=Math.round((p.x-1024)/4096),river=riverSection(lane,p.y);
+      if(Math.abs(p.x-river.x)>river.halfWidth+p.w/2+12)continue;
+      // Existing discovery coordinates are save-stable. A low bank-side pier
+      // makes their old paving read naturally beside the new shallow channel.
+      const left=p.x-p.w/2-7,top=p.y-22,width=p.w+14;
+      R(c,'#26363c',left-2,top+4,width+4,53);
+      R(c,'#51474e',left,top,width,49);
+      for(let y=top;y<top+49;y+=7){R(c,'#8e7971',left,y,width,5);R(c,'#b29a86',left,y,width,1);R(c,'#554751',left+width*.4,y,1,5);}
+      for(const x of [left+4,left+width-7]){R(c,'#493c44',x,top-3,4,55);R(c,'#ae9380',x,top-3,2,55);}
+    }
+  }
+  _broadleaf(c,p,seed){
+    const v=(p.variant||0)%5,random=rng(Math.floor(hash(v,17,seed+88)*4294967295));
+    const height=73+v*6;
+    shadow(c,2,7,70,24,.4);
+    P(c,'#302b35',[[-9,9],[-4,-height+20],[4,-height+20],[7,7],[13,12],[1,9],[-13,12]]);
+    R(c,'#826152',-3,-height+21,5,height-14);R(c,'#b08a6a',-3,-height+24,2,height-20);
+    L(c,'#73564b',0,-38,-17,-59,4);L(c,'#96745a',1,-46,18,-65,3);
+    const colors=v===4?['#394d38','#576a41','#798248','#a1a05b']:['#263e3d','#3e5b43','#617b4d','#8b995e'];
+    for(let i=0;i<15;i++){
+      const x=(random()-.5)*54,y=-height+random()*42,w=21+random()*20,h=15+random()*14;
+      blot(c,x+2,y+4,w+4,h+4,'#203138',random);blot(c,x,y,w,h,colors[1+i%2],random);
+      for(let k=0;k<8;k++){const xx=x+(random()-.5)*w*.75,yy=y+(random()-.5)*h*.7;R(c,colors[2+k%2],xx,yy,3+random()*3,2);}
+    }
+  }
+  _condo(c,p,seed){
+    const {foot,height,top}=buildingGeometry(p),w=p.w,left=-w/2,v=(p.variant||0)%5;
+    const wall=v%2?'#887a79':'#777581',lit=v%2?'#c0aaa0':'#b0a8b0';
+    shadow(c,5,foot+9,w+26,24,.58);
+    R(c,'#252635',left-3,top,w+10,height+3);R(c,wall,left,top,w,height);
+    R(c,'#444455',w/2-13,top,18,height);R(c,lit,left,top,4,height);
+    // A recessed penthouse and flat roof break the older brick skyline.
+    R(c,'#302d40',left+15,top-24,w-28,25);R(c,wall,left+17,top-21,w-34,22);
+    R(c,'#cec0b4',left+13,top-26,w-24,4);R(c,'#4c4b5a',left+18,top-21,w-35,3);
+    R(c,'#d0bfb6',left-7,top-3,w+19,5);R(c,'#403b4d',left-5,top+3,w+15,4);
+    for(let y=top+17;y<foot-47;y+=42){
+      for(let x=left+15;x<w/2-27;x+=31)this._window(c,x,y,22,25,PALETTES[1],Math.floor(hash(x,y,seed)*5),()=>0);
+      R(c,'#25283a',left+7,y+28,w-18,9);R(c,'#b5a6a5',left+5,y+30,w-14,5);R(c,'#514c60',left+6,y+36,w-15,4);
+      R(c,'#34404a',left+9,y+18,w-24,3);R(c,'#a8aca8',left+9,y+18,w-24,1);
+      for(let x=left+10;x<w/2-15;x+=9)R(c,'#34404a',x,y+20,2,10);
+      R(c,'#76604f',left+13,y+24,14,6);R(c,'#6e8957',left+14,y+19,12,5);R(c,'#a4ac70',left+17,y+17,5,3);
+    }
+    R(c,'#282a3a',left+13,foot-43,w-35,43);R(c,'#416371',left+16,foot-40,w-41,37);
+    for(let x=left+18;x<w/2-25;x+=26){R(c,'#8eadae',x,foot-38,3,31);R(c,'#2e3546',x+17,foot-40,3,38);}
+    R(c,'#c7b7ad',left+9,foot-47,w-24,5);R(c,'#686173',left-7,foot,w+18,8);R(c,'#bca8a4',left-7,foot+8,w+18,2);
+    R(c,'#3b3546',left+12,top-35,27,10);R(c,'#9c8f99',left+13,top-35,25,2);
+    for(let x=left+15;x<left+37;x+=4)R(c,'#6a6275',x,top-32,2,5);
+    this._damage(c,p,seed);
+  }
   _nature(c,p,seed){
     const v=(p.variant||0)%5,random=rng(Math.floor(hash(v,0,seed+88)*4294967295));
     shadow(c,2,6,Math.max(38,p.w+20),20,.45);
+    if(p.type==='pine'&&((p.variant||0)%5===1||(p.variant||0)%5===4)){this._broadleaf(c,p,seed);return;}
     if(p.type==='pine'){
       const height=76+v*7;
       P(c,'#302735',[[-8,8],[-4,-height+12],[4,-height+12],[7,8],[13,12],[1,9],[-13,12]]);
@@ -108,6 +213,7 @@ export class CityArt {
   _buildingVariant(c,p,seed){
     const kind=p.buildingKind||'apartment',w=p.w,{foot,height,top}=buildingGeometry(p),left=-w/2;
     if(kind==='apartment'){
+      if(w>=100&&((p.variant||0)%2===1)){this._condo(c,p,seed);return;}
       this._building(c,p,seed);
       // Exterior fire escape and balconies distinguish the taller apartment block.
       if(w>100){const x=left+12;for(let y=-p.h/2-4;y<foot-70;y+=40){R(c,'#201f30',x,y,w-35,4);R(c,'#8e7b84',x,y-10,w-35,2);for(let xx=x+3;xx<x+w-35;xx+=9)R(c,'#554b5c',xx,y-9,1,10);L(c,'#625b68',x+4,y+3,x+32,y+38,3);}}
@@ -141,6 +247,12 @@ export class CityArt {
         for(let x=left+10;x<w/2-25;x+=29)this._window(c,x,top+13,22,Math.max(28,height-25),PALETTES[2],0,()=>0);
         R(c,'#2b2336',w/2-28,foot-40,22,41);R(c,'#d49a63',w/2-25,foot-37,16,31);R(c,'#765050',w/2-18,foot-37,2,31);
         for(let x=left-2;x<w/2+2;x+=10){P(c,(Math.floor((x-left+2)/10)%2)?'#bd9c91':'#86485a',[[x,top+8],[x+9,top+8],[x+12,top+22],[x-3,top+22]]);R(c,'#4e3349',x-3,top+22,13,3);}
+        const label=['DEPANNEUR','CAFE','FLEURISTE','LIBRAIRIE','MARCHE'][(p.variant||0)%5];
+        R(c,'#2b2637',left+4,top-3,w-9,12);R(c,'#b9a08c',left+4,top-4,w-9,1);
+        text(c,label,-1,top,'#ead7ac',1,'center');
+        // Display shelves and small flower boxes distinguish street shops.
+        for(let xx=left+12;xx<w/2-30;xx+=29){R(c,'#55403e',xx,foot-18,19,2);for(let k=0;k<4;k++)R(c,['#c6a16a','#8f7566','#70927c','#b67e7d'][k],xx+k*4,foot-25,3,7);}
+        R(c,'#66505a',left+5,foot-7,27,8);R(c,'#87985f',left+7,foot-11,23,5);for(let i=0;i<5;i++)R(c,i%2?'#e1ae93':'#b16f9a',left+9+i*4,foot-14-i%2*2,3,3);
       }
     }
     // Ivy anchors each building to the same abandoned, reclaimed world.
@@ -151,7 +263,7 @@ export class CityArt {
   _tile(tx,ty,seed){
     const key=`${tx}:${ty}`;if(this.tiles.has(key))return this.tiles.get(key);
     const image=canvas(256,256);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;
-    if(biomeForChunk(Math.floor(tx/2),Math.floor(ty/2),seed)==='forest'){this._forestTile(c,tx,ty,seed);this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;}
+    if(biomeForChunk(Math.floor(tx/2),Math.floor(ty/2),seed)==='forest'){this._forestTile(c,tx,ty,seed);this._riverTile(c,tx,ty,seed);this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;}
     const random=rng(Math.floor(hash(tx,ty,seed)*4294967295));
     R(c,'#30283f',0,0,256,256);
     // Broad, irregular repairs and worn asphalt have many scales of detail.
@@ -173,6 +285,7 @@ export class CityArt {
     for(let i=0;i<7;i++)this._litter(c,random()*244+6,random()*244+6,Math.floor(random()*6),random);
     if(random()>.42)this._drain(c,24+random()*205,20+random()*215);
     this._forestEdge(c,tx,ty,seed);
+    this._riverTile(c,tx,ty,seed);
     this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;
   }
   _blockGround(c,x,y,seed){
@@ -443,6 +556,16 @@ export class CityArt {
     const color=(p.variant||0)%2?'#6c607e':'#a45163';shadow(c,1,9,30,12,.51);
     O(c,INK,-10,-9,21,20);R(c,color,-8,-15,17,21);O(c,'#c98a8b',-7,-25,15,14);O(c,INK,-9,-21,19,9);R(c,color,-8,-20,17,8);R(c,'#deaaa0',-6,-22,10,3);R(c,'#e6b5a2',-6,-13,2,16);R(c,'#63374e',5,-13,3,16);R(c,INK,-15,-12,9,9);R(c,'#b37683',-14,-11,8,7);R(c,'#dec1b4',-14,-10,2,4);R(c,INK,7,-12,9,9);R(c,'#bb7d87',9,-11,6,7);R(c,'#493d52',-10,5,22,5);R(c,'#9c8a99',-8,6,17,2);R(c,'#c4b7b9',-5,-27,10,3);R(c,'#7b5369',-3,-29,6,2);L(c,'#796778',13,-4,17,3,1);L(c,'#796778',17,3,11,8,1);
   }
+  isPropVisible(p,camera,width,height){
+    // Match the complete cached sprite bounds, including tall roofs whose feet
+    // are below the screen. Avoid constructing offscreen images and cycling
+    // through the bounded cache on dense city blocks.
+    const building=p.type==='building',w=Math.round(p.w||40),h=Math.round(p.h||40);
+    const cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100;
+    const ch=building?h+190:180,ay=building?Math.ceil(h/2)+110:110;
+    const x=p.x-Math.floor(cw/2),y=p.y-ay;
+    return x+cw>=camera.x-width/2&&x<=camera.x+width/2&&y+ch>=camera.y-height*.48&&y<=camera.y+height*.52;
+  }
   _propImage(p,seed){
     const w=Math.round(p.w||40),h=Math.round(p.h||40),v=p.variant??Math.floor(hash(p.x,p.y,seed)*5),detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${p.buildingKind||'apartment'}:${p.damage||0}:${w}:${h}:${v}:${detail}`;
     if(this.props.has(key))return this.props.get(key);
@@ -451,8 +574,18 @@ export class CityArt {
     if(building)this._buildingVariant(c,p,seed);else if(['pine','rock','stump','log','forestRuin'].includes(p.type))this._nature(c,p,seed);else if(p.type==='car')this._car(c,p,seed);else if(p.type==='bike')this._bike(c,p);else if(p.type==='bin')this._bin(c);else if(p.type==='bench')this._bench(c);else if(p.type==='lamp')this._lamp(c);else if(p.type==='mirror')this._mirror(c);else if(p.type==='phone')this._phone(c);else if(p.type==='billboard')this._billboard(c,p);else if(p.type==='foodcart')this._foodcart(c,p);else if(p.type==='vending')this._vending(c,p);else if(p.type==='planter')this._planter(c,p);else if(p.type==='tree')this._tree(c,p);else if(p.type==='table')this._table(c,p);else if(p.type==='cone')this._cone(c,p);else if(p.type==='barricade')this._barricade(c,p);else if(p.type==='crate')this._crate(c,p);else if(p.type==='pallet')this._pallet(c,p);else if(p.type==='bags')this._bags(c,p);else if(p.type==='trophy')this._trophy(c,p);else if(p.type==='hydrant')this._hydrant(c,p);
     const result={image,x:-ax,y:-ay};this.props.set(key,result);if(this.props.size>96)this.props.delete(this.props.keys().next().value);return result;
   }
-  drawProp(ctx,p,seed=42,time=0,reduced=false){
-    if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed);if(!item)return;ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
+  drawProp(ctx,p,seed=42,time=0,reduced=false,focus=null){
+    if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed);if(!item)return;
+    // Fade only foreground architecture/canopies that cover the player. The
+    // underlying collider and depth stay unchanged; there is no hidden corridor.
+    const tall=['building','pine','tree','billboard','foodcart','vending','trophy','mirror','phone'].includes(p.type);
+    const foot=p.type==='building'?p.y+p.h/2:p.y+10;
+    const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112;
+    const halfWidth=p.type==='pine'||p.type==='tree'?48:p.w/2+18;
+    const obscures=tall&&focus&&focus.y+10<foot&&focus.y>top&&focus.y-64<foot&&Math.abs(focus.x-p.x)<halfWidth+16;
+    if(obscures){ctx.save();ctx.globalAlpha=.34;}
+    ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
+    if(obscures)ctx.restore();
     if(reduced)return;
     // Minute life in an abandoned district: unreliable neon, not whole-screen flashes.
     if(p.type==='lamp'){const flicker=Math.sin(time*1.2+p.x)>.93?.45:1;ctx.save();ctx.globalAlpha=.32*flicker;O(ctx,'#ffe2a3',p.x+10,p.y-89,29,14,2);ctx.globalAlpha=.64*flicker;R(ctx,'#fff0c8',p.x+15,p.y-84,16,2);ctx.restore();}
