@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict'),path=require('path');
-const inputPath=path.resolve(__dirname,'../release/Toma_Popescu_JOUER.html');
+const inputPath=path.resolve(process.argv[3]||path.join(__dirname,'../release/Toma_Popescu_JOUER.html'));
 const outputPath=path.resolve(process.argv[2]||'/tmp/toma-combined-standalone.png');
 const inputStat=fs.statSync(inputPath);
 let outputStat=null;
@@ -17,8 +17,9 @@ function writeScreenshotAtomic(bytes) {
   fs.renameSync(staged,outputPath);
  } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 }
-const {createCanvas,Image}=require('@napi-rs/canvas');
-const html=fs.readFileSync(path.join(__dirname,'../release/Toma_Popescu_JOUER.html'),'utf8');
+const {createCanvas}=require('@napi-rs/canvas');
+const {Image,checkImageSource,checkStaticImages}=require('./offline-qa.cjs').offlineImages(inputPath);
+const html=fs.readFileSync(inputPath,'utf8');
 let code=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(code);assert(!/<script[^>]+src=/.test(html));assert(!/import\s*\{/.test(code));
 code=code.replace('modules["./app.js"]={};','globalThis.__qa={get game(){return game},renderer,frame,renderUpgrades,updateHud,pause,resume,persistRun,resumeSaved,get screen(){return screen}};modules["./app.js"]={};');
@@ -29,7 +30,7 @@ const document={hidden:false,getElementById(id){assert(elements.has(id),`missing
 const storage=new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,sound:false})]]);let lock=Promise.resolve();
 const sandbox={console,document,Image,OffscreenCanvas:class{constructor(w,h){return createCanvas(w,h)}},crypto:require('crypto').webcrypto,navigator:{locks:{request(_name,fn){const result=lock.then(fn);lock=result.catch(()=>{});return result;}}},window:{addEventListener(){},confirm(){return true}},ResizeObserver:class{observe(){}},localStorage:{getItem(k){return storage.get(k)??null},setItem(k,v){storage.set(k,v)},removeItem(k){storage.delete(k)}},matchMedia(){return{matches:false}},performance,Date,Math,URL,Uint8Array,Float32Array,HTMLInputElement:class{},requestAnimationFrame(){},setTimeout,clearTimeout,setInterval,clearInterval};
 sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbox);
-(async()=>{const q=sandbox.__qa;await q.renderer.ready;assert(q.renderer.companion.image,'existing atlas remains embedded');await elements.get('play').onclick();const g=q.game;for(const key in g.timers)g.timers[key]=99999;g.nextEvent=99999;g.s.enemies=[];
+(async()=>{await checkStaticImages(html);const q=sandbox.__qa;await q.renderer.ready;assert(q.renderer.companion.image,'existing atlas remains available');await elements.get('play').onclick();const g=q.game;for(const key in g.timers)g.timers[key]=99999;g.nextEvent=99999;g.s.enemies=[];
  const names=['Coupé fantôme','Pare-chocs VIP','Version large','Retour du voiturier','Convoi présidentiel'];
  for(let rank=1;rank<=5;rank++){
   g.s.vehicles=[];g.s.mode='upgrade';g.s.options=[{id:'car',name:'Lamborghini imaginaire',icon:'car',max:5}];q.renderUpgrades(g.s.options);const card=elements.get('upgrade-options').children[0];assert(card.children[1].children[0].textContent.includes(names[rank-1]));assert(card.children[1].children[1].textContent.length>20);

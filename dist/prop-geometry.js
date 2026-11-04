@@ -1,3 +1,4 @@
+import {presentSceneryProp} from './scenery-presentation.js';
 // Art keeps its original anchor/foot while short buildings expose empty space
 // above their facade. Collision and sorting consume these same dimensions.
 export function buildingGeometry(p){
@@ -18,9 +19,10 @@ export function propDepth(p){
 // Conservative foreground extents used for player fading and animal introductions.
 // They describe tall painted cover, separately from its ground collision footprint.
 export function propForegroundBounds(p){
+ p=presentSceneryProp(p);if(!p)return null;
  if(!['building','pine','tree','billboard','foodcart','vending','trophy','mirror','phone'].includes(p.type))return null;
- const foot=p.type==='building'?p.y+p.h/2:p.y+10;
- const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112;
- const halfWidth=p.type==='pine'||p.type==='tree'?48:p.w/2+18;
+ const scale=p.artScale||1,foot=p.type==='building'?p.y+p.h/2:p.y+10*scale;
+ const top=p.type==='building'?p.y+buildingGeometry(p).top-45:p.y-112*scale;
+ const halfWidth=(p.type==='pine'||p.type==='tree'?48:p.w/2+18)*scale;
  return {left:p.x-halfWidth,right:p.x+halfWidth,top,foot,halfWidth};
 }

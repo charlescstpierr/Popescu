@@ -1,0 +1,176 @@
+{
+  "format": "offline-folder-v1",
+  "entrypoint": "Toma_Popescu_JOUER.html",
+  "files": [
+    {
+      "path": "LIRE-MOI.txt",
+      "bytes": 1360,
+      "sha256": "ba0d1b86187cb0d3ec2aa56a60b44a73808542cb106330e0d58042d9340d576d"
+    },
+    {
+      "path": "Toma_Popescu_JOUER.html",
+      "bytes": 643861,
+      "sha256": "bbb4b08379ea61ff678ad56ee6c55c7855a561535b5702831573db997a1ab3b4"
+    },
+    {
+      "path": "assets/actors-v2.json",
+      "bytes": 981,
+      "sha256": "fa142a4df0a45a98844aba855a60dc886013ab9f4c6a10a725f433cb77e0a9c4"
+    },
+    {
+      "path": "assets/animals-approved.png",
+      "bytes": 1928857,
+      "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "assets/charles-whole-v1.png",
+      "bytes": 103638,
+      "sha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583"
+    },
+    {
+      "path": "assets/companion-levels-whole.png",
+      "bytes": 573149,
+      "sha256": "0c555ef01472de438dc2999c523533ed170cd80155951aff59e3f5bf13e61917"
+    },
+    {
+      "path": "assets/companion-portrait-1.png",
+      "bytes": 13468,
+      "sha256": "9d87f121c42b89a86c46a0bb0f21db00d61ccb2df8810622d98cbc835289c5da"
+    },
+    {
+      "path": "assets/companion-portrait-2.png",
+      "bytes": 12226,
+      "sha256": "be0b543820aca9f2e0968159e3819f6c65846164113de1540d585151cbc61605"
+    },
+    {
+      "path": "assets/companion-portrait-3.png",
+      "bytes": 17382,
+      "sha256": "c52c74a1b32142e91b13e73ee76bdb9609897a959d3cbd74ccbe83019e991c71"
+    },
+    {
+      "path": "assets/companion-portrait-4.png",
+      "bytes": 15734,
+      "sha256": "c712f5a3d516d4cd56492b94d35763d2eedf90c8cf69e7e0e481362966f3e754"
+    },
+    {
+      "path": "assets/companion-portrait-5.png",
+      "bytes": 18253,
+      "sha256": "2f483d8b7d7c506778d94e05f967a8ffd2eb7aca0834e6ea5e41c60aa73a0a57"
+    },
+    {
+      "path": "assets/couverture-personnages.webp",
+      "bytes": 42970,
+      "sha256": "d904e391efa4bbe0ee3ca76a6200e8b87cd21d89b97cd7cf22095a66131e30c9"
+    },
+    {
+      "path": "assets/dialogue-charles.png",
+      "bytes": 1801591,
+      "sha256": "dbd8ecd100d09ec63b6239f2a9f308d2a406f21c772fcae4c8b451c38c12a748"
+    },
+    {
+      "path": "assets/dialogue-companion-1.png",
+      "bytes": 2034519,
+      "sha256": "f6ebf4d0f3723cffd083308354b253a162b025f1d749e3aa17dd1290c2b2a11a"
+    },
+    {
+      "path": "assets/dialogue-pelican.png",
+      "bytes": 2077658,
+      "sha256": "1132f8f0eebbc7ad3d271441f06474f440d29931e64a3175d287a8d48d7cbe1a"
+    },
+    {
+      "path": "assets/dialogue-travestia.png",
+      "bytes": 2101062,
+      "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
+    },
+    {
+      "path": "assets/ego-beasts.png",
+      "bytes": 1027672,
+      "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
+    },
+    {
+      "path": "assets/girl-walk-v2.png",
+      "bytes": 122964,
+      "sha256": "ff2ae27f40de80560cc57f4914c1c9c95b3363827dc2bf5232e8064c9a6c118e"
+    },
+    {
+      "path": "assets/gorilla-walk-v2.png",
+      "bytes": 179140,
+      "sha256": "0fb2ddab9e2c0c3d05089387bd8e7ffd420ef74c64258801a8ae12ce8cc39960"
+    },
+    {
+      "path": "assets/gorille-femelle.webp",
+      "bytes": 12310,
+      "sha256": "f852d96895c96b842fcb2322aab88d66a7471e3bc40e68087014106361b144a4"
+    },
+    {
+      "path": "assets/opening-approved.png",
+      "bytes": 2798954,
+      "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
+    },
+    {
+      "path": "assets/orangutan-walk-v3.png",
+      "bytes": 176008,
+      "sha256": "584b18fb91860df181d957ec36bf97b49cb132b7bfb029d23035281606899413"
+    },
+    {
+      "path": "assets/pelican-poses.png",
+      "bytes": 1400510,
+      "sha256": "9d6c2c61f4b01a0a56f26cafd7c30a2b8b319734ae3ce2cf74df08fe9f05f6e8"
+    },
+    {
+      "path": "assets/portrait-blonde-ia.webp",
+      "bytes": 16712,
+      "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "assets/portrait-toma-v4.svg",
+      "bytes": 90606,
+      "sha256": "822c95ad35cb691c926ee1768d7a7cd2c76ed51050540e46b948252f401e71c4"
+    },
+    {
+      "path": "assets/portrait-toma.webp",
+      "bytes": 23468,
+      "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
+    },
+    {
+      "path": "assets/rival_goat-walk-v3.png",
+      "bytes": 128805,
+      "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "assets/rival_rooster-walk-v3.png",
+      "bytes": 176876,
+      "sha256": "96c70ca6c7514fbcaca6df30ecb29643d4a2d03e88c4483c932d41916387ab04"
+    },
+    {
+      "path": "assets/scene-gorilles.webp",
+      "bytes": 62564,
+      "sha256": "79bfe0ac58f5cc2936fc8fa8f642fa21749d382b8f60aa3ee0246501ccfb1981"
+    },
+    {
+      "path": "assets/toma-torso-rig-v3.png",
+      "bytes": 79424,
+      "sha256": "5d9fd819e16e18860c7d1fb80746728c4753b33c513852aca9fc09cca31e7145"
+    },
+    {
+      "path": "assets/toma-walk-v2.png",
+      "bytes": 140878,
+      "sha256": "9f57ee08161463778b950bc306cef753e461f986a1e431e006402f740fa9d69d"
+    },
+    {
+      "path": "assets/toma-whole-v5.png",
+      "bytes": 425084,
+      "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
+    },
+    {
+      "path": "assets/travestia-dash.png",
+      "bytes": 184441,
+      "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
+    },
+    {
+      "path": "assets/travestia-poses.png",
+      "bytes": 1623797,
+      "sha256": "4ac27a4c475a56b61004044ac4ed05d92a164edd6763f960139a43308c218eea"
+    }
+  ]
+}

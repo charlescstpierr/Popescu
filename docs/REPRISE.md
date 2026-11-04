@@ -8,7 +8,7 @@ Le projet est prêt à être continué à partir de la v1.5 approuvée le 3 nove
 - Commit de référence du Site au moment de la copie: `a19686f`.
 - Destination GitHub prévue: `charlescstpierr/toma-popescu`, dépôt privé. Sa création et son premier envoi sont gérés séparément de cette copie; la présence de ce document ne confirme pas que cet envoi a eu lieu.
 - Le code, les images, les sources artistiques, les tests et les scripts sont regroupés ici. La copie GitHub ne contient pas de configuration de déploiement du Site et ne lui est pas reliée automatiquement.
-- [release/Toma_Popescu_JOUER.html](../release/Toma_Popescu_JOUER.html) est la version autonome embarquant JavaScript, CSS et images. Elle permet de jouer sur ordinateur sans serveur.
+- [release/Toma_Popescu_JOUER.html](../release/Toma_Popescu_JOUER.html) est le point d'entrée du dossier hors ligne courant: JavaScript/CSS embarqués et images intactes dans `release/assets/`. Extraire le dossier complet puis ouvrir ce HTML sur ordinateur, sans serveur. Lire [EXPORTS-HORS-LIGNE.md](EXPORTS-HORS-LIGNE.md) pour la migration et l'export facultatif en un seul fichier.
 
 ## Jeu actuel
 
@@ -58,7 +58,8 @@ La direction du corps dépend d'une cible vue depuis le torse fixe `y−40`, ave
 | `dist/audio.js` | Composition et synthèse Web Audio, scènes, intensité, effets et limites de voix. |
 | `art/source/toma/` | Six PNG source haute résolution: course E, grand écart E et quatre autres vues. |
 | `scripts/prepare-hero-whole.py` | Préparation portable des images complètes et des points enregistrés. |
-| `scripts/export-standalone.py` | Assemblage du HTML autonome depuis `dist/`. |
+| `scripts/export-offline.py`, `offline_bundle.py` | Assemblage du dossier hors ligne courant depuis `dist/`. |
+| `scripts/export-standalone.py` | Export facultatif en un seul fichier sous `generated/standalone/`. |
 | `scripts/inspect-hero.mjs`, `inspect-graphics.mjs` | Inspection réelle avec Canvas natif et contacts d'animation. |
 | `scripts/render-music-preview.mjs` | WAV d'audition utilisant les mêmes notes et instruments que le jeu. |
 | `tests/` | Tests déterministes du jeu, du monde, du personnage, de l'audio et de la réaction au coq. |
@@ -75,14 +76,15 @@ Depuis la racine du dépôt:
 python3 -m http.server 8000 --directory dist
 ```
 
-Ouvrir `http://localhost:8000`. Ne pas lancer `dist/index.html` directement avec `file://`, car cette version utilise des modules ES. Pour une ouverture directe, utiliser le HTML autonome.
+Ouvrir `http://localhost:8000`. Ne pas lancer `dist/index.html` directement avec `file://`, car cette version utilise des modules ES. Pour une ouverture directe, utiliser `release/Toma_Popescu_JOUER.html` avec son dossier `assets/`.
 
 ```bash
 npm test
-python3 scripts/export-standalone.py release/Toma_Popescu_JOUER.html
+python3 scripts/export-offline.py
+python3 scripts/export-standalone.py
 ```
 
-La suite ne nécessite que Node.js. Pour la QA graphique facultative, installer `@napi-rs/canvas@0.1.100` avec `npm install --no-save @napi-rs/canvas@0.1.100`, puis lancer les deux scripts d'inspection en leur donnant un dossier de sortie. La préparation artistique Python utilise les versions épinglées de Pillow, NumPy et SciPy:
+La suite nécessite Node.js et Python 3 (bibliothèque standard pour les exports). Les tests du moteur et de l'export ne nécessitent aucun paquet externe; les trois tests de fumée graphiques du dossier hors ligne et le test natif de publication atomique des captures sont ignorés explicitement si `@napi-rs/canvas` n'est pas installé. Pour la QA graphique facultative, installer `@napi-rs/canvas@0.1.100` avec `npm install --no-save @napi-rs/canvas@0.1.100`, puis lancer les deux scripts d'inspection en leur donnant un dossier de sortie. La préparation artistique Python utilise les versions épinglées de Pillow, NumPy et SciPy:
 
 ```bash
 python3 -m pip install -r art/requirements.txt
@@ -98,6 +100,6 @@ La mesure locale de 9,6 ms par image vient de Canvas natif. Le contrôle sur nav
 
 ## Au début de la prochaine discussion
 
-Lire ce document, vérifier l'état Git et demander l'objectif de la nouvelle session s'il n'a pas été donné. Partir de la v1.5, préserver les choix approuvés et consulter les tests du composant concerné avant de le changer. Après une modification, exécuter les vérifications adaptées; régénérer le HTML autonome si l'application change. Un déploiement ou un envoi sur un service externe doit correspondre à une demande de l'utilisateur.
+Lire ce document, vérifier l'état Git et demander l'objectif de la nouvelle session s'il n'a pas été donné. Partir de la v1.5, préserver les choix approuvés et consulter les tests du composant concerné avant de le changer. Après une modification, exécuter les vérifications adaptées; régénérer le dossier `release/` si l'application change. Un déploiement ou un envoi sur un service externe doit correspondre à une demande de l'utilisateur.
 
 L'utilisateur souhaite explicitement du travail en sous-agents pour gagner du temps. Distribuer les tâches indépendantes sans partager les mêmes fichiers en écriture. Après une modification des animations, demander une revue visuelle indépendante des véritables rendus; des tests seuls ne suffisent pas à valider les proportions, la continuité du corps et le mouvement.

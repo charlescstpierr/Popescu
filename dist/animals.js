@@ -6,16 +6,16 @@ export const ANIMAL_FRAMES=Object.freeze(Object.fromEntries(Object.keys(ANIMALS)
  const size=type==='moose'?104:type==='ostrich'?98:80;
  return [type,Object.freeze({size,left:-size/2,top:-size*.94,anchorY:10})];
 })));
-export function animalFitsViewport(game,e){
- const f=ANIMAL_FRAMES[e.type],v=game.viewport,dx=e.x-game.s.x,dy=e.y-game.s.y;
+export function animalFitsViewport(game,e,frames=ANIMAL_FRAMES){
+ const f=frames[e.type],v=game.viewport,dx=e.x-game.s.x,dy=e.y-game.s.y;
  // One pixel covers the renderer's rounded camera and actor translations.
  return Math.abs(dx)+f.size/2+1<=v.width/2&&dy+f.anchorY+f.top-1>=-v.height*.48&&dy+f.anchorY+f.top+f.size+1<=v.height*.52;
 }
-export function findAnimalEntry(game,type,preferred,introduction=false){
- const s=game.s,v=game.viewport,r=ANIMALS[type].r;
+export function findAnimalEntry(game,type,preferred,introduction=false,catalog=ANIMALS,frames=ANIMAL_FRAMES){
+ const s=game.s,v=game.viewport,r=catalog[type].r;
  const moving=introduction&&s.walkMoving&&Math.hypot(s.travelX,s.travelY)>.08;
  const angle=moving?Math.atan2(s.travelY,s.travelX):Math.atan2(preferred.y-s.y,preferred.x-s.x);
- const frame=ANIMAL_FRAMES[type];
+ const frame=frames[type];
  // Only the first four encounters start visibly in the periphery. A 24px inset
  // survives ordinary camera movement between frames; 120px leaves ample room
  // beyond contact radii, including the smallest supported 240x320 viewport.
@@ -51,7 +51,7 @@ export function findAnimalEntry(game,type,preferred,introduction=false){
    // Samples are at most 8px apart; the extra 4px conservatively covers the
    // continuous swept chase footprint between them, including thin obstacles.
    if(game.world.collides(p.x,p.y,r*.64+4))break;
-   if(animalFitsViewport(game,p)){
+   if(animalFitsViewport(game,p,frames)){
     if(covers.some(b=>b.foot>p.y+frame.anchorY&&p.x+frame.size/2>b.left&&p.x-frame.size/2<b.right&&p.y+frame.anchorY+frame.top+frame.size>b.top&&p.y+frame.anchorY+frame.top<b.foot))break;
     if(remaining<=150)return {x,y};
    }

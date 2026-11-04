@@ -62,7 +62,8 @@ function beginAttack(game,e){
  e.peliDX=d?(s.x-e.x)/d:1;e.peliDY=d?(s.y-e.y)/d:0;e.peliX=e.x;e.peliY=e.y;e.peliTravel=0;e.peliHitPlayer=false;e.peliHitGirl=false;
  const kind=['hug','zodiac','tarot'][e.peliAttackCount%3];e.phase=`peli_${kind}_warning`;e.peliTime=PELICAN[kind].warning;
  if(s.elapsed>=e.peliTauntAt&&s.elapsed>=game.speechUntil&&!e.peliReplyPending){
-  const pair=PELICAN_BANTER[e.peliBanterIndex%PELICAN_BANTER.length];game.bark('PÉLI ZODIAQUE',pair[0],true,{actorId:e.id});e.peliBanterIndex++;e.peliTauntAt=s.elapsed+24;e.peliReply=pair[1];e.peliReplyPending=true;e.peliReplyTime=PELICAN.replyDelay;
+  const index=e.peliBanterIndex%PELICAN_BANTER.length,pair=PELICAN_BANTER[index],modal=game.queueEncounterDialogue({id:'boss:pelican',actorId:e.id,actorType:'pelican',pair:index});if(!modal)game.bark('PÉLI ZODIAQUE',pair[0],true,{actorId:e.id});e.peliBanterIndex++;e.peliTauntAt=s.elapsed+24;e.peliReply=pair[1];e.peliReplyPending=!modal;e.peliReplyTime=modal?0:PELICAN.replyDelay;
+  if(modal)return;
   game.speechUntil=Math.max(game.speechUntil,s.elapsed+PELICAN.replyDelay+4.3);
   for(const reply of [game.pendingStuntReply,game.pendingRivalReply])if(reply)reply.at=Math.max(reply.at,game.speechUntil+.2);
  }

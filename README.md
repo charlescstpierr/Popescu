@@ -4,13 +4,17 @@ Pour continuer dans une nouvelle discussion: [contexte de reprise](docs/REPRISE.
 
 Jeu web original en français québécois. Un seul monde procédural infini, auto-shooter, sept variantes de gorilles, orangs-outans, deux rivaux masculins, quinze améliorations, compagnon et musique originale synthétisée.
 
-## Jouer
-Ouvrir le lien déployé. Sur téléphone: glisser le pouce dans la partie inférieure gauche. Sur ordinateur: WASD, ZQSD ou flèches; Échap: pause; M: son. Les tirs sont automatiques. L'introduction et les événements peuvent être passés.
+## Jouer hors ligne
+Télécharger le dépôt complet en ZIP, l'extraire, puis ouvrir `release/Toma_Popescu_JOUER.html` dans un navigateur de bureau. Garder `release/assets/` à côté du HTML. Ne pas télécharger le HTML seul ni l'ouvrir dans l'aperçu du ZIP. Aucun serveur, Node.js ou accès réseau n'est nécessaire pour cette version.
+
+Le HTML courant ne pèse plus que 643 861 octets; les images sont réparties en fichiers de moins de 3 Mo, sans recompression ni perte. [Instructions de mise à jour et sauvegardes](docs/EXPORTS-HORS-LIGNE.md). Les anciennes versions dans `release/archives/` sont historiques, pas la version courante.
+
+Le lien déployé du Site reste une autre copie; sa présence ne garantit pas qu'il contient cette version. Sur téléphone: glisser le pouce dans la partie inférieure gauche. Sur ordinateur: WASD, ZQSD ou flèches; Échap: pause; M: son. Les tirs sont automatiques. L'introduction et les événements peuvent être passés.
 
 Après 20 minutes, victoire puis poursuite optionnelle à l'infini. Les records et paramètres sont conservés localement. Aucun service externe requis pendant la partie.
 
 ## Développement
-Aucune dépendance. Servir `dist/` par HTTP; ne pas ouvrir les modules directement avec file://. `npm test` exécute les tests déterministes du moteur et du monde. Les fichiers `dist/engine.js`, `world.js`, `renderer.js`, `content.js`, `audio.js`, `app.js` séparent simulation, génération, rendu, narration, audio et interface.
+Aucune dépendance pour jouer. Les tests utilisent Node.js et Python 3 (bibliothèque standard pour les exports); les trois tests de fumée graphiques du dossier hors ligne et le test natif de publication atomique des captures sont ignorés explicitement si le paquet de QA facultatif `@napi-rs/canvas` n'est pas déjà installé. Servir `dist/` par HTTP; ne pas ouvrir les modules directement avec file://. `npm test` exécute les tests déterministes du moteur et du monde. Les fichiers `dist/engine.js`, `world.js`, `renderer.js`, `content.js`, `audio.js`, `app.js` séparent simulation, génération, rendu, narration, audio et interface.
 
 ## Audio
 Le navigateur nécessite une première interaction pour autoriser le son. Le thème de combat original « Égo en cavale » joue à 150 BPM sur 32 mesures : refrain de sept notes, réponses, pont, harmonies, basse et percussions. Le menu reprend son motif à 104 BPM. La mélodie conserve sa progression pendant les améliorations et reprend après pause; les dialogues baissent la musique. Les voix et les effets sont limités pour garder la mélodie audible dans la horde. Le bouton ♫ active ou coupe le son.
@@ -20,8 +24,10 @@ Les tests couvrent déplacement normalisé, collisions, pauses, tirs, gaz annonc
 
 Les personnages, comportements et événements sont parodiques et volontairement exagérés.
 
-## Copie autonome
-Le script `python3 scripts/export-standalone.py /chemin/Toma_Popescu_JOUER.html` embarque CSS, JavaScript et images dans un seul fichier HTML. Sur un ordinateur, ouvrir ce fichier dans un navigateur permet de jouer sans serveur.
+## Exports hors ligne
+`python3 scripts/export-offline.py` régénère le dossier jouable `release/`: HTML avec JavaScript/CSS embarqués, images relatives intactes, instructions et manifeste SHA-256. C'est le format courant à distribuer.
+
+`python3 scripts/export-standalone.py` conserve l'export facultatif en un seul HTML, sous `generated/standalone/Toma_Popescu_JOUER.html`. Il pèse environ 27,4 Mo et n'est pas suivi dans Git. Un chemin de sortie personnalisé est possible; le script refuse de remplacer le point d'entrée courant dans `release/`. Les deux formats utilisent exactement le même code et les mêmes images.
 
 ## Mise à jour graphique
 Acteurs illustrés en pixel art avec poses de course avant/arrière, variantes de gorilles, ville enrichie (vitrines, trottoirs, reflets, affichage néon), impacts et réactions. Toma utilise des images complètes du crâne aux bottes: tête, torse, mains, fusil et jambes restent dans le même dessin. Le secours conserve lui aussi le personnage entier si son image ne charge pas.

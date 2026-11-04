@@ -1,0 +1,25 @@
+TOMA POPESCU — DOSSIER HORS LIGNE
+
+1. Extraire le dossier complet de l'archive ZIP.
+2. Garder Toma_Popescu_JOUER.html, assets/ et les autres fichiers ensemble.
+3. Ouvrir Toma_Popescu_JOUER.html dans un navigateur de bureau.
+
+Aucun serveur, Node.js ni connexion réseau n'est nécessaire pour jouer.
+Ne pas ouvrir le HTML depuis l'aperçu d'une archive ni télécharger le HTML seul.
+Les images conservent leurs octets d'origine; elles sont séparées, pas réduites.
+
+MISE À JOUR ET SAUVEGARDES
+Garder le même navigateur, profil et chemin complet du fichier HTML.
+Avant remplacement, fermer le jeu et conserver une copie de l'ancien dossier.
+Le format et les clés de sauvegarde restent inchangés. Le stockage des pages
+file:// dépend toutefois du navigateur; déplacer le dossier ou changer de
+profil peut rendre les anciennes sauvegardes invisibles. Aucune migration
+entre origines ou aucun effacement du stockage n'est effectué.
+
+EXPORT FACULTATIF EN UN SEUL FICHIER
+Depuis le dépôt source : python3 scripts/export-standalone.py
+Sortie : generated/standalone/Toma_Popescu_JOUER.html (fichier plus volumineux).
+Ce fichier généré n'est pas la version courante à ouvrir dans ce dossier.
+
+Les tests Canvas/DOM ne remplacent pas une vérification sur navigateur réel
+ou téléphone physique. Voir docs/EXPORTS-HORS-LIGNE.md dans le dépôt source.

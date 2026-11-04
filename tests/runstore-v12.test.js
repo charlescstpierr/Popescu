@@ -10,12 +10,12 @@ const key='toma-popescu-run-v1';
 const memory=raw=>{const data=new Map(raw===undefined?[]:[[key,raw]]);return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};};
 const fixture=name=>readFileSync(new URL(`./fixtures/runstore-v12-${name}.json`,import.meta.url),'utf8');
 
-test('new writes use v13 for both envelope and snapshot to exclude incompatible v12 engines',()=>{
+test('new writes use v15 for both envelope and snapshot to exclude incompatible older engines',()=>{
  const storage=memory(),store=new RunStore(storage),g=new Game({seed:42});
  g.s.upg.car=5;g.recalculate();g.timers.car=0;g.weapons(0);
  assert.equal(store.begin('convoy',g).ok,true);
  const value=JSON.parse(storage.getItem(key));
- assert.equal(value.version,13);assert.equal(value.run.snapshot.version,13);
+ assert.equal(value.version,15);assert.equal(value.run.snapshot.version,15);
  assert.equal(value.run.snapshot.game.s.vehicles[1].carDelay,.3);
 });
 
@@ -23,14 +23,14 @@ for(const name of ['legacy','delay','turn','return','dialogue'])test(`real v12 $
  const raw=fixture(name),original=JSON.parse(raw),storage=memory(raw),store=new RunStore(storage);
  assert.equal(original.version,12);assert.equal(original.run.snapshot.version,12);
  const read=store.read();assert.equal(read.status,'ready');
- const expected=structuredClone(original);expected.version=13;expected.run.snapshot.version=13;
+ const expected=structuredClone(original);expected.version=15;expected.run.snapshot.version=15;expected.run.snapshot.game.timers.ego=9;expected.run.snapshot.game.timers.egoIndex=0;expected.run.snapshot.game.encounters={active:null,queue:[],outcomes:{},legacyActorIds:[]};
  assert.deepEqual(read.value,expected);
  assert.equal(storage.getItem(key),raw,'read-only migration preserves original bytes');
  const game=restoreRun(read.value.run.snapshot);
  assert.deepEqual(captureRun(game,original.run.snapshot.dialogue),expected.run.snapshot);
  assert.equal(store.checkpoint(original.run.id,game,{dialogue:original.run.snapshot.dialogue}).ok,true);
  const saved=JSON.parse(storage.getItem(key));expected.revision++;
- assert.deepEqual(saved,expected,'first write changes only versions and revision');
+ assert.deepEqual(saved,expected,'first write changes only versions, new encounter and scheduler state and revision');
  assert.equal(new RunStore(storage).read().status,'ready');
  assert.equal(store.checkpoint(original.run.id,game,{credit:true,dialogue:original.run.snapshot.dialogue}).ok,true);
  const credited=store.read().value;
@@ -47,7 +47,7 @@ test('failed v12 migration write retains the complete original record for retry'
  assert.deepEqual(store.checkpoint(read.value.run.id,game),{ok:false,reason:'write-failed'});
  assert.equal(storage.getItem(key),raw);
  storage.setItem=write;assert.equal(store.checkpoint(read.value.run.id,game).ok,true);
- assert.equal(JSON.parse(storage.getItem(key)).version,13);
+ assert.equal(JSON.parse(storage.getItem(key)).version,15);
 });
 
 test('invalid v12 car state is rejected without rewriting or inventing recovery data',()=>{
@@ -63,5 +63,5 @@ test('new-format migration through the browser adapter preserves queued request-
  const read=store.read(),game=restoreRun(read.value.run.snapshot),expected=captureRun(game);
  const pending=store.checkpoint(read.value.run.id,game);game.s.kills+=100;
  assert.equal(storage.getItem(key),raw);release();assert.equal((await pending).ok,true);
- const saved=JSON.parse(storage.getItem(key));assert.equal(saved.version,13);assert.deepEqual(saved.run.snapshot,expected);
+ const saved=JSON.parse(storage.getItem(key));assert.equal(saved.version,15);assert.deepEqual(saved.run.snapshot,expected);
 });

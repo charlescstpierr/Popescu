@@ -8,7 +8,7 @@ const interval=a=>Math.max(2500,a.get('dialogue-text').textContent.length*48);
 const advanceAll=t=>{for(let n=0;n<7;n++)t.mock.timers.tick(20000);};
 function loader(){
  const pending=[],timers=new Map();let id=0;
- const art=new ActorArt({loadImage(path){if(!path.includes('animals-approved'))return null;return new Promise((resolve,reject)=>pending.push({resolve,reject}));},timers:{setTimeout(fn){timers.set(++id,fn);return id;},clearTimeout(key){timers.delete(key);}}});
+ const art=new ActorArt({loadImage(path){if(path.includes('ego-beasts'))return {width:1024,height:1024};if(!path.includes('animals-approved'))return null;return new Promise((resolve,reject)=>pending.push({resolve,reject}));},timers:{setTimeout(fn){timers.set(++id,fn);return id;},clearTimeout(key){timers.delete(key);}}});
  return {art,pending,success(index=pending.length-1){pending[index].resolve({width:1254,height:1254});},timeout(){for(const callback of [...timers.values()])callback();}};
 }
 async function savedCompanion(){

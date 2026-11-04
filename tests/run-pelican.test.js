@@ -23,7 +23,7 @@ test('pelican initializes every persistable attack field alongside the shared bo
  assert.ok(g.bossDirector.remaining>=150&&g.bossDirector.remaining<=210);
  for(const key of fields)assert.ok(Object.hasOwn(e,key),key);
  assert.equal(e.peliX,123);assert.equal(e.peliY,-45);assert.equal(e.peliDX,1);assert.equal(e.peliDY,0);
- assert.equal(captureRun(g).version,13);
+ assert.equal(captureRun(g).version,15);
 });
 for(const [name,time] of [['peli_hug_warning',.7],['peli_hug',.4],['peli_zodiac_warning',.9],['peli_zodiac',.7],['peli_tarot_warning',.6],['peli_tarot',.6],['peli_recover',.5]])test(`${name} resumes exactly without restarting or skipping the attack`,()=>{
  const {g,e}=setup();phase(g,e,name,time);
@@ -89,28 +89,28 @@ test('duplicate live pelicans are rejected instead of creating a second boss on 
 for(const version of [1,2,3,4])test(`v${version} migrates into the shared boss scheduler without losing progress or discoveries`,()=>{
  const g=new Game({seed:42});g.spawnEnemy('normal',100,100);g.s.elapsed=123;g.s.hp=67;g.s.kills=7;g.s.coins=11;
  g.discoveryCooldowns.set('site',250);g.discoveryContact='site';g.eventSeen.add('phone');
- const old=captureRun(g);old.version=version;delete old.game.timers.pelican;
+ const old=captureRun(g);old.version=version;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.timers.pelican;
  if(version<=3){delete old.game.timers.animal;delete old.game.timers.animalIndex;}
  if(version===1){delete old.game.timers.travestia;for(const enemy of old.game.s.enemies)for(const key of ['tailTime','tailFaceX','tailHitPlayer','tailHitGirl'])delete enemy[key];}
  const original=structuredClone(old),copy=restoreRun(old),saved=captureRun(copy);
- assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,13);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
+ assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,15);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
  assert.equal(copy.s.elapsed,123);assert.equal(copy.s.hp,67);assert.equal(copy.s.kills,7);assert.equal(copy.s.coins,11);
  assert.deepEqual([...copy.discoveryCooldowns],[['site',250]]);assert.equal(copy.discoveryContact,'site');assert.ok(copy.eventSeen.has('phone'));
 });
 test('legacy versions cannot smuggle new pelican enemies or attack state through migration',()=>{
  for(const version of [1,2,3,4]){
-  const {g}=setup(),saved=captureRun(g);saved.version=version;assert.throws(()=>restoreRun(saved));
-  const normal=new Game();normal.spawnEnemy('normal',20,20);const old=captureRun(normal);old.version=version;old.game.s.enemies[0].peliTime=1;assert.throws(()=>restoreRun(old));
+  const {g}=setup(),saved=captureRun(g);saved.version=version;delete saved.game?.timers?.ego;delete saved.game?.timers?.egoIndex;assert.throws(()=>restoreRun(saved));
+  const normal=new Game();normal.spawnEnemy('normal',20,20);const old=captureRun(normal);old.version=version;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;old.game.s.enemies[0].peliTime=1;assert.throws(()=>restoreRun(old));
  }
 });
 test('v4 store envelope upgrades atomically and keeps cumulative credits intact',()=>{
  const storage=memory(),originalStore=new RunStore(storage),g=new Game({seed:42});g.s.kills=7;g.s.coins=11;g.s.elapsed=123;
  assert.ok(originalStore.begin('legacy-v4',g,{best:100,lifetime:20,coins:30}).ok);assert.ok(originalStore.checkpoint('legacy-v4',g,{credit:true}).ok);
- const old=JSON.parse(storage.getItem(originalStore.key));old.version=4;old.run.snapshot.version=4;delete old.run.snapshot.game.timers.pelican;
+ const old=JSON.parse(storage.getItem(originalStore.key));old.version=4;old.run.snapshot.version=4;delete old.run.snapshot.game.timers.ego;delete old.run.snapshot.game.timers.egoIndex;delete old.run.snapshot.game.timers.pelican;
  const raw=JSON.stringify(old);storage.setItem(originalStore.key,raw);const store=new RunStore(storage),read=store.read();
- assert.equal(read.status,'ready');assert.equal(read.value.version,13);assert.equal(read.value.run.snapshot.version,13);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
+ assert.equal(read.status,'ready');assert.equal(read.value.version,15);assert.equal(read.value.run.snapshot.version,15);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
  const copy=restoreRun(read.value.run.snapshot);assert.ok(store.checkpoint('legacy-v4',copy,{credit:true}).ok);
- const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,13);assert.equal(written.run.snapshot.version,13);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
+ const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,15);assert.equal(written.run.snapshot.version,15);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
 });
 test('real pre-animal v3 envelope retains its Travestia state and both scheduler migrations',()=>{
  const raw=readFileSync(new URL('./fixtures/runstore-v3.json',import.meta.url),'utf8'),old=JSON.parse(raw),storage=memory();storage.setItem('toma-popescu-run-v1',raw);
@@ -119,7 +119,7 @@ test('real pre-animal v3 envelope retains its Travestia state and both scheduler
  assert.ok(store.checkpoint(old.run.id,copy,{credit:true}).ok);assert.deepEqual(store.read().value.totals,old.totals);
 });
 test('invalid migrated boss snapshots never rewrite the atomic store record',()=>{
- const {g}=setup(),snapshot=captureRun(g),storage=memory();snapshot.version=4;
+ const {g}=setup(),snapshot=captureRun(g),storage=memory();snapshot.version=4;delete snapshot.game?.timers?.ego;delete snapshot.game?.timers?.egoIndex;
  const raw=JSON.stringify({version:4,revision:1,totals:{best:0,lifetime:0,coins:0},run:{id:'bad',snapshot,creditedKills:0,creditedCoins:0}});storage.setItem('toma-popescu-run-v1',raw);
  const store=new RunStore(storage);assert.equal(store.read().status,'corrupt');assert.equal(store.begin('replacement',new Game()).ok,false);assert.equal(storage.getItem(store.key),raw);
 });

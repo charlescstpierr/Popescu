@@ -32,10 +32,11 @@ Ce dépôt est une copie portable de la version v1.5 approuvée. Le prochain obj
 ```bash
 npm test
 python3 -m http.server 8000 --directory dist
-python3 scripts/export-standalone.py release/Toma_Popescu_JOUER.html
+python3 scripts/export-offline.py
+python3 scripts/export-standalone.py
 ```
 
-Les tests utilisent Node.js sans dépendance externe. Pour la QA graphique native facultative:
+La suite utilise Node.js et Python 3 (bibliothèque standard pour vérifier les exports), sans paquet externe pour le moteur et l'export. Les trois tests de fumée graphiques du dossier hors ligne et le test natif de publication atomique des captures sont ignorés avec une raison explicite si `@napi-rs/canvas` n'est pas déjà installé. Pour la QA graphique native facultative:
 
 ```bash
 npm install --no-save @napi-rs/canvas@0.1.100
@@ -49,4 +50,4 @@ Les scripts Python de préparation artistique nécessitent les versions de Pillo
 python3 -m pip install -r art/requirements.txt
 ```
 
-Ne reconstruire les atlas que si la tâche le demande. Si `dist/` change, régénérer le HTML autonome avant de le livrer. Une mesure Canvas native ne prouve pas les performances ni le comportement tactile sur un téléphone physique.
+Ne reconstruire les atlas que si la tâche le demande. Si `dist/` change, régénérer le dossier hors ligne avec `scripts/export-offline.py` avant de le livrer. `release/Toma_Popescu_JOUER.html` est le point d'entrée courant avec `release/assets/`; ne pas déplacer ce chemin ni modifier les clés de sauvegarde pour un changement d'emballage. L'export monofichier facultatif va dans `generated/standalone/`, jamais à la place de ce dossier. Lire [docs/EXPORTS-HORS-LIGNE.md](docs/EXPORTS-HORS-LIGNE.md); les anciennes commandes d'export dans les rapports historiques ne définissent plus la livraison courante. Une mesure Canvas native ne prouve pas les performances ni le comportement tactile sur un téléphone physique.

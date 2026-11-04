@@ -44,12 +44,12 @@ test('initial visible animal has no immunity and retains the complete existing w
  const g=due();Object.assign(g.s,{walkMoving:true,travelX:1,travelY:0});g.spawnWave(.01);const e=g.s.enemies[0],hp=e.hp,playerHp=g.s.hp;g.hurt(e,18);assert.equal(e.hp,hp-18);g.updateEnemies(.01);assert.equal(e.phase,'animal_warning');assert.equal(e.animalTime,ANIMALS.ostrich.warning);assert.equal(g.s.hp,playerHp);assert.equal(g.s.pulses.length,0);
 });
 
-for(const index of [0,1,2,3,4])test(`v13 checkpoint retains initial-cycle boundary ${index} exactly`,()=>{
+for(const index of [0,1,2,3,4])test(`v14 checkpoint retains initial-cycle boundary ${index} exactly`,()=>{
  const a=new Game({seed:914});positionNewRun(a);a.setViewport(240,320);a.s.elapsed=30;
  for(const key of ['pack','horde','rival','chest'])a.timers[key]=100000;
  a.timers.spawn=0;a.timers.animal=0;a.timers.animalIndex=index;a.bossDirector.remaining=100;
  Object.assign(a.s,{walkMoving:true,travelX:0,travelY:1,moveX:0,moveY:1});
- const snapshot=captureRun(a);assert.equal(snapshot.version,13);const b=restoreRun(snapshot);
+ const snapshot=captureRun(a);assert.equal(snapshot.version,15);const b=restoreRun(snapshot);
  for(const g of [a,b])g.spawnWave(.01);assert.deepEqual(captureRun(a),captureRun(b));assert.equal(a.timers.animalIndex,index+(a.s.enemies.some(e=>ANIMALS[e.type])?1:0));
  b.pause();const paused=captureRun(b);b.update(.25,{x:1,y:0});assert.deepEqual(captureRun(b),paused);b.resume();
  a.setViewport(844,390);b.setViewport(844,390);for(let i=0;i<15;i++){a.update(1/60,{x:0,y:1});b.update(1/60,{x:0,y:1});assert.deepEqual(captureRun(a),captureRun(b));}

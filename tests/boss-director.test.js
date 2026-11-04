@@ -97,7 +97,7 @@ test('offscreen ordinary capacity can be retired without removing a rival or vis
 test('v6 saves preserve warnings, waiting capacity and subsequent random encounters exactly',()=>{
  const {g}=quiet(987);g.s.endless=true;for(let i=0;i<300;i++)g.spawnEnemy('normal',0,0);
  g.bossDirector.remaining=5.01;g.spawnWave(.02);g.spawnWave(5);
- const snapshot=captureRun(g);assert.equal(snapshot.version,13);assert.deepEqual(snapshot.game.bossDirector,g.bossDirector);
+ const snapshot=captureRun(g);assert.equal(snapshot.version,15);assert.deepEqual(snapshot.game.bossDirector,g.bossDirector);
  const b=restoreRun(snapshot);assert.deepEqual(captureRun(b),snapshot);assert.notEqual(b.bossDirector,g.bossDirector);assert.notEqual(b.bossDirector.bag,g.bossDirector.bag);
  g.s.enemies.pop();b.s.enemies.pop();g.spawnWave(1.01);b.spawnWave(1.01);assert.deepEqual(captureRun(g),captureRun(b));
  for(let i=0;i<8;i++){g.s.enemies=[];b.s.enemies=[];arrive(g);arrive(b);assert.deepEqual(captureRun(g),captureRun(b));}
@@ -111,14 +111,14 @@ test('malformed director fields are rejected instead of silently rerolling v6 sa
 
 test('legacy versions initialize a deterministic director without disturbing existing progress',()=>{
  for(const version of [1,2,3,4,5]){
-  const {g}=quiet(901);g.s.elapsed=345;g.spawnEnemy('normal',100,100);const snapshot=captureRun(g);snapshot.version=version;delete snapshot.game.bossDirector;
-  const a=restoreRun(snapshot),b=restoreRun(snapshot);assert.equal(a.s.elapsed,345);assert.deepEqual(a.s.enemies,g.s.enemies);assert.deepEqual(a.bossDirector,b.bossDirector);assert.equal(captureRun(a).version,13);
+  const {g}=quiet(901);g.s.elapsed=345;g.spawnEnemy('normal',100,100);const snapshot=captureRun(g);snapshot.version=version;delete snapshot.game?.timers?.ego;delete snapshot.game?.timers?.egoIndex;delete snapshot.game.bossDirector;
+  const a=restoreRun(snapshot),b=restoreRun(snapshot);assert.equal(a.s.elapsed,345);assert.deepEqual(a.s.enemies,g.s.enemies);assert.deepEqual(a.bossDirector,b.bossDirector);assert.equal(captureRun(a).version,15);
  }
 });
 
 test('legacy overlapping bosses survive migration and block new arrivals until all have cleared',()=>{
  const {g}=quiet(15);g.s.elapsed=400;const matriarch=g.spawnEnemy('matriarch',500,0);g.s.enemies=[];const travestia=g.spawnEnemy('travestia',600,0);g.s.enemies=[matriarch,travestia];
- const snapshot=captureRun(g);snapshot.version=5;delete snapshot.game.bossDirector;
+ const snapshot=captureRun(g);snapshot.version=5;delete snapshot.game?.timers?.ego;delete snapshot.game?.timers?.egoIndex;delete snapshot.game.bossDirector;
  const b=restoreRun(snapshot);assert.deepEqual(b.s.enemies,g.s.enemies);const before=clone(b.bossDirector);
  b.spawnWave(250);assert.deepEqual(b.bossDirector,before);assert.equal(bosses(b).length,2);
  b.s.enemies[0].dead=true;b.spawnWave(250);assert.deepEqual(b.bossDirector,before);assert.equal(bosses(b).length,1);
@@ -146,7 +146,7 @@ test('a capped finale retains its selected type across retries and save/resume',
 
 test('v5 Péli combat state remains intact during migration to the shared director',()=>{
  const {g}=quiet(57);g.s.elapsed=600;const e=g.spawnEnemy('pelican',100,0);g.updateEnemies(.01);assert.ok(e.phase.startsWith('peli_'));
- const snapshot=captureRun(g);snapshot.version=5;delete snapshot.game.bossDirector;const b=restoreRun(snapshot);
+ const snapshot=captureRun(g);snapshot.version=5;delete snapshot.game?.timers?.ego;delete snapshot.game?.timers?.egoIndex;delete snapshot.game.bossDirector;const b=restoreRun(snapshot);
  assert.deepEqual(b.s.enemies,g.s.enemies);const before=clone(b.bossDirector);b.spawnWave(300);assert.deepEqual(b.bossDirector,before);assert.equal(bosses(b).length,1);
 });
 
@@ -159,6 +159,6 @@ test('a genuine v5 overlapping-boss fixture migrates and remains resumable after
  assert.deepEqual(bosses(a).map(e=>e.type),['matriarch','pelican']);
  const before=clone(a.bossDirector);for(const key in a.timers)if(key!=='animalIndex')a.timers[key]=100000;
  a.spawnWave(200);assert.deepEqual(a.bossDirector,before);a.s.enemies[0].dead=true;a.spawnWave(200);assert.deepEqual(a.bossDirector,before);
- const saved=captureRun(a);assert.equal(saved.version,13);assert.deepEqual(captureRun(restoreRun(saved)),saved);
+ const saved=captureRun(a);assert.equal(saved.version,15);assert.deepEqual(captureRun(restoreRun(saved)),saved);
  a.s.enemies[1].dead=true;a.spawnWave(1);assert.equal(a.bossDirector.remaining,before.remaining-1);
 });

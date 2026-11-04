@@ -1,0 +1,56 @@
+{
+  "toma": {
+    "file": "toma-walk-v2.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 112,
+    "width": 87
+  },
+  "girl": {
+    "file": "girl-walk-v2.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 112,
+    "width": 79
+  },
+  "gorilla": {
+    "file": "gorilla-walk-v2.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 103,
+    "width": 116
+  },
+  "orangutan": {
+    "file": "orangutan-walk-v3.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 112,
+    "width": 113
+  },
+  "rival_rooster": {
+    "file": "rival_rooster-walk-v3.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 112,
+    "width": 104
+  },
+  "rival_goat": {
+    "file": "rival_goat-walk-v3.png",
+    "columns": 4,
+    "rows": 2,
+    "cell": 128,
+    "baseline": 121,
+    "height": 112,
+    "width": 83
+  }
+}
