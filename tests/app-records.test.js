@@ -52,7 +52,7 @@ test('chained upgrade renders once and plays one level cue per offer',async()=>{
 
 test('endless button keeps the earned upgrade screen instead of hiding it behind the HUD',async()=>{
   const a=app();await a.click('play');a.game.s.elapsed=1199.99;
-  a.game.s.drops=[{x:0,y:0,kind:'xp',value:50,life:10}];a.game.update(.02);
+  a.game.s.drops=[{x:a.game.s.x,y:a.game.s.y,kind:'xp',value:50,life:10}];a.game.update(.02);
   a.click('endless');assert.equal(a.game.s.mode,'upgrade');
   assert.equal(a.controller.screen,'upgrades');
 });
@@ -66,7 +66,7 @@ test('reload preserves dialogue index and exact lines before resuming',async()=>
 });
 
 test('upgrade autosave runs after the update removes consumed XP drops',async()=>{
- const a=app();await a.click('play');a.game.s.drops=[{x:0,y:0,life:10,kind:'xp',value:50}];a.controller.frame(performance.now()+50);await new Promise(r=>setTimeout(r,0));const snapshot=JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot;assert.equal(snapshot.game.s.mode,'upgrade');assert.equal(snapshot.game.s.drops.length,0);assert.equal(snapshot.game.s.xp,a.game.s.xp);
+ const a=app();await a.click('play');a.game.s.drops=[{x:a.game.s.x,y:a.game.s.y,life:10,kind:'xp',value:50}];a.controller.frame(performance.now()+50);await new Promise(r=>setTimeout(r,0));const snapshot=JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot;assert.equal(snapshot.game.s.mode,'upgrade');assert.equal(snapshot.game.s.drops.length,0);assert.equal(snapshot.game.s.xp,a.game.s.xp);
 });
 test('canceling a replacement leaves the saved run and active game untouched',async()=>{
  const a=app();await a.click('play');const id=a.controller.runId,old=a.game;a.click('pause');a.confirm(false);await a.click('restart');assert.equal(a.game,old);assert.equal(a.controller.runId,id);assert.equal(JSON.parse(a.values.get('toma-popescu-run-v1')).run.id,id);
@@ -310,4 +310,10 @@ test('Escape held while skipping a dialogue cannot toggle the next screen',async
  a.events.keydown({key:'Escape',repeat:false,target:{}});assert.equal(a.controller.screen,'hud');
  a.events.keydown({key:'Escape',repeat:true,target:{}});
  assert.equal(a.controller.screen,'hud');assert.equal(a.game.s.mode,'playing');
+});
+
+test('app starts new games on urban street but resume keeps the recorded location',async()=>{
+ const a=app();await a.click('play');assert.equal(a.game.s.x,256);assert.equal(a.game.s.y,512);
+ a.game.s.x=0;a.game.s.y=0;assert.equal((await a.controller.persistRun()).ok,true);
+ const b=app(a.values);await b.controller.resumeSaved();assert.equal(b.game.s.x,0);assert.equal(b.game.s.y,0);
 });

@@ -41,3 +41,12 @@ export function tutorialText(game){
  const phase=game.s.opening?.phase;
  return phase==='move'?'Glisse le pouce ou utilise les flèches / WASD / ZQSD.':phase==='shoot'?'Le tir est automatique. Garde tes distances.':'';
 }
+
+// Only the new-run UI calls this. Restore uses the exact recorded position.
+// The interior horizontal street lies in the guaranteed 2×2 starting city.
+export function positionNewRun(game){
+ const s=game.s;if(s.elapsed!==0||s.mode!=='playing'||s.enemies.length||s.opening||s.x!==0||s.y!==0)return false;
+ const x=256,y=512,gx=s.girl.x+x,gy=s.girl.y+y;
+ if(game.world.collides(x,y,13)||game.world.collides(gx,gy,13))return false;
+ s.x=x;s.y=y;s.girl.x=gx;s.girl.y=gy;game.world.update(x,y);return true;
+}

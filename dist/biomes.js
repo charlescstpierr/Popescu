@@ -15,6 +15,6 @@ export const BUILDING_KINDS=Object.freeze(['apartment','garage','warehouse','sho
 // invent separate bends or half-bridges at their edges.
 export function riverSection(lane,y){
   const base=1024+lane*4096;
-  return {x:base+9*Math.sin(y/143)+3*Math.sin(y/47),halfWidth:38+4*Math.sin(y/181),
+  return {x:base+23*Math.sin(y/100)+3*Math.sin(y/37),halfWidth:27+3*Math.sin(y/181),
     bridge:Math.abs(y-Math.round(y/512)*512)<=58};
 }
