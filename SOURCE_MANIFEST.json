@@ -219,8 +219,8 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 7978,
-      "sha256": "4f3790ccb9c1ab73cd222f00e17e147fd693e793abd6bbb6ea204cd4a73cc335"
+      "bytes": 10018,
+      "sha256": "98eacbdb01fd45931e1739ecbf07920b80ae3bd61bfded157d809e2be84bc832"
     },
     {
       "path": "dist/animals.js",
@@ -229,8 +229,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 39332,
-      "sha256": "99ae57e67bdbc699dbef6b3a07923573f23b0f915d0531e36acdd16ecfab1ad6"
+      "bytes": 41046,
+      "sha256": "a7d8561727f4bf3691bc16e4c0fdf42b777ad0d03baebb4e63b624a71faf698f"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -409,8 +409,8 @@
     },
     {
       "path": "dist/combat-art.js",
-      "bytes": 4413,
-      "sha256": "77ab45e1d0376a64cf937a011b742bd815c4d242fd771fa49366604cbc60837b"
+      "bytes": 4939,
+      "sha256": "369727a795fffe6c8f456c4125d1fc68368e767f4b3a562595c8acc8de3a239d"
     },
     {
       "path": "dist/companion-art.js",
@@ -439,8 +439,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 62716,
-      "sha256": "3203cfa6e229b90da075fb92246ff65e399585d177d5c9f2b9e6e7a53eb56051"
+      "bytes": 63162,
+      "sha256": "0523d05b70447be259ed840dc85884e5821fe6f295f089012aef153df77ce2bb"
     },
     {
       "path": "dist/evolutions.js",
@@ -504,8 +504,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 53616,
-      "sha256": "a3b2283c519f23dbadff62340b20ae34057d2cd7221986d2b5d28f727b23467a"
+      "bytes": 53622,
+      "sha256": "942d76fb3f96eb823e2a2e57b1ace884ae53673ec4dd7b642783c2f342c7d40c"
     },
     {
       "path": "dist/river-art.js",
@@ -554,8 +554,8 @@
     },
     {
       "path": "dist/world.js",
-      "bytes": 8937,
-      "sha256": "b119386812b3967c44ca59e93e49e74beb7d22d6014274fafeb598a2cd9d02b9"
+      "bytes": 10653,
+      "sha256": "d391b56db1dd1194abc797ed0031095b77fdb9af02c73657f7eff7c3464c0bd8"
     },
     {
       "path": "docs/BOSS-ALEATOIRES.md",
@@ -1059,8 +1059,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 15194445,
-      "sha256": "060db89d69cd5fe187e855e9024a3608d495c46bd9460ad12d1d966a1058f0b4"
+      "bytes": 15200893,
+      "sha256": "27ac1bc35e7f4c768084d225a46ad717f238b439f1f9b73ef8d0560a3515805a"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -1254,8 +1254,8 @@
     },
     {
       "path": "scripts/verify-boss-arrivals.mjs",
-      "bytes": 2394,
-      "sha256": "692003fe66b0cea64cfc30f15fd2d27ea851aa1cc44774595ba98ae06ddbcd7c"
+      "bytes": 2571,
+      "sha256": "b4ac15bc07e7432f66ad0ac109db6a26693b95d64d4c65f71db25b11e3cb6d6c"
     },
     {
       "path": "scripts/verify-boss-durability.mjs",
@@ -1303,6 +1303,11 @@
       "sha256": "4a6af003ca339ddc155658451677b2c1074e51c14db34cfc5f08d91aec531660"
     },
     {
+      "path": "tests/actor-loading.test.js",
+      "bytes": 12774,
+      "sha256": "c99d699124fdce456b2b60fe448babe62ba53a73e16a95c7d67c0665dd32f233"
+    },
+    {
       "path": "tests/animal-pacing.test.js",
       "bytes": 3862,
       "sha256": "86afde5fde0c7159d5f6e445e94ccfaaa0a9c39ae78a5fb37fa7eecf76577e8a"
@@ -1314,8 +1319,13 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 26915,
-      "sha256": "cc82f4edef8c54b7366a6379738bed130ae573f937301d4fa81c1044e731ca1b"
+      "bytes": 26963,
+      "sha256": "a70b0f3f8852045d44bbbc883b9b613fff250e3349fbbe311f476ef22e88414c"
+    },
+    {
+      "path": "tests/asset-loading-ui.test.js",
+      "bytes": 8906,
+      "sha256": "2338a8a06e206dffa155a17af28b3c92bb808a846c2e743a8cd55956f78609f2"
     },
     {
       "path": "tests/audio.test.js",
@@ -1394,13 +1404,18 @@
     },
     {
       "path": "tests/charles-ui.test.js",
-      "bytes": 21254,
-      "sha256": "1389d3b62eb1df39e30c7ea4f2a1c0df6556ecc31074d1bded1be63513450e4e"
+      "bytes": 21287,
+      "sha256": "a7106b0ef9748dcebaf7586a7536ba499a7ac20ce124d78eae132aee737cce95"
     },
     {
       "path": "tests/city-variety-visibility.test.js",
       "bytes": 2321,
       "sha256": "2931623cce537881c0f193b99d15adb451a3355fbd272f4f453786693626ba75"
+    },
+    {
+      "path": "tests/combat-lifecycle.test.js",
+      "bytes": 6098,
+      "sha256": "166250acc0b2faf9fbccce263e6aa5dad1bec8a98c603dff7611ac2785ca195d"
     },
     {
       "path": "tests/combined-candidate.test.js",
@@ -1436,6 +1451,11 @@
       "path": "tests/dialogue-compatibility.test.js",
       "bytes": 2584,
       "sha256": "e34fecbb3e98464419712ac4143370645d130aafe91c900c64b69c0e3954014c"
+    },
+    {
+      "path": "tests/dialogue-focus.test.js",
+      "bytes": 5589,
+      "sha256": "4a715a6946e942f5adb89ee1f3118bc878d47d3bd1ba5b54f2ceb314553e0ebf"
     },
     {
       "path": "tests/dialogue-scheduling.test.js",
@@ -1523,9 +1543,19 @@
       "sha256": "bb42baea2547d7112cceb6a157de49aa99af522a9e5184ce8254a7eed90f679c"
     },
     {
+      "path": "tests/helpers/asset-controller.js",
+      "bytes": 4553,
+      "sha256": "f1861683f9e31b7afc3b78331e84ec9fbe799fb2f2fd7d1a87541b2a0c21f725"
+    },
+    {
       "path": "tests/helpers/boss-combat.js",
       "bytes": 3507,
       "sha256": "693ca68971aecc3bfae0210d3d9f428f8c2cf20c7de3ed7de025d3a63e3c394b"
+    },
+    {
+      "path": "tests/helpers/focus-controller.js",
+      "bytes": 4447,
+      "sha256": "32743102b5f9a38688669b1da0ff62bf3a55f83ec4249a68c5787fb16872b04d"
     },
     {
       "path": "tests/hero-art.test.js",
@@ -1551,6 +1581,11 @@
       "path": "tests/integration-pacing-story.test.js",
       "bytes": 2133,
       "sha256": "b0e285e2d78ca06214d274866364e865ae365220d4f1f2ceb513ce43e1912d9e"
+    },
+    {
+      "path": "tests/knockback-collision.test.js",
+      "bytes": 4865,
+      "sha256": "79179436f8e404b76a30bf6ba270e30fb387ba922edd7707e64b5daf3dacc8a8"
     },
     {
       "path": "tests/lamborghini-art.test.js",
@@ -1624,8 +1659,8 @@
     },
     {
       "path": "tests/result-record-races.test.js",
-      "bytes": 6909,
-      "sha256": "ab759a98ded989fda845cd3de28de69c142d6b15b20dfa896dfba8a44ceb5c88"
+      "bytes": 6957,
+      "sha256": "9bd1b7acd6838147718893b35761ceddfadc363c5ba771c7edda61fb6895d84c"
     },
     {
       "path": "tests/river-art.test.js",
@@ -1688,6 +1723,11 @@
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
     },
     {
+      "path": "tests/stability-integration.test.js",
+      "bytes": 5272,
+      "sha256": "a60ee421bbb5f96a00d5559fefbca429b148fce89a3657f01a2e0e7d6a3905e7"
+    },
+    {
       "path": "tests/standalone-module-order.test.js",
       "bytes": 984,
       "sha256": "6fef29a8d187c194a0dfae853a427d610a7c9a63ce0a7b20c49e8aed65c157c1"
@@ -1744,8 +1784,8 @@
     },
     {
       "path": "tests/trophy-ui.test.js",
-      "bytes": 6332,
-      "sha256": "6b48dfe3ded521b8982403dfb28100be09c413add524f1f9fb59b15f66c86d12"
+      "bytes": 6380,
+      "sha256": "8c681eb5d30ce1624a4a954610f36cf654a15635bfde8aca070f4a4a0cd3d1f2"
     },
     {
       "path": "tests/upgrade-rewards.test.js",

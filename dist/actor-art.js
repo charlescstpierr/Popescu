@@ -6,13 +6,45 @@ const FILES={pelican:'assets/pelican-poses.png',animals:'assets/animals-approved
 const ENEMY_SIZE={normal:76,sprinter:66,gas:79,tank:96,jealous:76,explosive:80,matriarch:116,orangutan:83,rival_rooster:78,rival_goat:88};
 const sourceKind=(kind,type)=>ANIMALS[type]?'animals':kind==='enemy'&&['pelican','travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
-function load(src){return new Promise(resolve=>{if(typeof Image==='undefined'){resolve(null);return;}const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=src;});}
+function load(src,registerCancel){return new Promise(resolve=>{
+  if(typeof Image==='undefined'){resolve(null);return;}
+  const im=new Image();let done=false;
+  const finish=image=>{if(done)return;done=true;im.onload=null;im.onerror=null;resolve(image);};
+  im.onload=()=>finish(im);im.onerror=()=>finish(null);
+  registerCancel?.(()=>{
+    if(done)return;finish(null);
+    // Detach handlers first; DOM images can abandon their source without a new URL.
+    try{if(typeof im.removeAttribute==='function')im.removeAttribute('src');else im.src='';}catch{}
+  });
+  try{im.src=src;}catch{finish(null);}
+});}
+function usableAnimals(image){return Boolean(image&&image.width>0&&image.height>0&&(image.naturalWidth===undefined||image.naturalWidth>0)&&(image.naturalHeight===undefined||image.naturalHeight>0));}
 function box(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function polygon(c,color,points){c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();}
 export class ActorArt {
-  constructor({loadImage=load}={}){this.images={};this.cache=new Map();this.ready=Promise.all(Object.entries(FILES).map(async([key,path])=>{try{this.images[key]=await loadImage(path);}catch{this.images[key]=null;}}));}
-  available(kind){return Boolean(this.images[kind]);}
-  availableFor(actor,kind){return Boolean(this.images[sourceKind(kind,actor.type)]);}
+  constructor({loadImage=load,animalsTimeoutMs=10000,timers=globalThis}={}){
+    this.images={};this.cache=new Map();this._loadImage=loadImage;this._animalsTimeoutMs=animalsTimeoutMs;this._animalsTimers=timers;this._animalsAttempt=null;
+    this.ready=Promise.all(Object.entries(FILES).map(async([key,path])=>{if(key==='animals'){await this.ensureAnimalsReady();return;}try{this.images[key]=await loadImage(path);}catch{this.images[key]=null;}}));
+  }
+  ensureAnimalsReady(){
+    if(this.available('animals'))return Promise.resolve({ok:true});
+    if(this._animalsAttempt)return this._animalsAttempt.promise;
+    let resolve;const promise=new Promise(done=>{resolve=done;}),attempt={promise};this._animalsAttempt=attempt;
+    let settled=false,cancelLoad=null;
+    const finish=(image,reason='failed')=>{
+      // A timed-out image can still finish later; it must not replace a retry.
+      if(settled)return;settled=true;this._animalsTimers.clearTimeout(timer);
+      if(reason==='timeout'){try{cancelLoad?.();}catch{}}cancelLoad=null;
+      const ok=usableAnimals(image);this.images.animals=ok?image:null;this._animalsAttempt=null;
+      resolve(ok?{ok:true}:{ok:false,reason});
+    };
+    const timer=this._animalsTimers.setTimeout(()=>finish(null,'timeout'),this._animalsTimeoutMs);
+    // Existing one-argument loaders remain valid; cancellation is optional.
+    try{Promise.resolve(this._loadImage(FILES.animals,cancel=>{if(!settled&&typeof cancel==='function')cancelLoad=cancel;})).then(image=>finish(image),()=>finish(null));}catch{finish(null);}
+    return promise;
+  }
+  available(kind){return kind==='animals'?usableAnimals(this.images.animals):Boolean(this.images[kind]);}
+  availableFor(actor,kind){return this.available(sourceKind(kind,actor.type));}
   frame(kind,index,back,type='normal',flash=false){
     const image=this.images[sourceKind(kind,type)];if(!image)return null;
     const key=[kind,index,back,type,flash].join(':');if(this.cache.has(key))return this.cache.get(key);
@@ -51,7 +83,7 @@ export class ActorArt {
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
-    if(ANIMALS[actor.type]){const im=this.images.animals;if(!im)return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,size=actor.type==='moose'?104:actor.type==='ostrich'?98:80,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+10);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,-size/2,-size*.94,size,size);ctx.restore();return true;}
+    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,size=actor.type==='moose'?104:actor.type==='ostrich'?98:80,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+10);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,-size/2,-size*.94,size,size);ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
