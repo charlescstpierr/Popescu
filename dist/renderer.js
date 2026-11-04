@@ -1,3 +1,4 @@
+import {drawLamborghini} from './lamborghini-art.js';
 import {pickupAttraction} from './drops.js';
 import {CompanionArt} from './companion-art.js';
 import {CharlesArt} from './charles-art.js';
@@ -384,6 +385,7 @@ export class Renderer {
     const ctx=this.ctx;ctx.save();ctx.globalAlpha=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
   }
   _car(p,moving=false) {
+    if(moving&&p.carRank!==undefined){drawLamborghini(this.ctx,p,this.reducedEffects);return;}
     const ctx=this.ctx,x=p.x,y=p.y;
     if(moving&&!this.reducedEffects){
       // Speed marks stay attached to the actual car, never a second hitbox.
@@ -670,6 +672,17 @@ this._shadow(x,y+7,40,8);
     if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
   }
+  _dangerWarnings(enemies,shockwaves){
+    const ctx=this.ctx;
+    for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
+      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
+      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
+      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
+    }
+    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
+    for(const p of shockwaves||[])this._shockwave(p);
+  }
   render(game,time=0) {
     const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
@@ -704,14 +717,8 @@ this._shadow(x,y+7,40,8);
       ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
-    for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
-      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
-      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
-      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
-      rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
-    }
-    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
-    for(const p of s.shockwaves||[])this._shockwave(p);
+    const raisedCarWarnings=(s.vehicles||[]).some(v=>v.carRank!==undefined&&v.carDelay<=0&&v.life>0);
+    if(!raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
     const items=[];if(s.charles&&s.charles.phase!=='complete')items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
@@ -745,6 +752,7 @@ this._shadow(x,y+7,40,8);
     drawTrophyForeground(ctx,s,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects);
     this._shield(s);
+    if(raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}

@@ -39,9 +39,9 @@ test('all twelve upgrades have real effects and companion follows and charms', (
   for(const id of ids){g.s.mode='upgrade';g.s.options=[{id}];assert.equal(g.chooseUpgrade(id),true,id);}
   assert.equal(g.s.companion,true);assert.ok(g.s.shield>0);assert.ok(g.s.maxhp>100);
   const oldX=g.s.girl.x;tick(g,.6,{x:1,y:0});assert.ok(g.s.girl.x>oldX);
+  assert.ok(g.s.vehicles.some(v=>v.kind==='car'),'car upgrade summons a vehicle during its crossing');
   g.s.enemies=[enemy('normal',g.s.girl.x+75,g.s.girl.y)];tick(g,2);
   assert.ok(g.s.enemies.some(e=>e.charmed>0) || g.s.kills>0 || g.s.shots.some(s=>s.kind==='heart'));
-  assert.ok(g.s.vehicles.length>0,'car upgrade summons a vehicle');
 });
 
 test('jealous gorillas pursue companion and companion returns after being downed', () => {

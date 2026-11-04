@@ -1,3 +1,4 @@
+import {carLevel} from './lamborghini.js';
 import {TROPHIES,BOSS_TROPHIES,trophyChoices} from './boss-trophies.js';
 import {drawTrophyIcon,drawTrophyPortrait} from './trophy-art.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
@@ -161,12 +162,12 @@ function renderUpgrades(options){
  show('upgrades');audio.unlock().then(()=>sound('level'));$('upgrade-options').replaceChildren();
  for(const u of options.slice(0,3)){
   const rank=game?.state.upg[u.id]||0,permanent=UPGRADES.some(def=>def.id===u.id),evolution=EVOLUTIONS.find(def=>def.id===u.id);
-  const companion=u.id==='girlfriend'?companionLevel(rank+1):null,description=companion?.description||u.desc;
+  const companion=u.id==='girlfriend'?companionLevel(rank+1):null,car=u.id==='car'?carLevel(rank+1):null,description=companion?.description||car?.description||u.desc;
   const button=document.createElement('button');button.className=`upgrade-card${evolution?' evolution-card':''}`;
   if(evolution)button.style.setProperty('--evolution-color',evolution.color);
   button.setAttribute('aria-label',`${u.name}. ${evolution?`Évolution disponible. ${evolution.requirement}. `:''}${description}. ${permanent?`Niveau ${rank+1}`:evolution?'Évolution permanente':'Récompense immédiate'}`);
   const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`La même Blonde IA, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
-  const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:u.name;
+  const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:car?`${u.name} · ${car.name}`:u.name;
   const desc=document.createElement('p');desc.textContent=description;const level=document.createElement('span');level.className='upgrade-rank';
   if(evolution){level.textContent='ÉVOLUTION DISPONIBLE';const requirement=document.createElement('p');requirement.className='evolution-requirement';requirement.textContent=evolution.requirement;copy.append(name,level,requirement,desc);}
   else{level.textContent=permanent?`${rank===0?'NOUVEAU POUVOIR':`NIV. ${rank} → ${rank+1}`}  ${rank+1===u.max?'· MAX':''}`:'RÉCOMPENSE IMMÉDIATE';copy.append(name,desc,level);}
@@ -208,6 +209,7 @@ function startCharlesEpilogue(){
 }
 function leaveCharlesEpilogue(){
  if(transitionBusy||screen!=='pause-screen'||!charlesActive())return;
+ recoveryPending=false;
  game.leaveCharlesEpilogue();updateHud(true);requestSave();if(screen!=='results')syncEngineScreen();
 }
 function updateCharlesHud(){

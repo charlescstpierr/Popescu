@@ -1,4 +1,5 @@
 import test from 'node:test';
+import * as workers from 'node:worker_threads';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
@@ -9,13 +10,14 @@ import * as content from '../dist/content.js';
 import * as opening from '../dist/opening.js';
 import * as trophies from '../dist/boss-trophies.js';
 import * as evolutions from '../dist/evolutions.js';
+import {carLevel} from '../dist/lamborghini.js';
 
 // Run the real app controller with inert browser surfaces, real engine and storage.
-function app(existingValues){
+function app(existingValues,locks,clock=performance){
   const sounds=[],charlesPortraits=[];const elements=new Map(),values=existingValues||new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})]]);let queue=Promise.resolve(),confirmed=true;const events={};
   const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(key){this.state.add(key);},remove(key){this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(key,value){this[key]=value;},getAttribute(key){return this[key];},focus(){context.document.activeElement=this;},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({clearRect(){},fillRect(){},save(){},restore(){},translate(){},scale(){}})});
   const get=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
-  const context=vm.createContext({...content,...opening,...persistence,...evolutions,...trophies,drawTrophyIcon(){},drawTrophyPortrait(){},discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{constructor(){this.charles={draw(_ctx,c,time,reduced){charlesPortraits.push({c,time,reduced});}};}resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
+  const context=vm.createContext({...content,...opening,...persistence,...evolutions,carLevel,...trophies,drawTrophyIcon(){},drawTrophyPortrait(){},discoveryPrompt,Game,console,performance:clock,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:locks||{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{constructor(){this.charles={draw(_ctx,c,time,reduced){charlesPortraits.push({c,time,reduced});}};}resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
   for(const match of readFileSync(new URL('../dist/index.html',import.meta.url),'utf8').matchAll(/<[^>]+id="([^"]+)"[^>]*>/g)){const cls=match[0].match(/class="([^"]*)"/);for(const name of cls?.[1].split(/\s+/)||[])get(match[1]).classList.add(name);}
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get activeElement(){return document.activeElement},get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,renderTrophies,syncEngineScreen,updateHud,onGameEvent,showBanter,get runId(){return runId}};',context);
@@ -204,4 +206,20 @@ test('real v11 saved run remains visible and playable through the current contro
  const saved=JSON.parse(values.get('toma-popescu-run-v1'));
  assert.equal(saved.version,persistence.captureRun(a.game).version);assert.equal(saved.run.snapshot.version,saved.version);
  assert.deepEqual(saved.totals,{best:1200,lifetime:97,coins:41});
+});
+
+
+for(const native of [false,true])test(`leaving recovered Charles re-enables requested and periodic endless saves (${native?'native':'queued'} locks)`,{skip:native&&!workers.locks,timeout:5000},async()=>{
+ let queue=Promise.resolve(),now=100;const locks=native?workers.locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}};
+ const clock={now:()=>now},drain=()=>locks.request('toma-popescu-run-v1',()=>{}),record=a=>JSON.parse(a.values.get('toma-popescu-run-v1'));
+ const a=app(undefined,locks,clock);await a.click('play');a.game.s.elapsed=1199.99;a.game.update(.02);await a.controller.persistRun(true);
+ assert.equal(a.game.s.mode,'victory');a.click('meet-charles');a.click('charles-start');a.click('pause');assert.ok((await a.controller.persistRun()).ok);
+ const b=app(a.values,locks,clock);await b.click('resume-saved');assert.equal(b.controller.screen,'pause-screen');
+ const untouched=b.values.get('toma-popescu-run-v1');now+=6000;b.controller.frame(now);await drain();assert.equal(b.values.get('toma-popescu-run-v1'),untouched,'recovery pause remains read-only until an explicit choice');
+ b.click('charles-leave');await drain();assert.equal(b.controller.screen,'results');assert.equal(b.game.s.charles.phase,'complete');
+ const terminal=record(b);assert.equal(terminal.run.snapshot.game.s.mode,'victory');const kills=terminal.totals.lifetime,coins=terminal.totals.coins;
+ b.click('endless');now+=50;b.controller.frame(now);await drain();
+ const requested=record(b);assert.equal(b.controller.screen,'hud');assert.equal(b.game.s.endless,true);assert.ok(requested.revision>terminal.revision,'first endless frame must persist its requested transition');assert.equal(requested.run.snapshot.game.s.endless,true);
+ now+=5100;b.controller.frame(now);await drain();const periodic=record(b);assert.ok(periodic.revision>requested.revision,'ordinary periodic autosave must remain enabled');assert.ok(periodic.run.snapshot.game.s.elapsed>requested.run.snapshot.game.s.elapsed);assert.equal(periodic.totals.lifetime,kills);assert.equal(periodic.totals.coins,coins);
+ const restored=app(b.values,locks,clock);await restored.click('resume-saved');assert.equal(restored.game.s.endless,true);assert.equal(restored.game.s.elapsed,periodic.run.snapshot.game.s.elapsed);
 });
