@@ -280,7 +280,26 @@ $('banter-close').onclick=()=>{if(banterSpeechId!==null)game?.dismissSpeech();ba
 for(const button of document.querySelectorAll('.sound-button'))button.onclick=toggleSound;
 for(const button of document.querySelectorAll('[data-difficulty]'))button.onclick=()=>{setDifficulty(button.dataset.difficulty);sound();};
 $('sound-setting').onchange=e=>{prefs.sound=e.target.checked;audio.unlock();syncPrefs();save();};$('volume').oninput=e=>{prefs.volume=Number(e.target.value);syncPrefs();save();};$('reduced-fx').onchange=e=>{prefs.reduced=e.target.checked;if(game)game.state.reducedEffects=prefs.reduced;syncPrefs();save();};$('banter-setting').onchange=e=>{prefs.banter=e.target.checked;syncPrefs();save();};
-function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement))game.update(dt,movement);}if(!transitionBusy&&!recoveryPending&&runPersistence){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
+// Measure only before a due first-tour attempt. Bounds are simulation inputs,
+// not renderer state, and include the joystick at its actual dragged location.
+function refreshAnimalEntryOcclusions(dt){
+ if(game.timers.animalIndex>=4||game.timers.animal>dt||game.timers.spawn>dt)return;
+ const c=canvas.getBoundingClientRect();if(!(c.width>0&&c.height>0))return;
+ const sx=game.viewport.width/c.width,sy=game.viewport.height/c.height,rects=[];
+ const selector='.hud-head,.xp-track,#powers,.wallet,.bottom-hud,#joystick,#opening-help,#banter,#wave,#discovery-status,#offscreen .target-arrow,#trophy-toast,#toast,#control-hint,#coordinates';
+ for(const el of document.querySelectorAll(selector)){
+  if(el.getClientRects&&el.getClientRects().length===0)continue;
+  const r=el.getBoundingClientRect();if(!(r.width>0&&r.height>0))continue;
+  const box={x:(r.left-c.left)*sx,y:(r.top-c.top)*sy,width:r.width*sx,height:r.height*sy};
+  if(rects.length<24)rects.push(box);
+  else{ // Keep an overflow conservative instead of silently dropping a panel.
+   const last=rects[23],right=Math.max(last.x+last.width,box.x+box.width),bottom=Math.max(last.y+last.height,box.y+box.height);
+   last.x=Math.min(last.x,box.x);last.y=Math.min(last.y,box.y);last.width=right-last.x;last.height=bottom-last.y;
+  }
+ }
+ game.setViewportOcclusions(rects);
+}
+function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
 setDifficulty(difficulty);syncPrefs();updateRecordMenu();updateResumeMenu();requestAnimationFrame(frame);
 window.addEventListener('pagehide',()=>{cancelAssetWait();if(game)autosave.flush();});
 window.addEventListener('error',e=>{console.error('Toma runtime:',e.message);$('loading').classList.add('hidden');});

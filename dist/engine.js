@@ -8,7 +8,7 @@ import {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills} from 
 import {compactDrops,pickupAttraction} from './drops.js';
 import {BOSS_SCHEDULE,createBossDirector,scheduleNextBoss,isMajorBoss} from './boss-director.js';
 import {pelicanLocked,updatePelican,interruptPelican} from './pelican.js';
-import {ANIMALS,animalLocked,updateAnimal,interruptAnimal} from './animals.js';
+import {ANIMALS,animalLocked,updateAnimal,interruptAnimal,findAnimalEntry} from './animals.js';
 import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
@@ -50,6 +50,17 @@ export class Game {
   urgentSpeech(who,text,encounter=true){return enqueueSpeech(this,who,text,{urgent:true,encounter,scope:charlesActive(this.s)?'charles':'survival'});}
   rank(id){return this.s.upg[id]||0;}
   setViewport(width,height){this.viewport={width:clamp(Number(width)||390,240,1600),height:clamp(Number(height)||844,320,1600)};}
+  // DOM-free, saved input: callers provide measured canvas-relative HUD bounds.
+  // Resizing clears stale bounds; legacy/headless runs can omit them entirely.
+  setViewportOcclusions(rectangles){
+    const v=this.viewport,rects=[];
+    for(const r of (Array.isArray(rectangles)?rectangles:[]).slice(0,24)){
+      if(!r||!['x','y','width','height'].every(k=>Number.isFinite(r[k]))||r.width<=0||r.height<=0)continue;
+      const x=clamp(r.x,0,v.width),y=clamp(r.y,0,v.height),right=clamp(r.x+r.width,0,v.width),bottom=clamp(r.y+r.height,0,v.height);
+      if(right>x&&bottom>y)rects.push({x,y,width:right-x,height:bottom-y});
+    }
+    v.occlusions=rects;
+  }
   pause(){if(this.s.mode==='playing')this.s.mode='paused';}
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
   startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
@@ -194,9 +205,9 @@ export class Game {
     if(this.world.blocksAxisMove(entity.x+dx,entity.y,dy,r,true))dy=0;
     this.move(entity,dx,dy,r);
   }
-  spawnEnemy(type,x,y){
+  spawnEnemy(type,x,y,animalIntroduction=false){
     const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
-    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
+    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));if(ANIMALS[type]){const entry=findAnimalEntry(this,type,{x,y},animalIntroduction);if(!entry)return null;({x,y}=entry);}else for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     // Several attack cycles must survive developed offensive builds. Summons
     // justify a gentler first matriarch; only newly spawned bosses gain HP.
@@ -306,12 +317,12 @@ export class Game {
       if(animalDue){
         const types=Object.keys(ANIMALS),rng=this.rng;
         this.rng=(this.seed^Math.imul(this.timers.animalIndex+1,1640531527))|0;
-        const animal=this.spawnEnemy(types[this.timers.animalIndex%types.length]);this.rng=rng;
+        const animal=this.spawnEnemy(types[this.timers.animalIndex%types.length],undefined,undefined,this.timers.animalIndex<4);this.rng=rng;
         if(animal){
           this.timers.animalIndex++;
           // Introduce each species calmly, then follow normal arrival pressure.
           this.timers.animal=this.timers.animalIndex<4?6:Math.max(1.8,interval*10);
-        }
+        }else this.spawnEnemy(type); // Keep the ordinary slot while an entry is blocked.
       }else if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
     this.timers.pack-=dt;

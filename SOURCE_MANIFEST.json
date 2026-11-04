@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-lamborghini-save-v13-city-animal-pacing",
+  "version": "1.5-plus-lamborghini-save-v13-city-animal-entries",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -219,18 +219,18 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 10018,
-      "sha256": "98eacbdb01fd45931e1739ecbf07920b80ae3bd61bfded157d809e2be84bc832"
+      "bytes": 10035,
+      "sha256": "6f19614ba3cdba0043e246377efc2ded1ef2333300d4ac5904b439595c364581"
     },
     {
       "path": "dist/animals.js",
-      "bytes": 3682,
-      "sha256": "e0317418509acefb4b670a96affe47a427da5eabcdb187ce9c95abb624fd28b6"
+      "bytes": 7644,
+      "sha256": "c037c338bd431eb237932e2632d8d7bb4b800bd7c3af8f25a6c641e73974f145"
     },
     {
       "path": "dist/app.js",
-      "bytes": 41046,
-      "sha256": "a7d8561727f4bf3691bc16e4c0fdf42b777ad0d03baebb4e63b624a71faf698f"
+      "bytes": 42410,
+      "sha256": "b3ebe2327646a6d7c3be8539411119b587008f6a1b054171ef41b808809af6e3"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -404,8 +404,8 @@
     },
     {
       "path": "dist/city-art.js",
-      "bytes": 65099,
-      "sha256": "9b014df393363c95deed5232cb837237b79290ec28df8397d88923a813e2dc21"
+      "bytes": 64874,
+      "sha256": "2eefb85af5fcc9f4529992f07ce006935ed8a4069cb341a9dd499e2b6927e501"
     },
     {
       "path": "dist/combat-art.js",
@@ -439,8 +439,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 63162,
-      "sha256": "0523d05b70447be259ed840dc85884e5821fe6f295f089012aef153df77ce2bb"
+      "bytes": 64113,
+      "sha256": "f238a37c37ba836c1ff21d819aa2c7ddca68bb52d64a2dd2fb8fefa910e4354c"
     },
     {
       "path": "dist/evolutions.js",
@@ -499,8 +499,8 @@
     },
     {
       "path": "dist/prop-geometry.js",
-      "bytes": 791,
-      "sha256": "7606fa21312602094101d9825d86dd1abb68dbba33e350a7c856852c6a2cef31"
+      "bytes": 1378,
+      "sha256": "3b50de72e4bf670a23252a1822b91b14708ff50e44a18d0668fffc64146a3c82"
     },
     {
       "path": "dist/renderer.js",
@@ -519,8 +519,8 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 33590,
-      "sha256": "97fe9b69a84014994c9f616a4dd70ff99859f8df39dc6242c772e740313e8c41"
+      "bytes": 34106,
+      "sha256": "c6cb539418aeb97259ced387f76267c9dee9ec0232604fb4e30a1deefbd8f406"
     },
     {
       "path": "dist/speech.js",
@@ -641,6 +641,11 @@
       "path": "docs/PLAN.md",
       "bytes": 1942,
       "sha256": "d39a94e696eb6434222b3da6328b20c30d165e84e36823289769b26968fc9e0d"
+    },
+    {
+      "path": "docs/QA-ANIMAL-ENTRY.md",
+      "bytes": 5558,
+      "sha256": "782171db3eecca84bb8263748b36ed5bebb10e5045577c37526aaf804561ba6a"
     },
     {
       "path": "docs/QA-ANIMALS.md",
@@ -1059,8 +1064,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 15200893,
-      "sha256": "27ac1bc35e7f4c768084d225a46ad717f238b439f1f9b73ef8d0560a3515805a"
+      "bytes": 15208110,
+      "sha256": "edd71ad81cf540057bc0ea0ff889ab0b7a0d96657c44a25f00ecc52e8e5e8d8a"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -1218,6 +1223,11 @@
       "sha256": "727239eea75c9fa729b5703f956a1f6eec5fdb5279714d8ca317f18963db75cc"
     },
     {
+      "path": "scripts/measure-natural-xp-run.mjs",
+      "bytes": 1936,
+      "sha256": "2a3dddba306e2ebce341829a836f552682ab28e581f6f241f2c614c0e52e17c7"
+    },
+    {
       "path": "scripts/pack-actors.py",
       "bytes": 2396,
       "sha256": "1c037ef3e8a5dbeacdc6adef4165f5f5fb02a1d6a65d28eaff2b070fb6a026a2"
@@ -1306,6 +1316,21 @@
       "path": "tests/actor-loading.test.js",
       "bytes": 12774,
       "sha256": "c99d699124fdce456b2b60fe448babe62ba53a73e16a95c7d67c0665dd32f233"
+    },
+    {
+      "path": "tests/animal-entry.test.js",
+      "bytes": 8196,
+      "sha256": "bd81d915e7cd3f603e4697e932e2f2d85af4032a34af4e6a5a27f8d71cbd7160"
+    },
+    {
+      "path": "tests/animal-hud-entry.test.js",
+      "bytes": 7019,
+      "sha256": "56269604baa641151b4cfdc9357d86bf9b01ce6d13e53ffd68f5b070d4a7e001"
+    },
+    {
+      "path": "tests/animal-introduction.test.js",
+      "bytes": 6252,
+      "sha256": "ce348158dcfe5b43518cfb2522916ef2204bf429e9300c02987d87c3944c79f5"
     },
     {
       "path": "tests/animal-pacing.test.js",
@@ -1541,6 +1566,11 @@
       "path": "tests/fixtures/varied-city-legacy-world.json",
       "bytes": 719,
       "sha256": "bb42baea2547d7112cceb6a157de49aa99af522a9e5184ce8254a7eed90f679c"
+    },
+    {
+      "path": "tests/fixtures/xp-real-bank-139s.json",
+      "bytes": 25076,
+      "sha256": "448a027d89ccda4d3a5fd1866c6d685fa97aa64d2b269ab3f82a28a6db73ce9c"
     },
     {
       "path": "tests/helpers/asset-controller.js",
@@ -1814,8 +1844,13 @@
     },
     {
       "path": "tests/xp-direction.test.js",
-      "bytes": 7514,
-      "sha256": "82fe5fd9d6cf92803270d4ee9185acdfde7fc0f37b633863c087c90d03425c10"
+      "bytes": 6966,
+      "sha256": "da202745a859db3d00a09cfff7b40f5a67cafcd70d73da4c3f8104b8e2f44e7a"
+    },
+    {
+      "path": "tests/xp-real-bank.test.js",
+      "bytes": 3977,
+      "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
   "base_github_commit": "483f928d499d0591bf9036eda2bb2ad70eb009e7",
