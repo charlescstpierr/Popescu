@@ -59,7 +59,7 @@ test('wounded bosses in existing v7 saves resume without healing or changing rem
   // Existing pre-balance values deliberately do not use the new spawn maximum.
   const previousMax={matriarch:696.685,travestia:812.6,pelican:908.2}[type];
   e.maxhp=previousMax;e.hp=previousMax*.37;
-  const snapshot=captureRun(g);assert.equal(snapshot.version,9);
+  const snapshot=captureRun(g);assert.equal(snapshot.version,10);
   const resumed=restoreRun(snapshot);assert.deepEqual(captureRun(resumed),snapshot);
   assert.equal(resumed.s.enemies[0].hp,e.hp);assert.equal(resumed.s.enemies[0].maxhp,e.maxhp);
   resumed.hurt(resumed.s.enemies[0],e.hp+1);assert.equal(resumed.s.kills,1);

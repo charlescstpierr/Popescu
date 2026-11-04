@@ -1,0 +1,101 @@
+{
+  "out": "proof/charles",
+  "nativeCanvasMs": 4.713284669999994,
+  "soak": [
+    {
+      "difficulty": "easy",
+      "seconds": 179.99999999999235,
+      "checkpoints": 60,
+      "attacks": 28,
+      "phases": [
+        "intro",
+        "hover",
+        "shock_warning",
+        "shockwave",
+        "recover",
+        "cape_warning",
+        "cape_spin",
+        "descend",
+        "bend",
+        "scream",
+        "burst",
+        "empowered"
+      ],
+      "destroyed": 16
+    },
+    {
+      "difficulty": "normal",
+      "seconds": 179.99999999999235,
+      "checkpoints": 60,
+      "attacks": 28,
+      "phases": [
+        "intro",
+        "hover",
+        "shock_warning",
+        "shockwave",
+        "recover",
+        "cape_warning",
+        "cape_spin",
+        "descend",
+        "bend",
+        "scream",
+        "burst",
+        "empowered"
+      ],
+      "destroyed": 16
+    },
+    {
+      "difficulty": "hard",
+      "seconds": 179.99999999999235,
+      "checkpoints": 60,
+      "attacks": 28,
+      "phases": [
+        "intro",
+        "hover",
+        "shock_warning",
+        "shockwave",
+        "recover",
+        "cape_warning",
+        "cape_spin",
+        "descend",
+        "bend",
+        "scream",
+        "burst",
+        "empowered"
+      ],
+      "destroyed": 16
+    },
+    {
+      "difficulty": "nightmare",
+      "seconds": 179.99999999999235,
+      "checkpoints": 60,
+      "attacks": 28,
+      "phases": [
+        "intro",
+        "hover",
+        "shock_warning",
+        "shockwave",
+        "recover",
+        "cape_warning",
+        "cape_spin",
+        "descend",
+        "bend",
+        "scream",
+        "burst",
+        "empowered"
+      ],
+      "destroyed": 16
+    }
+  ],
+  "frames": 150,
+  "impacts": [
+    {
+      "phase": "bend",
+      "destroyed": 4
+    },
+    {
+      "phase": "burst",
+      "destroyed": 11
+    }
+  ]
+}
