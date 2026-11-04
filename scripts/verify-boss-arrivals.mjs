@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
 import {BOSS_TYPES} from '../dist/boss-director.js';
+import {BOSS_TROPHIES} from '../dist/boss-trophies.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
 import {DIFFICULTIES} from '../dist/content.js';
 const results=[];
@@ -8,6 +9,7 @@ for(const [index,difficulty]of Object.keys(DIFFICULTIES).entries()){
  let victories=0,checkpoints=0,peak=0;const arrivals=[],seen=new Map(),onEvent=type=>{if(type==='victory')victories++;};
  let game=new Game({seed:704+index,difficulty,onEvent});game.nextEvent=1e6;
  for(let frame=0;game.s.elapsed<1500&&frame<20000;frame++){
+  if(game.s.mode==='trophy')assert.ok(game.chooseTrophy(BOSS_TROPHIES[game.s.trophies.pending[0].bossType].choices[0]));
   if(game.s.mode==='upgrade')game.chooseUpgrade(game.s.options[0].id);
   if(game.s.mode==='dialogue')game.finishDialogue();
   if(game.s.mode==='victory'){assert.equal(victories,1);game.continueEndless();}

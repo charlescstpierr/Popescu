@@ -687,7 +687,7 @@ this._shadow(x,y+7,40,8);
     const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
-    const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
+    const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects,state);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
     const ctx=this.ctx,w=this.width,h=this.height;
     ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
     rect(ctx,'#191b31',0,0,w,h);

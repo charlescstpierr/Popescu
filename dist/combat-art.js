@@ -1,10 +1,13 @@
 // Short-lived visual reactions are derived from simulation changes, never written back.
 const COLORS={hit:'#ffe293',heart:'#ff8ebc',dust:'#a494a4'};
 export class CombatArt {
-  constructor(){this.previous=new Map();this.effects=[];this.appeared=new Map();this.seed=null;this.lastKills=0;this.lastLevel=1;this.lastHP=0;this.started=false;this.defeats=[];}
-  prepare(state,seed,defeats=[]){
+  constructor(){this.previous=new Map();this.effects=[];this.appeared=new Map();this.seed=null;this.lastKills=0;this.lastLevel=1;this.lastHP=0;this.started=false;this.defeats=[];this.owner=new WeakSet();this.lastElapsed=0;}
+  prepare(state,seed,defeats=[],source=state){
     this.defeats=defeats;
-    if(this.seed!==seed||state.kills<this.lastKills){this.seed=seed;this.previous.clear();this.appeared.clear();this.effects=[];this.started=false;this.lastKills=state.kills;this.lastLevel=state.level;this.lastHP=state.hp;}
+    // The raw state is stable through Charles's temporary render copies. Keep
+    // only a weak identity so returning to the menu does not retain an old run.
+    if(!this.owner.has(source)||source.elapsed<this.lastElapsed||this.seed!==seed||state.kills<this.lastKills){this.owner=new WeakSet([source]);this.seed=seed;this.previous.clear();this.appeared.clear();this.effects=[];this.started=false;this.lastKills=state.kills;this.lastLevel=state.level;this.lastHP=state.hp;}
+    this.lastElapsed=source.elapsed;
     const now=state.elapsed,next=new Map();
     for(const enemy of state.enemies){if(enemy.dead)continue;next.set(enemy.id,{hp:enemy.hp,x:enemy.x,y:enemy.y});const prev=this.previous.get(enemy.id);
       if(prev&&prev.hp-enemy.hp>.5)this.effects.push({kind:'hit',x:enemy.x,y:enemy.y-47,value:Math.round(prev.hp-enemy.hp),start:now,life:.65,color:enemy.charmed>0?COLORS.heart:COLORS.hit});
@@ -12,7 +15,9 @@ export class CombatArt {
     }
     if(state.hp<this.lastHP-.5)this.effects.push({kind:'ouch',x:state.x,y:state.y-40,start:now,life:.45,value:Math.round(this.lastHP-state.hp),color:'#ff7294'});
     if(state.level>this.lastLevel)this.effects.push({kind:'level',x:state.x,y:state.y,start:now,life:.8,color:'#f9d078'});
-    this.effects=this.effects.filter(e=>now-e.start<e.life).slice(-48);for(const [id,start]of this.appeared)if(now-start>.45)this.appeared.delete(id);
+    // Charles completion returns to survival time without replacing the run.
+    // Drop future-dated cues, while preserving newly observed lethal damage.
+    this.effects=this.effects.filter(e=>now>=e.start&&now-e.start<e.life).slice(-48);for(const [id,start]of this.appeared)if(now<start||now-start>.45)this.appeared.delete(id);
     this.previous=next;this.lastKills=state.kills;this.lastLevel=state.level;this.lastHP=state.hp;this.started=true;
   }
   alpha(id,elapsed){const t=this.appeared.get(id);return t===undefined?1:Math.max(.2,Math.min(1,(elapsed-t)/.28));}

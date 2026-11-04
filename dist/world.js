@@ -132,6 +132,32 @@ export class World {
     }
     return result.sort((a,b)=>a.id.localeCompare(b.id));
   }
+  blocksAxisMove(x,y,delta,r,vertical=false) {
+    if(delta===0)return false;
+    const endX=vertical?x:x+delta,endY=vertical?y+delta:y;
+    const minx=Math.floor((Math.min(x,endX)-r-110)/SIZE),maxx=Math.floor((Math.max(x,endX)+r+110)/SIZE);
+    const miny=Math.floor((Math.min(y,endY)-r-110)/SIZE),maxy=Math.floor((Math.max(y,endY)+r+110)/SIZE);
+    for(let a=minx;a<=maxx;a++)for(let b=miny;b<=maxy;b++){
+      const props=this.chunk(a,b);let solids=this.collisionBounds.get(props);
+      if(!solids){solids=props.filter(p=>p.solid&&!this.destroyed.has(p.id)).map(propCollisionBounds);this.collisionBounds.set(props,solids);}
+      for(const bounds of solids){
+        const startDX=Math.max(Math.abs(x-bounds.x)-bounds.w/2,0),startDY=Math.max(Math.abs(y-bounds.y)-bounds.h/2,0);
+        // Keep the existing escape behavior for an actor already inside a solid,
+        // but only when this axis really clears it. Y must use the accepted X.
+        if(startDX*startDX+startDY*startDY<r*r||(startDX===0&&startDY===0)){
+          const endDX=Math.max(Math.abs(endX-bounds.x)-bounds.w/2,0),endDY=Math.max(Math.abs(endY-bounds.y)-bounds.h/2,0);
+          if(endDX*endDX+endDY*endDY<r*r||(endDX===0&&endDY===0))return true;
+          continue;
+        }
+        // Distance from this axis-aligned segment to the rectangle is exact for
+        // a swept circle, including rounded corners and arbitrarily thin props.
+        const dx=Math.max(bounds.x-bounds.w/2-Math.max(x,endX),Math.min(x,endX)-bounds.x-bounds.w/2,0);
+        const dy=Math.max(bounds.y-bounds.h/2-Math.max(y,endY),Math.min(y,endY)-bounds.y-bounds.h/2,0);
+        if(dx*dx+dy*dy<r*r||(dx===0&&dy===0))return true;
+      }
+    }
+    return false;
+  }
   collides(x,y,r=0) {
     const minx=Math.floor((x-r-110)/SIZE),maxx=Math.floor((x+r+110)/SIZE);
     const miny=Math.floor((y-r-110)/SIZE),maxy=Math.floor((y+r+110)/SIZE);
