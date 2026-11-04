@@ -1,3 +1,5 @@
+import {CharlesArt} from './charles-art.js';
+import {charlesProp,drawCharlesGround,drawCharlesForeground} from './charles-effects.js';
 import {drawTrophyIcon,drawTrophyGround,drawTrophyForeground} from './trophy-art.js';
 import {BOSS_TROPHIES,chestTrophyEligible} from './boss-trophies.js';
 import {drawAnimalWarning} from './animals.js';
@@ -352,7 +354,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.heroPowerStamps=new Map();this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.charles=new CharlesArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready,this.charles.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.heroPowerStamps=new Map();this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -669,17 +671,20 @@ this._shadow(x,y+7,40,8);
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
   }
   render(game,time=0) {
-    const s=game.state||game.s;if(!s)return;
+    const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
     const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
     const ctx=this.ctx,w=this.width,h=this.height;
     ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
     rect(ctx,'#191b31',0,0,w,h);
-    const camera={x:s.x||0,y:s.y||0},ox=Math.round(w/2-camera.x),oy=Math.round(h*.48-camera.y);
+    // Reserve room below Charles's permanent banner, up to 48 px on short
+    // screens. Shift the shared view, never actors or attack geometry.
+    const charlesInset=s.charles&&s.charles.phase!=='complete'&&!s.endless?Math.max(0,Math.min(48,430-h*.48)):0;
+    const camera={x:s.x||0,y:(s.y||0)-charlesInset},ox=Math.round(w/2-camera.x),oy=Math.round(h*.48-camera.y);
     ctx.save();ctx.translate(ox,oy);
     this._drawGround(camera,seed);
-    const props=game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[];
+    const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>charlesProp(p,destroyed));
     const enemies=s.enemies||[],shots=s.shots||[],clouds=s.clouds||[],drops=s.drops||[],particles=s.particles||[];
     // Lamps cast local pools on pavement before any object or actor is painted.
     for(const p of props)if(p.type==='lamp'){
@@ -690,6 +695,7 @@ this._shadow(x,y+7,40,8);
     // Old checkpoints can contain legacy power rings. Do not replay them as
     // travelling attacks: truth damages at once and airplane is defensive.
     for(const p of s.pulses||[]){if(p.color==='#c9a8ff'||p.color==='#8adce6')continue;const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
+    drawCharlesGround(ctx,s.charles,this.reducedEffects);
     drawTrophyGround(ctx,s,this.reducedEffects);
     this.powers.drawGround(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.airplane?.active) {
@@ -705,7 +711,7 @@ this._shadow(x,y+7,40,8);
     }
     for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
     for(const p of s.shockwaves||[])this._shockwave(p);
-    const items=[];const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
+    const items=[];if(s.charles&&s.charles.phase!=='complete')items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
     for(const v of s.vehicles||[])items.push({y:v.y+13,kind:'vehicle',data:v});
@@ -715,7 +721,8 @@ this._shadow(x,y+7,40,8);
     items.push({y:s.y+10,kind:'hero',data:s});items.sort((a,b)=>a.y-b.y);
     const phase=Math.floor((s.elapsed||this.time)*12)%8;
     for(const item of items){
-      if(item.kind==='defeat')this._defeatImpact(item.data,s);
+      if(item.kind==='charles')this.charles.draw(ctx,item.data,item.data.elapsed,this.reducedEffects);
+      else if(item.kind==='defeat')this._defeatImpact(item.data,s);
       else if(item.kind==='prop')this._prop(item.data);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
@@ -735,6 +742,7 @@ this._shadow(x,y+7,40,8);
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
     drawTrophyForeground(ctx,s,this.reducedEffects);
+    drawCharlesForeground(ctx,s.charles,this.reducedEffects);
     this._shield(s);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.

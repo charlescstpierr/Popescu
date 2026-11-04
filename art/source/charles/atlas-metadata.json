@@ -1,0 +1,151 @@
+{
+  "image": "dist/assets/charles-whole-v1.png",
+  "width": 880,
+  "height": 176,
+  "columns": 5,
+  "rows": 1,
+  "cell": 176,
+  "anchor": [
+    88,
+    160
+  ],
+  "source": "art/source/charles/poses-transparent-source.png",
+  "sourceSha256": "68765b44ffa93f32498250032cdbed0b2f3db3627764253c797fc276cb73d682",
+  "generation": "Built-in image_gen, approved Charles identity and transformation storyboard references. Layout edit only for transparent gutters.",
+  "registration": "Five intact whole-body paintings with one uniform 0.26 scale. Runtime only translates each whole frame, without body rotation, limbs or warping.",
+  "frames": [
+    {
+      "index": 0,
+      "name": "float",
+      "sourceRect": [
+        0,
+        0,
+        418,
+        627
+      ],
+      "sourceAnchor": [
+        229,
+        561
+      ],
+      "scale": 0.26,
+      "translation": [
+        28.46,
+        14.139999999999986
+      ],
+      "eyes": [
+        [
+          86.44,
+          45.73
+        ],
+        [
+          91.12,
+          45.73
+        ]
+      ]
+    },
+    {
+      "index": 1,
+      "name": "planted",
+      "sourceRect": [
+        418,
+        0,
+        418,
+        627
+      ],
+      "sourceAnchor": [
+        640,
+        557
+      ],
+      "scale": 0.26,
+      "translation": [
+        30.28,
+        15.180000000000007
+      ],
+      "eyes": [
+        [
+          86.18,
+          50.15
+        ]
+      ]
+    },
+    {
+      "index": 2,
+      "name": "bend",
+      "sourceRect": [
+        836,
+        0,
+        418,
+        627
+      ],
+      "sourceAnchor": [
+        1022,
+        544
+      ],
+      "scale": 0.26,
+      "translation": [
+        39.64,
+        18.560000000000002
+      ],
+      "eyes": [
+        [
+          105.68,
+          83.82
+        ],
+        [
+          111.14,
+          84.08
+        ]
+      ]
+    },
+    {
+      "index": 3,
+      "name": "scream",
+      "sourceRect": [
+        0,
+        627,
+        418,
+        627
+      ],
+      "sourceAnchor": [
+        251,
+        1149
+      ],
+      "scale": 0.26,
+      "translation": [
+        22.739999999999995,
+        24.28
+      ],
+      "eyes": [
+        [
+          89.82,
+          63.28
+        ]
+      ]
+    },
+    {
+      "index": 4,
+      "name": "empowered",
+      "sourceRect": [
+        418,
+        627,
+        418,
+        627
+      ],
+      "sourceAnchor": [
+        633,
+        1159
+      ],
+      "scale": 0.26,
+      "translation": [
+        32.1,
+        21.680000000000007
+      ],
+      "eyes": [
+        [
+          89.3,
+          46.64
+        ]
+      ]
+    }
+  ]
+}

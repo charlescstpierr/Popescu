@@ -1,11 +1,11 @@
 {
-  "version": "1.5-plus-boss-trophies",
+  "version": "1.5-plus-trophies-charles-electric-epilogue-mobile",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 80,
-      "sha256": "1aaec666dbde0e1eebeae8219f27ceb6cf96b3585094418b267eeb66a0e43da0"
+      "bytes": 173,
+      "sha256": "607c7e8e5017318bd4dbfec0687670cc013bad680fc73409cb1611ad1f548558"
     },
     {
       "path": "AGENTS.md",
@@ -21,6 +21,41 @@
       "path": "art/requirements.txt",
       "bytes": 42,
       "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "art/source/charles/README.md",
+      "bytes": 2624,
+      "sha256": "ba9783f13ed66ae16ddbc6c3594363c738c65fdf64b3c694838ed229ee9b988f"
+    },
+    {
+      "path": "art/source/charles/atlas-metadata.json",
+      "bytes": 2581,
+      "sha256": "50f083376213d8b779c5993f4aabb95f232aa7fb0c14176ef3520d4002c4e168"
+    },
+    {
+      "path": "art/source/charles/imagegen-prompt.txt",
+      "bytes": 4212,
+      "sha256": "ac5616ed0d22a0a05b4194ac34c806fa438ea94bade1ecdf9886770ef984684d"
+    },
+    {
+      "path": "art/source/charles/inspect-art.mjs",
+      "bytes": 1483,
+      "sha256": "06b921d05b6de46dd4794e5ec9e584e7b161a028e9cfb0046aa4bfe3d5498f1c"
+    },
+    {
+      "path": "art/source/charles/native-pose-review.png",
+      "bytes": 233463,
+      "sha256": "871621ab3cdc5187b5954bd27c71e62b7d00bab714ef576670040901eaef1190"
+    },
+    {
+      "path": "art/source/charles/poses-transparent-source.png",
+      "bytes": 1295818,
+      "sha256": "68765b44ffa93f32498250032cdbed0b2f3db3627764253c797fc276cb73d682"
+    },
+    {
+      "path": "art/source/charles/register-atlas.mjs",
+      "bytes": 2480,
+      "sha256": "861636fcfe4290b9733b17aae0ada3673a521ffa55d375ddc2afaf9359afc348"
     },
     {
       "path": "art/source/orangutan-bra/README.md",
@@ -179,8 +214,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 34301,
-      "sha256": "5177565cbd01b95b77a89fca0ff67954785956e96a35e20d724452bae64b5df1"
+      "bytes": 37604,
+      "sha256": "01c15865cf5e4bee94340f952266af5659b7eca4d2f6657e2dcf2962eafd09da"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -191,6 +226,11 @@
       "path": "dist/assets/animals-approved.png",
       "bytes": 1928857,
       "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "dist/assets/charles-whole-v1.png",
+      "bytes": 103638,
+      "sha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583"
     },
     {
       "path": "dist/assets/couverture-personnages.webp",
@@ -303,6 +343,21 @@
       "sha256": "2ec1d61cd813e0f826d4ab0e3254387a8b3d66dc46d94e10b1769f6416a4b701"
     },
     {
+      "path": "dist/charles-art.js",
+      "bytes": 2589,
+      "sha256": "57713e114d7f0f869ee1f4f269c4863e8cd6e27c45c0157ae8ec5cfd24e46d8c"
+    },
+    {
+      "path": "dist/charles-effects.js",
+      "bytes": 7517,
+      "sha256": "4f511d808ad896675ac7d0d651d88233726ce7ec167cc634daa52eaff59aa103"
+    },
+    {
+      "path": "dist/charles.js",
+      "bytes": 8202,
+      "sha256": "43e2c0d401e2ff703b81ecff26fcc39ab86fcf6382a28ed0b9ddad43708c482a"
+    },
+    {
       "path": "dist/city-art.js",
       "bytes": 52544,
       "sha256": "cafb0fbaf3ebeb0271e85a88c48dc042231ef31179eab3194c4c3e5649e16ae8"
@@ -334,8 +389,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 56947,
-      "sha256": "3070072929f0ce051bfd233c6262b4ae09dea01c0a367235e7903c1d6b33b408"
+      "bytes": 58701,
+      "sha256": "8d88df67109c134a03a614d8e9af3f510d3e99c6dbf76b383a8e921fe29c3ae5"
     },
     {
       "path": "dist/evolutions.js",
@@ -359,8 +414,8 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 12909,
-      "sha256": "4c3d5ffe09bf1a74c858b50146a0af785dc7f307710457f295797d8ee493dc6f"
+      "bytes": 14628,
+      "sha256": "79acc28c40d8c6166d977b40a7d731d65b756a711b6b1a0ce65c13dd4628a389"
     },
     {
       "path": "dist/opening.js",
@@ -389,18 +444,18 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 51949,
-      "sha256": "f20a1dfba1716fc89a0016b8de9b8ed39688ea6fabeac4a30783a2913be9b33e"
+      "bytes": 52938,
+      "sha256": "6951515100c9dfb7447600b8968f35ec0ac8bc13f738f5941938ee493552143b"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 26843,
-      "sha256": "5160a3a3406311258f074e45f70a0b1692e0ccefa336ffb69b0db4ff8f7fe092"
+      "bytes": 29185,
+      "sha256": "72d7b21bb8550d3b6f9871eb8c6ce60927fe49c382cef8c2884e31c49729de55"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 31758,
-      "sha256": "a975712d1fec2464b8bb7189c0a312efe6faff0001ad2b7fcee4f45f6ec8d075"
+      "bytes": 35487,
+      "sha256": "218d4eaee49420e8c2e1bcb3f4541635f1769eb50f86d58eaa38f51cf69733ac"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -424,8 +479,8 @@
     },
     {
       "path": "dist/world.js",
-      "bytes": 8773,
-      "sha256": "48c2c99f5ffbf24839a24679fbe3492585bf76cfbac9492b8531726c0563c570"
+      "bytes": 8937,
+      "sha256": "b119386812b3967c44ca59e93e49e74beb7d22d6014274fafeb598a2cd9d02b9"
     },
     {
       "path": "docs/BOSS-ALEATOIRES.md",
@@ -441,6 +496,11 @@
       "path": "docs/BOSS-TROPHIES-DESIGN.md",
       "bytes": 8184,
       "sha256": "2864518e8f3aafe5ae82b0bd904dd9cf1b9e21d35e31c452e0c8a377c877afc3"
+    },
+    {
+      "path": "docs/CHARLES-EPILOGUE.md",
+      "bytes": 3800,
+      "sha256": "7f486c203936f4bce2153a2b4bd368b3473a2401d459d2413af2c7a2223b7943"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -511,6 +571,11 @@
       "path": "docs/QA-BOSS-TROPHIES.md",
       "bytes": 6603,
       "sha256": "368dff3f5995195e33aa3dca18167f8e70f4535b90948142d7cffd6e2cfc7ae9"
+    },
+    {
+      "path": "docs/QA-CHARLES.md",
+      "bytes": 5834,
+      "sha256": "6b888bebae4064f37aca02ac3c5169c9f38b05513fbe0feebfb08906007088e1"
     },
     {
       "path": "docs/QA-COMBINED-NOV3.md",
@@ -638,6 +703,11 @@
       "sha256": "e802b0a9a2008012090cabf7ca966711c93795bcf4c6928aa861e138e268ccc6"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-03-charles-epilogue.md",
+      "bytes": 2170,
+      "sha256": "bf7467d3dcf803a809f3330c24ba27268774677482f04147fb16cec817de7434"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-03-five-power-animations.md",
       "bytes": 2311,
       "sha256": "eaf23b68fa68aedf66c51a71205523f3281454ab31141861fd1dae82ea1115e5"
@@ -653,9 +723,204 @@
       "sha256": "07b478a06661487d0485ce60622bb744bc2f8b4b07c53eafda3d961cf82b1216"
     },
     {
+      "path": "proof/charles/banter-portrait.png",
+      "bytes": 8137,
+      "sha256": "82a5e4b112c2badfa63f711e490a7fe4b6e1181ecf71ea1f285c01078b05ab02"
+    },
+    {
+      "path": "proof/charles/bend-reduced.png",
+      "bytes": 164849,
+      "sha256": "d95d549014fabf2f6ad604a2003b7fac38aa7b14c549dda0c3341a098f4f35f5"
+    },
+    {
+      "path": "proof/charles/bend.png",
+      "bytes": 219450,
+      "sha256": "097f865911278d6e052fb5b311b2f3b869d7a6c4bd195d3c173466f5e32fb42d"
+    },
+    {
+      "path": "proof/charles/burst-reduced.png",
+      "bytes": 164673,
+      "sha256": "e01db20ea8d9e211563581b118f354c5794dd51cfd47a79cea3b08d3232d7595"
+    },
+    {
+      "path": "proof/charles/burst.png",
+      "bytes": 260325,
+      "sha256": "9e9520238724fb4df34680abde30144df897bb23e3885756c66362c1e2a9fd56"
+    },
+    {
+      "path": "proof/charles/cape_spin-reduced.png",
+      "bytes": 162600,
+      "sha256": "6032e72e9151784997fcf4208dfcef0b9e8aecbe552b9211efb9cfd8224a755d"
+    },
+    {
+      "path": "proof/charles/cape_spin.png",
+      "bytes": 203673,
+      "sha256": "7f84ec862ff1d97b4c16482d61ac2f295040e27ae06c7a39a35798cfa2b37b88"
+    },
+    {
+      "path": "proof/charles/electric-takeoff-reduced.png",
+      "bytes": 151605,
+      "sha256": "95ff654804d7e88de12585c1d260d43c5d7291d8870796cdd2e866df8bba492a"
+    },
+    {
+      "path": "proof/charles/electric-takeoff.png",
+      "bytes": 240388,
+      "sha256": "6c2dea5465588e8d54aba5ff1a6db68edb61fa9d42f1e4846bd3ea9fe914ed97"
+    },
+    {
+      "path": "proof/charles/full-tests.log",
+      "bytes": 69416,
+      "sha256": "8788d7c84103815223c9934fa3251805f28437bca819409b133eb1b29bde3101"
+    },
+    {
+      "path": "proof/charles/hover-reduced.png",
+      "bytes": 149223,
+      "sha256": "23874b8af3c840a3f9337ef546d0f29e7a9c1b3ff946d10c34f7aeae8fe98691"
+    },
+    {
+      "path": "proof/charles/hover.png",
+      "bytes": 190269,
+      "sha256": "c2511840d96a8e3bbb026001ba767cf789dc15f6336ee01cb20ad8b6a75750d3"
+    },
+    {
+      "path": "proof/charles/in-game-sequence.png",
+      "bytes": 474315,
+      "sha256": "9f2df47daa0ad79d017bbb28a8073fcfa917310d0ab981bec8d6dc47a2129b6b"
+    },
+    {
+      "path": "proof/charles/lightning-before-landing.png",
+      "bytes": 162153,
+      "sha256": "05aee573f3def4639352943c963d8e1ed622ee1b9f61ff9188163d3c928524af"
+    },
+    {
+      "path": "proof/charles/lightning-landing.png",
+      "bytes": 183069,
+      "sha256": "918e0edb2d146248c3b18fd1a68973fbe10a2e2ab679733ce71ae2fb05701d8a"
+    },
+    {
+      "path": "proof/charles/lightning-takeoff-reduced.png",
+      "bytes": 151605,
+      "sha256": "95ff654804d7e88de12585c1d260d43c5d7291d8870796cdd2e866df8bba492a"
+    },
+    {
+      "path": "proof/charles/lightning-takeoff.png",
+      "bytes": 240388,
+      "sha256": "6c2dea5465588e8d54aba5ff1a6db68edb61fa9d42f1e4846bd3ea9fe914ed97"
+    },
+    {
+      "path": "proof/charles/mobile-320-natural.png",
+      "bytes": 79702,
+      "sha256": "6f0a4b02cc22c4d139b1813a5e9a6dee143f466c8b2249a3c8f39344fbd3b224"
+    },
+    {
+      "path": "proof/charles/mobile-390-natural.png",
+      "bytes": 112456,
+      "sha256": "ebb3680059c205fa2e6ccd13c175f595cccd4e98f74344c5ffab941ecb55f559"
+    },
+    {
+      "path": "proof/charles/scream-reduced.png",
+      "bytes": 163457,
+      "sha256": "1a22a8b8fddbf866290e6e8f0614bc514a0c23fdede41f73b7fc6fd7a9db48b0"
+    },
+    {
+      "path": "proof/charles/scream.png",
+      "bytes": 235938,
+      "sha256": "0349f53fc3203d504d44b6d28ac2699ab70202564c79d76c5ef5333c9a0723f4"
+    },
+    {
+      "path": "proof/charles/shock_warning-reduced.png",
+      "bytes": 160181,
+      "sha256": "cc7a01b7954b93a94fedb57b804732cec99454e101ac95218926dd610467bde4"
+    },
+    {
+      "path": "proof/charles/shock_warning.png",
+      "bytes": 201258,
+      "sha256": "e8e32703ec14232eb90bcf7cf00364550688d1deb8aaf47221144a881d707a51"
+    },
+    {
+      "path": "proof/charles/standalone-smoke.png",
+      "bytes": 190710,
+      "sha256": "45fb1ded4522fa8cde73a235d3fd36c63b631898ca34941fa3e565cde343748c"
+    },
+    {
+      "path": "proof/charles/transformation-electric.mp4",
+      "bytes": 345182,
+      "sha256": "d1a312f296d97e183d2bc53de8cd5ce1fe20ab5aa30d3e876756ac9e3be3a3b2"
+    },
+    {
+      "path": "proof/charles/transformation-in-game.mp4",
+      "bytes": 164192,
+      "sha256": "96321d4c5106396bbf611eb2eeb9572d14f77804f873927661a3fdec99d43a7e"
+    },
+    {
+      "path": "proof/charles/transformation-lightning.mp4",
+      "bytes": 333122,
+      "sha256": "8492e6b1ebf6b936ff6e16128e17e7bf9e049532cd6a76e2e0343f410c2a3981"
+    },
+    {
+      "path": "proof/charles/verify-electric.log",
+      "bytes": 1871,
+      "sha256": "5319bb569253ca4c7e2ebb722219b8a8d62ed40179b8e287fc33b0a330a1847f"
+    },
+    {
+      "path": "proof/charles/verify-lightning.log",
+      "bytes": 1871,
+      "sha256": "bbc021fdeadd2412ac0b22070942ac7f2b432a1c8d94b2c8c43b38dc9b41db5e"
+    },
+    {
+      "path": "proof/charles/verify-mobile.log",
+      "bytes": 452,
+      "sha256": "d0a6f485b6bed140742966f691168b709f40f89dfb8c0654560aec74c969c5e0"
+    },
+    {
+      "path": "proof/charles/verify.log",
+      "bytes": 1736,
+      "sha256": "8730c71693ba61f45a3d3144fe65aafe26e4b0083c21f8dd32fdd236cd793ec3"
+    },
+    {
+      "path": "proof/trophies/effects-320-reduced.png",
+      "bytes": 95320,
+      "sha256": "ba96ad559acdb043a78c3716e5a27989d3f994e01c5ca24bf2c66d24a344d7b0"
+    },
+    {
+      "path": "proof/trophies/effects-320.png",
+      "bytes": 120970,
+      "sha256": "7419fa0415c078bc914689176e9cbfc00c2d23c5e9d9ec453d2d3a906cfd7fb4"
+    },
+    {
+      "path": "proof/trophies/effects-390-reduced.png",
+      "bytes": 144074,
+      "sha256": "5d2d41ccbb089ac30d4e42e102cae2d5bcea828b8b9d126f44b6e1372bd76ad1"
+    },
+    {
+      "path": "proof/trophies/effects-390.png",
+      "bytes": 189348,
+      "sha256": "cca473fdf176d2320f6ff06261cbe88bd8a2cdec5dbd5641c4a5a667feb0c152"
+    },
+    {
+      "path": "proof/trophies/icons.png",
+      "bytes": 6755,
+      "sha256": "3d1028d5e60d84d9aafbdc1647b4692a81657b5da1f74004c76234ddf8e4ac9b"
+    },
+    {
+      "path": "proof/trophies/portrait-matriarch.png",
+      "bytes": 25777,
+      "sha256": "d99e4cf58ce1858e9d3d83850424d8e3084ec8611f86c2b5ad9478d56810f2d1"
+    },
+    {
+      "path": "proof/trophies/portrait-pelican.png",
+      "bytes": 23429,
+      "sha256": "81767a018cff689924424e6eda68b771295712c89f38f9a4a281931ba8e6da7a"
+    },
+    {
+      "path": "proof/trophies/portrait-travestia.png",
+      "bytes": 19417,
+      "sha256": "4d52a9008e4e08bf43ef96a82863c87dc2e16d62af0a2a2c2ce7d819edb4c812"
+    },
+    {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 14070202,
-      "sha256": "bc49bff3b1c3b562d1fe972f1f55b4d8b2adddf12f0383ff7a57cfe636e085d5"
+      "bytes": 14240925,
+      "sha256": "1b332aab0256bfd1dc841139dae78905f1940f381e8641b0172a54c5fd8accac"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -668,14 +933,24 @@
       "sha256": "b16d89c59c635a0aa43500e9036006457010d3217db6f0ec387a2baf449d22f2"
     },
     {
+      "path": "scripts/charles-preview-fixtures.mjs",
+      "bytes": 2595,
+      "sha256": "51ab221aed207b8d212fe8e37d7b8210d41d53e2639f4e434f348345b45ba068"
+    },
+    {
       "path": "scripts/export-standalone.py",
-      "bytes": 1959,
-      "sha256": "d0cf230936c0a411473f421d0dd8ab2659fa089c81d8707714e6972f8aa619cd"
+      "bytes": 2001,
+      "sha256": "e0e568a58e77ff3abcebeafb6744722a55b9f47184153c170eba79766d48db95"
     },
     {
       "path": "scripts/inspect-animals.mjs",
       "bytes": 1291,
       "sha256": "4e3c5b3f82f14a693ae6c34fff935ce6132f93de942c900da620ff59bd399bed"
+    },
+    {
+      "path": "scripts/inspect-charles.mjs",
+      "bytes": 5063,
+      "sha256": "c46c57d3f29351e1d3a6a60f1cdfcfb283e57ae6faa3c7abb0697470b3945ce1"
     },
     {
       "path": "scripts/inspect-defeats.mjs",
@@ -734,8 +1009,8 @@
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 8590,
-      "sha256": "d555c503f933cbf4dd15e31f83404a5f51ef3e9dc049260f1b72734e6e1e8622"
+      "bytes": 9110,
+      "sha256": "aa67b116bbef0142f5316b57b622c3dec2f7a90680d50cbd9dd248b820a46cf6"
     },
     {
       "path": "scripts/inspect-tail-dash.mjs",
@@ -854,18 +1129,18 @@
     },
     {
       "path": "tests/boss-arrivals.test.js",
-      "bytes": 3464,
-      "sha256": "24d4d02d2355da0c7da6d1207101fcf97b0cdc4d53dc6aafa06881394e38eff3"
+      "bytes": 3478,
+      "sha256": "6c4ae4a9a4dff23fb95e79f52fae15485343ca78bbae43ab8a59dc09e9b62b63"
     },
     {
       "path": "tests/boss-director.test.js",
-      "bytes": 11885,
-      "sha256": "d69523e5eed9409871b9b44637b72ddf6d2e12425817e8b6529c14f2999921e8"
+      "bytes": 11888,
+      "sha256": "f04b77b159cbfb3a4b0de833e77aca843f0d814f04d8c84e33c74dfce5ca7e34"
     },
     {
       "path": "tests/boss-durability.test.js",
-      "bytes": 4770,
-      "sha256": "fbbf2f8dbc3e8f06ab14921655ac8ecafd9b99a01e3acfa3ca4e1d94ee610e16"
+      "bytes": 4771,
+      "sha256": "9a535241a8b0bad6ef970254052aa508a26bb803a19d4c7651d39e2314421794"
     },
     {
       "path": "tests/boss-hardening.test.js",
@@ -881,6 +1156,46 @@
       "path": "tests/boss-trophies.test.js",
       "bytes": 4987,
       "sha256": "96345aa13250a9d7a2cbbcdd85d4229765507febd0fe659927540b2dc12d9e7d"
+    },
+    {
+      "path": "tests/charles-art.test.js",
+      "bytes": 4169,
+      "sha256": "137440b7999944986a2989788355c9661da2678643ac93c89e35cf9e69a8fcf2"
+    },
+    {
+      "path": "tests/charles-combat.test.js",
+      "bytes": 4709,
+      "sha256": "8edb6790605303dfa7c5b50041b388c97831bb698e05aefe9e15b79bfa2c4888"
+    },
+    {
+      "path": "tests/charles-effects.test.js",
+      "bytes": 2920,
+      "sha256": "0db01bb7fa3b0388a343ec69eaf24a8128e22286064faa339e574e884d1f8166"
+    },
+    {
+      "path": "tests/charles-engine.test.js",
+      "bytes": 2869,
+      "sha256": "97ba5fb21525fdb182ea4421646357762962045da5bbbc9a0cbda4de1860dcd3"
+    },
+    {
+      "path": "tests/charles-framing.test.js",
+      "bytes": 2991,
+      "sha256": "f7c17b35655c2ad801be7945739f3d679880857c94091a29927fdb19d875a4db"
+    },
+    {
+      "path": "tests/charles-landing.test.js",
+      "bytes": 8539,
+      "sha256": "a5e975f18131292d7a777aef57ac42f3597d4d2cc3a853953caa1153dd8a9462"
+    },
+    {
+      "path": "tests/charles-save.test.js",
+      "bytes": 1450,
+      "sha256": "75838712adc79bbdc888d8a1ac545d8deddac5bc215d165e4586f3bd6e83594b"
+    },
+    {
+      "path": "tests/charles-ui.test.js",
+      "bytes": 10889,
+      "sha256": "f77233067ab766418b984157d56a75d4395da141f91b9297477fc3d9625d5aa9"
     },
     {
       "path": "tests/combined-candidate.test.js",
@@ -1044,13 +1359,13 @@
     },
     {
       "path": "tests/run-pelican.test.js",
-      "bytes": 14534,
-      "sha256": "6ed87814cce65c6abf321f328507c40785c0de099231b067d4e67e8bd8d0d8ba"
+      "bytes": 14540,
+      "sha256": "d10335c4284335f40557af8d70ad9fe00e0e9742ebacaf58f57391cc2fdc5507"
     },
     {
       "path": "tests/run-save.test.js",
-      "bytes": 11178,
-      "sha256": "85ef59aa3828eb6e680f852c4574780b5c86ea7650326e4c621debd7088d6d8f"
+      "bytes": 11182,
+      "sha256": "f35b781263cd72602b8b1975939e9d1eeccd61fbfaccbe8183dcf75418849913"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -1109,8 +1424,8 @@
     },
     {
       "path": "tests/trophy-save.test.js",
-      "bytes": 7872,
-      "sha256": "fef3e9c2c7fffd533f991c9b974e645a78db431bf0306310da0340c69b7ab56c"
+      "bytes": 7876,
+      "sha256": "5daab6a61887bd4add0e55d92cb4fa14aec8b79c8ada7ccdf9ea2efc1a5b8f99"
     },
     {
       "path": "tests/trophy-ui.test.js",
@@ -1143,6 +1458,6 @@
       "sha256": "cccef205f93a7e2a3d061f2ed36c2dc80b4c6b9195b681e4fe02f49601ba5a54"
     }
   ],
-  "base_github_commit": "b154dd78cd0b423a277ba3297d12e3d04a256686",
-  "integration_date": "2026-11-03"
+  "base_github_commit": "456b683283c309aa3906b0100f3859ea9b3e05fc",
+  "integration_date": "2026-11-04"
 }

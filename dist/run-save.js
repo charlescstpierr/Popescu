@@ -1,3 +1,4 @@
+import {CHARLES,CHARLES_LINES} from './charles.js';
 import {createTrophyState,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
 import {compactDrops} from './drops.js';
@@ -10,7 +11,7 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=9;
+const VERSION=10;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
@@ -77,6 +78,26 @@ function validateTrophies(s,nextId){
  check(s.enemies.filter(e=>e.trophyCharmLife>0).length<=2);
  for(const e of s.enemies)if(e.trophyCharmLife!==undefined){check(bounded(e.trophyCharmLife,2.5));if(e.trophyCharmLife>0)check(owns('fanclub')&&TROPHY_GORILLAS.includes(e.type)&&e.charmed>0);}
 }
+function validateCharles(s,nextId,world){
+ const c=s.charles;if(c===null)return;check(object(c));
+ check(integer(c.id,1)&&c.id<nextId&&c.type==='charles'&&c.r===28&&c.hp===1&&c.maxhp===1&&c.dead===false&&c.charmed===0);
+ check(!s.enemies.some(e=>e.id===c.id)&&finite(c.x)&&finite(c.y)&&Math.abs(c.x)<=1e8&&Math.abs(c.y)<=1e8);
+ check(Object.hasOwn(CHARLES.phases,c.phase)&&c.phaseDuration===CHARLES.phases[c.phase]&&finite(c.phaseTime)&&c.phaseTime>=0&&c.phaseTime<=c.phaseDuration);
+ check(finite(c.hitFlash)&&c.hitFlash>=0&&c.hitFlash<=.12&&integer(c.hits)&&c.hits<=CHARLES.hitsToTransform&&typeof c.powered==='boolean');
+ check(finite(c.elapsed)&&c.elapsed>=0&&c.elapsed<=1e8&&integer(c.attackCount));
+ check(integer(c.dialogueIndex)&&c.dialogueIndex<=CHARLES_LINES.length&&finite(c.nextDialogue)&&c.nextDialogue>=0&&c.nextDialogue<=c.elapsed+4.8+1e-6);
+ check(finite(c.safeAngle)&&Math.abs(c.safeAngle)<=Math.PI&&[300,380].includes(c.waveMax)&&[112,145].includes(c.capeRadius));
+ check(c.powered||c.waveMax===300&&c.capeRadius===112);
+ check(s.elapsed>=1200);
+ if(c.phase==='complete')check(['defeated','left'].includes(c.outcome)&&(s.endless||s.mode==='victory'));
+ else check(c.outcome===''&&!s.endless&&['playing','paused'].includes(s.mode)&&s.hp>0&&c.phaseTime>0);
+ if(c.phase==='intro')check(c.hits===0&&c.attackCount===0&&!c.powered);
+ if(['descend','bend','scream','burst','empowered'].includes(c.phase))check(c.hits===CHARLES.hitsToTransform&&c.attackCount>=2);
+ if(['descend','bend','scream','burst'].includes(c.phase))check(!c.powered);
+ if(c.powered)check(c.hits===CHARLES.hitsToTransform&&c.attackCount>=2);
+ check(Array.isArray(c.destroyed)&&c.destroyed.length<=CHARLES.maxDestroyed&&new Set(c.destroyed).size===c.destroyed.length);
+ for(const id of c.destroyed){check(typeof id==='string'&&/^-?\d+,-?\d+:(?:forest:)?\d+$/.test(id));const [x,y]=id.split(':')[0].split(',').map(Number);check(Number.isSafeInteger(x)&&Number.isSafeInteger(y)&&Math.abs(x)<=2e5&&Math.abs(y)<=2e5);const p=world.chunk(x,y).find(p=>p.id===id);check(p&&['tree','pine','crate','pallet','barricade','planter'].includes(p.type));}
+}
 function validate(snapshot){
  tree(snapshot);
  if(Number.isInteger(snapshot.version)&&snapshot.version>=1&&snapshot.version<VERSION){
@@ -99,9 +120,10 @@ function validate(snapshot){
   // Facing and input in older saves do not prove actual, unblocked movement.
   if(snapshot.version<8){snapshot.game.s.travelX=0;snapshot.game.s.travelY=0;}
   // Trophy state and boss provenance did not exist in any earlier schema.
-  snapshot.game.s.trophies=createTrophyState();
-  for(const c of snapshot.game.s.chests||[]){delete c.bossType;delete c.bossId;}
-  for(const e of snapshot.game.s.enemies)delete e.trophyCharmLife;
+  if(snapshot.version<9){snapshot.game.s.trophies=createTrophyState();
+   for(const c of snapshot.game.s.chests||[]){delete c.bossType;delete c.bossId;}
+   for(const e of snapshot.game.s.enemies)delete e.trophyCharmLife;}
+  snapshot.game.s.charles=null;
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -191,7 +213,7 @@ function validate(snapshot){
  check(s.drops.filter(item=>item.compact===true).length<=1);
  for(const c of s.chests)check(typeof c.open==='boolean');for(const wave of s.shockwaves)check(typeof wave.hitPlayer==='boolean'&&typeof wave.hitGirl==='boolean');
  for(const option of s.options)check([...EVOLUTIONS.map(u=>u.id),...UPGRADES.map(u=>u.id),'recovery','payday','barrier'].includes(option.id)&&typeof option.name==='string'&&typeof option.desc==='string');
- validateTrophies(s,d.id);
+ validateTrophies(s,d.id);validateCharles(s,d.id,base.world);
  if(s.mode==='upgrade')check(s.options.length>0);if(s.mode==='gameover')check(s.hp===0);if(s.mode==='victory')check(s.elapsed>=1200&&!s.endless);
  if(s.mode==='dialogue'){const ui=snapshot.dialogue;check(object(ui)&&Array.isArray(ui.lines)&&ui.lines.length>0&&ui.lines.length<=100&&integer(ui.index)&&ui.index<ui.lines.length);for(const line of ui.lines)check(object(line)&&typeof line.who==='string'&&typeof line.text==='string');}else check(snapshot.dialogue===null);
  return snapshot;
@@ -209,11 +231,12 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
  const validated=validate(copy(snapshot)),d=validated.game;
  const game=new Game({difficulty:d.s.difficulty,seed:d.seed,onEvent});for(const key of INTERNAL)game[key]=d[key];if(d.lastCrowReaction!==undefined)game.lastCrowReaction=d.lastCrowReaction;
  game.discoveryCooldowns=new Map(d.discoveryCooldowns);game.eventSeen=new Set(d.eventSeen);game.state=game.s=d.s;for(const key of ['shots','vehicles'])for(const item of game.s[key])item.hitIds=new Set(item.hitIds);
+ if(game.s.charles)game.world.setDestroyed(game.s.charles.destroyed);
  game.recalculate();game.world.update(game.s.x,game.s.y);return game;
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,6,7,8,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
+ tree(v);check([1,2,3,4,5,6,7,8,9,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
   const accumulated=old?{...old.totals}:totals(copy(legacy));

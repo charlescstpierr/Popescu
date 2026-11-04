@@ -1,3 +1,4 @@
+import {charlesActive,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills} from './evolutions.js';
@@ -25,7 +26,7 @@ export class Game {
     this.onEvent=onEvent;this.seed=seed|0;this.rng=(seed|0) || 1;this.id=1;this.world=new World(seed);this.viewport={width:390,height:844};
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
-    this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
+    this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
     this.bossDirector=createBossDirector(this.seed);
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
@@ -44,7 +45,11 @@ export class Game {
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
   startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
   finishDialogue(){if(this.s.mode==='dialogue'){this.s.mode=this.s.options.length?'upgrade':'playing';if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);else this.openTrophy();}}
-  continueEndless(){if(this.s.mode==='victory'){if(this.bossDirector.warned){this.bossDirector.warned=false;this.bossDirector.remaining=BOSS_SCHEDULE.warning;this.bossDirector.retryIn=0;}this.s.endless=true;this.s.mode=this.s.options.length?'upgrade':'playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);else this.openTrophy();}}
+  startCharlesEpilogue(){return startCharles(this);}
+  leaveCharlesEpilogue(){return finishCharles(this,'left');}
+  combatTargets(){return charlesActive(this.s)?[...this.s.enemies,this.s.charles]:this.s.enemies;}
+  effectTime(){return this.s.elapsed+(charlesActive(this.s)?this.s.charles.elapsed:0);}
+  continueEndless(){if(this.s.mode==='victory'){if(this.bossDirector.warned){this.bossDirector.warned=false;this.bossDirector.remaining=BOSS_SCHEDULE.warning;this.bossDirector.retryIn=0;}if(charlesActive(this.s))return;this.s.endless=true;this.s.mode=this.s.options.length?'upgrade':'playing';this.s.invulnerable=2;this.s.hp=Math.max(this.s.hp,this.s.maxhp*.5);if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);else this.openTrophy();}}
   openTrophy(){return openPendingTrophy(this);}
   chooseTrophy(id){return chooseBossTrophy(this,id);}
   finishUpgradeChoice(){if(!this.openTrophy())this.gainXP(0);}
@@ -107,6 +112,7 @@ export class Game {
     while(remaining>1e-7 && this.s.mode==='playing'){const step=Math.min(remaining,1/30);this.step(step,input);remaining-=step;}
   }
   step(dt,input){
+    if(charlesActive(this.s)){this.stepCharles(dt,input);return;}
     const s=this.s;s.elapsed+=dt;s.invulnerable=Math.max(0,s.invulnerable-dt);
     this.updateDiscoveries(dt);
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0;const n=Math.max(1,length(mx,my));s.moveX=mx/n;s.moveY=my/n;
@@ -124,7 +130,15 @@ export class Game {
     if(s.mode==='playing')this.story(dt);
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
   }
-  updateDiscoveries(dt){
+  stepCharles(dt,input){
+    const s=this.s,previous={x:s.x,y:s.y},trophySpeed=trophySpeedMultiplier(s);this.updateDiscoveryEffect(dt);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=Math.max(0,s.invulnerable-dt);
+    const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0,n=Math.max(1,Math.hypot(mx,my));s.moveX=mx/n;s.moveY=my/n;
+    this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=Math.hypot(s.x-previous.x,s.y-previous.y);s.walkMoving=moved>1e-7;
+    if(s.walkMoving){s.walkDistance+=moved;s.travelX=(s.x-previous.x)/moved;s.travelY=(s.y-previous.y)/moved;}
+    this.world.update(s.x,s.y);this.updateCompanion(dt);this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateEffects(dt);updateCharles(this,dt,previous);
+    for(const [key,max] of Object.entries(CAP))if(key!=='chests'&&s[key].length>max)s[key].splice(0,s[key].length-max);
+  }
+  updateDiscoveryEffect(dt){
     const s=this.s,d=s.discovery;
     if(d.active){
       const def=DISCOVERIES[d.active.kind];
@@ -132,6 +146,9 @@ export class Game {
       d.active.remaining=Math.max(0,d.active.remaining-dt);
       if(d.active.remaining===0){d.active=null;this.recalculate();}
     }
+  }
+  updateDiscoveries(dt){
+    const s=this.s,d=s.discovery;this.updateDiscoveryEffect(dt);
     for(const [id,until] of this.discoveryCooldowns)if(until<=s.elapsed)this.discoveryCooldowns.delete(id);
     const cx=Math.floor(s.x/512),cy=Math.floor(s.y/512);let nearby=null,nearest=210;
     for(let x=cx-1;x<=cx+1;x++)for(let y=cy-1;y<=cy+1;y++){
@@ -316,7 +333,7 @@ export class Game {
     this.announceEncounter(arrivals[boss.type],'boss');
   }
 
-  nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.s.enemies){if(e.dead || e===exclude || e.charmed>0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<best){best=d;target=e;}}return target;}
+  nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.combatTargets()){if(e.dead || e===exclude || e.charmed>0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<best){best=d;target=e;}}return target;}
   reenterBoss(e){
     // Running out of the active city must not count as defeating a boss.
     // Reuse its identity/HP, outside the camera and with a fresh attack delay.
@@ -457,15 +474,15 @@ export class Game {
   shoot(x,y,target,kind,damage,speed,offset=0){const a=Math.atan2(target.y-y,target.x-x)+offset;this.s.shots.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,kind,life:1.8,damage,r:kind==='heart'?8:kind==='bill'?7:4,pierce:kind==='bill'?1:0,hitIds:new Set(),...(kind==='heart'&&this.s.evolutions.viralLove?{viral:true,linkX:x,linkY:y}:{})});}
   updateShots(dt){
     const s=this.s,buckets=new Map(),size=80;
-    for(const e of s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
+    for(const e of this.combatTargets()){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
     // Boss hearts retain full damage. Brief interrupts plus recovery let the
     // existing warned attacks finish without long untargetable charm windows.
-    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
+    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(e.type!=='charles' && p.kind==='heart' && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
     s.shots=s.shots.filter(p=>p.life>0);
   }
-  hurt(e,damage){if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
+  hurt(e,damage){if(e.type==='charles'){hitCharles(this,e,damage);return;}if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
   kill(e){
-    if(e.rewarded)return;e.rewarded=true;const s=this.s;s.kills++;
+    if(e.type==='charles'||e.rewarded)return;e.rewarded=true;const s=this.s;s.kills++;
     if(e.type==='explosive')s.clouds.push({x:e.x,y:e.y,r:26,maxr:65,arm:.45,life:3.2,maxlife:3.2,vx:0,vy:0});const elite=isMajorBoss(e.type),mini=isRival(e.type),xp=elite?22:mini?9:e.type==='tank'?4:e.type==='orangutan'?3:2;
     s.drops.push({x:e.x,y:e.y,kind:'xp',value:xp,life:38});
     const chance=this.random();if(chance<.14||elite||mini)s.drops.push({x:e.x+9,y:e.y,kind:elite?'gem':'coin',value:elite?3:mini?3:1,life:35});
@@ -486,8 +503,8 @@ export class Game {
   }
   damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
   explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion');if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
-  areaDamage(x,y,r,damage,knock=false){for(const e of this.s.enemies)if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead){const d=length(e.x-x,e.y-y)||1;this.move(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
-  updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.s.enemies)if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
+  areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.move(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
+  updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
   updateClouds(dt){const s=this.s;for(const c of s.clouds){c.life-=dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=Math.exp(-dt*.45);c.vy*=Math.exp(-dt*.45);c.r=Math.min(c.maxr||49,c.r+dt*(c.maxr?16:10));c.arm=Math.max(0,(c.arm||0)-dt);if(c.life>0 && c.arm<=0 && length(c.x-s.x,c.y-s.y)<c.r+10)this.damage(7*(this.difficulty.damage||1),'gas');if(c.arm<=0 && s.companion && s.girl.down<=0 && length(c.x-s.girl.x,c.y-s.girl.y)<c.r+8)s.girl.hp-=dt*3*s.stats.gasMultiplier;}s.clouds=s.clouds.filter(c=>c.life>0);}
   updateShockwaves(dt,previousPlayer=this.s,previousGirl=this.s.girl){
     const s=this.s;
@@ -526,7 +543,7 @@ export class Game {
   powerEffect(power,kind,x=this.s.x,y=this.s.y,r=0,detail={}){
     // Cosmetic records and their throttles never enter saved state or consume RNG.
     this.prunePowerEffects();
-    const now=this.s.elapsed,key=`${power}:${kind}`,period=kind==='heal'||kind==='recharge'?1.2:kind==='impact'?.12:0;
+    const now=this.effectTime(),key=`${power}:${kind}`,period=kind==='heal'||kind==='recharge'?1.2:kind==='impact'?.12:0;
     if(period&&now<(this.powerCueCooldowns.get(key)??-Infinity))return;
     if(kind==='collect'&&this.powerEffects.some(e=>e.kind===kind&&e.power===power))return;
     if(kind==='attract'||kind==='slow'){let count=0;for(const e of this.powerEffects)if(e.kind===kind&&++count>=3)return;}
@@ -534,7 +551,7 @@ export class Game {
     if(this.powerEffects.length>=16)this.powerEffects.shift();
     this.powerEffects.push({power,kind,x,y,r,rank:this.rank(power),start:now,life:kind==='acquire'?.85:kind==='collect'||kind==='attract'?.28:power==='truth'?.42:power==='airplane'?.5:.55,...detail});
   }
-  prunePowerEffects(){let count=0;for(const effect of this.powerEffects)if(this.s.elapsed-effect.start<effect.life)this.powerEffects[count++]=effect;this.powerEffects.length=count;}
+  prunePowerEffects(){let count=0;for(const effect of this.powerEffects)if(this.effectTime()-effect.start<effect.life)this.powerEffects[count++]=effect;this.powerEffects.length=count;}
   burst(x,y,color,count){for(let i=0;i<count;i++){const a=this.random()*TAU,v=20+this.random()*70,life=.25+this.random()*.35;this.s.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,maxlife:life,color});}}
   updateEffects(dt){const s=this.s;this.prunePowerEffects();this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
   updateStunt(dt,moved){

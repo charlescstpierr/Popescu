@@ -18,7 +18,7 @@ test('spawning a different major boss never stacks a second encounter',()=>{
 test('genuine v5 overlap migrates without deleting enemies or progress',()=>{
  const original=JSON.parse(readFileSync(new URL('./fixtures/runstore-v5.json',import.meta.url),'utf8'));
  const game=restoreRun(original.run.snapshot),saved=captureRun(game);
- assert.equal(saved.version,9);assert.deepEqual(saved.game.s,{...original.run.snapshot.game.s,coinsSpent:0,upgradeRerolls:0,evolutions:{},travelX:0,travelY:0,trophies:createTrophyState()});
+ assert.equal(saved.version,10);assert.deepEqual(saved.game.s,{...original.run.snapshot.game.s,coinsSpent:0,upgradeRerolls:0,evolutions:{},travelX:0,travelY:0,trophies:createTrophyState(),charles:null});
  assert.equal(game.s.enemies.length,2);assert.ok(game.bossDirector);
  assert.equal(game.spawnEnemy('travestia',500,0),null);
 });

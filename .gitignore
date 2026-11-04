@@ -6,3 +6,6 @@ __pycache__/
 !.env.example
 qa-output/
 .DS_Store
+
+# Reproducible raw verification frames; the review video is retained.
+proof/charles/frames/
