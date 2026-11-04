@@ -2508,7 +2508,7 @@ class Game {
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
-    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:12,animalIndex:0};
+    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0};
     this.bossDirector=createBossDirector(this.seed);
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
@@ -2766,14 +2766,24 @@ class Game {
     this.pulse(s.x,s.y,70,'#e2b944',.45);this.bark('SYSTÈME','Un groupe de discussion vient de te trouver.');
   }
   spawnWave(dt){
-    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;
+    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;this.timers.animal-=dt;
     const interval=Math.max(.08,.46/(1+m*.22))/((this.difficulty.spawn||1)*pacing.pressure);
     if(this.timers.spawn<=0){
       this.timers.spawn+=interval;let type='normal';const p=this.random();
       if(m>.5&&p<.2)type='sprinter';else if(m>1&&p<.36)type='gas';else if(m>2&&p<.45)type='jealous';else if(m>3&&p<.55)type='tank';else if(m>4&&p<.65)type='explosive';
-      if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
+      // Approved animals replace ordinary arrival slots: more variety, no extra crowd.
+      const animalDue=this.timers.animal<=0&&!pacing.finale&&!pacing.recovery&&s.enemies.filter(e=>ANIMALS[e.type]&&!e.dead).length<8;
+      if(animalDue){
+        const types=Object.keys(ANIMALS),rng=this.rng;
+        this.rng=(this.seed^Math.imul(this.timers.animalIndex+1,1640531527))|0;
+        const animal=this.spawnEnemy(types[this.timers.animalIndex%types.length]);this.rng=rng;
+        if(animal){
+          this.timers.animalIndex++;
+          // Introduce each species calmly, then follow normal arrival pressure.
+          this.timers.animal=this.timers.animalIndex<4?6:Math.max(1.8,interval*10);
+        }
+      }else if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
-    this.timers.animal-=dt;if(this.timers.animal<=0&&!pacing.finale&&!pacing.recovery){if(s.enemies.filter(e=>ANIMALS[e.type]&&!e.dead).length<8){const types=Object.keys(ANIMALS);const rng=this.rng;this.rng=(this.seed^Math.imul(this.timers.animalIndex+1,1640531527))|0;const animal=this.spawnEnemy(types[this.timers.animalIndex%4]);this.rng=rng;if(animal){this.timers.animalIndex++;this.timers.animal=this.timers.animalIndex<4?14:22;}}else this.timers.animal=3;}
     this.timers.pack-=dt;
     if(this.timers.pack<=0){this.timers.pack=pacing.recovery||pacing.finale?.1:7;if(!pacing.recovery&&!pacing.finale)this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
     if(pacing.finale)return;

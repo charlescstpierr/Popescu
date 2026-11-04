@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-lamborghini-save-v13",
+  "version": "1.5-plus-lamborghini-save-v13-city-animal-pacing",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -229,8 +229,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 39296,
-      "sha256": "585b9c3a6682e61b7bca5b57b19cdbe1fbd6b942af3ec4f2dcabc58a78bbab95"
+      "bytes": 39332,
+      "sha256": "99ae57e67bdbc699dbef6b3a07923573f23b0f915d0531e36acdd16ecfab1ad6"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -374,8 +374,8 @@
     },
     {
       "path": "dist/biomes.js",
-      "bytes": 1007,
-      "sha256": "152245c6f515f5f961b34ced1d8bf91f02ce9e85b790ec82d3df3ee1501b95c2"
+      "bytes": 1008,
+      "sha256": "1b7a2297917efaf23319b118a3c46f09aacbda2e0d02fcf80e62bba259a5e7c1"
     },
     {
       "path": "dist/boss-director.js",
@@ -404,8 +404,8 @@
     },
     {
       "path": "dist/city-art.js",
-      "bytes": 60707,
-      "sha256": "71aa99b0d44e3a8b95f23828352653717ddf5f9c7d989d4281d8ca10a67dbcbe"
+      "bytes": 65099,
+      "sha256": "9b014df393363c95deed5232cb837237b79290ec28df8397d88923a813e2dc21"
     },
     {
       "path": "dist/combat-art.js",
@@ -439,8 +439,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 62444,
-      "sha256": "158f75bfb9273f60724036b55ca441c5d0234798b3a571704ad360f8e458d6a2"
+      "bytes": 62716,
+      "sha256": "3203cfa6e229b90da075fb92246ff65e399585d177d5c9f2b9e6e7a53eb56051"
     },
     {
       "path": "dist/evolutions.js",
@@ -479,8 +479,8 @@
     },
     {
       "path": "dist/opening.js",
-      "bytes": 1969,
-      "sha256": "24af39be47312d71ad46400ad4570766fc8a762e28273aadefec4e11dc760258"
+      "bytes": 2476,
+      "sha256": "a9c3de2e3c771ea080020f27b5e742b8957f57705fe2f7d257c3996c1e9ab348"
     },
     {
       "path": "dist/pelican-art.js",
@@ -506,6 +506,11 @@
       "path": "dist/renderer.js",
       "bytes": 53616,
       "sha256": "a3b2283c519f23dbadff62340b20ae34057d2cd7221986d2b5d28f727b23467a"
+    },
+    {
+      "path": "dist/river-art.js",
+      "bytes": 4301,
+      "sha256": "5bb990a682e3fb574c259676d7b91726639fa8616e8b4109302a017b4309697e"
     },
     {
       "path": "dist/run-history.js",
@@ -576,6 +581,11 @@
       "path": "docs/CONTRACT.md",
       "bytes": 8164,
       "sha256": "109436cd5a482c99e2ba4583bdef72598427a0a973ea096461c4bd261a7aeba1"
+    },
+    {
+      "path": "docs/DECOR-CORRECTION.md",
+      "bytes": 4452,
+      "sha256": "075aed1376ce76fa3b9f89e121fe9d44ba6e75cce8dace1ef6f7535d46ed2075"
     },
     {
       "path": "docs/DECOUVERTES.md",
@@ -838,6 +848,11 @@
       "sha256": "ed08b14c09d396c574e56857abdcbff59960e1de373c24dab71101e55c777922"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-04-decor-correction.md",
+      "bytes": 2064,
+      "sha256": "1eed969e17ace54d1aec108acb34d4dbceac227f8844c82f4e9e22513aaa24b3"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-04-lamborghini-levels.md",
       "bytes": 1975,
       "sha256": "19bcb5821ffbe99660472650fd37b03b30a28998fc3030252711c4db6deb1093"
@@ -1044,8 +1059,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 15184872,
-      "sha256": "4ae1014c266e565f88ac7f9957d6b942935459d10f71fe5fbe05e7985d477f2d"
+      "bytes": 15194445,
+      "sha256": "060db89d69cd5fe187e855e9024a3608d495c46bd9460ad12d1d966a1058f0b4"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -1064,8 +1079,8 @@
     },
     {
       "path": "scripts/export-standalone.py",
-      "bytes": 2072,
-      "sha256": "5df8cb4128a644719e1d3970f094bfc55a9135d519b2c4bfe8bb66faf795012a"
+      "bytes": 2084,
+      "sha256": "7ae94cdb536c6a7451c701ef0822c50dd6242226b3107e58dfbaf849b7154972"
     },
     {
       "path": "scripts/generate-v12-save-fixtures.mjs",
@@ -1096,6 +1111,11 @@
       "path": "scripts/inspect-companion.mjs",
       "bytes": 2985,
       "sha256": "dd35b0eee48b2333418456267ae87b7aa4b3af3cfd2e54aeebe9e4268b5a3041"
+    },
+    {
+      "path": "scripts/inspect-decor-correction.mjs",
+      "bytes": 3188,
+      "sha256": "cf843f58486ac48bd47e18de44dcdf2098024465c98c1c1a6610c85d15751249"
     },
     {
       "path": "scripts/inspect-defeats.mjs",
@@ -1283,14 +1303,19 @@
       "sha256": "4a6af003ca339ddc155658451677b2c1074e51c14db34cfc5f08d91aec531660"
     },
     {
+      "path": "tests/animal-pacing.test.js",
+      "bytes": 3862,
+      "sha256": "86afde5fde0c7159d5f6e445e94ccfaaa0a9c39ae78a5fb37fa7eecf76577e8a"
+    },
+    {
       "path": "tests/animals.test.js",
-      "bytes": 4034,
-      "sha256": "a697ee4a81dc1f6117212c29c092f9da464591eba1c3939be33432323fc414b9"
+      "bytes": 4051,
+      "sha256": "be6cb5ecf9a75c672d97b5f7173b8e0663d9aca73d16644a9d8f388cd286b7b3"
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 26489,
-      "sha256": "49ecd4c6f8deeb54cf6bfc39a4015dc883e32ca6cba57b1cafa696c9a8a6a1c0"
+      "bytes": 26915,
+      "sha256": "cc82f4edef8c54b7366a6379738bed130ae573f937301d4fa81c1044e731ca1b"
     },
     {
       "path": "tests/audio.test.js",
@@ -1371,6 +1396,11 @@
       "path": "tests/charles-ui.test.js",
       "bytes": 21254,
       "sha256": "1389d3b62eb1df39e30c7ea4f2a1c0df6556ecc31074d1bded1be63513450e4e"
+    },
+    {
+      "path": "tests/city-variety-visibility.test.js",
+      "bytes": 2321,
+      "sha256": "2931623cce537881c0f193b99d15adb451a3355fbd272f4f453786693626ba75"
     },
     {
       "path": "tests/combined-candidate.test.js",
@@ -1534,8 +1564,8 @@
     },
     {
       "path": "tests/opening.test.js",
-      "bytes": 2117,
-      "sha256": "893d801e1b2d5f71b47b5af931c1752ea6f0ee34892e3104a61c891963693c6b"
+      "bytes": 4464,
+      "sha256": "288727b0dc232b3eced5be3d988ef03adc185f146b67564c5be312f935593d6d"
     },
     {
       "path": "tests/orangutan-art.test.js",
@@ -1598,6 +1628,11 @@
       "sha256": "ab759a98ded989fda845cd3de28de69c142d6b15b20dfa896dfba8a44ceb5c88"
     },
     {
+      "path": "tests/river-art.test.js",
+      "bytes": 2475,
+      "sha256": "ef5bb18519a33ff88e886c01e6bda55bc3bc5344334063e87a561339517f8f9a"
+    },
+    {
       "path": "tests/rooster-reaction.test.js",
       "bytes": 2037,
       "sha256": "4c9f5c39596fcca1e376d6b52373f0fea9c0972af7999e49b479d75d1c85c984"
@@ -1651,6 +1686,11 @@
       "path": "tests/scenery-art.test.js",
       "bytes": 1916,
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
+    },
+    {
+      "path": "tests/standalone-module-order.test.js",
+      "bytes": 984,
+      "sha256": "6fef29a8d187c194a0dfae853a427d610a7c9a63ce0a7b20c49e8aed65c157c1"
     },
     {
       "path": "tests/standalone-output-safety.test.js",
@@ -1738,6 +1778,6 @@
       "sha256": "82fe5fd9d6cf92803270d4ee9185acdfde7fc0f37b633863c087c90d03425c10"
     }
   ],
-  "base_github_commit": "da6a6ea8d519977d79cd3107ad6e1c04859476da",
+  "base_github_commit": "483f928d499d0591bf9036eda2bb2ad70eb009e7",
   "integration_date": "2026-11-04"
 }
