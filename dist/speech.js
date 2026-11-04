@@ -47,7 +47,7 @@ export function setSpeechEnabled(g,enabled){
   retainInterrupted(g,g.speech.active);g.speech.active=null;g.speechUntil=g.s.elapsed;
  }
 }
-function payload(g,line){return {who:line.who,text:line.text,encounter:line.encounter,speechId:line.id,readingSeconds:Math.max(0,line.until-speechTime(g))};}
+function payload(g,line){return {who:line.who,text:line.text,encounter:line.encounter,speechId:line.id,actorId:line.actorId,scope:line.scope,sceneId:line.sceneId,readingSeconds:Math.max(0,line.until-speechTime(g))};}
 function start(g,line){line.until=speechTime(g)+line.remaining;g.speech.active=line;g.speechUntil=Math.max(g.speechUntil,g.s.elapsed+line.remaining);g.emit('bark',payload(g,line));}
 export function flushSpeech(g){
  const state=g.speech,now=speechTime(g);

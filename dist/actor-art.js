@@ -1,10 +1,12 @@
+import {EGO_BEASTS} from './ego-beasts.js';
+import {drawEgoBody} from './ego-art.js';
 import {ANIMALS,ANIMAL_FRAMES} from './animals.js';
 import {travestiaFrame} from './travestia.js';
 import {PELICAN_ART,pelicanFrame} from './pelican-art.js';
 // Raster actor atlases share one light direction and one registered foot baseline.
-const FILES={pelican:'assets/pelican-poses.png',animals:'assets/animals-approved.png',travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
+const FILES={ego:'assets/ego-beasts.png',pelican:'assets/pelican-poses.png',animals:'assets/animals-approved.png',travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
 const ENEMY_SIZE={normal:76,sprinter:66,gas:79,tank:96,jealous:76,explosive:80,matriarch:116,orangutan:83,rival_rooster:78,rival_goat:88};
-const sourceKind=(kind,type)=>ANIMALS[type]?'animals':kind==='enemy'&&['pelican','travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
+const sourceKind=(kind,type)=>EGO_BEASTS[type]?'ego':ANIMALS[type]?'animals':kind==='enemy'&&['pelican','travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
 function load(src,registerCancel){return new Promise(resolve=>{
   if(typeof Image==='undefined'){resolve(null);return;}
@@ -19,12 +21,13 @@ function load(src,registerCancel){return new Promise(resolve=>{
   try{im.src=src;}catch{finish(null);}
 });}
 function usableAnimals(image){return Boolean(image&&image.width>0&&image.height>0&&(image.naturalWidth===undefined||image.naturalWidth>0)&&(image.naturalHeight===undefined||image.naturalHeight>0));}
+function usableEgo(image){return usableAnimals(image)&&image.width===image.height&&image.width%4===0;}
 function box(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function polygon(c,color,points){c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();}
 export class ActorArt {
   constructor({loadImage=load,animalsTimeoutMs=10000,timers=globalThis}={}){
     this.images={};this.cache=new Map();this._loadImage=loadImage;this._animalsTimeoutMs=animalsTimeoutMs;this._animalsTimers=timers;this._animalsAttempt=null;
-    this.ready=Promise.all(Object.entries(FILES).map(async([key,path])=>{if(key==='animals'){await this.ensureAnimalsReady();return;}try{this.images[key]=await loadImage(path);}catch{this.images[key]=null;}}));
+    this.ready=Promise.all(Object.entries(FILES).map(async([key,path])=>{if(key==='ego'){await this.ensureEgoReady();return;}if(key==='animals'){await this.ensureAnimalsReady();return;}try{this.images[key]=await loadImage(path);}catch{this.images[key]=null;}}));
   }
   ensureAnimalsReady(){
     if(this.available('animals'))return Promise.resolve({ok:true});
@@ -43,7 +46,24 @@ export class ActorArt {
     try{Promise.resolve(this._loadImage(FILES.animals,cancel=>{if(!settled&&typeof cancel==='function')cancelLoad=cancel;})).then(image=>finish(image),()=>finish(null));}catch{finish(null);}
     return promise;
   }
-  available(kind){return kind==='animals'?usableAnimals(this.images.animals):Boolean(this.images[kind]);}
+  ensureEgoReady(){
+    if(this.available('ego'))return Promise.resolve({ok:true});
+    if(this._egoAttempt)return this._egoAttempt.promise;
+    let resolve;const promise=new Promise(done=>{resolve=done;}),attempt={promise};this._egoAttempt=attempt;
+    let settled=false,cancelLoad=null;
+    const finish=(image,reason='failed')=>{
+      // A timed-out image can still finish later; it must not replace a retry.
+      if(settled)return;settled=true;this._animalsTimers.clearTimeout(timer);
+      if(reason==='timeout'){try{cancelLoad?.();}catch{}}cancelLoad=null;
+      const ok=usableEgo(image);this.images.ego=ok?image:null;this._egoAttempt=null;
+      resolve(ok?{ok:true}:{ok:false,reason});
+    };
+    const timer=this._animalsTimers.setTimeout(()=>finish(null,'timeout'),this._animalsTimeoutMs);
+    // Existing one-argument loaders remain valid; cancellation is optional.
+    try{Promise.resolve(this._loadImage(FILES.ego,cancel=>{if(!settled&&typeof cancel==='function')cancelLoad=cancel;})).then(image=>finish(image),()=>finish(null));}catch{finish(null);}
+    return promise;
+  }
+  available(kind){return kind==='ego'?usableEgo(this.images.ego):kind==='animals'?usableAnimals(this.images.animals):Boolean(this.images[kind]);}
   availableFor(actor,kind){return this.available(sourceKind(kind,actor.type));}
   frame(kind,index,back,type='normal',flash=false){
     const image=this.images[sourceKind(kind,type)];if(!image)return null;
@@ -83,6 +103,7 @@ export class ActorArt {
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
+    if(EGO_BEASTS[actor.type])return drawEgoBody(ctx,actor,this.images.ego,this.cache,phase);
     if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,frame.left,frame.top,size,size);ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);

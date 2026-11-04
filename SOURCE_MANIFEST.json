@@ -1,21 +1,21 @@
 {
-  "version": "1.5-plus-lamborghini-save-v13-city-animal-entries",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
       "path": ".gitignore",
-      "bytes": 173,
-      "sha256": "607c7e8e5017318bd4dbfec0687670cc013bad680fc73409cb1611ad1f548558"
+      "bytes": 262,
+      "sha256": "92a2a127ae13620ad3504e035ea2498efd880f28f86fac8d62365493e6f3f0dd"
     },
     {
       "path": "AGENTS.md",
-      "bytes": 4494,
-      "sha256": "1f0b439a66360cf3a24be7a10ac7662ec0044cac7ce3fa28590f2c8417bdcada"
+      "bytes": 5273,
+      "sha256": "9c1f99d4dd87df61696e031f1b03142d8afc88f9d23681a0cefdbc90e41ec2bf"
     },
     {
       "path": "README.md",
-      "bytes": 8110,
-      "sha256": "22b0dc3a39ba763917d1aae111fdcc2523900b78a47c2733c4d4af501cd3bc3e"
+      "bytes": 9520,
+      "sha256": "ef27d67f5a292afbc1480e55ed34ef307f602ab40bf479c0b35a92fa8877a948"
     },
     {
       "path": "art/requirements.txt",
@@ -71,6 +71,26 @@
       "path": "art/source/companion/levels-whole-source.png",
       "bytes": 1874526,
       "sha256": "5d6cacd3f7f89cdb994cd2d0a4e8eb6413343f295cc6c0349e16a740c471099d"
+    },
+    {
+      "path": "art/source/ego-beasts/README.md",
+      "bytes": 3077,
+      "sha256": "2c28b49edd5e8b217438a658c7571d14d870dc58ca5f38ab5f4481b261be0ba9"
+    },
+    {
+      "path": "art/source/ego-beasts/poses-opaque.png",
+      "bytes": 1757778,
+      "sha256": "e23dd179aec4a8d9c92717a65c52698c43e5965b1ecca262d2320d920573b1b8"
+    },
+    {
+      "path": "art/source/ego-beasts/poses-transparent.png",
+      "bytes": 1268459,
+      "sha256": "802836be950d5ca6a536683d58ccc0537e30b26a7473bf67395344cbb73fbb6e"
+    },
+    {
+      "path": "art/source/ego-beasts/registration.json",
+      "bytes": 5420,
+      "sha256": "819d1f77172cc80374d5c7ec3165f8375f7bc6e2d076b2ee74f1824e6b1866df"
     },
     {
       "path": "art/source/orangutan-bra/README.md",
@@ -219,18 +239,18 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 10035,
-      "sha256": "6f19614ba3cdba0043e246377efc2ded1ef2333300d4ac5904b439595c364581"
+      "bytes": 11552,
+      "sha256": "d11073b6d3b218678e88a8e06a1f8d9b6eb20f5176c2629d146a6274b5abdcdd"
     },
     {
       "path": "dist/animals.js",
-      "bytes": 7644,
-      "sha256": "c037c338bd431eb237932e2632d8d7bb4b800bd7c3af8f25a6c641e73974f145"
+      "bytes": 7695,
+      "sha256": "14262896365ce2ac9a1c37191cc4a0c67639f69e24012bd8655e5e58362a9074"
     },
     {
       "path": "dist/app.js",
-      "bytes": 42410,
-      "sha256": "b3ebe2327646a6d7c3be8539411119b587008f6a1b054171ef41b808809af6e3"
+      "bytes": 45655,
+      "sha256": "93961eb36dfc824915aec61b6e7e22ed42f4545dd656ca2c81b1a291d74c82b1"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -281,6 +301,31 @@
       "path": "dist/assets/couverture-personnages.webp",
       "bytes": 42970,
       "sha256": "d904e391efa4bbe0ee3ca76a6200e8b87cd21d89b97cd7cf22095a66131e30c9"
+    },
+    {
+      "path": "dist/assets/dialogue-charles.png",
+      "bytes": 1801591,
+      "sha256": "dbd8ecd100d09ec63b6239f2a9f308d2a406f21c772fcae4c8b451c38c12a748"
+    },
+    {
+      "path": "dist/assets/dialogue-companion-1.png",
+      "bytes": 2034519,
+      "sha256": "f6ebf4d0f3723cffd083308354b253a162b025f1d749e3aa17dd1290c2b2a11a"
+    },
+    {
+      "path": "dist/assets/dialogue-pelican.png",
+      "bytes": 2077658,
+      "sha256": "1132f8f0eebbc7ad3d271441f06474f440d29931e64a3175d287a8d48d7cbe1a"
+    },
+    {
+      "path": "dist/assets/dialogue-travestia.png",
+      "bytes": 2101062,
+      "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
+    },
+    {
+      "path": "dist/assets/ego-beasts.png",
+      "bytes": 1027672,
+      "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
     },
     {
       "path": "dist/assets/girl-walk-v2.png",
@@ -399,13 +444,13 @@
     },
     {
       "path": "dist/charles.js",
-      "bytes": 8270,
-      "sha256": "166178a8056a3f11faba7b0e394db0fbe1bd5d7d21ba66e36e036a00c3885542"
+      "bytes": 8686,
+      "sha256": "ed0f6ca8985cd9abf8a42962b0f35cd0dc225d290a4c0060b018ac1ed23bac94"
     },
     {
       "path": "dist/city-art.js",
-      "bytes": 64874,
-      "sha256": "2eefb85af5fcc9f4529992f07ce006935ed8a4069cb341a9dd499e2b6927e501"
+      "bytes": 66096,
+      "sha256": "371a4844eba1b005db3119ab15551ae668a991d3f1040695f7f726b1a6885f58"
     },
     {
       "path": "dist/combat-art.js",
@@ -423,6 +468,11 @@
       "sha256": "2c732d886c54a8fcf20ef04cfbcddbe81f19650c22bdb7e8fd7876eaab474b38"
     },
     {
+      "path": "dist/dialogue-presentation.js",
+      "bytes": 8126,
+      "sha256": "a3b08a8d5099e5ad709d34b7365f95cbecd0eb41076d683e493ee2578f7ad9d2"
+    },
+    {
       "path": "dist/discoveries.js",
       "bytes": 1100,
       "sha256": "c0233158b86f980d2a9ad6fafcbf79e2d26d9638451f9d5ec0469dc47c4d7ff5"
@@ -438,9 +488,29 @@
       "sha256": "9f2ec9a1156b13ea449b70f56e87b6faea0ff7fcb1b8813b286baeea42bdb9c4"
     },
     {
+      "path": "dist/ego-art.js",
+      "bytes": 4924,
+      "sha256": "42a75d41d5ba04e2f194fab0fdd0deab7d6b74e1361687fc6d2b6ba5e5acebdc"
+    },
+    {
+      "path": "dist/ego-beasts.js",
+      "bytes": 8292,
+      "sha256": "7e530166323e7e50e969bdeba7001427965e0ebd889250ec2e8d7fba3758c236"
+    },
+    {
+      "path": "dist/ego-entry.js",
+      "bytes": 724,
+      "sha256": "8731e15c604ab1c09b676534c69ae9f17df090c79412c46764cffb37ce12d014"
+    },
+    {
+      "path": "dist/encounter-dialogue.js",
+      "bytes": 8436,
+      "sha256": "cdbcd65c354bca7200660c6ad239b4ab7213d95abe82157c020a1b89ccf22629"
+    },
+    {
       "path": "dist/engine.js",
-      "bytes": 64113,
-      "sha256": "f238a37c37ba836c1ff21d819aa2c7ddca68bb52d64a2dd2fb8fefa910e4354c"
+      "bytes": 68483,
+      "sha256": "f584371984c3b46b94937468a3af0b55a25e3eb92a567879d6dbee0eca081ab1"
     },
     {
       "path": "dist/evolutions.js",
@@ -464,8 +534,8 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 14805,
-      "sha256": "fbcb6fc438b5528849f35d116be9592df16325550a526f54203b6f98fa9722bc"
+      "bytes": 15620,
+      "sha256": "9ce00feebbffabe1796fcecea888863c49bb911c6efffb944865a27906c45cc9"
     },
     {
       "path": "dist/lamborghini-art.js",
@@ -489,8 +559,8 @@
     },
     {
       "path": "dist/pelican.js",
-      "bytes": 6509,
-      "sha256": "c6c9e41a389e62cdd8a33005edc5e359c6335bb896f9912d2eb729903a99c566"
+      "bytes": 6659,
+      "sha256": "c893802e796ef47ae01a9dbc067846a81785b52f2aebcfb3b68bce04e7af0b73"
     },
     {
       "path": "dist/power-art.js",
@@ -499,38 +569,43 @@
     },
     {
       "path": "dist/prop-geometry.js",
-      "bytes": 1378,
-      "sha256": "3b50de72e4bf670a23252a1822b91b14708ff50e44a18d0668fffc64146a3c82"
+      "bytes": 1524,
+      "sha256": "118c18fb675925c562e0d171b34ae06aa1d9a19c9d23dd86e12bba1c6f032e4f"
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 53622,
-      "sha256": "942d76fb3f96eb823e2a2e57b1ace884ae53673ec4dd7b642783c2f342c7d40c"
+      "bytes": 54139,
+      "sha256": "f566a522f8c1f0b0bc116bad991689d3b51f6568a8c44ee883fe779f54b8ebdc"
     },
     {
       "path": "dist/river-art.js",
-      "bytes": 4301,
-      "sha256": "5bb990a682e3fb574c259676d7b91726639fa8616e8b4109302a017b4309697e"
+      "bytes": 6180,
+      "sha256": "c7e7ae57ca2e26bac8be5f8df067fbaf2fa11b4f6d1736fc1514f89a4269e684"
     },
     {
       "path": "dist/run-history.js",
-      "bytes": 5633,
-      "sha256": "adb4df43e4b39c7cbabb1721446848e633ed551d3a49a319ae97f0ccf08a436f"
+      "bytes": 5704,
+      "sha256": "34744bb2b398fa3d3062d81e1219035c1f4fc0669b35d1ec49d17f80f7e79b58"
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 34106,
-      "sha256": "c6cb539418aeb97259ced387f76267c9dee9ec0232604fb4e30a1deefbd8f406"
+      "bytes": 35882,
+      "sha256": "c55029061e7a2ced26f78dfaff37433c1ca7c7b1504d0b77c18ea9d7bb894e11"
+    },
+    {
+      "path": "dist/scenery-presentation.js",
+      "bytes": 1311,
+      "sha256": "ef0867784638e605b7f50c82c6cdff8417851a2d24b42e3fb28c5ebfee390603"
     },
     {
       "path": "dist/speech.js",
-      "bytes": 5295,
-      "sha256": "da7caee709fe5e48414c637d208af4faa9f8f1ffe14db325068ad40397699eb1"
+      "bytes": 5354,
+      "sha256": "b8425a19599e50a5c68f43e3c827ea954331e334615fbf1e1220bdad07e7bee8"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 35523,
-      "sha256": "900ad0d95cf35506e20205835f585ab93531b6f6cdb14d7114d0453256fe8feb"
+      "bytes": 43721,
+      "sha256": "87bee83f1c571e5e1fe980e884f09984a84be2e92b8462b22bde9ffbd0b574ca"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -539,8 +614,8 @@
     },
     {
       "path": "dist/travestia.js",
-      "bytes": 3440,
-      "sha256": "dd35c318b26b9fd4a6bf7f0bfe197ea8dac7b70e10d689e020217fedcad82cc2"
+      "bytes": 3583,
+      "sha256": "65afe032c804b0c5eddc9fbe04af91dec0b2140318ead24c550f7fe12749050e"
     },
     {
       "path": "dist/trophy-art.js",
@@ -598,9 +673,19 @@
       "sha256": "acf83dbea88a5823b50fc18c145bcb95844de336feea16e4bd6fe1fca9e0faf5"
     },
     {
+      "path": "docs/EXPORTS-HORS-LIGNE.md",
+      "bytes": 5366,
+      "sha256": "1c9a9c110965eb7d00d956fdc47a13a4a0ec6f26c9c534536353c03d7044db12"
+    },
+    {
       "path": "docs/FORETS-ET-RUINES.md",
       "bytes": 4242,
       "sha256": "cc8742c2d01c13f6f7af4ea05484970c59485c718bac6d8848eca8023b8d273a"
+    },
+    {
+      "path": "docs/FOUR-BEASTS-INTEGRATION.md",
+      "bytes": 1396,
+      "sha256": "d878b09266639a0a23c1439816ebd7dd1f092ac408d0e91fe2024794426965c2"
     },
     {
       "path": "docs/GRAPHICS.md",
@@ -611,6 +696,11 @@
       "path": "docs/ORANGS-OUTANS-ROSES.md",
       "bytes": 2619,
       "sha256": "6d877fbf4331b1144dc639d3e892fdc75e90e5a86ff2cbf80b2a046a6e87a363"
+    },
+    {
+      "path": "docs/PAUSED-ENCOUNTERS-V14.md",
+      "bytes": 5024,
+      "sha256": "335976b9327737a4220cdc7a5d57f6504f41b51241f3b498a20046f26bfe3d87"
     },
     {
       "path": "docs/PELI-ZODIAQUE.md",
@@ -698,6 +788,11 @@
       "sha256": "bf874e722e1dfccde9ff1291c6ac7d56fd65f62ce58cb768c53433e25ef7c3d3"
     },
     {
+      "path": "docs/QA-FOUR-BEASTS.md",
+      "bytes": 3625,
+      "sha256": "2fe7f3e325da4308679b918108562ab763b7c0f3d864f2a6b731fa89b1d401eb"
+    },
+    {
       "path": "docs/QA-GRAPHICS.md",
       "bytes": 2038,
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
@@ -716,6 +811,11 @@
       "path": "docs/QA-OPENING.md",
       "bytes": 2536,
       "sha256": "f4729deec1ca2d142885a06e8e482eb551c651f48012688214ec9908c616bbb8"
+    },
+    {
+      "path": "docs/QA-PAUSED-PRESENTATION.md",
+      "bytes": 3667,
+      "sha256": "0c384c6c09186bc9cd89ac2add61125a79fa00d435a59c1e6dee0c4346a3b102"
     },
     {
       "path": "docs/QA-POWER-ANIMATIONS.md",
@@ -804,8 +904,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 11596,
-      "sha256": "8ef9dbdd93558f78e74d4167a6e06f81ce5a3590ca800a9c501f44ead50ad906"
+      "bytes": 12287,
+      "sha256": "749d77f704589edf46220a3885fca19f9df6e5ddb423cb0ec2d44739a11adca1"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -1063,9 +1163,189 @@
       "sha256": "4d52a9008e4e08bf43ef96a82863c87dc2e16d62af0a2a2c2ce7d819edb4c812"
     },
     {
+      "path": "release/LIRE-MOI.txt",
+      "bytes": 1360,
+      "sha256": "ba0d1b86187cb0d3ec2aa56a60b44a73808542cb106330e0d58042d9340d576d"
+    },
+    {
+      "path": "release/OFFLINE_MANIFEST.json",
+      "bytes": 5663,
+      "sha256": "7f91ea3974aaad12718911427a55f84e4a5dca35b8835d43b779fc91542a92f8"
+    },
+    {
       "path": "release/Toma_Popescu_JOUER.html",
+      "bytes": 643861,
+      "sha256": "bbb4b08379ea61ff678ad56ee6c55c7855a561535b5702831573db997a1ab3b4"
+    },
+    {
+      "path": "release/archives/README.md",
+      "bytes": 623,
+      "sha256": "223cfca3cb9faf65e04511de5921920ee9e6fbab146f4f7d9c2f2428a207692b"
+    },
+    {
+      "path": "release/archives/Toma_Popescu_v13_0cf1b385.html",
       "bytes": 15208110,
       "sha256": "edd71ad81cf540057bc0ea0ff889ab0b7a0d96657c44a25f00ecc52e8e5e8d8a"
+    },
+    {
+      "path": "release/assets/actors-v2.json",
+      "bytes": 981,
+      "sha256": "fa142a4df0a45a98844aba855a60dc886013ab9f4c6a10a725f433cb77e0a9c4"
+    },
+    {
+      "path": "release/assets/animals-approved.png",
+      "bytes": 1928857,
+      "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "release/assets/charles-whole-v1.png",
+      "bytes": 103638,
+      "sha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583"
+    },
+    {
+      "path": "release/assets/companion-levels-whole.png",
+      "bytes": 573149,
+      "sha256": "0c555ef01472de438dc2999c523533ed170cd80155951aff59e3f5bf13e61917"
+    },
+    {
+      "path": "release/assets/companion-portrait-1.png",
+      "bytes": 13468,
+      "sha256": "9d87f121c42b89a86c46a0bb0f21db00d61ccb2df8810622d98cbc835289c5da"
+    },
+    {
+      "path": "release/assets/companion-portrait-2.png",
+      "bytes": 12226,
+      "sha256": "be0b543820aca9f2e0968159e3819f6c65846164113de1540d585151cbc61605"
+    },
+    {
+      "path": "release/assets/companion-portrait-3.png",
+      "bytes": 17382,
+      "sha256": "c52c74a1b32142e91b13e73ee76bdb9609897a959d3cbd74ccbe83019e991c71"
+    },
+    {
+      "path": "release/assets/companion-portrait-4.png",
+      "bytes": 15734,
+      "sha256": "c712f5a3d516d4cd56492b94d35763d2eedf90c8cf69e7e0e481362966f3e754"
+    },
+    {
+      "path": "release/assets/companion-portrait-5.png",
+      "bytes": 18253,
+      "sha256": "2f483d8b7d7c506778d94e05f967a8ffd2eb7aca0834e6ea5e41c60aa73a0a57"
+    },
+    {
+      "path": "release/assets/couverture-personnages.webp",
+      "bytes": 42970,
+      "sha256": "d904e391efa4bbe0ee3ca76a6200e8b87cd21d89b97cd7cf22095a66131e30c9"
+    },
+    {
+      "path": "release/assets/dialogue-charles.png",
+      "bytes": 1801591,
+      "sha256": "dbd8ecd100d09ec63b6239f2a9f308d2a406f21c772fcae4c8b451c38c12a748"
+    },
+    {
+      "path": "release/assets/dialogue-companion-1.png",
+      "bytes": 2034519,
+      "sha256": "f6ebf4d0f3723cffd083308354b253a162b025f1d749e3aa17dd1290c2b2a11a"
+    },
+    {
+      "path": "release/assets/dialogue-pelican.png",
+      "bytes": 2077658,
+      "sha256": "1132f8f0eebbc7ad3d271441f06474f440d29931e64a3175d287a8d48d7cbe1a"
+    },
+    {
+      "path": "release/assets/dialogue-travestia.png",
+      "bytes": 2101062,
+      "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
+    },
+    {
+      "path": "release/assets/ego-beasts.png",
+      "bytes": 1027672,
+      "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
+    },
+    {
+      "path": "release/assets/girl-walk-v2.png",
+      "bytes": 122964,
+      "sha256": "ff2ae27f40de80560cc57f4914c1c9c95b3363827dc2bf5232e8064c9a6c118e"
+    },
+    {
+      "path": "release/assets/gorilla-walk-v2.png",
+      "bytes": 179140,
+      "sha256": "0fb2ddab9e2c0c3d05089387bd8e7ffd420ef74c64258801a8ae12ce8cc39960"
+    },
+    {
+      "path": "release/assets/gorille-femelle.webp",
+      "bytes": 12310,
+      "sha256": "f852d96895c96b842fcb2322aab88d66a7471e3bc40e68087014106361b144a4"
+    },
+    {
+      "path": "release/assets/opening-approved.png",
+      "bytes": 2798954,
+      "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
+    },
+    {
+      "path": "release/assets/orangutan-walk-v3.png",
+      "bytes": 176008,
+      "sha256": "584b18fb91860df181d957ec36bf97b49cb132b7bfb029d23035281606899413"
+    },
+    {
+      "path": "release/assets/pelican-poses.png",
+      "bytes": 1400510,
+      "sha256": "9d6c2c61f4b01a0a56f26cafd7c30a2b8b319734ae3ce2cf74df08fe9f05f6e8"
+    },
+    {
+      "path": "release/assets/portrait-blonde-ia.webp",
+      "bytes": 16712,
+      "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "release/assets/portrait-toma-v4.svg",
+      "bytes": 90606,
+      "sha256": "822c95ad35cb691c926ee1768d7a7cd2c76ed51050540e46b948252f401e71c4"
+    },
+    {
+      "path": "release/assets/portrait-toma.webp",
+      "bytes": 23468,
+      "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
+    },
+    {
+      "path": "release/assets/rival_goat-walk-v3.png",
+      "bytes": 128805,
+      "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "release/assets/rival_rooster-walk-v3.png",
+      "bytes": 176876,
+      "sha256": "96c70ca6c7514fbcaca6df30ecb29643d4a2d03e88c4483c932d41916387ab04"
+    },
+    {
+      "path": "release/assets/scene-gorilles.webp",
+      "bytes": 62564,
+      "sha256": "79bfe0ac58f5cc2936fc8fa8f642fa21749d382b8f60aa3ee0246501ccfb1981"
+    },
+    {
+      "path": "release/assets/toma-torso-rig-v3.png",
+      "bytes": 79424,
+      "sha256": "5d9fd819e16e18860c7d1fb80746728c4753b33c513852aca9fc09cca31e7145"
+    },
+    {
+      "path": "release/assets/toma-walk-v2.png",
+      "bytes": 140878,
+      "sha256": "9f57ee08161463778b950bc306cef753e461f986a1e431e006402f740fa9d69d"
+    },
+    {
+      "path": "release/assets/toma-whole-v5.png",
+      "bytes": 425084,
+      "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
+    },
+    {
+      "path": "release/assets/travestia-dash.png",
+      "bytes": 184441,
+      "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
+    },
+    {
+      "path": "release/assets/travestia-poses.png",
+      "bytes": 1623797,
+      "sha256": "4ac27a4c475a56b61004044ac4ed05d92a164edd6763f960139a43308c218eea"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -1083,9 +1363,14 @@
       "sha256": "51ab221aed207b8d212fe8e37d7b8210d41d53e2639f4e434f348345b45ba068"
     },
     {
+      "path": "scripts/export-offline.py",
+      "bytes": 2744,
+      "sha256": "1524b7e22a19c965c53c411fd975ae8299a07f444ebcc5b61267f690009a7a33"
+    },
+    {
       "path": "scripts/export-standalone.py",
-      "bytes": 2084,
-      "sha256": "7ae94cdb536c6a7451c701ef0822c50dd6242226b3107e58dfbaf849b7154972"
+      "bytes": 727,
+      "sha256": "495addccbf34a8dcd49e22778cea4809f411e8ae20b8ecd93cf82653b3cc5107"
     },
     {
       "path": "scripts/generate-v12-save-fixtures.mjs",
@@ -1109,8 +1394,8 @@
     },
     {
       "path": "scripts/inspect-companion-standalone.cjs",
-      "bytes": 5402,
-      "sha256": "b4bcbca04cbfea234b4c9186902a78c1495470f421a90c1fcc71efd5141fd2d2"
+      "bytes": 5442,
+      "sha256": "e7883d77631415a082bb2b4383e6ca0f8a2d80b80483df67c3ad74f901479188"
     },
     {
       "path": "scripts/inspect-companion.mjs",
@@ -1133,6 +1418,21 @@
       "sha256": "7871a86ca4a821b11360f38bdc2531b2733a0855f00563e6888851121493915f"
     },
     {
+      "path": "scripts/inspect-ego-arrivals.mjs",
+      "bytes": 2271,
+      "sha256": "4032da7bc8d9a0fe02e8964bd121148bdec7e929ab75277e97fdbc87daec2fed"
+    },
+    {
+      "path": "scripts/inspect-ego-pack.mjs",
+      "bytes": 2092,
+      "sha256": "02ae86c96b3aafce3d842bbae58ab9304dc0e5605c1a212f4f77375b5da690cb"
+    },
+    {
+      "path": "scripts/inspect-ego.mjs",
+      "bytes": 3491,
+      "sha256": "e6676a115b8acbbd269575f8733265c419665c4c350c9ee487d2dc3cfda3014d"
+    },
+    {
       "path": "scripts/inspect-evolutions.mjs",
       "bytes": 2249,
       "sha256": "e3212ddf033471cd90dd8465b273420551703960ac2c5481a6a323bef59680c9"
@@ -1149,8 +1449,8 @@
     },
     {
       "path": "scripts/inspect-lamborghini-standalone.cjs",
-      "bytes": 5060,
-      "sha256": "dea18379b469d66912f00a74ab4e391a1cb134bc323cf83b60bf0e04f7ab7c74"
+      "bytes": 5168,
+      "sha256": "8042068b0a71674f4fa420a9373e092d23fffeda17ca17b1879d32fb72bee108"
     },
     {
       "path": "scripts/inspect-lamborghini.mjs",
@@ -1189,8 +1489,8 @@
     },
     {
       "path": "scripts/inspect-standalone.cjs",
-      "bytes": 9110,
-      "sha256": "3d275f77bef343b88b5aa241acee2e460eca6706e6573ad31f5e3cb0836ba716"
+      "bytes": 11118,
+      "sha256": "edf6ec1188804cba60304aaf1b85ea5f78c4b7851340d140ad9be3f5a8bf7063"
     },
     {
       "path": "scripts/inspect-story.mjs",
@@ -1226,6 +1526,16 @@
       "path": "scripts/measure-natural-xp-run.mjs",
       "bytes": 1936,
       "sha256": "2a3dddba306e2ebce341829a836f552682ab28e581f6f241f2c614c0e52e17c7"
+    },
+    {
+      "path": "scripts/offline-qa.cjs",
+      "bytes": 1570,
+      "sha256": "f35dc58abbafc268a9872d68954c6ce2ed74a70d376fe88e4a3ca38056acdad5"
+    },
+    {
+      "path": "scripts/offline_bundle.py",
+      "bytes": 2119,
+      "sha256": "8637e8c3d5b41b635c13d8f9d5cab3c488cbc9e2b19f1065e06bffbdbbd0ce35"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -1320,17 +1630,17 @@
     {
       "path": "tests/animal-entry.test.js",
       "bytes": 8196,
-      "sha256": "bd81d915e7cd3f603e4697e932e2f2d85af4032a34af4e6a5a27f8d71cbd7160"
+      "sha256": "7019b0340fc5133237b43dedc65cb82142118527680abd0ffcc44171cd85a600"
     },
     {
       "path": "tests/animal-hud-entry.test.js",
       "bytes": 7019,
-      "sha256": "56269604baa641151b4cfdc9357d86bf9b01ce6d13e53ffd68f5b070d4a7e001"
+      "sha256": "555025277d00f3a3f9204938c06a3586c7aaff23f1b723793ac608b5b2ab73a8"
     },
     {
       "path": "tests/animal-introduction.test.js",
       "bytes": 6252,
-      "sha256": "ce348158dcfe5b43518cfb2522916ef2204bf429e9300c02987d87c3944c79f5"
+      "sha256": "08079fce83e8d8e82824498dd91e0a685b9439b6c011b4b332a046a3c83948ce"
     },
     {
       "path": "tests/animal-pacing.test.js",
@@ -1339,13 +1649,13 @@
     },
     {
       "path": "tests/animals.test.js",
-      "bytes": 4051,
-      "sha256": "be6cb5ecf9a75c672d97b5f7173b8e0663d9aca73d16644a9d8f388cd286b7b3"
+      "bytes": 4112,
+      "sha256": "629d3e2d94191207c427f10614fdaf05327cc9503746c54fd2dd7458f01a179d"
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 26963,
-      "sha256": "a70b0f3f8852045d44bbbc883b9b613fff250e3349fbbe311f476ef22e88414c"
+      "bytes": 27192,
+      "sha256": "d1767b373a97ef6fe20c0a89ee773538d2d4f053a2c2411b3ade3a2a5c3dc67d"
     },
     {
       "path": "tests/asset-loading-ui.test.js",
@@ -1365,17 +1675,17 @@
     {
       "path": "tests/boss-arrivals.test.js",
       "bytes": 3478,
-      "sha256": "a5f63bab12dd07f0eaf1f4abe86f57bd6c810460e31a6596fca82c071683c88a"
+      "sha256": "421710e78b096e9b3b702dfde8d046b5012028ff00aea8e630de3c5bfe9832a5"
     },
     {
       "path": "tests/boss-director.test.js",
-      "bytes": 11888,
-      "sha256": "a3ad8f30b45756df6f15c03bc6e89fb5e0770954f1b8521add03bff0919cb4d1"
+      "bytes": 12107,
+      "sha256": "4046db0db2652bca2a317d4eddd1f025548b3ef33b857b8505f7b491a527732f"
     },
     {
       "path": "tests/boss-durability.test.js",
       "bytes": 4771,
-      "sha256": "d17add5397361b69f97ddb388d55fe3fee7c780257e629a82375488f0f5b08af"
+      "sha256": "1d1c109bfd5421b387161bd9eec4d1c888cb1baa802f1dd3bc10a71456e6a17b"
     },
     {
       "path": "tests/boss-hardening.test.js",
@@ -1424,13 +1734,13 @@
     },
     {
       "path": "tests/charles-save.test.js",
-      "bytes": 1450,
-      "sha256": "9d87ae5212504098bb58a9a0cb6cfa49769b48e7e3da9c65d5613ae8de1f5a19"
+      "bytes": 1523,
+      "sha256": "535f4e9f8f56c1d87ac8cc1f7b044f2a79f10b249c984ed28b2017f8d5c8beb5"
     },
     {
       "path": "tests/charles-ui.test.js",
-      "bytes": 21287,
-      "sha256": "a7106b0ef9748dcebaf7586a7536ba499a7ac20ce124d78eae132aee737cce95"
+      "bytes": 21516,
+      "sha256": "c38c0c767cfe582e5042ca24d4ba5228f004569ccfa8e735e3c97b13ea8fb4a4"
     },
     {
       "path": "tests/city-variety-visibility.test.js",
@@ -1483,9 +1793,14 @@
       "sha256": "4a715a6946e942f5adb89ee1f3118bc878d47d3bd1ba5b54f2ceb314553e0ebf"
     },
     {
+      "path": "tests/dialogue-presentation.test.js",
+      "bytes": 9363,
+      "sha256": "406ff53a9cce578291b4808502483f827d74c609d1172b4bc9e0697c338b8720"
+    },
+    {
       "path": "tests/dialogue-scheduling.test.js",
-      "bytes": 5713,
-      "sha256": "0f55c5751e5ebb145f7e405d1fee172a16dcb26ff1112489ce102876544f5b69"
+      "bytes": 5776,
+      "sha256": "100b0f72873eb8b1edc879c654ff2ce400cac9122967c1032a1bd560e37fdfae"
     },
     {
       "path": "tests/discoveries.test.js",
@@ -1498,14 +1813,84 @@
       "sha256": "134d0c15bcc7f62bdcb52f9a3e24d53c0e4e34a47c24019eb30d4321f650b301"
     },
     {
+      "path": "tests/ego-art.test.js",
+      "bytes": 5055,
+      "sha256": "027bca3b9cab84df94da096756e3752086793dabc022cb558b68d1a3059bb982"
+    },
+    {
+      "path": "tests/ego-asset-ui.test.js",
+      "bytes": 1653,
+      "sha256": "6f720b80df1e023bbb4ac30058bcfcbd7fe25de506a0e70e4912a42710f186cf"
+    },
+    {
+      "path": "tests/ego-beasts.test.js",
+      "bytes": 11838,
+      "sha256": "fbf80e7d484281d208c8735be714b958059880b79cfd083bd652237a8bc412f3"
+    },
+    {
+      "path": "tests/ego-combat-integration.test.js",
+      "bytes": 2304,
+      "sha256": "37bdc8cfbc9b909e81c969ac9015e10de59b328f36e3be255a628a3539c0a697"
+    },
+    {
+      "path": "tests/ego-entry.test.js",
+      "bytes": 2579,
+      "sha256": "d8c0ac0abc2f646c812e7bb8ea6e18be122175bcfed7a021cabba2cc7cc82b0e"
+    },
+    {
+      "path": "tests/ego-save-fence.test.js",
+      "bytes": 1387,
+      "sha256": "fbed66028debea4fab24fb3aabb18b07f050e3d2f8c0c7b02270a2444a70696c"
+    },
+    {
+      "path": "tests/ego-save.test.js",
+      "bytes": 4895,
+      "sha256": "19e29ba4c0018d5dcfb7109534dc157751eb2a44c49028bb02a6ae48e87239db"
+    },
+    {
+      "path": "tests/ego-spawn.test.js",
+      "bytes": 3519,
+      "sha256": "ff4064f3645c58d01eb5d668857bdc9275ec2f5b65f545fdb77f02eb3d9f8872"
+    },
+    {
       "path": "tests/engine.test.js",
       "bytes": 28246,
       "sha256": "8fd6b360979bf507de8f431958a9bcc60b6ecb51d745a2a96ad2efaafa308131"
     },
     {
       "path": "tests/evolutions.test.js",
-      "bytes": 6255,
-      "sha256": "53300b96ea56af1079caae6b765b7ddca8240d492435c33ade328ed7ccb57a02"
+      "bytes": 6320,
+      "sha256": "d66ac7c0e26abdd446d5a4b360e4765db8521f17bdae1a29d223c0c586f8e261"
+    },
+    {
+      "path": "tests/fixtures/paused-charles-v13-recover.json",
+      "bytes": 2689,
+      "sha256": "157733b940e64ca6c7408ee02679ee429f2cc547c7489b26daa35a41d4b7b17c"
+    },
+    {
+      "path": "tests/fixtures/paused-v13-provenance.md",
+      "bytes": 1296,
+      "sha256": "b2791418cc40f63f1c5ae335dfe560659f7cd3ff8ada3cf10c0352e0db4fae6c"
+    },
+    {
+      "path": "tests/fixtures/paused-v14-provenance.md",
+      "bytes": 1019,
+      "sha256": "d8b0f69cb92a8c78e8f1b6f8405f8db55242f180b8e4f2f214c4faa6bf07d322"
+    },
+    {
+      "path": "tests/fixtures/paused-v14-travestia.json",
+      "bytes": 5155,
+      "sha256": "a2d2e827a8de9541161e2b672afc08c001a96b050d13192d7a72bfa4c5a16a52"
+    },
+    {
+      "path": "tests/fixtures/run-save-v13-source.txt",
+      "bytes": 34106,
+      "sha256": "c6cb539418aeb97259ced387f76267c9dee9ec0232604fb4e30a1deefbd8f406"
+    },
+    {
+      "path": "tests/fixtures/run-save-v14-source.txt",
+      "bytes": 34711,
+      "sha256": "078078456c301930e323b65596e080340b850bb4cfec3bd271ce2685e13590e6"
     },
     {
       "path": "tests/fixtures/runstore-v11.json",
@@ -1574,8 +1959,8 @@
     },
     {
       "path": "tests/helpers/asset-controller.js",
-      "bytes": 4553,
-      "sha256": "f1861683f9e31b7afc3b78331e84ec9fbe799fb2f2fd7d1a87541b2a0c21f725"
+      "bytes": 4785,
+      "sha256": "192b57871dda385c8c7babbde37e9bbad3273d559ce6e54ea9da12b99f0c247c"
     },
     {
       "path": "tests/helpers/boss-combat.js",
@@ -1584,8 +1969,8 @@
     },
     {
       "path": "tests/helpers/focus-controller.js",
-      "bytes": 4447,
-      "sha256": "32743102b5f9a38688669b1da0ff62bf3a55f83ec4249a68c5787fb16872b04d"
+      "bytes": 4791,
+      "sha256": "4a1cec3eb3b7dc58ee70a9456603049bba08a9aa4fad2f8c91cc715795e382d0"
     },
     {
       "path": "tests/hero-art.test.js",
@@ -1608,6 +1993,11 @@
       "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
     },
     {
+      "path": "tests/inspect-dialogue-layout.mjs",
+      "bytes": 12445,
+      "sha256": "670b401820e91e2b0584d8e600cec0666e81670f05d91229d5527d868e896aa4"
+    },
+    {
       "path": "tests/integration-pacing-story.test.js",
       "bytes": 2133,
       "sha256": "b0e285e2d78ca06214d274866364e865ae365220d4f1f2ceb513ce43e1912d9e"
@@ -1628,6 +2018,16 @@
       "sha256": "de14087aadab7001bdfe50d547b4c03271b8a33ce38800e5f419b167c153ba63"
     },
     {
+      "path": "tests/offline-export.test.js",
+      "bytes": 3590,
+      "sha256": "933244fa210170aa6d5a3ba239439447f1831f818ff624019598f87b4e48e60f"
+    },
+    {
+      "path": "tests/offline-smoke.test.js",
+      "bytes": 1514,
+      "sha256": "6e70b55e0b9ed69bd311984fda0709734962377f27f2f95b947a43f8d5e4ebb6"
+    },
+    {
       "path": "tests/opening.test.js",
       "bytes": 4464,
       "sha256": "288727b0dc232b3eced5be3d988ef03adc185f146b67564c5be312f935593d6d"
@@ -1636,6 +2036,16 @@
       "path": "tests/orangutan-art.test.js",
       "bytes": 2949,
       "sha256": "99fac9674f8f3fbbbc02bfc75e5c93f203b246f3b63e5c9452fb2fcc9cf8fccb"
+    },
+    {
+      "path": "tests/paused-dialogue-input.test.js",
+      "bytes": 10210,
+      "sha256": "8c73b20c2dfa415cdee3f8335f11cf5e3b0ee1521309f26d484461ffe5aab4f7"
+    },
+    {
+      "path": "tests/paused-encounters.test.js",
+      "bytes": 17339,
+      "sha256": "5f9a0467d21f13e2eedcdbad9b751f9c51fe0293e8a71a016cbf24757d7309b5"
     },
     {
       "path": "tests/pelican-art.test.js",
@@ -1684,18 +2094,23 @@
     },
     {
       "path": "tests/replay-dialogue-integration.test.js",
-      "bytes": 4547,
-      "sha256": "982b33fdaad5be2f94e27346baa26213b23650c687763e7b3a3faecc85b9e8e3"
+      "bytes": 4632,
+      "sha256": "8ff6f5a3bee2bf8bfa2f9faf28158b1da513850ac4c502f2c7c61bcf58711cda"
     },
     {
       "path": "tests/result-record-races.test.js",
-      "bytes": 6957,
-      "sha256": "9bd1b7acd6838147718893b35761ceddfadc363c5ba771c7edda61fb6895d84c"
+      "bytes": 7186,
+      "sha256": "a83761201b98d452b95059b2e3ba6efb87cd20ec213d1b1f9227878f03b62863"
     },
     {
       "path": "tests/river-art.test.js",
       "bytes": 2475,
       "sha256": "ef5bb18519a33ff88e886c01e6bda55bc3bc5344334063e87a561339517f8f9a"
+    },
+    {
+      "path": "tests/river-natural-art.test.js",
+      "bytes": 827,
+      "sha256": "58b5fab2b9a3ecaf567a582343f97101ec03b7f08dabe4b651bf2442d8c37b7e"
     },
     {
       "path": "tests/rooster-reaction.test.js",
@@ -1719,18 +2134,18 @@
     },
     {
       "path": "tests/run-pelican.test.js",
-      "bytes": 14540,
-      "sha256": "ecfdb03b01fa4cf75cb84b04363c966e61c348519bef2cf558c726ed2b85b10d"
+      "bytes": 14891,
+      "sha256": "1f9a48a7790622d53796929bc90662e8c6c15d3282c373046df30f7e557408dc"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11182,
-      "sha256": "e1d5d713b5e9a0cb874686d8c16452a1c64f296b06e46859d867a924cc833b15"
+      "sha256": "9e655ced82e87c7922189b21c1768630e30b1a2acbffa9157f08515fa8925b2d"
     },
     {
       "path": "tests/run-travestia.test.js",
-      "bytes": 4715,
-      "sha256": "b61963d992b62bef977ebd6901dc4c8d7656b42b008899b41a2d483730bd1787"
+      "bytes": 4774,
+      "sha256": "bab578e9ba712881562816aed3bcb76df61d54e86fb3f5f24b269a2d42486fde"
     },
     {
       "path": "tests/runstore-v11.test.js",
@@ -1739,8 +2154,8 @@
     },
     {
       "path": "tests/runstore-v12.test.js",
-      "bytes": 4454,
-      "sha256": "a89fb002bbaf90f070cb213bd540c46cfba395a43cc2f85f772d24e3b9004f11"
+      "bytes": 4667,
+      "sha256": "afa968fa38893d8a59b49098b4bb218f9b33a3e84dfb8dbfd3d1fe15b9fbd3f1"
     },
     {
       "path": "tests/save-performance.test.js",
@@ -1748,14 +2163,29 @@
       "sha256": "e09d36f11e6e19aee94ec1fd91ae19b3bdac09d3d13ae4efbe8c84e91397f149"
     },
     {
+      "path": "tests/save-v14-fence.test.js",
+      "bytes": 1878,
+      "sha256": "d6959e4087fd07f9eca4d3624f2c71058172eed7ba7a4b9e415cc188524558ae"
+    },
+    {
       "path": "tests/scenery-art.test.js",
       "bytes": 1916,
       "sha256": "ad0ce404d1cbe3c567046e8985fdaebd9a775400bd7812f1d432b564ee50ce18"
     },
     {
+      "path": "tests/scenery-presentation.test.js",
+      "bytes": 3104,
+      "sha256": "b18397a81456218ca255a7035f12752d6c0a92d89f3a87b1dfc7b85dd1932f95"
+    },
+    {
+      "path": "tests/scenery-threat-visibility.test.js",
+      "bytes": 1489,
+      "sha256": "5a943f0af196db6336ae00a17c6c5f2bbba982e63384b27c654015cff70c23ec"
+    },
+    {
       "path": "tests/stability-integration.test.js",
-      "bytes": 5272,
-      "sha256": "a60ee421bbb5f96a00d5559fefbca429b148fce89a3657f01a2e0e7d6a3905e7"
+      "bytes": 5335,
+      "sha256": "240c934f8a26a6d790d0bc2584ad55aef318ac92c52cb74f476c1a596e587a01"
     },
     {
       "path": "tests/standalone-module-order.test.js",
@@ -1764,13 +2194,13 @@
     },
     {
       "path": "tests/standalone-output-safety.test.js",
-      "bytes": 3035,
-      "sha256": "9f01037e79e30c3d147ba5ddd750ab2b143f251d080ef24049f4b9a8daa779cc"
+      "bytes": 3405,
+      "sha256": "eb385a909a7ee9d8d3f0de5ee182dfbad00a2dbff1672d438a83d16c72d491d2"
     },
     {
       "path": "tests/story-conversations.test.js",
-      "bytes": 11387,
-      "sha256": "9febfa75897a9b6da0ab7283663a26c55c9a4e1a4faa79612a57414fcb836427"
+      "bytes": 11513,
+      "sha256": "258973d4cacf95e9971cba393f1c51ddd74e178983ec8a7a486d145df5fb93d0"
     },
     {
       "path": "tests/story.test.js",
@@ -1784,8 +2214,8 @@
     },
     {
       "path": "tests/travestia-dash.test.js",
-      "bytes": 3938,
-      "sha256": "34914e4bcb2aa31f78b1c8b58974c65c8fd8f0828f37540b364595a24bd7f977"
+      "bytes": 3997,
+      "sha256": "84ff7ea78e44ab5a3607c496e0e29588759b38e8f146e3b19d4b49fb87a8e920"
     },
     {
       "path": "tests/travestia.test.js",
@@ -1810,12 +2240,12 @@
     {
       "path": "tests/trophy-save.test.js",
       "bytes": 7876,
-      "sha256": "c28f42f6d8eff2a41d9e8e631b6abed6a6f7b0104a2d0b13d0a83a9f203b597b"
+      "sha256": "4a4d01d1b1299bd0de178f2bd2ab2106ae853ef2f72f8fab87de198eaeb7bd00"
     },
     {
       "path": "tests/trophy-ui.test.js",
-      "bytes": 6380,
-      "sha256": "8c681eb5d30ce1624a4a954610f36cf654a15635bfde8aca070f4a4a0cd3d1f2"
+      "bytes": 6609,
+      "sha256": "2579a765ea4ed53c4ae9bbf24a86bf5757eec91e5de6a58d4c0810bf1ecca9e2"
     },
     {
       "path": "tests/upgrade-rewards.test.js",
@@ -1853,6 +2283,12 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "483f928d499d0591bf9036eda2bb2ad70eb009e7",
-  "integration_date": "2026-11-04"
+  "base_github_commit": "0cf1b385c5c15fe8c001590b042be29260b04e25",
+  "integration_date": "2026-11-04",
+  "offline_release": {
+    "format": "offline-folder-v1",
+    "entrypoint": "release/Toma_Popescu_JOUER.html",
+    "manifest": "release/OFFLINE_MANIFEST.json",
+    "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
+  }
 }

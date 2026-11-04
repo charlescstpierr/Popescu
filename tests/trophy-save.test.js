@@ -10,9 +10,9 @@ const copy=x=>JSON.parse(JSON.stringify(x));
 const fixture=()=>JSON.parse(readFileSync(new URL('./fixtures/runstore-v8.json',import.meta.url),'utf8'));
 test('genuine v8 record migrates to v10 without changing travel or crediting trophies',()=>{
  const old=fixture();assert.equal(old.version,8);assert.equal(old.run.snapshot.game.s.trophies,undefined);
- let raw=JSON.stringify(old);const store=new RunStore({getItem:()=>raw,setItem:(_k,v)=>raw=v});const read=store.read();assert.equal(read.status,'ready');assert.equal(read.value.version,13);
+ let raw=JSON.stringify(old);const store=new RunStore({getItem:()=>raw,setItem:(_k,v)=>raw=v});const read=store.read();assert.equal(read.status,'ready');assert.equal(read.value.version,15);
  const g=restoreRun(read.value.run.snapshot);assert.deepEqual(g.s.trophies,blank());assert.equal(g.s.travelX,.6);assert.equal(g.s.travelY,.8);assert.equal(g.s.coins,7);
- assert.ok(store.checkpoint('real-v8-run',g).ok);assert.equal(JSON.parse(raw).version,13);
+ assert.ok(store.checkpoint('real-v8-run',g).ok);assert.equal(JSON.parse(raw).version,15);
 });
 test('legacy schemas cannot smuggle trophy state, provenance or charm',()=>{
  const old=fixture().run.snapshot;old.game.s.trophies={...blank(),chosen:{pelican:'tarot'}};old.game.s.chests=[{id:old.game.id++,x:0,y:0,open:false,openedAt:0,bossType:'pelican',bossId:1}];old.game.s.enemies[0].trophyCharmLife=2;
@@ -20,7 +20,7 @@ test('legacy schemas cannot smuggle trophy state, provenance or charm',()=>{
 });
 test('valid chosen effects persist exactly and remain independent',()=>{
  const g=run();g.id=20;Object.assign(g.s.trophies,{chosen:{pelican:'tarot',travestia:'panache',matriarch:'fanclub'},tarot:{x:110,y:0,originX:0,originY:0,dx:1,dy:0,age:.4,hitOut:[1,2],hitBack:[]},panache:{x:0,y:0,dx:1,dy:0,life:.2,hitIds:[1,2]},feedback:{id:'tarot',life:.5,amount:18}});g.s.trophies.cooldowns.tarot=7.6;
- const s=captureRun(g);assert.equal(s.version,13);const restored=restoreRun(s);assert.deepEqual(captureRun(restored),s);assert.notEqual(restored.s.trophies,g.s.trophies);
+ const s=captureRun(g);assert.equal(s.version,15);const restored=restoreRun(s);assert.deepEqual(captureRun(restored),s);assert.notEqual(restored.s.trophies,g.s.trophies);
 });
 test('rejects malformed choices, cooldowns, effect ownership and attack bounds',()=>{
  const bad=[t=>t.chosen.pelican='badge',t=>t.chosen.fake='tarot',t=>t.cooldowns.tarot=8.1,t=>t.cooldowns.ascendant=-1,t=>t.cooldowns.star=Infinity,t=>t.cooldowns.fanclub=19,t=>t.starLife=2.1,t=>t.starLife=1,t=>t.feedback={id:'badge',life:.5,amount:2},t=>t.pending=[{bossType:'pelican',bossId:1,chestId:2}],t=>t.tarot={x:0,y:0,originX:0,originY:0,dx:1,dy:0,age:0,hitOut:[],hitBack:[]}];

@@ -49,8 +49,8 @@ test('a build scene needs the actual upgrade and its callback needs completed re
  read(g);read(g);read(g);g.s.elapsed=600;g.story(.01);assert.notEqual(events.at(-1).text,content.STORY_MILESTONES[1].text);assert.match(events.at(-1).text,/siège|distance|char/i);
 });
 test('v11 saves gain an empty scene cursor without losing reading or replay data',()=>{
- const {g}=fixture();g.bark('TOMA','Ancienne phrase encore à lire.');const old=captureRun(g);old.version=11;delete old.game.speech.scene;for(const line of [old.game.speech.active,...old.game.speech.queue])if(line)delete line.sceneId;
- const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,13);
+ const {g}=fixture();g.bark('TOMA','Ancienne phrase encore à lire.');const old=captureRun(g);old.version=11;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.speech.scene;for(const line of [old.game.speech.active,...old.game.speech.queue])if(line)delete line.sceneId;
+ const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,15);
 });
 
 test('every story line restores the same cursor, remainder and final completion',()=>{
@@ -85,7 +85,7 @@ test('scene schema rejects malformed cursors, mismatched text and orphan scene l
 });
 test('legacy pending replies keep their exact old wording after migration',()=>{
  const {g}=fixture();g.s.companion=true;const rival=g.spawnEnemy('rival_goat',100,0);g.pendingStuntReply={at:30,index:3};g.pendingRivalReply={at:30,index:2,ally:false,id:rival.id,type:rival.type};
- const old=captureRun(g);old.version=11;delete old.game.speech.scene;const r=restoreRun(old),lines=[];r.onEvent=(t,p)=>{if(t==='bark')lines.push(p.text);};r.updateStunt(.01,0);read(r);r.updateRivalBanter();
+ const old=captureRun(g);old.version=11;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.speech.scene;const r=restoreRun(old),lines=[];r.onEvent=(t,p)=>{if(t==='bark')lines.push(p.text);};r.updateStunt(.01,0);read(r);r.updateRivalBanter();
  assert.deepEqual(lines,[content.STUNT_REPLIES[3].text,content.RIVAL_REPLIES.rival_goat[2]]);
 });
 test('final minute does not start optional three-line story scenes',()=>{

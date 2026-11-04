@@ -1,3 +1,8 @@
+import {EGO_BEASTS,EGO_LIMITS,initEgoBeast,egoBeastLocked,interruptEgoBeast,egoDamageMultiplier,egoHeight,updateEgoBeast} from './ego-beasts.js';
+import {egoFitsViewport,findEgoEntry} from './ego-entry.js';
+import {biomeForChunk} from './biomes.js';
+import {propForegroundBounds} from './prop-geometry.js';
+import {createEncounterDialogue,queueEncounterDialogue,openEncounterDialogue,advanceEncounterDialogue,closeEncounterDialogue,cancelEncounterDialogues,dialoguePresentation} from './encounter-dialogue.js';
 import {carLevel,launchLamborghini,updateLamborghini} from './lamborghini.js';
 import {lethalDamageCause} from './run-history.js';
 import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled} from './speech.js';
@@ -13,7 +18,7 @@ import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim } from './hero-pose.js';
-import { companionLevel, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
+import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 const TAU=Math.PI*2;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -22,7 +27,7 @@ const dist=(a,b)=>length(a.x-b.x,a.y-b.y);
 const CAP={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12};
 const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 % des PV maximum.',icon:'ego',max:1,color:'#8eddab'},{id:'payday',name:'Petit contrat',desc:'Reçois 8 pièces immédiatement.',icon:'money',max:1,color:'#edc764'},{id:'barrier',name:'Compliment gratuit',desc:'Récupère jusqu’à 30 bouclier, sans dépasser ta capacité (minimum 30).',icon:'validation',max:1,color:'#8adce6'}];
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
-const BASE={...ANIMALS,pelican:{hp:760,speed:42,r:29},travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
+const BASE={...EGO_BEASTS,...ANIMALS,pelican:{hp:760,speed:42,r:29},travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
 export class Game {
   constructor({difficulty='normal',seed=42,onEvent=()=>{}}={}) {
@@ -30,8 +35,8 @@ export class Game {
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
-    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0};
-    this.bossDirector=createBossDirector(this.seed);
+    this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0,ego:9,egoIndex:0};
+    this.bossDirector=createBossDirector(this.seed);this.encounters=createEncounterDialogue();this.pausedEncountersEnabled=false;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
@@ -48,6 +53,12 @@ export class Game {
   setBanterEnabled(enabled){setSpeechEnabled(this,enabled);}
   clearSpeech(){this.speech=createSpeech();this.speechUntil=this.s.elapsed;}
   urgentSpeech(who,text,encounter=true){return enqueueSpeech(this,who,text,{urgent:true,encounter,scope:charlesActive(this.s)?'charles':'survival'});}
+  setPausedEncountersEnabled(enabled){this.pausedEncountersEnabled=Boolean(enabled);}
+  queueEncounterDialogue(scene){return queueEncounterDialogue(this,scene);}
+  openEncounterDialogue(){return openEncounterDialogue(this);}
+  cancelEncounterDialogues(scope){cancelEncounterDialogues(this,scope);}
+  advanceEncounterDialogue(id,index){return advanceEncounterDialogue(this,id,index);}
+  dialoguePresentation(line){return dialoguePresentation(this,line);}
   rank(id){return this.s.upg[id]||0;}
   setViewport(width,height){this.viewport={width:clamp(Number(width)||390,240,1600),height:clamp(Number(height)||844,320,1600)};}
   // DOM-free, saved input: callers provide measured canvas-relative HUD bounds.
@@ -63,8 +74,8 @@ export class Game {
   }
   pause(){if(this.s.mode==='playing')this.s.mode='paused';}
   resume(){if(this.s.mode==='paused')this.s.mode='playing';}
-  startDialogue(lines){if(!lines?.length || this.s.mode==='gameover')return;this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);}
-  finishDialogue(){if(this.s.mode==='dialogue'){this.s.mode=this.s.options.length?'upgrade':'playing';if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);else this.openTrophy();}}
+  startDialogue(lines){if(!lines?.length||this.encounters.active||['dialogue','gameover','victory'].includes(this.s.mode))return false;if(lines===EVENTS.companion){const queued=this.queueEncounterDialogue({id:'companion:invocation',actorId:null,actorType:'companion'});if(queued)this.openEncounterDialogue();return queued;}this.s.mode='dialogue';this.s.moveX=0;this.s.moveY=0;this.emit('dialogue',lines);return true;}
+  finishDialogue(skipped=false){if(this.s.mode!=='dialogue')return false;closeEncounterDialogue(this,skipped);if(charlesActive(this.s)){this.s.mode='playing';return true;}this.s.mode=this.s.options.length?'upgrade':'playing';if(this.s.mode==='upgrade')this.emit('upgrade',this.s.options);else this.openTrophy();return true;}
   startCharlesEpilogue(){return startCharles(this);}
   leaveCharlesEpilogue(){return finishCharles(this,'left');}
   combatTargets(){return charlesActive(this.s)?[...this.s.enemies,this.s.charles]:this.s.enemies;}
@@ -129,6 +140,7 @@ export class Game {
   }
   update(dt,input={x:0,y:0}){
     if(this.s.mode!=='playing' || !Number.isFinite(dt) || dt<=0)return;
+    if(this.openEncounterDialogue())return;
     let remaining=Math.min(dt,.25);
     while(remaining>1e-7 && this.s.mode==='playing'){const step=Math.min(remaining,1/30);this.step(step,input);remaining-=step;}
   }
@@ -144,12 +156,12 @@ export class Game {
     this.world.update(s.x,s.y);
     if(this.rank('detox')){const from=s.hp;s.hp=Math.min(s.maxhp,s.hp+.2*this.rank('detox')*dt);if(s.hp>from)this.powerEffect('detox','heal',s.x,s.y,0,{amount:s.hp-from});}
     if(s.elapsed-this.lastHit>6 && s.shield<s.stats.shieldMax){const from=s.shield;s.shield=Math.min(s.stats.shieldMax,s.shield+(3+2*this.rank('validation'))*dt);if(this.rank('validation')&&s.shield>from)this.powerEffect('validation','recharge',s.x,s.y,0,{from,to:s.shield,maximum:s.stats.shieldMax,amount:s.shield-from});}
-    this.spawnWave(dt);this.updateCompanion(dt);this.updateEnemies(dt);const trophySpeed=trophySpeedMultiplier(s);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
+    this.spawnWave(dt);if(this.rank('airplane')&&this.timers.airplane<=dt)this.activateAirplane();this.updateCompanion(dt);this.updateEnemies(dt);const trophySpeed=trophySpeedMultiplier(s);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
     if(s.hp>0)delete s.deathCause;
     if(s.hp<=0){s.hp=0;s.mode='gameover';this.sound('defeat');this.emit('gameover',s);return;}
     if(s.elapsed>=1200 && !s.endless){s.mode='victory';this.sound('victory');this.emit('victory',s);return;}
     this.openTrophy();
-    if(s.mode==='playing'){this.flushSpeech();this.story(dt);}
+    if(s.mode==='playing'&&!this.openEncounterDialogue()){this.flushSpeech();this.story(dt);}
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
   }
   stepCharles(dt,input){
@@ -157,7 +169,7 @@ export class Game {
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0,n=Math.max(1,Math.hypot(mx,my));s.moveX=mx/n;s.moveY=my/n;
     this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=Math.hypot(s.x-previous.x,s.y-previous.y);s.walkMoving=moved>1e-7;
     if(s.walkMoving){s.walkDistance+=moved;s.travelX=(s.x-previous.x)/moved;s.travelY=(s.y-previous.y)/moved;}
-    this.world.update(s.x,s.y);this.updateCompanion(dt);this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateEffects(dt);updateCharles(this,dt,previous);this.flushSpeech();
+    this.world.update(s.x,s.y);this.updateCompanion(dt);this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateEffects(dt);updateCharles(this,dt,previous);if(!this.openEncounterDialogue())this.flushSpeech();
     for(const [key,max] of Object.entries(CAP))if(key!=='chests'&&s[key].length>max)s[key].splice(0,s[key].length-max);
   }
   updateDiscoveryEffect(dt){
@@ -190,7 +202,7 @@ export class Game {
     this.emit('discovery',{...d.active});
   }
   move(entity,dx,dy,r){
-    if(tailLocked(entity)||animalLocked(entity)||pelicanLocked(entity))return;
+    if(tailLocked(entity)||animalLocked(entity)||egoBeastLocked(entity)||pelicanLocked(entity))return;
     const oldX=entity.x,oldY=entity.y;
     if(!this.world.collides(entity.x+dx,entity.y,r))entity.x+=dx;
     if(!this.world.collides(entity.x,entity.y+dy,r))entity.y+=dy;
@@ -198,7 +210,7 @@ export class Game {
     if(entity.type==='travestia'){const moved=length(entity.x-oldX,entity.y-oldY);entity.tailWalkDistance=(entity.tailWalkDistance||0)+moved;if(moved>1e-7)entity.tailMoving=true;}
   }
   knockback(entity,dx,dy,r){
-    if(tailLocked(entity)||animalLocked(entity)||pelicanLocked(entity))return;
+    if(tailLocked(entity)||animalLocked(entity)||egoBeastLocked(entity)||pelicanLocked(entity))return;
     // Keep normal crowd movement cheap. Only instantaneous pushes need a full
     // sweep; preserve the existing X-then-Y sliding and animation bookkeeping.
     if(this.world.blocksAxisMove(entity.x,entity.y,dx,r))dx=0;
@@ -206,8 +218,8 @@ export class Game {
     this.move(entity,dx,dy,r);
   }
   spawnEnemy(type,x,y,animalIntroduction=false){
-    const s=this.s;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
-    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));if(ANIMALS[type]){const entry=findAnimalEntry(this,type,{x,y},animalIntroduction);if(!entry)return null;({x,y}=entry);}else for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
+    const s=this.s;if(EGO_BEASTS[type]&&(s.enemies.filter(e=>!e.dead&&EGO_BEASTS[e.type]).length>=EGO_LIMITS.active||s.enemies.filter(e=>!e.dead&&e.type===type).length>=EGO_LIMITS.perType))return null;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
+    if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));if(ANIMALS[type]||EGO_BEASTS[type]){const entry=EGO_BEASTS[type]?findEgoEntry(this,type,{x,y},animalIntroduction):findAnimalEntry(this,type,{x,y},animalIntroduction);if(!entry)return null;({x,y}=entry);}else for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
     const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     // Several attack cycles must survive developed offensive builds. Summons
     // justify a gentler first matriarch; only newly spawned bosses gain HP.
@@ -216,7 +228,24 @@ export class Game {
     const hp=spec.hp*scale*(type==='matriarch'?1+minutes*.02:1)*bossDurability;
     const enemy={id:this.id++,type,sex:['travestia','pelican'].includes(type)?null:isRival(type)?'male':'female',x,y,hp,maxhp:hp,r:spec.r,speed:spec.speed*(this.difficulty.speed||1)*(1+Math.min(.35,minutes*.014)),phase:'chase',faceX:0,faceY:1,gasPose:0,windup:0,hitFlash:0,charmed:0,dead:false,cooldown:type==='gas'?2+this.random()*2:0,attack:0,summon:6,crow:0,charge:0,chargeDirX:0,chargeDirY:1,banterCount:0,nextTaunt:0,swipe:0,swipeDirX:0,swipeDirY:1,target:'player',tailTime:0,tailFaceX:1,tailHitPlayer:false,tailHitGirl:false};
     if(type==='pelican')Object.assign(enemy,{peliTime:0,peliDX:1,peliDY:0,peliX:x,peliY:y,peliTravel:0,peliAttackCount:0,peliHitPlayer:false,peliHitGirl:false,peliReplyPending:false,peliBanterIndex:0,peliTauntAt:0,peliReply:'',peliReplyTime:0,peliWalkDistance:0,peliMoving:false});
+    if(EGO_BEASTS[type])initEgoBeast(enemy);
     if(ANIMALS[type])Object.assign(enemy,{animalTime:0,animalDX:1,animalDY:0,animalX:x,animalY:y,animalTravel:0,animalHit:false});s.enemies.push(enemy);return enemy;
+  }
+  egoFitsViewport(e){return egoFitsViewport(this,e);}
+  egoSurfaceAt(x,y){
+    // The same world geometry that draws the backdrop decides camouflage.
+    // Called at bounded intervals by the chameleon, never by a pixel read.
+    for(const p of this.world.getVisible(x,y,180,240)){
+      if(p.type!=='building'||this.world.destroyed.has(p.id))continue;
+      const b=propForegroundBounds(p);
+      if(b&&x>=b.left-12&&x<=b.right+12&&y-40>=b.top&&y-40<=b.foot+12)return 'building';
+    }
+    return biomeForChunk(Math.floor(x/512),Math.floor(y/512),this.seed)==='forest'?'grass':'asphalt';
+  }
+  egoStatus(){
+    const types=Object.keys(EGO_BEASTS),species=types.map(type=>({type,name:EGO_BEASTS[type].name,count:0,phases:{}}));
+    for(const e of this.s.enemies){if(e.dead||!EGO_BEASTS[e.type])continue;const row=species[types.indexOf(e.type)];row.count++;row.phases[e.phase]=(row.phases[e.phase]||0)+1;}
+    return {active:species.reduce((n,e)=>n+e.count,0),limit:EGO_LIMITS.active,next:types[this.timers.egoIndex%types.length],remaining:Math.max(0,this.timers.ego),introduced:Math.min(4,this.timers.egoIndex),species};
   }
   spawnPack(type,count){
     const first=this.spawnEnemy(type);if(!first)return [];
@@ -307,7 +336,7 @@ export class Game {
     this.pulse(s.x,s.y,70,'#e2b944',.45);this.bark('SYSTÈME','Un groupe de discussion vient de te trouver.');
   }
   spawnWave(dt){
-    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;this.timers.animal-=dt;
+    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;this.timers.animal-=dt;this.timers.ego-=dt;
     const interval=Math.max(.08,.46/(1+m*.22))/((this.difficulty.spawn||1)*pacing.pressure);
     if(this.timers.spawn<=0){
       this.timers.spawn+=interval;let type='normal';const p=this.random();
@@ -323,6 +352,14 @@ export class Game {
           // Introduce each species calmly, then follow normal arrival pressure.
           this.timers.animal=this.timers.animalIndex<4?6:Math.max(1.8,interval*10);
         }else this.spawnEnemy(type); // Keep the ordinary slot while an entry is blocked.
+      }else if(this.timers.ego<=0&&!pacing.finale&&!pacing.recovery){
+        // Independent stream keeps old animal introductions unchanged. New
+        // beasts replace ordinary slots and never add extra crowd pressure.
+        const types=Object.keys(EGO_BEASTS),rng=this.rng,index=this.timers.egoIndex;
+        this.rng=(this.seed^Math.imul(index+1,1103515245)^0x324e6a19)|0;
+        const beast=this.spawnEnemy(types[index%types.length],undefined,undefined,index<4);this.rng=rng;
+        if(beast){this.timers.egoIndex++;this.timers.ego=this.timers.egoIndex<4?6:Math.max(5,interval*14);}
+        else this.spawnEnemy(type);
       }else if(s.elapsed<.1)this.spawnPack('normal',3);else this.spawnEnemy(type);
     }
     this.timers.pack-=dt;
@@ -373,7 +410,8 @@ export class Game {
     this.announceEncounter(arrivals[boss.type],'boss');
   }
 
-  nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.combatTargets()){if(e.dead || e===exclude || e.charmed>0)continue;const d=(e.x-x)**2+(e.y-y)**2;if(d<best){best=d;target=e;}}return target;}
+  targetPosition(e){const height=egoHeight(e);return height?{x:e.x,y:e.y-height}:e;}
+  nearest(x,y,range=Infinity,exclude){let target=null,best=range*range;for(const e of this.combatTargets()){if(e.dead || e===exclude || e.charmed>0)continue;const point=this.targetPosition(e),d=(point.x-x)**2+(point.y-y)**2;if(d<best){best=d;target=e;}}return target;}
   reenterBoss(e){
     // Running out of the active city must not count as defeating a boss.
     // Reuse its identity/HP, outside the camera and with a fresh attack delay.
@@ -411,8 +449,9 @@ export class Game {
       if(e.charmed>0){const friend=this.nearest(e.x,e.y,350,e);if(friend){target=friend;e.target='enemy';}else target={x:e.x+(e.x-s.x),y:e.y+(e.y-s.y)};}
       const dx=target.x-e.x,dy=target.y-e.y,d=length(dx,dy)||1;if(e.type==='gas' && (e.windup>0 || e.gasPose>0) && Number.isFinite(e.gasDirX)){e.faceX=e.gasDirX;e.faceY=e.gasDirY;}else if(e.type==='orangutan'&&(e.windup>0||e.swipe>0)){e.faceX=e.swipeDirX;e.faceY=e.swipeDirY;}else if(isRival(e.type)&&(e.windup>0||e.charge>0||e.crow>0)){e.faceX=e.chargeDirX;e.faceY=e.chargeDirY;}else{e.faceX=dx/d;e.faceY=dy/d;}
       const suppressed=s.airplane.active && dist(e,s)<s.airplane.r;
-      if(suppressed){e.cooldown=Math.max(e.cooldown,1.5);e.windup=0;e.gasPose=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='suppressed';interruptAnimal(e);interruptPelican(e,'suppressed');}
+      if(suppressed){e.cooldown=Math.max(e.cooldown,1.5);e.windup=0;e.gasPose=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='suppressed';interruptAnimal(e);interruptEgoBeast(e);interruptPelican(e,'suppressed');}
       if(ANIMALS[e.type])updateAnimal(this,e,dt,suppressed);
+      if(EGO_BEASTS[e.type])updateEgoBeast(this,e,dt,suppressed);
       if(e.type==='travestia')updateTravestia(this,e,dt,suppressed);
       if(e.type==='pelican')updatePelican(this,e,dt,suppressed);
       if(e.type==='gas' && e.charmed<=0 && !suppressed){
@@ -453,8 +492,8 @@ export class Game {
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,87,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
-      if(!animalLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
-      if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
+      if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
+      if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&!EGO_BEASTS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
     }
     s.enemies=s.enemies.filter(e=>!e.dead);this.separateEnemies(dt);
@@ -469,7 +508,7 @@ export class Game {
         // push for actual contacts, but reject separated bounds first.
         if(Math.abs(dx)>=gap||Math.abs(dy)>=gap)continue;let d=length(dx,dy);if(d>=gap)continue;
         if(d<.001){const angle=e.id*2.399963+other.id*.37;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
-        const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
+        const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!egoBeastLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!egoBeastLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
         if(++pushes>=8)break neighbors;
       }
     }
@@ -495,23 +534,18 @@ export class Game {
   weapons(dt){
     const s=this.s;s.shotClock-=dt;const target=this.nearest(s.x,s.y,s.stats.range);
     if(target){
-      const d=dist(target,s)||1;s.aimX=(target.x-s.x)/d;s.aimY=(target.y-s.y)/d;
+      const point=this.targetPosition(target),d=dist(point,s)||1;s.aimX=(point.x-s.x)/d;s.aimY=(point.y-s.y)/d;
       if(Math.abs(s.aimX)>.1)s.aimSide=s.aimX<0?-1:1;
       // At contact distance the enemy may already be under the carried barrel.
       // Keep facing them; the hit below must not send a bullet back through it.
-      if(d+1e-7>=80){const aim=solveHeroAim(s,target);s.aimX=aim.aimX;s.aimY=aim.aimY;s.aimArtView=aim.aimArtView;}else s.aimArtView=null;
+      if(d+1e-7>=80){const aim=solveHeroAim(s,point);s.aimX=aim.aimX;s.aimY=aim.aimY;s.aimArtView=aim.aimArtView;}else s.aimArtView=null;
     }else{s.aimArtView=null;if(length(s.moveX,s.moveY)>.08){const d=length(s.moveX,s.moveY);s.aimX=s.moveX/d;s.aimY=s.moveY/d;if(Math.abs(s.aimX)>.1)s.aimSide=s.aimX<0?-1:1;}}
 
-    if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle;const underBarrel=dist(target,s)<80&&(target.x-muzzle.x)*pose.aim.x+(target.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
+    if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle,point=this.targetPosition(target);const underBarrel=dist(point,s)<80&&(point.x-muzzle.x)*pose.aim.x+(point.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;
     const car=this.rank('car');if(car && this.timers.car<=0)this.timers.car=launchLamborghini(this)?carLevel(car).interval:.15;
     const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);this.powerEffect('money','activate');}
-    const airplane=this.rank('airplane');
-    if(airplane && this.timers.airplane<=0){
-      this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
-      for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';interruptAnimal(e);interruptPelican(e,'suppressed');}
-      this.powerEffect('airplane','activate',s.x,s.y,s.airplane.r);this.sound('truth');
-    }
+    if(this.rank('airplane')&&this.timers.airplane<=0)this.activateAirplane();
     if(s.airplane.active){s.airplane.x=s.x;s.airplane.y=s.y;s.airplane.life-=dt;if(s.airplane.life<=0)s.airplane.active=false;}
     const chopper=this.rank('chopper');
     if(chopper && this.timers.chopper<=0){
@@ -520,16 +554,22 @@ export class Game {
     }
     const truth=this.rank('truth');if(truth && this.timers.truth<=0){this.timers.truth=Math.max(3,8-truth*.65);this.areaDamage(s.x,s.y,145+truth*24,28+truth*15,true);this.powerEffect('truth','activate',s.x,s.y,145+truth*24);this.sound('truth');}
   }
-  shoot(x,y,target,kind,damage,speed,offset=0){const a=Math.atan2(target.y-y,target.x-x)+offset;this.s.shots.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,kind,life:1.8,damage,r:kind==='heart'?8:kind==='bill'?7:4,pierce:kind==='bill'?1:0,hitIds:new Set(),...(kind==='heart'&&this.s.evolutions.viralLove?{viral:true,linkX:x,linkY:y}:{})});}
+  activateAirplane(){
+    const s=this.s,airplane=this.rank('airplane');if(!airplane)return;
+      this.timers.airplane=Math.max(8,17-airplane*1.2);s.airplane={x:s.x,y:s.y,active:true,life:3+airplane*.6,r:420+airplane*35};s.clouds=[];s.shockwaves=[];
+      for(const e of s.enemies)if(dist(e,s)<s.airplane.r){e.windup=0;e.gasPose=0;e.charge=0;e.crow=0;e.swipe=0;e.cooldown=Math.max(e.cooldown,3);e.attack=Math.max(e.attack,1.2);e.phase='suppressed';interruptAnimal(e);interruptEgoBeast(e);interruptPelican(e,'suppressed');}
+      this.powerEffect('airplane','activate',s.x,s.y,s.airplane.r);this.sound('truth');
+  }
+  shoot(x,y,target,kind,damage,speed,offset=0){const point=this.targetPosition(target),a=Math.atan2(point.y-y,point.x-x)+offset;this.s.shots.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,kind,life:1.8,damage,r:kind==='heart'?8:kind==='bill'?7:4,pierce:kind==='bill'?1:0,hitIds:new Set(),...(kind==='heart'&&this.s.evolutions.viralLove?{viral:true,linkX:x,linkY:y}:{})});}
   updateShots(dt){
     const s=this.s,buckets=new Map(),size=80;
-    for(const e of this.combatTargets()){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
+    for(const e of this.combatTargets()){const point=this.targetPosition(e),key=`${Math.floor(point.x/size)},${Math.floor(point.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
     // Boss hearts retain full damage. Brief interrupts plus recovery let the
     // existing warned attacks finish without long untargetable charm windows.
-    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || length(e.x-p.x,e.y-p.y)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(e.type!=='charles' && p.kind==='heart' && !p.drone && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
+    for(const p of s.shots){p.life-=dt;const steps=Math.max(1,Math.ceil(length(p.vx,p.vy)*dt/17));for(let i=0;i<steps && p.life>0;i++){p.x+=p.vx*dt/steps;p.y+=p.vy*dt/steps;const cx=Math.floor(p.x/size),cy=Math.floor(p.y/size);let hit=false;for(let a=cx-1;a<=cx+1 && !hit;a++)for(let b=cy-1;b<=cy+1 && !hit;b++)for(const e of buckets.get(`${a},${b}`)||[]){if(e.dead || e.charmed>0 || p.hitIds?.has(e.id) || dist(this.targetPosition(e),p)>e.r+(p.r||4))continue;p.hitIds?.add(e.id);this.hurt(e,p.damage);if(e.type!=='charles' && p.kind==='heart' && !p.drone && !e.dead && this.random()<.55+.08*this.rank('charisma')&&!(e.bossCharmResistance>0)){e.charmed=isMajorBoss(e.type)?.7+.1*this.rank('charisma'):2.5+.9*this.rank('charisma');if(isMajorBoss(e.type))e.bossCharmResistance=10;e.windup=0;e.swipe=0;e.charge=0;e.crow=0;e.phase='charmed';interruptAnimal(e);interruptEgoBeast(e);interruptPelican(e,'charmed');this.burst(e.x,e.y,'#ff80b5',4);}if(!bounceHeart(this,p,e)){if((p.pierce||0)>0)p.pierce--;else p.life=0;}hit=true;break;}}}
     s.shots=s.shots.filter(p=>p.life>0);
   }
-  hurt(e,damage){if(e.type==='charles'){hitCharles(this,e,damage);return;}if(e.dead)return;e.hp-=damage;e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
+  hurt(e,damage){if(e.type==='charles'){hitCharles(this,e,damage);return;}if(e.dead)return;e.hp-=damage*egoDamageMultiplier(e);e.hitFlash=.12;if(e.hp<=0){e.dead=true;this.kill(e);}}
   kill(e){
     if(e.type==='charles'||e.rewarded)return;e.rewarded=true;const s=this.s;s.kills++;
     if(e.type==='explosive')s.clouds.push({x:e.x,y:e.y,r:26,maxr:65,arm:.45,life:3.2,maxlife:3.2,vx:0,vy:0});const elite=isMajorBoss(e.type),mini=isRival(e.type),xp=elite?22:mini?9:e.type==='tank'?4:e.type==='orangutan'?3:2;

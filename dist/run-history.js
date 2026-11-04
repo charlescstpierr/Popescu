@@ -2,13 +2,14 @@ import {DIFFICULTIES,UPGRADES} from './content.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
 import {BOSS_TROPHIES} from './boss-trophies.js';
 import {ANIMALS} from './animals.js';
+import {EGO_BEASTS} from './ego-beasts.js';
 
 // Additive metadata has its own version; existing run snapshots and totals retain
 // their schema. Never assign an old aggregate record to an invented difficulty.
 export const RUN_HISTORY_LIMIT=20;
 const MODES=['survival','endless'];
 const SOURCES=['touch','gas','explosion','shockwave','tail','pelican','unknown'];
-const ACTORS=[...Object.keys(ANIMALS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
+const ACTORS=[...Object.keys(ANIMALS),...Object.keys(EGO_BEASTS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;
 const count=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e12;
 const number=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1e12;

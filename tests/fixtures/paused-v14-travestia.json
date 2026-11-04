@@ -1,0 +1,244 @@
+{
+  "version": 14,
+  "game": {
+    "encounters": {
+      "active": {
+        "id": "boss:travestia",
+        "actorId": 1,
+        "actorType": "travestia",
+        "scope": "survival",
+        "start": 0,
+        "pair": 0,
+        "lines": [
+          {
+            "who": "TRAVESTIA",
+            "text": "Vas-y Toma, je sais que tu veux toucher ma queue, touche-la Toma"
+          },
+          {
+            "who": "TOMA",
+            "text": "FUCKK !"
+          }
+        ],
+        "index": 1
+      },
+      "queue": [],
+      "outcomes": {
+        "boss:travestia": "active"
+      },
+      "legacyActorIds": []
+    },
+    "speech": {
+      "active": null,
+      "queue": [],
+      "nextId": 1,
+      "scene": null
+    },
+    "bossDirector": {
+      "rng": 2276972895,
+      "bag": [
+        "pelican",
+        "matriarch"
+      ],
+      "nextType": "travestia",
+      "remaining": 181.8089438835159,
+      "warned": false,
+      "retryIn": 0,
+      "lastType": null
+    },
+    "seed": 152,
+    "rng": 152,
+    "id": 2,
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "timers": {
+      "spawn": 0.02,
+      "car": 1,
+      "money": 1,
+      "airplane": 2,
+      "chopper": 0.1,
+      "truth": 1,
+      "bark": 13,
+      "chest": 28,
+      "horde": 20,
+      "pack": 10,
+      "rival": 60,
+      "animal": 6,
+      "animalIndex": 0
+    },
+    "eventSeen": [],
+    "nextEvent": 28,
+    "lastHit": -10,
+    "barkIndex": 0,
+    "stuntRng": 1261958920,
+    "stuntCharge": 0,
+    "runStreak": 0,
+    "stuntWait": 13.762936245650053,
+    "pendingStuntReply": null,
+    "pendingRivalReply": null,
+    "rivalIndex": 0,
+    "rivalBarkIndex": 0,
+    "lastRivalBark": -100,
+    "rivalRng": 2135587981,
+    "speechUntil": 0,
+    "discoveryCooldowns": [],
+    "discoveryContact": null,
+    "s": {
+      "mode": "dialogue",
+      "difficulty": "normal",
+      "x": 0,
+      "y": 0,
+      "hp": 100,
+      "maxhp": 100,
+      "shield": 0,
+      "xp": 0,
+      "xpNeed": 8,
+      "level": 1,
+      "elapsed": 112,
+      "kills": 14,
+      "coins": 31,
+      "coinsSpent": 0,
+      "upgradeRerolls": 0,
+      "evolutions": {},
+      "trophies": {
+        "chosen": {},
+        "pending": [],
+        "cooldowns": {
+          "tarot": 0,
+          "ascendant": 0,
+          "panache": 0,
+          "star": 0,
+          "fanclub": 0
+        },
+        "tarot": null,
+        "panache": null,
+        "starLife": 0,
+        "feedback": null
+      },
+      "charles": null,
+      "gems": 0,
+      "endless": false,
+      "invulnerable": 0,
+      "moveX": 0,
+      "moveY": 0,
+      "travelX": 0,
+      "travelY": 0,
+      "walkDistance": 0,
+      "walkMoving": false,
+      "faceX": 0,
+      "faceY": 1,
+      "aimX": 1,
+      "aimY": 0,
+      "aimSide": 1,
+      "stunt": {
+        "kind": "split",
+        "progress": 0,
+        "time": 0,
+        "duration": 1.3,
+        "active": false,
+        "faceX": 0,
+        "faceY": 1,
+        "count": 0
+      },
+      "upg": {},
+      "companion": false,
+      "girl": {
+        "x": -28,
+        "y": 24,
+        "hp": 70,
+        "maxhp": 70,
+        "down": 0,
+        "shoot": 0
+      },
+      "enemies": [
+        {
+          "id": 1,
+          "type": "travestia",
+          "sex": null,
+          "x": 100,
+          "y": 0,
+          "hp": 1830.0159999999998,
+          "maxhp": 1830.0159999999998,
+          "r": 30,
+          "speed": 40.0192,
+          "phase": "tail_windup",
+          "faceX": -1,
+          "faceY": 0,
+          "gasPose": 0,
+          "windup": 0,
+          "hitFlash": 0,
+          "charmed": 0,
+          "dead": false,
+          "cooldown": 0,
+          "attack": 0,
+          "summon": 6,
+          "crow": 0,
+          "charge": 0,
+          "chargeDirX": 0,
+          "chargeDirY": 1,
+          "banterCount": 0,
+          "nextTaunt": 0,
+          "swipe": 0,
+          "swipeDirX": 0,
+          "swipeDirY": 1,
+          "target": "player",
+          "tailTime": 4.2,
+          "tailFaceX": -1,
+          "tailHitPlayer": false,
+          "tailHitGirl": false,
+          "tailMoving": false,
+          "tailWarning": 4.2,
+          "tailReply": "FUCKK !",
+          "tailBanterIndex": 1,
+          "tailTauntAt": 130,
+          "tailReplyPending": false
+        }
+      ],
+      "shots": [],
+      "drops": [],
+      "clouds": [],
+      "particles": [],
+      "vehicles": [],
+      "pulses": [],
+      "chests": [],
+      "shockwaves": [],
+      "options": [],
+      "shotClock": 0.12,
+      "airplane": {
+        "x": 0,
+        "y": 0,
+        "active": false,
+        "life": 0,
+        "r": 440
+      },
+      "stats": {
+        "speed": 144,
+        "damage": 18,
+        "fireInterval": 0.52,
+        "magnet": 70,
+        "gasMultiplier": 1,
+        "shieldMax": 0,
+        "range": 620
+      },
+      "discovery": {
+        "active": null,
+        "count": 0,
+        "nearby": null
+      }
+    }
+  },
+  "dialogue": {
+    "lines": [
+      {
+        "who": "TRAVESTIA",
+        "text": "Vas-y Toma, je sais que tu veux toucher ma queue, touche-la Toma"
+      },
+      {
+        "who": "TOMA",
+        "text": "FUCKK !"
+      }
+    ],
+    "index": 1
+  }
+}

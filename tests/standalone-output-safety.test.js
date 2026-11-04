@@ -5,6 +5,13 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+let skipNativeQA=false;
+try{require.resolve('@napi-rs/canvas');}catch(error){
+ if(error.code!=='MODULE_NOT_FOUND')throw error;
+ skipNativeQA='Optional native screenshot QA requires an already installed @napi-rs/canvas; output rejection tests remain active.';
+}
 const root=fileURLToPath(new URL('../',import.meta.url));
 const html=path.join(root,'release/Toma_Popescu_JOUER.html');
 const script=path.join(root,'scripts/inspect-standalone.cjs');
@@ -38,7 +45,7 @@ test('screenshot inspector refuses any existing symlink without touching its oth
   assert.equal(readFileSync(target,'utf8'),'preserve this unrelated HTML');
  }finally{rmSync(tmp,{recursive:true,force:true});}
 });
-test('atomic screenshot publication does not follow a symlink substituted after validation',()=>{
+test('atomic screenshot publication does not follow a symlink substituted after validation',{skip:skipNativeQA},()=>{
  const tmp=mkdtempSync(path.join(path.dirname(html),'.output-safety-'));
  const before=hash();
  try{

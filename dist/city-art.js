@@ -108,7 +108,7 @@ export class CityArt {
     R(c,'#3c3d4c',left+setback+3,top-4,upper-3,3);
     R(c,'#d0bfb6',left-7,top-3,w+19,5);R(c,'#403b4d',left-5,top+3,w+15,4);
     for(let y=top+17;y<foot-47;y+=42){
-      for(let x=left+15;x<w/2-27;x+=31)this._window(c,x,y,22,25,PALETTES[1],Math.floor(hash(x,y,seed)*5),()=>0);
+      for(let x=left+15;x<w/2-27;x+=31)this._window(c,x,y,22,25,PALETTES[1],hash(x,y,seed)>.58?0:1,()=>0);
       R(c,'#25283a',left+7,y+28,w-18,9);R(c,'#b5a6a5',left+5,y+30,w-14,5);R(c,'#514c60',left+6,y+36,w-15,4);
       R(c,'#34404a',left+9,y+18,w-24,3);R(c,'#a8aca8',left+9,y+18,w-24,1);
       for(let x=left+10;x<w/2-15;x+=9)R(c,'#34404a',x,y+20,2,10);
@@ -283,11 +283,11 @@ export class CityArt {
     for(let ax=minBX;ax<=maxBX;ax++)for(let ay=minBY;ay<=maxBY;ay++)this._blockGround(c,ax*512,ay*512,seed);
     c.restore();
     // Branching fractures cut across patches instead of forming a repeated grid.
-    for(let i=0;i<10;i++){let x=random()*256,y=random()*256;const length=15+random()*48,angle=random()*TAU;for(let j=0;j<4;j++){const nx=x+Math.cos(angle+(random()-.5)*.8)*length/4,ny=y+Math.sin(angle+(random()-.5)*.8)*length/4;L(c,'#171a2d',x,y,nx,ny,2);L(c,'#675069',x+1,y+1,nx+1,ny+1,1);if(j===2)L(c,'#18192b',x,y,x+random()*14-7,y+random()*14-7,1);x=nx;y=ny;}}
+    for(let i=0;i<5;i++){let x=random()*256,y=random()*256;const length=15+random()*48,angle=random()*TAU;for(let j=0;j<4;j++){const nx=x+Math.cos(angle+(random()-.5)*.8)*length/4,ny=y+Math.sin(angle+(random()-.5)*.8)*length/4;L(c,'#171a2d',x,y,nx,ny,2);L(c,'#675069',x+1,y+1,nx+1,ny+1,1);if(j===2)L(c,'#18192b',x,y,x+random()*14-7,y+random()*14-7,1);x=nx;y=ny;}}
     // Rain-dark puddles with broken pink/cyan reflections.
-    for(let i=0;i<3;i++){const x=random()*240+8,y=random()*240+8,w=16+random()*39,h=6+random()*15;blot(c,x,y,w+4,h+3,'#191e32',random);blot(c,x,y,w,h,'#293047',random);const tint=i%2?'#73516e':'#436276';for(let s=0;s<5;s++){const yy=y-h/3+s*h/7,span=w*(.25+random()*.35);R(c,tint,x-span/2+random()*5,yy,span,1);}R(c,'#8291a0',x-w/4,y-h/3,7,1);}
+    for(let i=0;i<2;i++){const x=random()*240+8,y=random()*240+8,w=16+random()*39,h=6+random()*15;blot(c,x,y,w+4,h+3,'#191e32',random);blot(c,x,y,w,h,'#293047',random);const tint=i%2?'#73516e':'#436276';for(let s=0;s<5;s++){const yy=y-h/3+s*h/7,span=w*(.25+random()*.35);R(c,tint,x-span/2+random()*5,yy,span,1);}R(c,'#8291a0',x-w/4,y-h/3,7,1);}
     // Small narrative debris, laid into the ground with contact shadows.
-    for(let i=0;i<7;i++)this._litter(c,random()*244+6,random()*244+6,Math.floor(random()*6),random);
+    for(let i=0;i<3;i++)this._litter(c,random()*244+6,random()*244+6,Math.floor(random()*6),random);
     if(random()>.42)this._drain(c,24+random()*205,20+random()*215);
     this._forestEdge(c,tx,ty,seed);
     this._riverTile(c,tx,ty,seed);
@@ -304,6 +304,12 @@ export class CityArt {
     // Quiet backlot texture and subtle parking-bay outlines.
     for(let i=0;i<18;i++){const a=hash(x+i,y,seed),b=hash(x,y+i,seed+1);R(c,'#514052',x+147+a*215,y+149+b*215,2+i%3,1);}
     L(c,'#65575e',x+141,y+159,x+141,y+304,1);L(c,'#65575e',x+96,y+160,x+132,y+160,1);L(c,'#65575e',x+96,y+286,x+132,y+286,1);
+    // Low planting beds soften service yards while leaving every saved walking
+    // route and collision untouched. They are ground texture, never fake walls.
+    const garden=rng(Math.floor(hash(x,y,seed+271)*4294967295));
+    const bedX=x+144,bedY=y+148,bedW=62+Math.floor(garden()*22),bedH=33+Math.floor(garden()*24);
+    P(c,'#555952',[[bedX,bedY+6],[bedX+8,bedY],[bedX+bedW-6,bedY+3],[bedX+bedW,bedY+bedH-5],[bedX+bedW-10,bedY+bedH],[bedX,bedY+bedH-7]]);
+    for(let i=0;i<58;i++){const gx=bedX+4+garden()*(bedW-10),gy=bedY+7+garden()*(bedH-15);R(c,i%3?'#55705a':'#779071',gx,gy,3+garden()*4,2);if(i%7===0)R(c,i%2?'#c692a8':'#d4bc8b',gx+1,gy-2,2,2);}
     // Individual slab joins are staggered. Chipped curbs alternate lit and worn blocks.
     for(let q=101;q<420;q+=23){L(c,'#332f45',x+q,y+89,x+q,y+134,1);L(c,'#332f45',x+q,y+381,x+q,y+422,1);R(c,'#97818d',x+q+1,y+88,15,2);R(c,'#8e7c89',x+q+1,y+423,15,2);}
     for(let q=101;q<420;q+=24){L(c,'#353045',x+89,y+q,x+134,y+q,1);L(c,'#353045',x+381,y+q,x+422,y+q,1);R(c,'#8f7c8b',x+88,y+q+1,2,15);R(c,'#9f8493',x+423,y+q+1,2,15);}
@@ -608,7 +614,7 @@ export class CityArt {
     return x+cw>=camera.x-width/2&&x<=camera.x+width/2&&y+ch>=camera.y-height*.48&&y<=camera.y+height*.52;
   }
   _propImage(p,seed){
-    const w=Math.round(p.w||40),h=Math.round(p.h||40),baseVariant=p.variant??Math.floor(hash(p.x,p.y,seed)*5),v=p.type==='billboard'?((baseVariant+Math.floor(p.x/512)+2*Math.floor(p.y/512))%5+5)%5:baseVariant,detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${p.buildingKind||'apartment'}:${p.damage||0}:${w}:${h}:${v}:${detail}`;
+    const w=Math.round(p.w||40),h=Math.round(p.h||40),baseVariant=p.variant??Math.floor(hash(p.x,p.y,seed)*5),v=p.artVariant??(p.type==='billboard'?((baseVariant+Math.floor(p.x/512)+2*Math.floor(p.y/512))%5+5)%5:baseVariant),detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${p.buildingKind||'apartment'}:${p.damage||0}:${w}:${h}:${v}:${detail}`;
     if(this.props.has(key))return this.props.get(key);
     const building=p.type==='building',cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100,ch=building?h+190:180,ax=Math.floor(cw/2),ay=building?Math.ceil(h/2)+110:110;
     const image=canvas(cw,ch);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;c.translate(ax,ay);
@@ -620,14 +626,19 @@ export class CityArt {
     // Fade only foreground architecture/canopies that cover the player. The
     // underlying collider and depth stay unchanged; there is no hidden corridor.
     const cover=propForegroundBounds(p);
-    const obscures=cover&&focus&&focus.y+10<cover.foot&&focus.y>cover.top&&focus.y-64<cover.foot&&Math.abs(focus.x-p.x)<cover.halfWidth+16;
+    const coversActor=(actor,padding=16)=>actor&&actor.y+10<cover.foot&&actor.y>cover.top&&actor.y-64<cover.foot&&Math.abs(actor.x-p.x)<cover.halfWidth+padding;
+    const obscures=cover&&focus&&(coversActor(focus)||(focus.companion&&coversActor(focus.girl))||(focus.enemies||[]).some(e=>!e.dead&&e.hp>0&&coversActor(e,38)));
     if(obscures){ctx.save();ctx.globalAlpha=.34;}
-    ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
+    if(p.artScale&&p.artScale!==1){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.scale(p.artScale,p.artScale);ctx.drawImage(item.image,item.x,item.y);ctx.restore();}
+    else ctx.drawImage(item.image,Math.round(p.x+item.x),Math.round(p.y+item.y));
     if(obscures)ctx.restore();
     if(reduced)return;
+    const scaled=p.artScale&&p.artScale!==1;
+    if(scaled){ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.artScale,p.artScale);ctx.translate(-p.x,-p.y);}
     // Minute life in an abandoned district: unreliable neon, not whole-screen flashes.
     if(p.type==='lamp'){const flicker=Math.sin(time*1.2+p.x)>.93?.45:1;ctx.save();ctx.globalAlpha=.32*flicker;O(ctx,'#ffe2a3',p.x+10,p.y-89,29,14,2);ctx.globalAlpha=.64*flicker;R(ctx,'#fff0c8',p.x+15,p.y-84,16,2);ctx.restore();}
     else if(p.type==='phone'){ctx.save();ctx.globalAlpha=.2+.12*Math.sin(time*2+p.y);R(ctx,'#ee71b7',p.x-11,p.y-62,25,1);ctx.restore();}
     else if(p.type==='mirror'&&Math.sin(time*.6+p.x)>.85)star(ctx,p.x+8,p.y-48,'#e6d8ed',2);
+    if(scaled)ctx.restore();
   }
 }

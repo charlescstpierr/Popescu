@@ -44,7 +44,7 @@ test('viral heart hits at most three distinct enemies and cannot bounce back',()
 });
 test('legacy v6 migration preserves pending boss, RNG, warning and exact offered cards',()=>{
  const g=new Game({seed:7});g.s.coins=22;g.gainXP(8);g.bossDirector.remaining=3;g.bossDirector.warned=true;
- const legacy=captureRun(g);legacy.version=6;delete legacy.game.s.coinsSpent;delete legacy.game.s.upgradeRerolls;delete legacy.game.s.evolutions;
+ const legacy=captureRun(g);legacy.version=6;delete legacy.game.timers.ego;delete legacy.game.timers.egoIndex;delete legacy.game.s.coinsSpent;delete legacy.game.s.upgradeRerolls;delete legacy.game.s.evolutions;
  const b=restoreRun(legacy);assert.deepEqual(b.bossDirector,g.bossDirector);assert.deepEqual(b.s.options,g.s.options);assert.equal(b.s.coinsSpent,0);assert.equal(b.s.upgradeRerolls,0);
 });
 test('lifetime credits use total earned before and after spending without duplication',()=>{

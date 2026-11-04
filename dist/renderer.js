@@ -1,3 +1,5 @@
+import {EGO_BEASTS,egoCamoRatio} from './ego-beasts.js';
+import {drawEgoGround,drawEgoForeground} from './ego-art.js';
 import {drawLamborghini} from './lamborghini-art.js';
 import {pickupAttraction} from './drops.js';
 import {CompanionArt} from './companion-art.js';
@@ -8,6 +10,7 @@ import {BOSS_TROPHIES,chestTrophyEligible} from './boss-trophies.js';
 import {drawAnimalWarning} from './animals.js';
 import {TAIL_DASH,DASH_DIRECTIONS} from './travestia-dash.js';
 import {propDepth} from './prop-geometry.js';
+import {presentSceneryProp} from './scenery-presentation.js';
 import {drawDiscovery} from './discovery-art.js';
 import {TRAVESTIA} from './travestia.js';
 import {drawPelicanGround,drawPelicanCards} from './pelican-art.js';
@@ -506,7 +509,7 @@ this._shadow(x,y+7,40,8);
       const original=makeCanvas(224,224),ivory=makeCanvas(224,224);if(!original||!ivory)return;
       const c=original.getContext('2d');c.imageSmoothingEnabled=false;c.translate(112,184);
       const actor={...effect.actor,x:0,y:0,hitFlash:0};
-      if(!this.actors.draw(c,actor,'enemy',effect.phase,s,effect.start,true)){
+      if(!this.actors.draw(c,actor,'enemy',effect.phase,s,effect.start,true)&&!EGO_BEASTS[actor.type]){
         const scale=ENEMY_SCALE[actor.type]||.84,sprite=this._sprite('gorilla',effect.phase,actor.faceY<-.45,actor.type);
         if(sprite)c.drawImage(sprite,-34*scale,10-71*scale,68*scale,76*scale);
       }
@@ -560,6 +563,7 @@ this._shadow(x,y+7,40,8);
     const fx=actor.faceX??s.faceX??1,fy=actor.faceY??s.faceY??0,back=gas||fy<-.45;
     const scale=isEnemy?(ENEMY_SCALE[type]||.84):(isGirl?.82:.88);
     if(['travestia','pelican'].includes(type)&&!this.actors.availableFor(actor,kind)){ctx.save();ctx.fillStyle='#ffbd6b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(type==='pelican'?'PÉLI ZODIAQUE':'TRAVESTIA',actor.x,actor.y-35);ctx.restore();return;}
+    if(EGO_BEASTS[type]){ctx.save();if(egoCamoRatio(actor)===0)this._shadow(Math.round(actor.x),Math.round(actor.y)+8,36,9);this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);drawEgoForeground(ctx,actor);ctx.restore();return;}
     const sprite=this.actors.availableFor(actor,kind)?null:this._sprite(kind==='enemy'?'gorilla':kind,phase,back,type);
     if(!sprite&&!this.actors.availableFor(actor,kind))return;
     const x=Math.round(actor.x),y=Math.round(actor.y),flip=fx<-.1&&!gas;
@@ -680,7 +684,7 @@ this._shadow(x,y+7,40,8);
       ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
       rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
     }
-    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
+    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawEgoGround(ctx,e,this.reducedEffects);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
     for(const p of shockwaves||[])this._shockwave(p);
   }
   render(game,time=0) {
@@ -697,7 +701,7 @@ this._shadow(x,y+7,40,8);
     const camera={x:s.x||0,y:(s.y||0)-charlesInset},ox=Math.round(w/2-camera.x),oy=Math.round(h*.48-camera.y);
     ctx.save();ctx.translate(ox,oy);
     this._drawGround(camera,seed);
-    const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>charlesProp(p,destroyed)).filter(p=>this.city.isPropVisible(p,camera,w,h));
+    const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>presentSceneryProp(charlesProp(p,destroyed))).filter(p=>p&&this.city.isPropVisible(p,camera,w,h));
     this.city.drawRiverLandings(ctx,props);
     const enemies=s.enemies||[],shots=s.shots||[],clouds=s.clouds||[],drops=s.drops||[],particles=s.particles||[];
     // Lamps cast local pools on pavement before any object or actor is painted.

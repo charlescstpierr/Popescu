@@ -17,11 +17,11 @@ test('published v10 Charles saves acquire speech and replay metadata without cha
  const storage=memory(),store=new RunStore(storage),g=new Game({seed:72});
  g.s.elapsed=1200;g.s.mode='victory';assert.ok(g.startCharlesEpilogue());
  assert.ok(store.begin('legacy-charles',g,{best:1400,lifetime:19,coins:7}).ok);
- const old=JSON.parse(storage.getItem(store.key));old.version=10;old.run.snapshot.version=10;delete old.run.snapshot.game.speech;delete old.replay;
+ const old=JSON.parse(storage.getItem(store.key));old.version=10;old.run.snapshot.version=10;delete old.run.snapshot.game.timers.ego;delete old.run.snapshot.game.timers.egoIndex;delete old.run.snapshot.game.speech;delete old.replay;
  const raw=JSON.stringify(old);storage.setItem(store.key,raw);
  const migratedStore=new RunStore(storage),saved=record(migratedStore);
  assert.equal(storage.getItem(store.key),raw);assert.deepEqual(saved.totals,old.totals);
- assert.equal(saved.version,13);assert.equal(saved.replay.legacyBest,1400);assert.deepEqual(saved.replay.history,[]);
+ assert.equal(saved.version,15);assert.equal(saved.replay.legacyBest,1400);assert.deepEqual(saved.replay.history,[]);
  const resumed=restoreRun(saved.run.snapshot);assert.deepEqual(resumed.s.charles,g.s.charles);assert.equal(resumed.speech.active,null);
  assert.ok(migratedStore.checkpoint('legacy-charles',resumed,{credit:true}).ok);
  assert.equal(record(migratedStore).replay.history[0].outcome,'victory');

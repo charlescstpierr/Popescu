@@ -9,3 +9,6 @@ qa-output/
 
 # Reproducible raw verification frames; the review video is retained.
 proof/charles/frames/
+
+# Optional large exports are generated on demand, never the current release.
+generated/
