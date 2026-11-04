@@ -237,7 +237,7 @@ function companionLevel(rank=1){return COMPANION_LEVELS[Math.max(0,Math.min(4,(M
 
 const UPGRADES = [
   { id: 'muscle', name: 'Muscles Photoshop', desc: 'Dégâts des balles +25 % par rang. Le certificat sent le toner.', icon: 'muscle', max: 5, color: '#fb6d9d' },
-  { id: 'car', name: 'Lamborghini imaginaire', desc: 'Un char fonce dans la horde. Chaque rang augmente ses dégâts et sa fréquence.', icon: 'car', max: 5, color: '#f4bd58' },
+  { id: 'car', name: 'Lamborghini imaginaire', desc: 'Du coupé au convoi : pare-chocs, voie élargie, retour et deux voitures.', icon: 'car', max: 5, color: '#f4bd58' },
   { id: 'followers', name: 'Abonnés fictifs', desc: 'Cadence de tir +18 % par rang. Un tir supplémentaire aux rangs 3 et 5.', icon: 'followers', max: 5, color: '#69cafa' },
   { id: 'ego', name: 'Ego surdimensionné', desc: '+20 PV maximum et 25 PV récupérés par rang. Ça déborde du cadre.', icon: 'ego', max: 5, color: '#cf83ff' },
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
@@ -1366,6 +1366,87 @@ function updateCarBills(game,car,dt){
 modules["./evolutions.js"]={EVOLUTIONS,REROLL_COSTS,evolutionReady,totalEarnedCoins,bounceHeart,updateCarBills};
 })();
 (()=>{
+const {updateCarBills}=modules['./evolutions.js'];
+// Frozen rank data drives physics, choice copy and artwork. Trips retain their
+// launch rank, so an upgrade never changes a car already crossing the screen.
+const CAR_LEVELS=Object.freeze([
+ {name:'Coupé fantôme',description:'Un coupé jaune traverse la horde en ligne droite.',damage:72,speed:455,interval:8.9,halfWidth:36,halfHeight:18,knockback:0,returns:false,count:1},
+ {name:'Pare-chocs VIP',description:'Le pare-chocs renforcé repousse les ennemis ordinaires au contact.',damage:94,speed:490,interval:7.8,halfWidth:39,halfHeight:18,knockback:22,returns:false,count:1},
+ {name:'Version large',description:'Une carrosserie plus large frappe un couloir élargi et repousse au contact.',damage:116,speed:525,interval:6.7,halfWidth:43,halfHeight:25,knockback:26,returns:false,count:1},
+ {name:'Retour du voiturier',description:'Après son passage, le char marque une pause puis revient dans la même voie. 82 dégâts par passage.',damage:82,speed:560,interval:6.5,halfWidth:43,halfHeight:25,knockback:26,returns:true,count:1},
+ {name:'Convoi présidentiel',description:'Deux voitures décalées font l’aller-retour. 64 dégâts par voiture et par passage; deux voitures actives maximum.',damage:64,speed:595,interval:7.5,halfWidth:43,halfHeight:25,knockback:26,returns:true,count:2},
+].map((level,index)=>Object.freeze({...level,rank:index+1})));
+const CAR_TRIP=Object.freeze({distance:960,halfDistance:480,turnDelay:.32,escortDelay:.3,maxActive:2});
+function carLevel(rank=1){return CAR_LEVELS[Math.max(0,Math.min(4,(Math.trunc(rank)||1)-1))];}
+function launchLamborghini(game){
+ const s=game.s,level=carLevel(game.rank('car'));
+ if(s.vehicles.filter(v=>v.kind==='car'&&v.life>0).length+level.count>CAR_TRIP.maxActive)return false;
+ for(let i=0;i<level.count;i++){
+  const delay=i*CAR_TRIP.escortDelay,originY=s.y+40+(i?8:0);
+  s.vehicles.push({kind:'car',x:s.x-CAR_TRIP.halfDistance,y:originY,vx:level.speed,vy:0,damage:level.damage,hitIds:new Set(),
+   life:CAR_TRIP.distance/level.speed*(level.returns?2:1)+(level.returns?CAR_TRIP.turnDelay:0)+delay,
+   carRank:level.rank,carOriginX:s.x,carOriginY:originY,carPhase:'out',carTurnClock:0,carDelay:delay,
+   ...(i===0&&s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});
+ }
+ game.powerEffect('car','activate');game.sound('truth');return true;
+}
+function contacts(game,v,fromX,toX,level){
+ const left=Math.min(fromX,toX)-level.halfWidth,right=Math.max(fromX,toX)+level.halfWidth;
+ for(const e of game.combatTargets()){
+  if(e.dead||v.hitIds.has(e.id)||e.x+e.r<=left||e.x-e.r>=right||Math.abs(e.y-v.y)>=e.r+level.halfHeight)continue;
+  v.hitIds.add(e.id);game.hurt(e,level.damage);
+  // Boss positions and locked attack lanes must not shift under their warnings.
+  if(level.knockback&&!e.dead&&!['charles','pelican','travestia','matriarch'].includes(e.type)&&!(e.windup>0||e.charge>0||e.swipe>0||e.crow>0||e.gasPose>0))game.move(e,Math.sign(v.vx)*level.knockback,0,e.r*.6);
+  game.burst(e.x,e.y,'#f2bd53',Math.min(4,Math.max(0,200-game.s.particles.length)));
+ }
+}
+function updateLamborghini(game,v,dt){
+ const level=carLevel(v.carRank),epsilon=1e-9;let remaining=Math.max(0,dt);
+ // At most: escort wait, three outbound bill segments, turn, return. No queue,
+ // timers or extra vehicles are allocated when crossing an endpoint.
+ for(let transitions=0;remaining>epsilon&&v.life>epsilon&&transitions<10;transitions++){
+  if(v.carDelay>epsilon){const step=Math.min(remaining,v.carDelay);v.carDelay=Math.max(0,v.carDelay-step);v.life-=step;remaining-=step;continue;}
+  if(v.carPhase==='turn'){
+   const step=Math.min(remaining,v.carTurnClock);v.carTurnClock=Math.max(0,v.carTurnClock-step);v.life-=step;remaining-=step;
+   if(v.carTurnClock<=epsilon){v.carTurnClock=0;v.carPhase='back';v.vx=-level.speed;v.hitIds.clear();}continue;
+  }
+  const end=v.carOriginX+(v.carPhase==='out'?CAR_TRIP.halfDistance:-CAR_TRIP.halfDistance);
+  const untilEnd=Math.abs(end-v.x)/level.speed;
+  const untilBill=v.billSalvos>0?Math.max(epsilon,v.billClock):Infinity;
+  const step=Math.min(remaining,untilEnd,untilBill),before=v.x;
+  v.x+=v.vx*step;contacts(game,v,before,v.x,level);updateCarBills(game,v,step);v.life=Math.max(0,v.life-step);remaining-=step;
+  if(untilEnd-step<=epsilon){
+   v.x=end;
+   if(v.carPhase==='out'&&level.returns){v.carPhase='turn';v.carTurnClock=CAR_TRIP.turnDelay;v.vx=0;}
+   else{v.life=0;break;}
+  }
+ }
+ if(v.carDelay<epsilon)v.carDelay=0;
+ if(v.life<epsilon)v.life=0;
+}
+function validLamborghiniState(v,ownedRank){
+ const fields=['carRank','carOriginX','carOriginY','carPhase','carTurnClock','carDelay'];
+ if(!fields.some(key=>v[key]!==undefined))return true; // pre-feature vehicles
+ if(v.kind!=='car'||!Number.isInteger(v.carRank)||v.carRank<1||v.carRank>5||v.carRank>ownedRank)return false;
+ const level=carLevel(v.carRank),near=(a,b)=>Number.isFinite(a)&&Math.abs(a-b)<1e-6;
+ if(!Number.isFinite(v.carOriginX)||Math.abs(v.carOriginX)>1e8||!Number.isFinite(v.carOriginY)||Math.abs(v.carOriginY)>1e8||!near(v.y,v.carOriginY)||v.vy!==0||v.damage!==level.damage)return false;
+ if(!['out','turn','back'].includes(v.carPhase)||!Number.isFinite(v.carDelay)||v.carDelay<0||v.carDelay>CAR_TRIP.escortDelay||!Number.isFinite(v.carTurnClock)||v.carTurnClock<0||v.carTurnClock>CAR_TRIP.turnDelay)return false;
+ if(Math.abs(v.x-v.carOriginX)>CAR_TRIP.halfDistance+1e-6)return false;
+ if(v.carDelay>0&&(v.carRank!==5||v.carPhase!=='out'||!near(v.x,v.carOriginX-CAR_TRIP.halfDistance)))return false;
+ if(!level.returns&&v.carPhase!=='out')return false;
+ if(v.carPhase==='turn'){
+  if(v.vx!==0||v.carTurnClock<=0||!near(v.x,v.carOriginX+CAR_TRIP.halfDistance)||v.carDelay!==0)return false;
+ }else if(v.vx!==(v.carPhase==='out'?level.speed:-level.speed)||v.carTurnClock!==0)return false;
+ let life=v.carDelay;
+ if(v.carPhase==='out')life+=(v.carOriginX+CAR_TRIP.halfDistance-v.x)/level.speed+(level.returns?CAR_TRIP.turnDelay+CAR_TRIP.distance/level.speed:0);
+ else if(v.carPhase==='turn')life+=v.carTurnClock+CAR_TRIP.distance/level.speed;
+ else life+=(v.x-v.carOriginX+CAR_TRIP.halfDistance)/level.speed;
+ return near(v.life,life)&&v.life>0&&new Set(v.hitIds).size===v.hitIds.length;
+}
+
+modules["./lamborghini.js"]={CAR_LEVELS,CAR_TRIP,carLevel,launchLamborghini,updateLamborghini,validLamborghiniState};
+})();
+(()=>{
 // Shared descriptions are the rules shown to the player, not separate UI copies.
 const DISCOVERIES = Object.freeze({
   ruin: {name:'Ruines du studio',description:'Fusil : dégâts +35 %',duration:24,color:'#e3b581',damage:1.35},
@@ -2312,6 +2393,7 @@ function recordReplay(replay,id,snapshot,{replaced=false}={}){
 modules["./run-history.js"]={RUN_HISTORY_LIMIT,createReplayState,lethalDamageCause,validateDeathCause,validateReplayState,recordReplay};
 })();
 (()=>{
+const {carLevel,launchLamborghini,updateLamborghini}=modules['./lamborghini.js'];
 const {lethalDamageCause}=modules['./run-history.js'];
 const {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled}=modules['./speech.js'];
 const {charlesActive,startCharles,finishCharles,hitCharles,updateCharles}=modules['./charles.js'];
@@ -2788,7 +2870,7 @@ class Game {
 
     if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle;const underBarrel=dist(target,s)<80&&(target.x-muzzle.x)*pose.aim.x+(target.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;
-    const car=this.rank('car');if(car && this.timers.car<=0){this.timers.car=Math.max(3,10-car*1.1);s.vehicles.push({x:s.x-480,y:s.y+40,vx:420+car*35,vy:0,life:2.6,kind:'car',damage:50+car*22,hitIds:new Set(),...(s.evolutions.billionaire?{billSalvos:2,billClock:.8}:{})});this.powerEffect('car','activate');this.sound('truth');}
+    const car=this.rank('car');if(car && this.timers.car<=0)this.timers.car=launchLamborghini(this)?carLevel(car).interval:.15;
     const money=this.rank('money');if(money && this.timers.money<=0){this.timers.money=Math.max(1.2,4-money*.4);const t=target||{x:s.x+s.faceX*100,y:s.y+s.faceY*100};for(let i=0;i<3+money;i++)this.shoot(s.x,s.y,t,'bill',16+money*9,310,(i-(2+money)/2)*.23);this.powerEffect('money','activate');}
     const airplane=this.rank('airplane');
     if(airplane && this.timers.airplane<=0){
@@ -2837,7 +2919,7 @@ class Game {
   damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
   explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.move(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
-  updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
+  updateVehicles(dt){for(const v of this.s.vehicles){if(v.kind==='car'&&v.carRank!==undefined){updateLamborghini(this,v,dt);continue;}v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
   updateClouds(dt){const s=this.s;for(const c of s.clouds){c.life-=dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=Math.exp(-dt*.45);c.vy*=Math.exp(-dt*.45);c.r=Math.min(c.maxr||49,c.r+dt*(c.maxr?16:10));c.arm=Math.max(0,(c.arm||0)-dt);if(c.life>0 && c.arm<=0 && length(c.x-s.x,c.y-s.y)<c.r+10)this.damage(7*(this.difficulty.damage||1),'gas');if(c.arm<=0 && s.companion && s.girl.down<=0 && length(c.x-s.girl.x,c.y-s.girl.y)<c.r+8)s.girl.hp-=dt*3*s.stats.gasMultiplier;}s.clouds=s.clouds.filter(c=>c.life>0);}
   updateShockwaves(dt,previousPlayer=this.s,previousGirl=this.s.girl){
     const s=this.s;
@@ -4395,6 +4477,57 @@ function drawCharlesForeground(ctx,c,reduced=false){
 modules["./charles-effects.js"]={charlesProp,charlesBeam,drawCharlesGround,drawCharlesForeground};
 })();
 (()=>{
+const {carLevel}=modules['./lamborghini.js'];
+const INK='#100e20',BODY='#d6a619',GOLD='#ffd634',LIGHT='#fff3a6';
+function rect(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
+function poly(c,color,points){c.fillStyle=color;c.beginPath();for(let i=0;i<points.length;i++){const [x,y]=points[i];if(i)c.lineTo(x,y);else c.moveTo(x,y);}c.closePath();c.fill();}
+function tire(c,x,y,w=9,h=18){rect(c,INK,x,y,w,h);rect(c,'#353647',x+2,y+2,w-3,h-3);rect(c,'#969da9',x+4,y+3,3,h-6);rect(c,'#d4d8d8',x+4,y+4,1,h-8);}
+// Native pixel geometry follows the approved three-quarter coupé: a broad front,
+// darker side, exposed tires, reinforced bumper, wide fenders and rear spoiler.
+// The simulation footprint grows at rank three, independently of projected roof.
+function drawLamborghini(c,v,reduced=false){
+ if(v.carDelay>0||v.life===0)return;
+ const rank=carLevel(v.carRank).rank,wide=rank>=3,w=wide?43:rank>=2?39:36,h=wide?25:18;
+ c.save();c.translate(Math.round(v.x),Math.round(v.y));if(v.vx<0||v.carPhase==='back')c.scale(-1,1);
+ c.save();c.globalAlpha=.35;rect(c,'#080913',-w+1,h+4,w*2+3,7);c.restore();
+ if(v.vx&&!reduced){for(let n=0;n<3;n++)rect(c,n===1?LIGHT:GOLD,-w-14-n*3,-9+n*9,10+n*4,2);}
+ // Low angular body, with a dark passenger side rather than a flat gold block.
+ poly(c,INK,[[-w,-2],[-w+11,-15],[-w+27,-31],[w-21,-31],[w,-13],[w+2,h-12],[w-13,h+3],[-w+3,h+3],[-w,h-3]]);
+ poly(c,BODY,[[-w+2,0],[w-14,0],[w-14,h],[ -w+5,h],[-w+2,h-4]]);
+ poly(c,'#a67b12',[[w-13,-1],[w-1,-11],[w-1,h-12],[w-13,h]]);
+ poly(c,'#f3bf25',[[w-12,1],[w-3,-6],[w-3,h-13],[w-12,h-3]]);
+ poly(c,'#ffe35d',[[-w+2,-2],[-w+13,-13],[w-2,-13],[w-14,-2]]);
+ // Windshield and side window retain a visibly three-quarter orientation.
+ poly(c,GOLD,[[-w+11,-13],[-w+28,-29],[w-22,-29],[w-2,-13],[w-14,-5]]);
+ poly(c,'#24324d',[[-w+16,-14],[-w+30,-27],[w-23,-27],[w-17,-14]]);
+ poly(c,'#8eacc0',[[-w+28,-26],[-w+23,-21],[-w+25,-21],[-w+31,-26]]);
+ poly(c,'#7893a9',[[-w+23,-20],[-w+27,-20],[-w+22,-15],[-w+27,-15]]);
+ poly(c,'#17263c',[[w-19,-26],[w-5,-14],[w-11,-9],[w-16,-14]]);
+ rect(c,LIGHT,-w+3,-2,w*2-19,3);rect(c,'#e9b924',-w+5,9,w*2-24,3);rect(c,'#9c7315',-w+5,h-4,w*2-23,3);
+ // Distinct lamps, dark grille and plate make the front legible at phone scale.
+ rect(c,LIGHT,-w+7,3,11,5);rect(c,LIGHT,w-29,3,10,5);rect(c,INK,-13,6,16,5);rect(c,'#c4bd8b',-9,h-2,10,3);
+ rect(c,'#6a5115',w-10,0,4,2);rect(c,'#f8d765',w-9,-6,3,4);
+ // Tires are intentionally above body paint: do not hide them behind the fascia.
+ tire(c,w-5,h-19,8,17);tire(c,w-23,h-9,10,18);rect(c,INK,-w+5,h-1,7,9);rect(c,'#444553',-w+7,h,3,7);
+ if(rank>=2){
+  rect(c,'#727883',-w+1,1,7,h-1);rect(c,'#c9cbd0',-w+1,2,4,h-3);
+  rect(c,'#727883',w-23,0,8,h-4);rect(c,'#d6d8d6',w-22,1,4,h-6);
+  rect(c,GOLD,-15,11,20,3);rect(c,'#927017',-13,14,16,3);
+ }
+ if(wide){rect(c,GOLD,-w+2,-9,9,8);rect(c,'#aa8115',-w+2,0,5,h-1);poly(c,'#ffe35d',[[w-29,-1],[w-24,-5],[w-17,-4],[w-14,1],[w-16,4],[w-23,1]]);}
+ if(rank>=4){rect(c,INK,-4,-34,4,9);rect(c,INK,w-17,-32,4,10);rect(c,INK,-9,-38,w+11,7);rect(c,GOLD,-7,-37,w+7,3);rect(c,'#ad7c13',-8,-33,w+9,3);}
+ if(rank===5){rect(c,LIGHT,-8,-11,4,8);rect(c,LIGHT,0,-11,4,8);rect(c,'#fff7db',w-10,7,3,3);}
+ if(v.carPhase==='turn'){
+  // This static cue announces the return; no trail implies motion while parked.
+  const y=h+14;rect(c,LIGHT,-13,y,21,2);rect(c,LIGHT,-13,y-3,3,8);rect(c,LIGHT,-17,y-1,5,4);
+ }
+ c.restore();
+}
+
+modules["./lamborghini-art.js"]={drawLamborghini};
+})();
+(()=>{
+const {drawLamborghini}=modules['./lamborghini-art.js'];
 const {pickupAttraction}=modules['./drops.js'];
 const {CompanionArt}=modules['./companion-art.js'];
 const {CharlesArt}=modules['./charles-art.js'];
@@ -4781,6 +4914,7 @@ class Renderer {
     const ctx=this.ctx;ctx.save();ctx.globalAlpha=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
   }
   _car(p,moving=false) {
+    if(moving&&p.carRank!==undefined){drawLamborghini(this.ctx,p,this.reducedEffects);return;}
     const ctx=this.ctx,x=p.x,y=p.y;
     if(moving&&!this.reducedEffects){
       // Speed marks stay attached to the actual car, never a second hitbox.
@@ -5067,6 +5201,17 @@ this._shadow(x,y+7,40,8);
     if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
     line(ctx,'#9c4f18',p.x-dx*9,p.y-dy*9,p.x,p.y,4);line(ctx,'#ffd540',p.x-dx*7,p.y-dy*7,p.x,p.y,2);rect(ctx,'#fff7bd',p.x-1,p.y-1,2,2);
   }
+  _dangerWarnings(enemies,shockwaves){
+    const ctx=this.ctx;
+    for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
+      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
+      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
+      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
+    }
+    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
+    for(const p of shockwaves||[])this._shockwave(p);
+  }
   render(game,time=0) {
     const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
@@ -5101,14 +5246,8 @@ this._shadow(x,y+7,40,8);
       ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
-    for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
-      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
-      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
-      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
-      rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
-    }
-    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
-    for(const p of s.shockwaves||[])this._shockwave(p);
+    const raisedCarWarnings=(s.vehicles||[]).some(v=>v.carRank!==undefined&&v.carDelay<=0&&v.life>0);
+    if(!raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
     const items=[];if(s.charles&&s.charles.phase!=='complete')items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
@@ -5142,6 +5281,7 @@ this._shadow(x,y+7,40,8);
     drawTrophyForeground(ctx,s,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects);
     this._shield(s);
+    if(raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}
@@ -5682,6 +5822,7 @@ class AudioManager {
 modules["./audio.js"]={MUSIC_SCORE,CHIP_VOICES,CHIP_WAVES,getMusicVoice,createChipNoise,getMusicStepEvents,AudioManager};
 })();
 (()=>{
+const {validLamborghiniState,CAR_TRIP}=modules['./lamborghini.js'];
 const {createReplayState,validateReplayState,recordReplay,validateDeathCause}=modules['./run-history.js'];
 const {createSpeech,SPEECH_QUEUE_LIMIT,speechDuration}=modules['./speech.js'];
 const {CHARLES,CHARLES_LINES}=modules['./charles.js'];
@@ -5933,6 +6074,8 @@ function validate(snapshot){
  if(s.deathCause!==undefined){check(s.mode==='gameover'&&s.hp===0);validateDeathCause(s.deathCause,s.elapsed,d.id);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
+ for(const vehicle of s.vehicles)check(validLamborghiniState(vehicle,s.upg.car||0));
+ if(s.vehicles.some(v=>v.carRank!==undefined))check(s.vehicles.filter(v=>v.kind==='car').length<=CAR_TRIP.maxActive);
  for(const shot of s.shots)if(shot.drone!==undefined)check(shot.drone===true&&shot.kind==='heart'&&s.upg.girlfriend===5&&shot.damage===6&&shot.pierce===0);
  for(const shot of s.shots)if(shot.viral!==undefined){check(shot.viral===true&&shot.kind==='heart'&&s.evolutions.viralLove===true&&shot.hitIds.length<3&&new Set(shot.hitIds).size===shot.hitIds.length&&finite(shot.linkX)&&finite(shot.linkY)&&Math.abs(shot.linkX)<=1e8&&Math.abs(shot.linkY)<=1e8&&shot.pierce===0);}
  for(const car of s.vehicles)if(car.billSalvos!==undefined||car.billClock!==undefined){check(car.kind==='car'&&s.evolutions.billionaire===true&&integer(car.billSalvos)&&car.billSalvos<=2&&finite(car.billClock)&&car.billClock>=0&&car.billClock<=.8&&(car.billSalvos>0||car.billClock===0));}
@@ -6073,6 +6216,7 @@ function tutorialText(game){
 modules["./opening.js"]={OPENING,openingStage,beginTutorial,updateTutorial,tutorialText};
 })();
 (()=>{
+const {carLevel}=modules['./lamborghini.js'];
 const {TROPHIES,BOSS_TROPHIES,trophyChoices}=modules['./boss-trophies.js'];
 const {drawTrophyIcon,drawTrophyPortrait}=modules['./trophy-art.js'];
 const {EVOLUTIONS,totalEarnedCoins}=modules['./evolutions.js'];
@@ -6236,12 +6380,12 @@ function renderUpgrades(options){
  show('upgrades');audio.unlock().then(()=>sound('level'));$('upgrade-options').replaceChildren();
  for(const u of options.slice(0,3)){
   const rank=game?.state.upg[u.id]||0,permanent=UPGRADES.some(def=>def.id===u.id),evolution=EVOLUTIONS.find(def=>def.id===u.id);
-  const companion=u.id==='girlfriend'?companionLevel(rank+1):null,description=companion?.description||u.desc;
+  const companion=u.id==='girlfriend'?companionLevel(rank+1):null,car=u.id==='car'?carLevel(rank+1):null,description=companion?.description||car?.description||u.desc;
   const button=document.createElement('button');button.className=`upgrade-card${evolution?' evolution-card':''}`;
   if(evolution)button.style.setProperty('--evolution-color',evolution.color);
   button.setAttribute('aria-label',`${u.name}. ${evolution?`Évolution disponible. ${evolution.requirement}. `:''}${description}. ${permanent?`Niveau ${rank+1}`:evolution?'Évolution permanente':'Récompense immédiate'}`);
   const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`La même Blonde IA, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
-  const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:u.name;
+  const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:car?`${u.name} · ${car.name}`:u.name;
   const desc=document.createElement('p');desc.textContent=description;const level=document.createElement('span');level.className='upgrade-rank';
   if(evolution){level.textContent='ÉVOLUTION DISPONIBLE';const requirement=document.createElement('p');requirement.className='evolution-requirement';requirement.textContent=evolution.requirement;copy.append(name,level,requirement,desc);}
   else{level.textContent=permanent?`${rank===0?'NOUVEAU POUVOIR':`NIV. ${rank} → ${rank+1}`}  ${rank+1===u.max?'· MAX':''}`:'RÉCOMPENSE IMMÉDIATE';copy.append(name,desc,level);}
@@ -6283,6 +6427,7 @@ function startCharlesEpilogue(){
 }
 function leaveCharlesEpilogue(){
  if(transitionBusy||screen!=='pause-screen'||!charlesActive())return;
+ recoveryPending=false;
  game.leaveCharlesEpilogue();updateHud(true);requestSave();if(screen!=='results')syncEngineScreen();
 }
 function updateCharlesHud(){

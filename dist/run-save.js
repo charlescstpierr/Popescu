@@ -1,3 +1,4 @@
+import {validLamborghiniState,CAR_TRIP} from './lamborghini.js';
 import {createReplayState,validateReplayState,recordReplay,validateDeathCause} from './run-history.js';
 import {createSpeech,SPEECH_QUEUE_LIMIT,speechDuration} from './speech.js';
 import {CHARLES,CHARLES_LINES} from './charles.js';
@@ -249,6 +250,8 @@ function validate(snapshot){
  if(s.deathCause!==undefined){check(s.mode==='gameover'&&s.hp===0);validateDeathCause(s.deathCause,s.elapsed,d.id);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
+ for(const vehicle of s.vehicles)check(validLamborghiniState(vehicle,s.upg.car||0));
+ if(s.vehicles.some(v=>v.carRank!==undefined))check(s.vehicles.filter(v=>v.kind==='car').length<=CAR_TRIP.maxActive);
  for(const shot of s.shots)if(shot.drone!==undefined)check(shot.drone===true&&shot.kind==='heart'&&s.upg.girlfriend===5&&shot.damage===6&&shot.pierce===0);
  for(const shot of s.shots)if(shot.viral!==undefined){check(shot.viral===true&&shot.kind==='heart'&&s.evolutions.viralLove===true&&shot.hitIds.length<3&&new Set(shot.hitIds).size===shot.hitIds.length&&finite(shot.linkX)&&finite(shot.linkY)&&Math.abs(shot.linkX)<=1e8&&Math.abs(shot.linkY)<=1e8&&shot.pierce===0);}
  for(const car of s.vehicles)if(car.billSalvos!==undefined||car.billClock!==undefined){check(car.kind==='car'&&s.evolutions.billionaire===true&&integer(car.billSalvos)&&car.billSalvos<=2&&finite(car.billClock)&&car.billClock>=0&&car.billClock<=.8&&(car.billSalvos>0||car.billClock===0));}

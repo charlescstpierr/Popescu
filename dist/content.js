@@ -18,7 +18,7 @@ export function companionLevel(rank=1){return COMPANION_LEVELS[Math.max(0,Math.m
 
 export const UPGRADES = [
   { id: 'muscle', name: 'Muscles Photoshop', desc: 'Dégâts des balles +25 % par rang. Le certificat sent le toner.', icon: 'muscle', max: 5, color: '#fb6d9d' },
-  { id: 'car', name: 'Lamborghini imaginaire', desc: 'Un char fonce dans la horde. Chaque rang augmente ses dégâts et sa fréquence.', icon: 'car', max: 5, color: '#f4bd58' },
+  { id: 'car', name: 'Lamborghini imaginaire', desc: 'Du coupé au convoi : pare-chocs, voie élargie, retour et deux voitures.', icon: 'car', max: 5, color: '#f4bd58' },
   { id: 'followers', name: 'Abonnés fictifs', desc: 'Cadence de tir +18 % par rang. Un tir supplémentaire aux rangs 3 et 5.', icon: 'followers', max: 5, color: '#69cafa' },
   { id: 'ego', name: 'Ego surdimensionné', desc: '+20 PV maximum et 25 PV récupérés par rang. Ça déborde du cadre.', icon: 'ego', max: 5, color: '#cf83ff' },
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
