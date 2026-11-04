@@ -16,6 +16,6 @@ export function advanceTailDash(game,e,dt){
   e.x+=d.x*travel;e.y+=d.y*travel;e.tailDashDistance+=travel;e.tailWalkDistance=(e.tailWalkDistance||0)+travel;e.tailMoving=travel>0;
   const tipX=e.x+d.x*TAIL_DASH.reach,tipY=e.y+d.y*TAIL_DASH.reach;
   const hits=target=>segmentDistance(target,oldX,oldY,tipX,tipY)<=TAIL_DASH.halfWidth&&clearLine(game.world,e.x,e.y,target);
-  if(!e.tailHitPlayer&&hits(game.s)){e.tailHitPlayer=true;game.damage(TAIL_DASH.damage*(game.difficulty.damage||1),'tail');}
+  if(!e.tailHitPlayer&&hits(game.s)){e.tailHitPlayer=true;game.damage(TAIL_DASH.damage*(game.difficulty.damage||1),'tail',{actorType:e.type,actorId:e.id});}
   if(game.s.companion&&game.s.girl.down<=0&&!e.tailHitGirl&&hits(game.s.girl)){e.tailHitGirl=true;game.s.girl.hp-=TAIL_DASH.damage*(game.difficulty.damage||1);}
 }

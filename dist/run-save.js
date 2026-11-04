@@ -1,3 +1,5 @@
+import {createReplayState,validateReplayState,recordReplay,validateDeathCause} from './run-history.js';
+import {createSpeech,SPEECH_QUEUE_LIMIT,speechDuration} from './speech.js';
 import {CHARLES,CHARLES_LINES} from './charles.js';
 import {createTrophyState,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
@@ -11,10 +13,10 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=10;
+const VERSION=11;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
-const INTERNAL=['bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
+const INTERNAL=['speech','bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
 const MODES=['playing','paused','upgrade','dialogue','trophy','victory','gameover'];
 const ENEMIES=[...Object.keys(ANIMALS),'travestia','pelican','normal','sprinter','gas','tank','jealous','explosive','matriarch','orangutan','rival_rooster','rival_goat'];
 const REQUIRED={enemies:'id x y hp maxhp r speed windup hitFlash charmed cooldown attack summon',shots:'x y vx vy life damage r pierce',drops:'x y life value',clouds:'x y vx vy r life',particles:'x y vx vy life maxlife',vehicles:'x y vx vy life damage',pulses:'x y r maxr life maxlife',chests:'id x y openedAt',shockwaves:'x y r prevR maxR life maxlife width damage ownerId'};
@@ -98,6 +100,18 @@ function validateCharles(s,nextId,world){
  check(Array.isArray(c.destroyed)&&c.destroyed.length<=CHARLES.maxDestroyed&&new Set(c.destroyed).size===c.destroyed.length);
  for(const id of c.destroyed){check(typeof id==='string'&&/^-?\d+,-?\d+:(?:forest:)?\d+$/.test(id));const [x,y]=id.split(':')[0].split(',').map(Number);check(Number.isSafeInteger(x)&&Number.isSafeInteger(y)&&Math.abs(x)<=2e5&&Math.abs(y)<=2e5);const p=world.chunk(x,y).find(p=>p.id===id);check(p&&['tree','pine','crate','pallet','barricade','planter'].includes(p.type));}
 }
+function validateSpeech(s,nextActorId,now){
+ check(object(s)&&integer(s.nextId,1)&&Array.isArray(s.queue)&&s.queue.length<=SPEECH_QUEUE_LIMIT);
+ const ids=new Set();check(s.queue.every(object));
+ for(const line of [s.active,...s.queue]){if(line===null){check(s.active===null);continue;}
+  check(object(line)&&integer(line.id,1)&&line.id<s.nextId&&!ids.has(line.id));ids.add(line.id);
+  check(typeof line.who==='string'&&line.who.length>0&&line.who.length<=80&&typeof line.text==='string'&&line.text.length>0&&line.text.length<=2000);
+  check(typeof line.encounter==='boolean'&&['survival','charles'].includes(line.scope));
+  check(line.actorId===null||integer(line.actorId,1)&&line.actorId<nextActorId);
+  check(finite(line.remaining)&&line.remaining>0&&line.remaining<=speechDuration(line.text));
+  check(finite(line.until)&&line.until>=0&&line.until<=now+speechDuration(line.text)+1e-6);
+ }
+}
 function validate(snapshot){
  tree(snapshot);
  if(Number.isInteger(snapshot.version)&&snapshot.version>=1&&snapshot.version<VERSION){
@@ -123,7 +137,8 @@ function validate(snapshot){
   if(snapshot.version<9){snapshot.game.s.trophies=createTrophyState();
    for(const c of snapshot.game.s.chests||[]){delete c.bossType;delete c.bossId;}
    for(const e of snapshot.game.s.enemies)delete e.trophyCharmLife;}
-  snapshot.game.s.charles=null;
+  if(snapshot.version<10)snapshot.game.s.charles=null;
+  if(snapshot.version<11)snapshot.game.speech=createSpeech();
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));
@@ -136,11 +151,12 @@ function validate(snapshot){
  if(director.warned)check(director.remaining<=BOSS_SCHEDULE.warning);
  else check(director.retryIn===0);
  if(director.retryIn>0)check(director.warned&&director.remaining===0);
- for(const key of INTERNAL){if(['bossDirector','viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
+ for(const key of INTERNAL){if(['speech','bossDirector','viewport','timers','eventSeen','pendingStuntReply','pendingRivalReply','discoveryCooldowns','discoveryContact'].includes(key))continue;check(finite(d[key]));}
  check(Number.isInteger(d.seed)&&d.seed>=-2147483648&&d.seed<=2147483647);check(Number.isInteger(d.rng)&&d.rng>=-2147483648&&d.rng<=2147483647);check(integer(d.id,1)&&integer(d.stuntRng)&&d.stuntRng<=4294967295&&integer(d.rivalRng)&&d.rivalRng<=4294967295);
  for(const key of ['barkIndex','rivalIndex','rivalBarkIndex'])check(integer(d[key]));if(d.lastCrowReaction!==undefined)check(finite(d.lastCrowReaction));
  check(d.viewport.width>=240&&d.viewport.width<=1600&&d.viewport.height>=320&&d.viewport.height<=1600);check(Array.isArray(d.eventSeen)&&d.eventSeen.length<=100&&d.eventSeen.every(x=>typeof x==='string'));
  for(const key of ['pendingStuntReply','pendingRivalReply']){const p=d[key];check(p===null||object(p)&&finite(p.at)&&integer(p.index));if(key==='pendingRivalReply'&&p)check(integer(p.id,1)&&['rival_rooster','rival_goat'].includes(p.type)&&typeof p.ally==='boolean');}
+ validateSpeech(d.speech,d.id,s.elapsed+(s.charles?.elapsed||0));
  check(Array.isArray(d.discoveryCooldowns)&&d.discoveryCooldowns.length<=256);
  for(const entry of d.discoveryCooldowns)check(Array.isArray(entry)&&entry.length===2&&typeof entry[0]==='string'&&finite(entry[1])&&entry[1]>=0);
  check(d.discoveryContact===null||typeof d.discoveryContact==='string');
@@ -205,6 +221,7 @@ function validate(snapshot){
   if(e.type==='gas'&&(e.windup>0||e.gasPose>0))check(finite(e.gasDirX)&&Math.abs(e.gasDirX)<=1.001&&finite(e.gasDirY)&&Math.abs(e.gasDirY)<=1.001);
  }
  if(s.opening!==undefined){check(object(s.opening)&&['move','shoot','done'].includes(s.opening.phase)&&finite(s.opening.startedAt)&&s.opening.startedAt>=0&&s.opening.startedAt<=s.elapsed);}
+ if(s.deathCause!==undefined){check(s.mode==='gameover'&&s.hp===0);validateDeathCause(s.deathCause,s.elapsed,d.id);}
  physics(s);
  for(const [key,kinds] of [['shots',['bullet','heart','bill']],['vehicles',['car','bike']]])for(const item of s[key]){check(kinds.includes(item.kind)&&Array.isArray(item.hitIds)&&item.hitIds.length<=2000&&item.hitIds.every(id=>integer(id,1)));}
  for(const shot of s.shots)if(shot.viral!==undefined){check(shot.viral===true&&shot.kind==='heart'&&s.evolutions.viralLove===true&&shot.hitIds.length<3&&new Set(shot.hitIds).size===shot.hitIds.length&&finite(shot.linkX)&&finite(shot.linkY)&&Math.abs(shot.linkX)<=1e8&&Math.abs(shot.linkY)<=1e8&&shot.pierce===0);}
@@ -236,21 +253,24 @@ export function restoreRun(snapshot,{onEvent=()=>{}}={}){
 }
 function totals(v){check(object(v)&&finite(v.best)&&v.best>=0&&integer(v.lifetime)&&integer(v.coins));return v;}
 function validateRecord(v){
- tree(v);check([1,2,3,4,5,6,7,8,9,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
+ tree(v);check([1,2,3,4,5,6,7,8,9,10,VERSION].includes(v.version)&&integer(v.revision,1));totals(v.totals);if(v.replay===undefined)v.replay=createReplayState(v.totals.best);else validateReplayState(v.replay);check(object(v.run)&&typeof v.run.id==='string'&&v.run.id.length>0&&v.run.id.length<200);validate(v.run.snapshot);v.version=VERSION;check(integer(v.run.creditedKills)&&integer(v.run.creditedCoins)&&v.run.creditedKills<=v.run.snapshot.game.s.kills&&v.run.creditedCoins<=totalEarnedCoins(v.run.snapshot.game.s));return v;
 }
 function beginRecord(store,id,snapshot,legacy={best:0,lifetime:0,coins:0},previous=null){return store.transaction(old=>{
-  const accumulated=old?{...old.totals}:totals(copy(legacy));
+  const accumulated=old?{...old.totals}:totals(copy(legacy)),replay=old?copy(old.replay):createReplayState(accumulated.best);
   if(old){
    if(previous)check(previous.id===old.run.id);
    const source=previous?validate(copy(previous.snapshot)):old.run.snapshot,s=source.game.s;
    check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);
    accumulated.best=Math.max(accumulated.best,s.elapsed);accumulated.lifetime+=s.kills-old.run.creditedKills;accumulated.coins+=totalEarnedCoins(s)-old.run.creditedCoins;
+   recordReplay(replay,old.run.id,source,{replaced:true});
   }
-  return {totals:accumulated,run:{id,snapshot:snapshot(),creditedKills:0,creditedCoins:0}};
+  return {totals:accumulated,replay,run:{id,snapshot:snapshot(),creditedKills:0,creditedCoins:0}};
  });}
 function checkpointRecord(store,id,snapshot,{credit=false}={}){return store.transaction(old=>{
- if(!old||old.run.id!==id)throw Error('conflict');const captured=snapshot(),s=captured.game.s;check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);const next={totals:{...old.totals},run:{...old.run,snapshot:captured}};
- if(credit){next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=totalEarnedCoins(s)-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=totalEarnedCoins(s);}return next;
+ if(!old||old.run.id!==id)throw Error('conflict');const captured=snapshot(),s=captured.game.s;check(s.kills>=old.run.creditedKills&&totalEarnedCoins(s)>=old.run.creditedCoins);const next={totals:{...old.totals},replay:copy(old.replay),run:{...old.run,snapshot:captured}};
+ // Preserve a saved survival victory even when the next write is already endless.
+ if(!old.run.snapshot.game.s.endless&&s.endless)recordReplay(next.replay,id,old.run.snapshot);
+ if(credit){recordReplay(next.replay,id,captured);next.totals.best=Math.max(next.totals.best,s.elapsed);next.totals.lifetime+=s.kills-old.run.creditedKills;next.totals.coins+=totalEarnedCoins(s)-old.run.creditedCoins;next.run.creditedKills=s.kills;next.run.creditedCoins=totalEarnedCoins(s);}return next;
  });}
 // Run, cumulative totals, and credit markers share ONE atomic localStorage write.
 // Optimistic revision checks detect stale tabs; callers must stop autosaving on conflict.

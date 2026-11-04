@@ -105,3 +105,14 @@ test('saved Charles resumes paused with its warning and explicit exit available'
  const b=app(a.values);await b.click('resume-saved');assert.equal(b.controller.screen,'pause-screen');assert.equal(visible(b,'charles-leave'),true);
  b.click('resume');assert.equal(b.controller.screen,'hud');assert.equal(b.game.s.charles.phase,'intro');assert.equal(visible(b,'charles-banner'),true);
 });
+
+test('managed dialogue remains visible after a wall-clock jump while simulation is paused',async()=>{
+ const a=app();await a.click('play');a.game.bark('TOMA','Une phrase que je veux finir de lire.',true);const line=a.get('banter-text').textContent;
+ a.click('pause');a.controller.frame(performance.now()+30000);a.click('resume');
+ assert.equal(visible(a,'banter'),true);assert.equal(a.get('banter-text').textContent,line);
+ a.controller.frame(performance.now()+60000);assert.equal(visible(a,'banter'),true);
+});
+test('saved active dialogue returns on resume rather than leaving a blank reserved interval',async()=>{
+ const a=app();await a.click('play');a.game.bark('TOMA','Je conserve cette phrase après la sauvegarde.',true);a.click('pause');await a.controller.persistRun();
+ const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(visible(b,'banter'),true);assert.match(b.get('banter-text').textContent,/conserve cette phrase/);
+});

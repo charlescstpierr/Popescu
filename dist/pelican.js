@@ -47,7 +47,7 @@ function segmentDistance(p,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,q=dx*dx+dy*dy,t=
 function visible(world,e,p){const dx=p.x-e.peliX,dy=p.y-e.peliY,distance=Math.hypot(dx,dy);if(distance>PELICAN.trigger+PELICAN.hug.width)return false;const n=Math.max(1,Math.ceil(distance/8));for(let i=1;i<=n;i++)if(world.collides(e.peliX+dx*i/n,e.peliY+dy*i/n,2))return false;return true;}
 function hitTargets(game,e,damage,hits){
  const s=game.s,amount=damage*(game.difficulty.damage||1);
- if(!e.peliHitPlayer&&hits(s)&&visible(game.world,e,s)){e.peliHitPlayer=true;game.damage(amount,'pelican');}
+ if(!e.peliHitPlayer&&hits(s)&&visible(game.world,e,s)){e.peliHitPlayer=true;game.damage(amount,'pelican',{actorType:e.type,actorId:e.id});}
  if(s.companion&&s.girl.down<=0&&!e.peliHitGirl&&hits(s.girl)&&visible(game.world,e,s.girl)){e.peliHitGirl=true;s.girl.hp-=amount;game.burst(s.girl.x,s.girl.y,'#f4b0ef',4);}
 }
 export function pelicanCards(e,time=e.peliTime){
@@ -62,14 +62,14 @@ function beginAttack(game,e){
  e.peliDX=d?(s.x-e.x)/d:1;e.peliDY=d?(s.y-e.y)/d:0;e.peliX=e.x;e.peliY=e.y;e.peliTravel=0;e.peliHitPlayer=false;e.peliHitGirl=false;
  const kind=['hug','zodiac','tarot'][e.peliAttackCount%3];e.phase=`peli_${kind}_warning`;e.peliTime=PELICAN[kind].warning;
  if(s.elapsed>=e.peliTauntAt&&s.elapsed>=game.speechUntil&&!e.peliReplyPending){
-  const pair=PELICAN_BANTER[e.peliBanterIndex%PELICAN_BANTER.length];game.bark('PÉLI ZODIAQUE',pair[0],true);e.peliBanterIndex++;e.peliTauntAt=s.elapsed+24;e.peliReply=pair[1];e.peliReplyPending=true;e.peliReplyTime=PELICAN.replyDelay;
+  const pair=PELICAN_BANTER[e.peliBanterIndex%PELICAN_BANTER.length];game.bark('PÉLI ZODIAQUE',pair[0],true,{actorId:e.id});e.peliBanterIndex++;e.peliTauntAt=s.elapsed+24;e.peliReply=pair[1];e.peliReplyPending=true;e.peliReplyTime=PELICAN.replyDelay;
   game.speechUntil=Math.max(game.speechUntil,s.elapsed+PELICAN.replyDelay+4.3);
   for(const reply of [game.pendingStuntReply,game.pendingRivalReply])if(reply)reply.at=Math.max(reply.at,game.speechUntil+.2);
  }
 }
 export function updatePelican(game,e,dt,suppressed){
  if(e.charmed>0||suppressed){interruptPelican(e,suppressed?'suppressed':'charmed');return;}
- if(e.peliReplyPending){e.peliReplyTime=Math.max(0,e.peliReplyTime-dt);if(e.peliReplyTime===0){game.bark('TOMA',e.peliReply,true);e.peliReplyPending=false;}}
+ if(e.peliReplyPending){e.peliReplyTime=Math.max(0,e.peliReplyTime-dt);if(e.peliReplyTime===0){game.bark('TOMA',e.peliReply,true,{actorId:e.id});e.peliReplyPending=false;}}
  if(e.peliTime<=0){e.phase='chase';if(e.cooldown<=0&&Math.hypot(game.s.x-e.x,game.s.y-e.y)<PELICAN.trigger)beginAttack(game,e);return;}
  e.faceX=e.peliDX;e.faceY=e.peliDY;
  const previous=e.peliTime,step=Math.min(dt,previous);e.peliTime=Math.max(0,previous-dt);

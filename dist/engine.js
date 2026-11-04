@@ -1,3 +1,5 @@
+import {lethalDamageCause} from './run-history.js';
+import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech} from './speech.js';
 import {charlesActive,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
@@ -32,13 +34,18 @@ export class Game {
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
-    this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.recalculate();this.world.update(0,0);
+    this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.speech=createSpeech();this.recalculate();this.world.update(0,0);
   }
   random(){let x=this.rng;x^=x<<13;x^=x>>>17;x^=x<<5;this.rng=x|0;return (x>>>0)/4294967296;}
   stuntRandom(){this.stuntRng=(Math.imul(this.stuntRng,1664525)+1013904223)>>>0;return this.stuntRng/4294967296;}
   rivalRandom(){this.rivalRng=(Math.imul(this.rivalRng,1664525)+1013904223)>>>0;return this.rivalRng/4294967296;}
   emit(type,payload){this.onEvent(type,payload);}
   sound(name){this.emit('sound',name);}
+  flushSpeech(){flushSpeech(this);}
+  presentSpeech(){presentSpeech(this);}
+  dismissSpeech(){dismissSpeech(this);}
+  clearSpeech(){this.speech=createSpeech();this.speechUntil=this.s.elapsed;}
+  urgentSpeech(who,text,encounter=true){return enqueueSpeech(this,who,text,{urgent:true,encounter,scope:charlesActive(this.s)?'charles':'survival'});}
   rank(id){return this.s.upg[id]||0;}
   setViewport(width,height){this.viewport={width:clamp(Number(width)||390,240,1600),height:clamp(Number(height)||844,320,1600)};}
   pause(){if(this.s.mode==='playing')this.s.mode='paused';}
@@ -124,10 +131,11 @@ export class Game {
     if(this.rank('detox')){const from=s.hp;s.hp=Math.min(s.maxhp,s.hp+.2*this.rank('detox')*dt);if(s.hp>from)this.powerEffect('detox','heal',s.x,s.y,0,{amount:s.hp-from});}
     if(s.elapsed-this.lastHit>6 && s.shield<s.stats.shieldMax){const from=s.shield;s.shield=Math.min(s.stats.shieldMax,s.shield+(3+2*this.rank('validation'))*dt);if(this.rank('validation')&&s.shield>from)this.powerEffect('validation','recharge',s.x,s.y,0,{from,to:s.shield,maximum:s.stats.shieldMax,amount:s.shield-from});}
     this.spawnWave(dt);this.updateCompanion(dt);this.updateEnemies(dt);const trophySpeed=trophySpeedMultiplier(s);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
+    if(s.hp>0)delete s.deathCause;
     if(s.hp<=0){s.hp=0;s.mode='gameover';this.sound('defeat');this.emit('gameover',s);return;}
     if(s.elapsed>=1200 && !s.endless){s.mode='victory';this.sound('victory');this.emit('victory',s);return;}
     this.openTrophy();
-    if(s.mode==='playing')this.story(dt);
+    if(s.mode==='playing'){this.flushSpeech();this.story(dt);}
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
   }
   stepCharles(dt,input){
@@ -135,7 +143,7 @@ export class Game {
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0,n=Math.max(1,Math.hypot(mx,my));s.moveX=mx/n;s.moveY=my/n;
     this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=Math.hypot(s.x-previous.x,s.y-previous.y);s.walkMoving=moved>1e-7;
     if(s.walkMoving){s.walkDistance+=moved;s.travelX=(s.x-previous.x)/moved;s.travelY=(s.y-previous.y)/moved;}
-    this.world.update(s.x,s.y);this.updateCompanion(dt);this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateEffects(dt);updateCharles(this,dt,previous);
+    this.world.update(s.x,s.y);this.updateCompanion(dt);this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateEffects(dt);updateCharles(this,dt,previous);this.flushSpeech();
     for(const [key,max] of Object.entries(CAP))if(key!=='chests'&&s[key].length>max)s[key].splice(0,s[key].length-max);
   }
   updateDiscoveryEffect(dt){
@@ -227,7 +235,7 @@ export class Game {
     // Keep other pending threats readable when a new critical notice replaces the bubble.
     if(kind){const pending=this.pendingEncounterNotices();delete pending[kind];text=[text,...Object.values(pending)].join(' ');}
     // Encounter notices remain visible even when optional banter is disabled.
-    this.emit('bark',{who:'SYSTÈME',text,encounter:true});
+    this.urgentSpeech('SYSTÈME',text);
     // Narrative uses the UI's full reading duration; combat reactions stay immediate.
     this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+Math.max(4.3,text.length*.039));
     // Do not let a previously queued joke immediately cover an encounter warning.
@@ -396,7 +404,7 @@ export class Game {
         else if(e.charge>0)e.phase='charge';
         else if(d<180&&e.cooldown<=0){e.windup=.8;e.chargeDirX=dx/d;e.chargeDirY=dy/d;e.faceX=e.chargeDirX;e.faceY=e.chargeDirY;e.phase='windup';}
         else e.phase='chase';
-        if(e.charge>0){this.move(e,e.chargeDirX*285*dt,e.chargeDirY*285*dt,e.r*.64);if(dist(e,target)<e.r+15&&e.attack<=0){e.attack=1;this.damage(20*(this.difficulty.damage||1),'touch');}}
+        if(e.charge>0){this.move(e,e.chargeDirX*285*dt,e.chargeDirY*285*dt,e.r*.64);if(dist(e,target)<e.r+15&&e.attack<=0){e.attack=1;this.damage(20*(this.difficulty.damage||1),'touch',{actorType:e.type,actorId:e.id});}}
       }
       if(e.type==='orangutan'&&e.charmed<=0&&!suppressed){
         if(e.windup>0){
@@ -404,7 +412,7 @@ export class Game {
           if(e.windup===0){
             e.phase='swipe';e.swipe=.28;e.cooldown=2.5;
             const reach=length(target.x-e.x,target.y-e.y)||1,dot=((target.x-e.x)*e.swipeDirX+(target.y-e.y)*e.swipeDirY)/reach;
-            if(reach<=73&&dot>=.55){if(target===g){g.hp-=14*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage(14*(this.difficulty.damage||1),'touch');}
+            if(reach<=73&&dot>=.55){if(target===g){g.hp-=14*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage(14*(this.difficulty.damage||1),'touch',{actorType:e.type,actorId:e.id});}
             this.pulse(e.x+e.swipeDirX*35,e.y+e.swipeDirY*35,32,'#f0a552',.25);
           }
         }else if(e.swipe>0)e.phase='swipe';
@@ -501,8 +509,8 @@ export class Game {
       this.sound('kill');
     }
   }
-  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
-  explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion');if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
+  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
+  explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.move(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
   updateVehicles(dt){for(const v of this.s.vehicles){v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.move(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
   updateClouds(dt){const s=this.s;for(const c of s.clouds){c.life-=dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=Math.exp(-dt*.45);c.vy*=Math.exp(-dt*.45);c.r=Math.min(c.maxr||49,c.r+dt*(c.maxr?16:10));c.arm=Math.max(0,(c.arm||0)-dt);if(c.life>0 && c.arm<=0 && length(c.x-s.x,c.y-s.y)<c.r+10)this.damage(7*(this.difficulty.damage||1),'gas');if(c.arm<=0 && s.companion && s.girl.down<=0 && length(c.x-s.girl.x,c.y-s.girl.y)<c.r+8)s.girl.hp-=dt*3*s.stats.gasMultiplier;}s.clouds=s.clouds.filter(c=>c.life>0);}
@@ -523,7 +531,7 @@ export class Game {
         if(minimum>half&&slope(0)<0&&slope(1)>0){let low=0,high=1;for(let i=0;i<12;i++){const mid=(low+high)/2;if(slope(mid)<0)low=mid;else high=mid;}minimum=Math.min(minimum,gap((low+high)/2));}
         return minimum<=half&&maximum>=-half;
       };
-      if(!wave.hitPlayer&&crosses(previousPlayer,s,13)){wave.hitPlayer=true;this.damage(wave.damage,'shockwave');}
+      if(!wave.hitPlayer&&crosses(previousPlayer,s,13)){wave.hitPlayer=true;this.damage(wave.damage,'shockwave',{actorType:'rival_rooster',actorId:wave.ownerId});}
       if(s.companion&&s.girl.down<=0&&!wave.hitGirl&&crosses(previousGirl,s.girl,10)){wave.hitGirl=true;s.girl.hp-=wave.damage;this.burst(s.girl.x,s.girl.y,'#f1be73',5);}
     }
     s.shockwaves=s.shockwaves.filter(w=>w.life>0);
@@ -555,11 +563,11 @@ export class Game {
   burst(x,y,color,count){for(let i=0;i<count;i++){const a=this.random()*TAU,v=20+this.random()*70,life=.25+this.random()*.35;this.s.particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life,maxlife:life,color});}}
   updateEffects(dt){const s=this.s;this.prunePowerEffects();this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);for(const p of s.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}s.particles=s.particles.filter(p=>p.life>0);for(const p of s.pulses){p.life-=dt;p.r=p.maxr*(1-p.life/p.maxlife);}s.pulses=s.pulses.filter(p=>p.life>0);}
   updateStunt(dt,moved){
-    const s=this.s,stunt=s.stunt;
+    this.flushSpeech();const s=this.s,stunt=s.stunt;
     if(stunt.active){stunt.time=Math.min(stunt.duration,stunt.time+dt);stunt.progress=clamp(stunt.time/stunt.duration,0,1);if(stunt.time>=stunt.duration){stunt.active=false;s.walkDistance=0;}}
-    if(this.pendingStuntReply&&s.elapsed>=this.pendingStuntReply.at){
+    if(this.pendingStuntReply&&s.elapsed>=this.pendingStuntReply.at&&s.elapsed>=this.speechUntil){
       const reply=this.pendingStuntReply;this.pendingStuntReply=null;
-      if(s.companion&&s.girl.down<=0&&STUNT_REPLIES.length){const line=STUNT_REPLIES[reply.index%STUNT_REPLIES.length];this.speechUntil=s.elapsed+3.1;this.bark(line.who,line.text,true);}
+      if(s.companion&&s.girl.down<=0&&STUNT_REPLIES.length){const line=STUNT_REPLIES[reply.index%STUNT_REPLIES.length];this.bark(line.who,line.text,true);}
     }
     const running=moved>=dt*28&&length(s.moveX,s.moveY)>.35;
     this.runStreak=running?this.runStreak+dt:0;if(running)this.stuntCharge+=dt;
@@ -568,29 +576,29 @@ export class Game {
       stunt.active=true;stunt.time=0;stunt.progress=0;stunt.faceX=s.moveX/d;stunt.faceY=s.moveY/d;
       this.stuntCharge=0;this.stuntWait=22+this.stuntRandom()*13;this.speechUntil=s.elapsed+3.2;
       if(STUNT_BARKS.length){const line=STUNT_BARKS[index%STUNT_BARKS.length];this.bark(line.who,line.text,true);}
-      this.pendingStuntReply={at:s.elapsed+2.6,index};this.sound('split');
+      this.pendingStuntReply={at:this.speechUntil+.2,index};this.speechUntil=this.pendingStuntReply.at;this.sound('split');
     }
   }
   reactToCrow(){
     const now=this.s.elapsed;if(now-(this.lastCrowReaction??-100)<.9)return;
     this.lastCrowReaction=now;const until=now+4.3;
     for(const reply of [this.pendingStuntReply,this.pendingRivalReply])if(reply)reply.at=Math.max(reply.at,until+.1);
-    this.bark(ROOSTER_REACTION.who,ROOSTER_REACTION.text,true);this.speechUntil=Math.max(this.speechUntil,until);
+    this.urgentSpeech(ROOSTER_REACTION.who,ROOSTER_REACTION.text,false);this.speechUntil=Math.max(this.speechUntil,until);
   }
   updateRivalBanter(){
-    const s=this.s;
-    if(this.pendingRivalReply&&s.elapsed>=this.pendingRivalReply.at){
+    this.flushSpeech();const s=this.s;
+    if(this.pendingRivalReply&&s.elapsed>=this.pendingRivalReply.at&&s.elapsed>=this.speechUntil){
       const reply=this.pendingRivalReply;this.pendingRivalReply=null;
-      if(reply.ally){if(s.companion&&s.girl.down<=0){const line=RIVAL_COMPANION_REPLIES[reply.index%RIVAL_COMPANION_REPLIES.length];if(line)this.bark(line.who,line.text,true);}}
-      else if(s.enemies.some(e=>e.id===reply.id&&!e.dead)){const lines=RIVAL_REPLIES[reply.type]||[],text=lines[reply.index%lines.length];if(text)this.bark(reply.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text,true);}
+      if(reply.ally){if(s.companion&&s.girl.down<=0&&s.enemies.some(e=>e.id===reply.id&&!e.dead)){const line=RIVAL_COMPANION_REPLIES[reply.index%RIVAL_COMPANION_REPLIES.length];if(line)this.bark(line.who,line.text,true,{actorId:reply.id});}}
+      else if(s.enemies.some(e=>e.id===reply.id&&!e.dead)){const lines=RIVAL_REPLIES[reply.type]||[],text=lines[reply.index%lines.length];if(text)this.bark(reply.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text,true,{actorId:reply.id});}
     }
     if(s.elapsed<this.speechUntil||s.elapsed-this.lastRivalBark<10||!RIVAL_BARKS.length)return;
     const rival=s.enemies.find(e=>!e.dead&&e.sex==='male'&&isRival(e.type)&&e.charmed<=0&&e.banterCount<2&&(e.banterCount===0||dist(e,s)<330&&s.elapsed>=e.nextTaunt));
     if(!rival)return;
-    const index=this.rivalBarkIndex++,line=RIVAL_BARKS[index%RIVAL_BARKS.length];this.bark(line.who,line.text,true);this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
-    if(index%2===0||s.companion)this.pendingRivalReply={at:s.elapsed+2.7,id:rival.id,type:rival.type,index,ally:index%2===1&&s.companion};
+    const index=this.rivalBarkIndex++,line=RIVAL_BARKS[index%RIVAL_BARKS.length];this.bark(line.who,line.text,true,{actorId:rival.id});this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
+    if(index%2===0||s.companion){this.pendingRivalReply={at:this.speechUntil+.2,id:rival.id,type:rival.type,index,ally:index%2===1&&s.companion};this.speechUntil=this.pendingRivalReply.at;}
   }
-  bark(who,text,priority=false){if(who==='BLONDE IA'&&(!this.s.companion||this.s.girl.down>0))return false;if(!priority&&this.s.elapsed<this.speechUntil)return false;this.emit('bark',{who,text});this.speechUntil=Math.max(this.speechUntil,this.s.elapsed+(priority?3.1:Math.max(4.3,text.length*.039)));return true;}
+  bark(who,text,priority=false,options={}){this.flushSpeech();if(!priority&&this.s.elapsed<this.speechUntil)return false;return enqueueSpeech(this,who,text,{queue:priority,scope:charlesActive(this.s)?'charles':'survival',...options});}
 
   story(dt){
     const s=this.s;this.timers.bark-=dt;
