@@ -19,7 +19,7 @@ export function updateAnimal(game,e,dt,suppressed){
   for(let i=1;i<=steps;i++){const n=travel/steps;if(game.world.collides(e.x+e.animalDX*n,e.y+e.animalDY*n,e.r*.64)){e.animalTime=0;break;}e.x+=e.animalDX*n;e.y+=e.animalDY*n;moved+=n;}e.animalTravel+=moved;
  }
  const dx=s.x-e.x,dy=s.y-e.y,d=Math.hypot(dx,dy),hit=e.type==='paparazzi'?d<=a.reach&&(dx*e.animalDX+dy*e.animalDY)/(d||1)>=Math.cos(a.width):e.type==='disco_chicken'?d<=a.reach:segmentDistance(s,ox,oy,e.x,e.y)<=a.width;
- if(!e.animalHit&&hit&&visible(game.world,e,s)){e.animalHit=true;game.damage(a.damage*(game.difficulty.damage||1),'touch');}
+ if(!e.animalHit&&hit&&visible(game.world,e,s)){e.animalHit=true;game.damage(a.damage*(game.difficulty.damage||1),'touch',{actorType:e.type,actorId:e.id});}
  if(e.animalTime===0){e.phase='animal_recover';e.animalTime=a.recovery;}
 }
 export function drawAnimalWarning(ctx,e){

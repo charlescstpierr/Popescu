@@ -38,7 +38,7 @@ sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbo
  let dash=q.game.s.enemies.find(e=>e.type==='travestia');Object.assign(dash,{phase:'chase',tailTime:0,tailReplyPending:false,cooldown:0,tailAttackCount:1});q.game.world.collides=()=>false;q.game.updateEnemies(.01);
  for(const phase of ['tail_dash_windup','tail_dash','tail_dash_recover']){let steps=0;while(dash.phase!==phase&&steps++<1000)q.game.updateEnemies(.01);assert.equal(dash.phase,phase);const state=JSON.stringify(dash);assert((await q.persistRun()).ok);await q.resumeSaved();dash=q.game.s.enemies.find(e=>e.type==='travestia');assert.equal(JSON.stringify(dash),state);q.resume();q.game.world.collides=()=>false;}q.renderer.render(q.game,10);
  // Exercise the newly bundled boss through the real app's save and portrait paths.
- q.game.s.enemies=[];q.game.s.invulnerable=100;q.game.speechUntil=0;q.game.s.elapsed=361;
+ q.game.s.enemies=[];q.game.s.invulnerable=100;q.game.clearSpeech();q.game.s.elapsed=361;
  let peli=q.game.spawnEnemy('pelican',q.game.s.x+100,q.game.s.y);q.game.world.collides=()=>false;q.game.updateEnemies(.01);
  assert.equal(elements.get('banter-name').textContent,'PÉLI ZODIAQUE');assert(!elements.get('banter-rival').classList.contains('hidden'));
  for(const [count,kind]of ['hug','zodiac','tarot'].entries()){

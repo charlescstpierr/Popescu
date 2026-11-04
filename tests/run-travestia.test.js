@@ -4,9 +4,9 @@ import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun,RunStore} from '../dist/run-save.js';
 import {travestiaFrame} from '../dist/travestia.js';
 function setup(){const events=[],g=new Game({seed:42,onEvent:(type,payload)=>events.push([type,payload])});for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;g.s.companion=true;g.s.girl.x=0;g.s.girl.y=0;g.recalculate();const e=g.spawnEnemy('travestia',60,0);g.updateEnemies(.01);return {g,e,events};}
-function advance(g,seconds){for(let t=0;t<seconds-1e-7;t+=.01){g.s.elapsed+=.01;g.updateEnemies(.01);}}
+function advance(g,seconds){for(let t=0;t<seconds-1e-7;t+=.01){g.s.elapsed+=.01;g.updateEnemies(.01);g.flushSpeech();}}
 test('warning resumes exact phase and delivers pending reply once',()=>{
- const {g,e}=setup();advance(g,3.2);assert.equal(e.phase,'tail_windup');assert.equal(e.tailReplyPending,true);const events=[],b=restoreRun(captureRun(g),{onEvent:(t,p)=>events.push([t,p])});assert.equal(travestiaFrame(b.s.enemies[0]),travestiaFrame(e));advance(g,.7);advance(b,.7);assert.deepEqual(captureRun(b),captureRun(g));assert.equal(events.filter(([t,p])=>t==='bark'&&p.text==='FUCKK !').length,1);
+ const {g,e}=setup();advance(g,3.2);assert.equal(e.phase,'tail_windup');assert.equal(e.tailReplyPending,true);const events=[],b=restoreRun(captureRun(g),{onEvent:(t,p)=>events.push([t,p])});assert.equal(travestiaFrame(b.s.enemies[0]),travestiaFrame(e));advance(g,1.2);advance(b,1.2);assert.deepEqual(captureRun(b),captureRun(g));assert.equal(events.filter(([t,p])=>t==='bark'&&p.text==='FUCKK !').length,1);
 });
 test('spin resumes hit flags so player and companion are not damaged twice',()=>{
  const {g,e}=setup();advance(g,4.25);assert.equal(e.phase,'tail_spin');assert.equal(e.tailHitPlayer,true);assert.equal(e.tailHitGirl,true);const b=restoreRun(captureRun(g)),hp=b.s.hp,girlHp=b.s.girl.hp;b.s.invulnerable=0;advance(b,.6);assert.equal(b.s.hp,hp);assert.equal(b.s.girl.hp,girlHp);

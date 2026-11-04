@@ -225,7 +225,7 @@ test('split banter has at least twelve unique Quebec boasts and a delayed compan
   assert.ok(awaitedContent.STUNT_BARKS?.length>=12);assert.equal(new Set(awaitedContent.STUNT_BARKS.map(b=>b.text)).size,awaitedContent.STUNT_BARKS.length);
   const events=[];const g=quietRun(game({onEvent:(type,payload)=>events.push({type,payload,at:g.s.elapsed})}));acquire(g,'girlfriend');events.length=0;runUntilSplit(g);
   const boasts=events.filter(e=>e.type==='bark'&&e.payload.who==='TOMA');assert.equal(boasts.length,1);g.timers.bark=0;tick(g,2.2,{x:1,y:0});assert.equal(events.filter(e=>e.type==='bark').length,1);
-  tick(g,.6,{x:1,y:0});const reply=events.filter(e=>e.type==='bark'&&e.payload.who==='BLONDE IA');assert.equal(reply.length,1);assert.ok(reply[0].at-boasts[0].at>=2.4);assert.ok(reply[0].at-boasts[0].at<=3.1);
+  tick(g,2.4,{x:1,y:0});const reply=events.filter(e=>e.type==='bark'&&e.payload.who==='BLONDE IA');assert.equal(reply.length,1);assert.ok(reply[0].at-boasts[0].at>=4.3);assert.ok(reply[0].at-boasts[0].at<=4.7);
 });
 
 test('split never schedules girlfriend dialogue before she is unlocked', () => {
@@ -278,7 +278,7 @@ test('vulgar rival banter is male-only, rotates, obeys speech protection and is 
   g.s.enemies=[enemy('normal',100,0),enemy('orangutan',150,0)];tick(g,15);assert.equal(events.filter(e=>e.type==='bark'&&awaitedContent.RIVAL_BARKS.some(b=>b.text===e.payload.text)).length,0);
   g.s.enemies=[];g.speechUntil=g.s.elapsed+3;g.spawnEnemy('rival_rooster',150,0);tick(g,2);assert.equal(events.filter(e=>e.type==='bark'&&awaitedContent.RIVAL_BARKS.some(b=>b.text===e.payload.text)).length,0);tick(g,2);
   g.spawnEnemy('rival_goat',-150,0);tick(g,9);const first=events.filter(e=>e.type==='bark'&&awaitedContent.RIVAL_BARKS.some(b=>b.text===e.payload.text));assert.ok(first.length>=1);
-  tick(g,35);const taunts=events.filter(e=>e.type==='bark'&&awaitedContent.RIVAL_BARKS.some(b=>b.text===e.payload.text));assert.ok(taunts.length>=2);assert.ok(taunts.slice(1).every((b,i)=>b.at-taunts[i].at>=9.99));assert.ok(new Set(taunts.map(b=>b.payload.text)).size>=2);
+  tick(g,35);const seen=new Set();const taunts=events.filter(e=>{if(e.type!=='bark'||!awaitedContent.RIVAL_BARKS.some(b=>b.text===e.payload.text)||seen.has(e.payload.speechId))return false;seen.add(e.payload.speechId);return true;});assert.ok(taunts.length>=2);assert.ok(taunts.slice(1).every((b,i)=>b.at-taunts[i].at>=9.99));assert.ok(new Set(taunts.map(b=>b.payload.text)).size>=2);
 });
 
 test('male rival charges and banter clocks freeze while the game is paused', () => {

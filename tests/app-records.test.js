@@ -233,11 +233,11 @@ for(const banter of [false,true])for(const reduced of [false,true])for(const rel
 
 test('resume never repeats optional jokes or invents a countdown after the encounter arrived',async()=>{
  const a=app();await a.click('play');a.game.s.elapsed=300;
- a.game.bark('TOMA','Une blague passée.',true);a.click('pause');a.click('resume');
+ a.game.bark('TOMA','Une blague passée.',true);a.game.s.elapsed+=5;a.game.flushSpeech();a.click('pause');a.click('resume');
  assert.equal(a.get('banter').classList.contains('hidden'),true,'optional joke is not replayed');
  Object.assign(a.game.bossDirector,{remaining:5.01,warned:false});a.game.updateBossArrivals(.02);
  a.game.s.elapsed+=5;a.game.updateBossArrivals(5);a.click('pause');a.click('resume');
- assert.equal(a.get('banter').classList.contains('hidden'),true,'arrived boss does not get a new countdown');
+ assert.ok(a.get('banter').classList.contains('hidden')||!a.get('banter-text').textContent.includes('dans environ'),'arrived boss does not get a new countdown');
 });
 
 test('announced finale countdown returns from a saved pause with remaining time',async()=>{

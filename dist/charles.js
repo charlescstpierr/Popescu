@@ -15,9 +15,10 @@ const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 export function charlesWaveRadius(c){return c.waveMax*(1-c.phaseTime/c.phaseDuration);}
 export function charlesWaveSafe(c,x,y,margin=0){const d=Math.hypot(x-c.x,y-c.y);return d>margin&&Math.abs(angleDelta(Math.atan2(y-c.y,x-c.x),c.safeAngle))<Math.max(0,CHARLES.gapHalfAngle-Math.asin(Math.min(1,margin/d)));}
 function phase(c,name){c.phase=name;c.phaseDuration=CHARLES.phases[name];c.phaseTime=c.phaseDuration;}
-function line(g,text){g.emit('bark',{who:'CHARLES',text,encounter:true});}
+function line(g,text){g.urgentSpeech('CHARLES',text);}
 export function startCharles(g){
  const s=g.s;if(s.mode!=='victory'||s.endless||s.charles||s.elapsed<1200)return false;
+ g.clearSpeech();
  const offset=Math.max(-30,Math.min(80,g.viewport.height*.48-310));
  s.charles={id:g.id++,type:'charles',x:s.x+(g.viewport.height<650?65:0),y:s.y-offset,r:28,hp:1,maxhp:1,dead:false,charmed:0,hitFlash:0,hits:0,powered:false,phase:'intro',phaseTime:8,phaseDuration:8,elapsed:0,attackCount:0,safeAngle:Math.PI/2,waveMax:300,capeRadius:112,dialogueIndex:0,nextDialogue:0,outcome:'',destroyed:[]};
  // No ordinary enemy or projectile can steal this optional encounter. Rewards
@@ -30,7 +31,7 @@ export function startCharles(g){
 export function finishCharles(g,outcome='left'){
  const s=g.s,c=s.charles;if(!charlesActive(s))return false;
  g.powerEffects=[];g.defeatEffects=[];g.powerCueCooldowns.clear();
- c.outcome=outcome;phase(c,'complete');s.mode='victory';s.moveX=0;s.moveY=0;s.walkMoving=false;
+ g.clearSpeech();c.outcome=outcome;phase(c,'complete');s.mode='victory';s.moveX=0;s.moveY=0;s.walkMoving=false;
  if(outcome==='defeated'){s.hp=0;g.sound('defeat');}g.emit('epilogue-complete',c);return true;
 }
 export function hitCharles(g,c,damage){
@@ -81,7 +82,7 @@ export function updateCharles(g,dt,previousPlayer){
  const s=g.s,c=s.charles;if(!charlesActive(s))return;
  c.elapsed+=dt;c.hitFlash=Math.max(0,c.hitFlash-dt);
  if(c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
-  g.emit('bark',CHARLES_LINES[c.dialogueIndex++]);c.nextDialogue=c.elapsed+4.8;
+  const dialogue=CHARLES_LINES[c.dialogueIndex];if(g.bark(dialogue.who,dialogue.text,true)){c.dialogueIndex++;c.nextDialogue=c.elapsed+4.8;}
  }
  const oldPhase=c.phase,oldRadius=c.phase==='shockwave'?charlesWaveRadius(c):0;
  if(['hover','recover','empowered'].includes(c.phase))follow(g,c,dt);
