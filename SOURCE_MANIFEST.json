@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-lamborghini-levels-charles-recovery",
+  "version": "1.5-plus-lamborghini-save-v13",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -514,8 +514,8 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 33355,
-      "sha256": "d6946c75b86518a6d1547a2ae2da05988e118128d7123239a2cfdc22be88c976"
+      "bytes": 33590,
+      "sha256": "97fe9b69a84014994c9f616a4dd70ff99859f8df39dc6242c772e740313e8c41"
     },
     {
       "path": "dist/speech.js",
@@ -694,8 +694,8 @@
     },
     {
       "path": "docs/QA-LAMBORGHINI-LEVELS.md",
-      "bytes": 3489,
-      "sha256": "8fa8c425ede3294dc7550f35ac4f0a5baa2ee8b403b5b41c3dc0a559ef99b8bd"
+      "bytes": 3706,
+      "sha256": "763b8e08024fa8d593e56d67bf443c10ee3586c900b60fa6713185a5197ca39a"
     },
     {
       "path": "docs/QA-OPENING.md",
@@ -741,6 +741,11 @@
       "path": "docs/QA-RUN-PACING.md",
       "bytes": 2359,
       "sha256": "241ef8e644694669a7f7a295c37c59b0ca988626dc8cae549e89ee1c013e4768"
+    },
+    {
+      "path": "docs/QA-SAVE-V13.md",
+      "bytes": 3568,
+      "sha256": "c4153a82c0f31192843059c1c0d7f0962181a12e54fda6b9d9f92204ba129b62"
     },
     {
       "path": "docs/QA-STORY-CONVERSATIONS.md",
@@ -1039,8 +1044,8 @@
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 15184637,
-      "sha256": "0844f2ea06d3f25a3c35adf514c9e5ea2ea771e8966c04384b9130dda027db6c"
+      "bytes": 15184872,
+      "sha256": "4ae1014c266e565f88ac7f9957d6b942935459d10f71fe5fbe05e7985d477f2d"
     },
     {
       "path": "scripts/benchmark-crowd.mjs",
@@ -1061,6 +1066,11 @@
       "path": "scripts/export-standalone.py",
       "bytes": 2072,
       "sha256": "5df8cb4128a644719e1d3970f094bfc55a9135d519b2c4bfe8bb66faf795012a"
+    },
+    {
+      "path": "scripts/generate-v12-save-fixtures.mjs",
+      "bytes": 2880,
+      "sha256": "a229a7d8b6702be309117bc87d0e6d01772a16eb0113a3cb7db3bdfc799f8cc1"
     },
     {
       "path": "scripts/inspect-animals.mjs",
@@ -1258,6 +1268,11 @@
       "sha256": "7793bbd7e999ddf5dafcbf43b9b9cca4ab95be6a9f0062fe0e6c44c89c4a4dbd"
     },
     {
+      "path": "scripts/verify-save-compatibility.mjs",
+      "bytes": 5338,
+      "sha256": "05a407aca91f069a7508ecc34962768f4a40f9ae9286f30961c8ddfea7913f10"
+    },
+    {
       "path": "scripts/verify-trophy-balance.mjs",
       "bytes": 8625,
       "sha256": "a6d05711177ad43330fd0854ca8bfcd28ae20b1498bc9308f5c7990bedc8b4a6"
@@ -1290,17 +1305,17 @@
     {
       "path": "tests/boss-arrivals.test.js",
       "bytes": 3478,
-      "sha256": "70c76522383a9ef69b2a634d3eda25f1a6ac08aec2f0ea475383ed4787c6376d"
+      "sha256": "a5f63bab12dd07f0eaf1f4abe86f57bd6c810460e31a6596fca82c071683c88a"
     },
     {
       "path": "tests/boss-director.test.js",
       "bytes": 11888,
-      "sha256": "ef6fb34cb87e0978e0902fa1b897890b76b219d8c6160d930c543545aa6f14c5"
+      "sha256": "a3ad8f30b45756df6f15c03bc6e89fb5e0770954f1b8521add03bff0919cb4d1"
     },
     {
       "path": "tests/boss-durability.test.js",
       "bytes": 4771,
-      "sha256": "c9619d8079b0a741748107e75be27b1c094efc77b70da0749b5dfe25c8246ada"
+      "sha256": "d17add5397361b69f97ddb388d55fe3fee7c780257e629a82375488f0f5b08af"
     },
     {
       "path": "tests/boss-hardening.test.js",
@@ -1350,7 +1365,7 @@
     {
       "path": "tests/charles-save.test.js",
       "bytes": 1450,
-      "sha256": "da8a7a5775570fb91f6e7171abfa612ccda34a3d9a29b071a4609e8ac9153e37"
+      "sha256": "9d87ae5212504098bb58a9a0cb6cfa49769b48e7e3da9c65d5613ae8de1f5a19"
     },
     {
       "path": "tests/charles-ui.test.js",
@@ -1421,6 +1436,36 @@
       "path": "tests/fixtures/runstore-v11.json",
       "bytes": 3128,
       "sha256": "a2150aa1602626b0d06380ae6e8eaf34a5bb1f8db03d66f89f456d76e34b915c"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-delay.json",
+      "bytes": 3978,
+      "sha256": "fcda31a9bbbab71b827d436e93b8d8571e245a98eb86e9369abc7105bcc4bbcc"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-dialogue.json",
+      "bytes": 4082,
+      "sha256": "d791b8b56cf3c34fda992a74d19fe585cd559e10e375f9569a16c9e7bb2f627d"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-legacy.json",
+      "bytes": 3687,
+      "sha256": "f18d6e5d844d1343c30d946ac2d5fdba50bac5bdef489b90421aed6dc294b684"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-provenance.md",
+      "bytes": 1691,
+      "sha256": "19eaed3c2603dc7549db4f3f16e7ae6c07b6c8ef15aa83f3318cfb1aa55a3343"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-return.json",
+      "bytes": 4769,
+      "sha256": "37a122068c8f727787c4407eb9bddd6cba534b5cdaaebae407822fc1ebb02628"
+    },
+    {
+      "path": "tests/fixtures/runstore-v12-turn.json",
+      "bytes": 4748,
+      "sha256": "1b5780a9b9d4dde99735207fd2697524e4ef3f1f082b59980bcd7eb5f82eaf05"
     },
     {
       "path": "tests/fixtures/runstore-v3.json",
@@ -1545,7 +1590,7 @@
     {
       "path": "tests/replay-dialogue-integration.test.js",
       "bytes": 4547,
-      "sha256": "b18b744738f6c4e7fc3424b76f895c4b5f61584ffc920175c319d2b486996ab8"
+      "sha256": "982b33fdaad5be2f94e27346baa26213b23650c687763e7b3a3faecc85b9e8e3"
     },
     {
       "path": "tests/result-record-races.test.js",
@@ -1575,12 +1620,12 @@
     {
       "path": "tests/run-pelican.test.js",
       "bytes": 14540,
-      "sha256": "1b0ec3724eb6b91be1117b2f2a8951961c43d71ce10792cf30df00d28ccaecb7"
+      "sha256": "ecfdb03b01fa4cf75cb84b04363c966e61c348519bef2cf558c726ed2b85b10d"
     },
     {
       "path": "tests/run-save.test.js",
       "bytes": 11182,
-      "sha256": "a2cff0a88c6b16c70fe4c229f579ac74849b2ecb8bb61042e392cd6950fde3b5"
+      "sha256": "e1d5d713b5e9a0cb874686d8c16452a1c64f296b06e46859d867a924cc833b15"
     },
     {
       "path": "tests/run-travestia.test.js",
@@ -1591,6 +1636,11 @@
       "path": "tests/runstore-v11.test.js",
       "bytes": 3420,
       "sha256": "23a249555dd49e4d8ae2858dd03150d3c9ccc754ed70532bd6136e6d507517b9"
+    },
+    {
+      "path": "tests/runstore-v12.test.js",
+      "bytes": 4454,
+      "sha256": "a89fb002bbaf90f070cb213bd540c46cfba395a43cc2f85f772d24e3b9004f11"
     },
     {
       "path": "tests/save-performance.test.js",
@@ -1610,7 +1660,7 @@
     {
       "path": "tests/story-conversations.test.js",
       "bytes": 11387,
-      "sha256": "45437820983e7041bdef6605a25f518b919317d3460f36ee3c613e8835c94d57"
+      "sha256": "9febfa75897a9b6da0ab7283663a26c55c9a4e1a4faa79612a57414fcb836427"
     },
     {
       "path": "tests/story.test.js",
@@ -1650,7 +1700,7 @@
     {
       "path": "tests/trophy-save.test.js",
       "bytes": 7876,
-      "sha256": "58610a8c276ff9f90bccf056831f29a9d9e8dc08b5acaa1c9e29dde0e14add46"
+      "sha256": "c28f42f6d8eff2a41d9e8e631b6abed6a6f7b0104a2d0b13d0a83a9f203b597b"
     },
     {
       "path": "tests/trophy-ui.test.js",
@@ -1688,6 +1738,6 @@
       "sha256": "82fe5fd9d6cf92803270d4ee9185acdfde7fc0f37b633863c087c90d03425c10"
     }
   ],
-  "base_github_commit": "0d6e0f99214a5024bbe926707fad209a1d520d33",
+  "base_github_commit": "da6a6ea8d519977d79cd3107ad6e1c04859476da",
   "integration_date": "2026-11-04"
 }

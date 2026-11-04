@@ -2,6 +2,10 @@
 
 Validated 2026-11-04. No external runtime packages, image assets, networking, save-schema bump or published changes added.
 
+Follow-up: the original feature retained schema v12, which an older engine could
+misinterpret. [The v13 compatibility fix](QA-SAVE-V13.md) documents the later
+format bump, preserved v12 data and old-tab protections.
+
 ## Visible and mechanical progression
 
 1. Coupé fantôme: golden three-quarter coupe, one straight pass, 72 damage.

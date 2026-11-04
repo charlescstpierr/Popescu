@@ -14,7 +14,10 @@ import {PELICAN,PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from './pelican.js
 import {DISCOVERIES} from './discoveries.js';
 import {Game} from './engine.js';
 import {UPGRADES,DIFFICULTIES} from './content.js';
-const VERSION=12;
+// v13 fences off engines that predate ranked Lamborghini trips. Those engines
+// accept v12's extra car fields but move them with incompatible physics.
+// v12 data already has the required fields: migrate its version, never its trip.
+const VERSION=13;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['speech','bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
