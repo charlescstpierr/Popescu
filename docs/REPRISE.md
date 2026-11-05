@@ -1,5 +1,7 @@
 # Reprise dans une nouvelle discussion
 
+Cohérence des portraits au démarrage du 5 novembre 2026 : le HUD, les répliques compactes et le résultat utilisent désormais un petit recadrage du nouveau portrait fidèle. Le grand portrait de chaque locuteur et les sauvegardes sont inchangés. Lire [QA-START-PORTRAITS-2026-11-05.md](QA-START-PORTRAITS-2026-11-05.md).
+
 Portraits de dialogue du 5 novembre 2026 : le grand portrait suit chaque locuteur, indépendamment de l’acteur propriétaire de la scène sauvegardée. Toma utilise `dialogue-toma.png`, cohérent avec le visage des sprites v7. Lire [QA-SPEAKER-PORTRAITS-2026-11-05.md](QA-SPEAKER-PORTRAITS-2026-11-05.md).
 
 Correction de ressemblance du 5 novembre 2026 : le personnage courant utilise `toma-whole-v7.png`, peint d'après les quatre nouvelles photos fournies par l'utilisateur. Lire [QA-TOMA-LIKENESS.md](QA-TOMA-LIKENESS.md). Les huit vues (quatorze directions avec miroirs), les cellules, les commandes et les règles de mouvement restent les mêmes. Les mentions ci-dessous de pixels E intacts décrivent l'historique v1.5, pas la correction explicitement demandée depuis.

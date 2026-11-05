@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -479,8 +479,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 50091,
-      "sha256": "241476fbf4e3c8a81d1f5cd63025891cbcb0043119393dd09d9484768cf527c0"
+      "bytes": 50103,
+      "sha256": "13d6b71d53d46aae2440050072c309a5a6514a27a00aeb4c0b147e0d89b09386"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -611,6 +611,11 @@
       "path": "dist/assets/portrait-blonde-ia.webp",
       "bytes": 16712,
       "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "dist/assets/portrait-toma-current.webp",
+      "bytes": 15772,
+      "sha256": "163945ba7b57c86b44aa47d91d3c2ca67f05dfe2b5dfc918a74645dc41cd586b"
     },
     {
       "path": "dist/assets/portrait-toma-v4.svg",
@@ -814,8 +819,8 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 16509,
-      "sha256": "3b0c357861d0545b51461fc6349db3cf0adecdf29ac8e0fa5aa1ea42c61f210b"
+      "bytes": 16539,
+      "sha256": "81b61b5a495be35b5d4183e4e284c0df010a45dc6798013e13f1673aa61472be"
     },
     {
       "path": "dist/lamborghini-art.js",
@@ -1248,6 +1253,11 @@
       "sha256": "ffadcea007aa689905d721791390885e665a80f4bf14fbe9cec50655da4f71b7"
     },
     {
+      "path": "docs/QA-START-PORTRAITS-2026-11-05.md",
+      "bytes": 3434,
+      "sha256": "b3170caea516e7f5fd5c75823d8e17d15ee9e246a8eb72f0f799628e19f63884"
+    },
+    {
       "path": "docs/QA-STORY-CONVERSATIONS.md",
       "bytes": 4041,
       "sha256": "98ec18ac19f93426276ef1fa143141f9cc392c5687b73a008fda90879a8708b8"
@@ -1309,8 +1319,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 13345,
-      "sha256": "51779f4f9c7f854190ba4fac35d511f8b109065ff545b92f54964c4cd99dd3cb"
+      "bytes": 13672,
+      "sha256": "f698c7261eb081fd96cfdc897423dbb00d89ff9620408234444f99e9564304ad"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -1734,13 +1744,13 @@
     },
     {
       "path": "release/OFFLINE_MANIFEST.json",
-      "bytes": 6978,
-      "sha256": "d08038c0fe1361eba2021c9f374eb58868b172920a180768eb5e59b3546c3110"
+      "bytes": 7147,
+      "sha256": "be85316a75d421533f7dedd17001dbe3bfb0d937956f3e63154a3159a67d8910"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 753748,
-      "sha256": "a3e3d6bb7d9eb3af9d4042998f28fc5e3f7a59479a23ab941711d42ea27c3e5d"
+      "bytes": 753790,
+      "sha256": "3f306fa1d272130a43d98232f7cc0db046b6f1bc4f782c059947cc7b43bba5da"
     },
     {
       "path": "release/archives/README.md",
@@ -1881,6 +1891,11 @@
       "path": "release/assets/portrait-blonde-ia.webp",
       "bytes": 16712,
       "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "release/assets/portrait-toma-current.webp",
+      "bytes": 15772,
+      "sha256": "163945ba7b57c86b44aa47d91d3c2ca67f05dfe2b5dfc918a74645dc41cd586b"
     },
     {
       "path": "release/assets/portrait-toma-v4.svg",
@@ -2226,6 +2241,11 @@
       "path": "scripts/pack-hero-approved.py",
       "bytes": 6793,
       "sha256": "eb37f0cfc62a5a8dcae0c786f49c8cf0629d337c33a05e9399b838853be17e34"
+    },
+    {
+      "path": "scripts/prepare-compact-portrait.mjs",
+      "bytes": 905,
+      "sha256": "5d2cfd405b12b554bfcbcbc49662bf73f72728f4ab72cf1e7269c2476fe718db"
     },
     {
       "path": "scripts/prepare-companion-art.py",
@@ -3008,6 +3028,11 @@
       "sha256": "badea6030544213ff2366ff481282383e5d1925989d73f3eeca49ca46773cd25"
     },
     {
+      "path": "tests/start-visuals.test.js",
+      "bytes": 5026,
+      "sha256": "ed900bdf6981c4991e9c2307b4902aa712b1e298975dd82bde774468708eaace"
+    },
+    {
       "path": "tests/story-conversations.test.js",
       "bytes": 11513,
       "sha256": "258973d4cacf95e9971cba393f1c51ddd74e178983ec8a7a486d145df5fb93d0"
@@ -3113,7 +3138,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "97a58931459bb08bc4e960a8e1229c51d65406ed",
+  "base_github_commit": "58c1b50f02f1cb4ffd73c2c111c56a83c9af3161",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3121,5 +3146,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "3b45aca59fd7ccfccf5caa28a24fccb8a87b8d5a"
+  "base_github_tree": "b55f0c125c0682a1af870d11d4aa66991d8cb6e5"
 }
