@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -414,8 +414,8 @@
     },
     {
       "path": "dist/audio.js",
-      "bytes": 23787,
-      "sha256": "d5aa40ae06db16737e606980c1d5d518fd6ee1dfb19c7c28d109060e67b25952"
+      "bytes": 23980,
+      "sha256": "e391d94c883d348e08843e2bbb2409dcef97114f134420d10f47d7b1485af6e5"
     },
     {
       "path": "dist/biomes.js",
@@ -791,6 +791,11 @@
       "path": "docs/QA-CONTROL-SYMBOLS-2026-11-04.md",
       "bytes": 3553,
       "sha256": "95dd9e3a0fa5efa7db7a53ee2fe3f8b2e3afd1b33aac5017d3f31b9e2bf1e3f2"
+    },
+    {
+      "path": "docs/QA-DAMAGE-AUDIO.md",
+      "bytes": 5199,
+      "sha256": "dbdb3d800114b6f835906bdef25deb62d8a20779be98fab134ec38c196dfcef9"
     },
     {
       "path": "docs/QA-DIALOGUE-CONSISTENCY-2026-11-04.md",
@@ -1220,12 +1225,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "1b731bf93e8d8d380e4f23ea9001cfacfa46bd511282fb74df85cfb564c2f286"
+      "sha256": "bae392f8698d5dad26a25bb4a657659fc7281d0dff64b4e586027b584a1fe3c8"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 651384,
-      "sha256": "271e9664d4cd152b03e8f4ab7d722d2699f0a885c6d6e9b50ca2b2183fb1a768"
+      "bytes": 651577,
+      "sha256": "f92703804a0348b9bb150d59626621b846f9a29450ce40e15bac45f783a55764"
     },
     {
       "path": "release/archives/README.md",
@@ -1724,8 +1729,8 @@
     },
     {
       "path": "tests/audio.test.js",
-      "bytes": 13819,
-      "sha256": "52b7395dcd12db68bb323cd80910c6f45c8f9120e4092a73713e089f8cd3ca85"
+      "bytes": 20709,
+      "sha256": "26dee410fddf4be2cf99551f9243e8c2bd102c60e5f56b586578e3477160feaf"
     },
     {
       "path": "tests/biomes.test.js",

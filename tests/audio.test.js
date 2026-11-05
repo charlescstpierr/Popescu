@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import * as audioModule from '../dist/audio.js';
+import { Game } from '../dist/engine.js';
 import { renderMusic, encodeWav } from '../scripts/render-music-preview.mjs';
 
 class Param {
@@ -249,4 +250,127 @@ test('kill cue is brief, throttled under crowds and honors mute and pause',async
  audio.context.advance(.1);audio.sfx('kill');assert.ok(audio.context.sources.length>count);
  audio.setEnabled(false);await Promise.resolve();const muted=audio.context.sources.length;audio.sfx('kill');assert.equal(audio.context.sources.length,muted);
  audio.setEnabled(true);audio.setScene('paused');await Promise.resolve();audio.sfx('kill');assert.equal(audio._voices.size,0);
+});
+
+function exhaustRoutineCredits(audio) {
+  for (const name of ['shoot', 'collect', 'coin', 'heart', 'kill', 'truth', 'gas']) audio.sfx(name);
+  audio.context.advance(0.15);
+  for (const name of ['shoot', 'collect', 'coin']) audio.sfx(name);
+  assert.ok(audio._sfxTokens < 1, 'the real routine limiter is exhausted');
+}
+
+test('accepted damage keeps its original two-part cue when routine credits are exhausted', async t => {
+  const audio = await createAudio(t);
+  audio.setScene('battle'); await Promise.resolve();
+  exhaustRoutineCredits(audio);
+  const credits = audio._sfxTokens, existing = new Set(audio._voices);
+  audio.sfx('hit');
+  const hit = [...audio._voices].filter(voice => !existing.has(voice));
+  assert.equal(hit.length, 2, 'both damage components must reach the audio graph');
+  assert.equal(audio._sfxTokens, credits, 'damage does not spend routine credits');
+  assert.deepEqual(hit.map(voice => Math.max(...voice.gain.gain.events.map(([value]) => value))), [0.14, 0.13]);
+  assert.equal(hit[0].filter.type, 'highpass');
+  assert.equal(hit[0].filter.frequency.value, 650);
+  assert.equal(hit[1].source.type, 'square');
+  assert.equal(hit[1].source.frequency.events[0][0], 110);
+  assert.ok(hit.every(voice => voice.source.stopTime - voice.source.startTime < 0.15));
+  assert.ok(audio._voices.size <= 32);
+});
+
+test('ordinary effects cannot steal a live damage cue or the melody and bass', async t => {
+  const audio = await createAudio(t);
+  audio.setScene('battle'); await Promise.resolve();
+  const music = [...audio._voices].filter(voice => ['lead', 'bass'].includes(voice.instrument));
+  const before = new Set(audio._voices); audio.sfx('hit');
+  const hit = [...audio._voices].filter(voice => !before.has(voice));
+  assert.equal(hit.length, 2);
+  for (let i = 0; i < 300; i++) for (const name of ['shoot', 'collect', 'coin', 'heart', 'kill', 'truth', 'gas']) audio.sfx(name);
+  assert.ok(hit.every(voice => audio._voices.has(voice)), 'ordinary voice eviction must preserve the damage cue');
+  assert.ok(music.length >= 2 && music.every(voice => audio._voices.has(voice)));
+  assert.ok([...audio._voices].filter(voice => voice.kind === 'sfx').length <= 14);
+  assert.ok(audio._voices.size <= 32);
+});
+
+test('damage uses free important capacity without stealing existing protected cues', async t => {
+  const audio = await createAudio(t);
+  audio.sfx('chest'); audio.sfx('split');
+  const existing = [...audio._voices], before = audio.context.sources.length;
+  assert.equal(existing.filter(voice => voice.kind === 'sfx').length, 12);
+  audio.sfx('hit');
+  assert.equal(audio.context.sources.slice(before).filter(source => source.startTime !== undefined).length, 2);
+  assert.ok(existing.every(voice => audio._voices.has(voice)));
+  assert.equal([...audio._voices].filter(voice => voice.kind === 'sfx').length, 14);
+});
+
+test('damage never displaces a full allocation of higher-priority cues', async t => {
+  const audio = await createAudio(t);
+  audio.sfx('chest'); audio.sfx('level'); audio.sfx('rooster');
+  const protectedVoices = [...audio._voices].filter(voice => voice.kind === 'sfx');
+  assert.equal(protectedVoices.length, 14);
+  audio.sfx('hit');
+  assert.ok(protectedVoices.every(voice => audio._voices.has(voice)));
+  assert.equal([...audio._voices].filter(voice => voice.kind === 'sfx').length, 14);
+  assert.ok(audio._voices.size <= 32);
+});
+
+for (const [musicCount, cues, effects] of [[20, ['chest', 'split'], 12], [28, ['rooster'], 4]])
+test(`the global ceiling with ${musicCount} music voices preserves higher-priority cues`, async t => {
+  const audio = await createAudio(t);
+  audio._stopVoices();
+  for (let i = 0; i < musicCount; i++) audio._tone(60, 0, 1, 0.1, 'triangle', 'music', null, { priority: 5 });
+  for (const name of cues) audio.sfx(name);
+  const existing = [...audio._voices];
+  assert.equal(existing.length, 32);
+  assert.equal(existing.filter(voice => voice.kind === 'sfx').length, effects);
+  audio.sfx('hit'); audio.sfx('shoot');
+  assert.ok(existing.every(voice => audio._voices.has(voice)), 'global admission must respect protected SFX priority');
+  assert.equal(audio._voices.size, 32);
+});
+
+test('at the global ceiling damage replaces routine effects without losing either component', async t => {
+  const audio = await createAudio(t);
+  audio._stopVoices();
+  for (let i = 0; i < 24; i++) audio._tone(60, 0, 1, 0.1, 'triangle', 'music', null, { priority: 5 });
+  const music = [...audio._voices];
+  audio.sfx('truth'); audio.sfx('gas');
+  assert.equal(audio._voices.size, 32);
+  const existing = new Set(audio._voices); audio.sfx('hit');
+  assert.equal([...audio._voices].filter(voice => !existing.has(voice)).length, 2);
+  assert.ok(music.every(voice => audio._voices.has(voice)));
+  assert.equal(audio._voices.size, 32);
+});
+
+test('protected damage remains rate-limited, muted, paused and destroyed safely', async t => {
+  const audio = await createAudio(t);
+  audio.sfx('hit'); const first = audio.context.sources.length;
+  for (let i = 0; i < 300; i++) audio.sfx('hit');
+  audio.context.advance(0.169); audio.sfx('hit');
+  assert.equal(audio.context.sources.length, first);
+  audio.context.advance(0.002); audio.sfx('hit');
+  assert.equal(audio.context.sources.length, first + 2);
+  audio.setEnabled(false); await Promise.resolve();
+  audio.context.advance(1); const muted = audio.context.sources.length; audio.sfx('hit');
+  assert.equal(audio.context.sources.length, muted); assert.equal(audio._voices.size, 0);
+  audio.setScene('paused'); audio.setEnabled(true); await Promise.resolve();
+  audio.sfx('hit'); assert.equal(audio.context.sources.length, muted);
+  const ctx = audio.context; audio.destroy(); audio.sfx('hit');
+  assert.equal(audio._voices.size, 0); assert.ok(ctx.sources.every(source => source.disconnected));
+});
+
+for (const [source, shield, expectedHp, expectedShield, invulnerability] of [
+  ['touch', 0, 95, 0, 0.72], ['touch', 10, 100, 5, 0.72], ['gas', 0, 95, 0, 0.55],
+]) test(`real ${source} damage with shield ${shield} signals once despite busy audio`, async t => {
+  const audio = await createAudio(t);
+  exhaustRoutineCredits(audio);
+  const game = new Game({ onEvent(type, name) { if (type === 'sound') audio.sfx(name); } });
+  game.s.shield = shield;
+  const before = audio.context.sources.length;
+  game.damage(5, source);
+  assert.equal(game.s.hp, expectedHp); assert.equal(game.s.shield, expectedShield);
+  assert.equal(game.s.invulnerable, invulnerability);
+  assert.equal(audio.context.sources.slice(before).filter(node => node.startTime !== undefined).length, 2);
+  const after = audio.context.sources.length;
+  for (let i = 0; i < 300; i++) game.damage(5, source);
+  assert.equal(game.s.hp, expectedHp); assert.equal(game.s.shield, expectedShield);
+  assert.equal(audio.context.sources.length, after, 'invulnerable contacts remain silent');
 });
