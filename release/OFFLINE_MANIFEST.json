@@ -9,8 +9,8 @@
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 754080,
-      "sha256": "6a6fe24ac2560d884aef2214810fc38c62aacfce3f52a18dc094a1f09cc1a43e"
+      "bytes": 758809,
+      "sha256": "d0cb2832aa537623f3ff3febbc7d695d64026bfa725cc52c173526c8da81ab36"
     },
     {
       "path": "assets/actors-v2.json",
@@ -26,6 +26,11 @@
       "path": "assets/charles-arrival-v1.png",
       "bytes": 62650,
       "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
+    },
+    {
+      "path": "assets/charles-motion-v1.png",
+      "bytes": 257168,
+      "sha256": "8e0f52851b916b1af85a0b203b056996b08ee6d9b58b947467debb5b5e065bc4"
     },
     {
       "path": "assets/charles-whole-v1.png",

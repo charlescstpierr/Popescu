@@ -6,7 +6,7 @@ dist=root/'dist'
 
 def bundle_html(*, embed_assets):
     parts=['(()=>{\nconst modules=Object.create(null);']
-    for name in ['content','speech','evolutions','upgrade-draft','lamborghini','discoveries','biomes','river-art','scenery-presentation','prop-geometry','world','hero-frames','hero-pose','travestia-dash','travestia','animals','ego-beasts','ego-entry','pelican','boss-director','drops','boss-trophies','trophy-effects','charles','encounter-dialogue','run-history','enemy-gait','engine','pelican-art','travestia-pose','companion-art','ego-art','enemy-attack-pose','actor-art','hero-art','city-art','combat-art','power-art','trophy-art','discovery-art','charles-art','charles-effects','lamborghini-art','renderer','audio','run-save','opening','dialogue-presentation','app']:
+    for name in ['content','speech','evolutions','upgrade-draft','lamborghini','discoveries','biomes','river-art','scenery-presentation','prop-geometry','world','hero-frames','hero-pose','travestia-dash','travestia','animals','ego-beasts','ego-entry','pelican','boss-director','drops','boss-trophies','trophy-effects','charles','encounter-dialogue','run-history','enemy-gait','engine','pelican-art','travestia-pose','companion-art','ego-art','enemy-attack-pose','actor-art','hero-art','city-art','combat-art','power-art','trophy-art','discovery-art','charles-motion-frames','charles-art','charles-effects','lamborghini-art','renderer','audio','run-save','opening','dialogue-presentation','app']:
         code=(dist/f'{name}.js').read_text()
         code=re.sub(r"new URL\(['\"]\./assets/([^'\"]+)['\"],\s*import\.meta\.url\)\.href",lambda m:repr('assets/'+m[1]),code)
         exports=re.findall(r'export\s+(?:const|let|class|function)\s+(\w+)',code)

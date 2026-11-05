@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -61,6 +61,36 @@
       "path": "art/source/charles-arrival/register-atlas.mjs",
       "bytes": 5477,
       "sha256": "b2323660da94220c2f65db200d1980db82b80711ada7614d6871a0d3d7c7c2f4"
+    },
+    {
+      "path": "art/source/charles-motion/README.md",
+      "bytes": 2030,
+      "sha256": "ee1c0feb4bc1b545f20cc286514d8d05fbd98bac28e873c1fcdde94bdde26a37"
+    },
+    {
+      "path": "art/source/charles-motion/atlas-metadata.json",
+      "bytes": 10927,
+      "sha256": "63a1ae25b3f54bc6e03675991b8cbf20633e5eef9eb536db4e9ce99037438644"
+    },
+    {
+      "path": "art/source/charles-motion/imagegen-prompts.txt",
+      "bytes": 3892,
+      "sha256": "82373d0159325e1cbba5e9eb48e2ebc3f40555e80246ce91c16e693212ac6f11"
+    },
+    {
+      "path": "art/source/charles-motion/native-pose-review.png",
+      "bytes": 252342,
+      "sha256": "235243c1a157fc3edb918bbde59c4ca45aa87a5ce4d5982a7820c40da72eebdd"
+    },
+    {
+      "path": "art/source/charles-motion/poses-transparent-source.png",
+      "bytes": 1524883,
+      "sha256": "59fc0dde9aa6fb17274bceab034da0b686af82812913255abd3e2a334dc6f81a"
+    },
+    {
+      "path": "art/source/charles-motion/register-atlas.py",
+      "bytes": 3776,
+      "sha256": "d74d305907e2ac1bbf3e5f1e5b4f99ba054b3788dc67a65fae157e8feabef472"
     },
     {
       "path": "art/source/charles/README.md",
@@ -498,6 +528,11 @@
       "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
     },
     {
+      "path": "dist/assets/charles-motion-v1.png",
+      "bytes": 257168,
+      "sha256": "8e0f52851b916b1af85a0b203b056996b08ee6d9b58b947467debb5b5e065bc4"
+    },
+    {
       "path": "dist/assets/charles-whole-v1.png",
       "bytes": 103638,
       "sha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583"
@@ -709,13 +744,18 @@
     },
     {
       "path": "dist/charles-art.js",
-      "bytes": 3632,
-      "sha256": "8272e7fc049f8f50b560a3a322cc0c335ff16016375fe246e9766eea6bdd0f9a"
+      "bytes": 6406,
+      "sha256": "95f2f9e27721afc5bf88e30ed80c6837cec8b7413802c41c19001ec2df013913"
     },
     {
       "path": "dist/charles-effects.js",
-      "bytes": 8486,
-      "sha256": "998487827e0f8b0bc2cbdf18524e1ce256d06ddffa8726c14ee536c601ee3b4a"
+      "bytes": 8562,
+      "sha256": "c62918ac4be6f5661116be6ea97ad70da0fbca70e99a5fc7438e4c0809a219eb"
+    },
+    {
+      "path": "dist/charles-motion-frames.js",
+      "bytes": 1686,
+      "sha256": "d960c0db1e8d94f063afc8ae4f5abe8c0a6cad8d4befd52c9510284f2dd09ffd"
     },
     {
       "path": "dist/charles.js",
@@ -859,8 +899,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 55800,
-      "sha256": "56f56c6dc8d08989fd23b754dad84644d4e9fff2e7abea9692d7e57e55e434e7"
+      "bytes": 55941,
+      "sha256": "dcd6b56ed85ebca1bb8ad87fd27393942533a85b48b30011b4bd61ae237ff3cd"
     },
     {
       "path": "dist/river-art.js",
@@ -1086,6 +1126,21 @@
       "path": "docs/QA-CHARLES-EGO-INTEGRATION-2026-11-05.md",
       "bytes": 5700,
       "sha256": "75f163d135680ea9d34acc04379a6b1647e6bd0d3fea9bacb2f7c4c5b725c6d6"
+    },
+    {
+      "path": "docs/QA-CHARLES-MOTION-2026-11-05.md",
+      "bytes": 5487,
+      "sha256": "fa48effe807af1609a73aa67a62eab262f2107cedfb69fe339e1fbde95371fa3"
+    },
+    {
+      "path": "docs/QA-CHARLES-MOTION-BENCHMARK.json",
+      "bytes": 12810,
+      "sha256": "59e85aaae76f6fd08fb783e20f61b089f7b6d44a179241985bb6d41a6a95d609"
+    },
+    {
+      "path": "docs/QA-CHARLES-MOTION-INDEPENDENT.md",
+      "bytes": 5393,
+      "sha256": "7f57ea99a81a7b515851a54f3fa3437ee0557faf0540baf9d33dd7a2da5c4777"
     },
     {
       "path": "docs/QA-CHARLES.md",
@@ -1324,8 +1379,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 14014,
-      "sha256": "d1928eb161eb10522f23b0ddaa2f038e3b4c5a1051256d03a0b8ea92da6648ac"
+      "bytes": 14394,
+      "sha256": "233bff364da42f4481f4362ed5e9054bb6910223a07dd6b22606caff2c125b78"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -1749,13 +1804,13 @@
     },
     {
       "path": "release/OFFLINE_MANIFEST.json",
-      "bytes": 7147,
-      "sha256": "c994672a976e91be7e6451ac9ed41f132cb97000a753d0dbb26f975c1ce609c8"
+      "bytes": 7312,
+      "sha256": "19c0d53e2274c51ba4df64dd838343047d60e34d810eb70e323304b91ae944af"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 754080,
-      "sha256": "6a6fe24ac2560d884aef2214810fc38c62aacfce3f52a18dc094a1f09cc1a43e"
+      "bytes": 758809,
+      "sha256": "d0cb2832aa537623f3ff3febbc7d695d64026bfa725cc52c173526c8da81ab36"
     },
     {
       "path": "release/archives/README.md",
@@ -1781,6 +1836,11 @@
       "path": "release/assets/charles-arrival-v1.png",
       "bytes": 62650,
       "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
+    },
+    {
+      "path": "release/assets/charles-motion-v1.png",
+      "bytes": 257168,
+      "sha256": "8e0f52851b916b1af85a0b203b056996b08ee6d9b58b947467debb5b5e065bc4"
     },
     {
       "path": "release/assets/charles-whole-v1.png",
@@ -2028,6 +2088,11 @@
       "sha256": "81a0396d105ace0138ed1552222dac2b1ab423a1f4297907cef242d794b12e77"
     },
     {
+      "path": "scripts/inspect-charles-motion.mjs",
+      "bytes": 4271,
+      "sha256": "9562853424a6dec850c4900f4dee74fa3290a45d01bc49bf861dbd91e1466917"
+    },
+    {
       "path": "scripts/inspect-charles.mjs",
       "bytes": 5063,
       "sha256": "c46c57d3f29351e1d3a6a60f1cdfcfb283e57ae6faa3c7abb0697470b3945ce1"
@@ -2229,8 +2294,8 @@
     },
     {
       "path": "scripts/offline_bundle.py",
-      "bytes": 2185,
-      "sha256": "43a1f7a21092c2ddd590f8e54a6c16cd31212fa19ffccdc615cda48cbd8579bc"
+      "bytes": 2209,
+      "sha256": "d0e767cdd795b714a6c7141eb2caecb5b5a6d6eba282123ae28004349308d367"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -2449,8 +2514,8 @@
     },
     {
       "path": "tests/charles-art.test.js",
-      "bytes": 5289,
-      "sha256": "b9177ebac3bf6fd5b67feb29cea89d7f561ab2204714efe744ff7c2c2f18d9b8"
+      "bytes": 5347,
+      "sha256": "40b1f5eaf727e471c12855553ee0a814d64a9270fea10458edb654477d2cbd1d"
     },
     {
       "path": "tests/charles-automatic.test.js",
@@ -2486,6 +2551,11 @@
       "path": "tests/charles-landing.test.js",
       "bytes": 8539,
       "sha256": "a5e975f18131292d7a777aef57ac42f3597d4d2cc3a853953caa1153dd8a9462"
+    },
+    {
+      "path": "tests/charles-motion.test.js",
+      "bytes": 5679,
+      "sha256": "c5066057cac2c2fe48e58b2c03a833fa1f04cd2b873d24dab24211df0e929252"
     },
     {
       "path": "tests/charles-save.test.js",
@@ -3148,7 +3218,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "4911db194ae38fb183a127055d7ea37f58673e72",
+  "base_github_commit": "993b70b5c0cb2ffb2d3c5cf6a7a9843ccd998437",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3156,5 +3226,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "192d99294db4aad556f2083afccc552ade68b2cb"
+  "base_github_tree": "10defab002c76d4b30370fceff26b2d5f719214b"
 }
