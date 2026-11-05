@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -249,8 +249,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 47333,
-      "sha256": "7851dd6c911a815da06ea0c2f414d8c7991f066d56185d87420c964d1d3dfe0d"
+      "bytes": 48006,
+      "sha256": "7528d903f596a0542fd115b1636e579e70adee9e08e5048cf6379a738c417e13"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -818,6 +818,11 @@
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
     },
     {
+      "path": "docs/QA-HUD-SPACE-2026-11-05.md",
+      "bytes": 4757,
+      "sha256": "693685a94f40243c420a68c1e6c358f46f259698753171cb6ef8e9d4aa1a43aa"
+    },
+    {
       "path": "docs/QA-INTEGRATION.md",
       "bytes": 2125,
       "sha256": "3ff33cec0c27dda263bc898881d9f8ab4ca7e7d51c26b8de1d26fdc759e7aa98"
@@ -1215,12 +1220,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "132d20eec7edfe370077fb7588dd168d6849b9fd59d23c7b2df09227e3131326"
+      "sha256": "1b731bf93e8d8d380e4f23ea9001cfacfa46bd511282fb74df85cfb564c2f286"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 650711,
-      "sha256": "0c5a450263a484c7fb88159ea12d0a2be54d6cd9126ec43ee5ca8a1996007c1b"
+      "bytes": 651384,
+      "sha256": "271e9664d4cd152b03e8f4ab7d722d2699f0a885c6d6e9b50ca2b2183fb1a768"
     },
     {
       "path": "release/archives/README.md",
@@ -2039,8 +2044,8 @@
     },
     {
       "path": "tests/helpers/focus-controller.js",
-      "bytes": 5058,
-      "sha256": "85c48e0474f474631b1c49f55e57fc7eaf9396abca86943d5610b1b904d88183"
+      "bytes": 5466,
+      "sha256": "e8d9082451f4999f7af509cf9e727686a7254d1a5c0ad441e0efea563f3b9d25"
     },
     {
       "path": "tests/helpers/upgrade-offer.js",
@@ -2066,6 +2071,11 @@
       "path": "tests/hero-pose.test.js",
       "bytes": 6120,
       "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
+    },
+    {
+      "path": "tests/hud-space-activation.test.js",
+      "bytes": 9953,
+      "sha256": "ab7a0fdec231240669c5f0543741b953a0d21af3d20b0ce7b44911f7d3bc4d12"
     },
     {
       "path": "tests/inspect-dialogue-layout.mjs",
@@ -2383,7 +2393,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "dc2519e8e5b67552ddea4a1d5e3b520de531dfc9",
+  "base_github_commit": "196365e2a1f221d869500fb4ba2359bb09b528c9",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
