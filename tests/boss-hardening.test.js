@@ -48,10 +48,10 @@ test('boss resistance freezes during pause and survives repeated resumes without
  for(let i=0;i<3;i++){g=restoreRun(captureRun(g));assert.deepEqual(captureRun(g),saved);}
  g.resume();g.s.enemies[0].charmed=0;heart(g,g.s.enemies[0]);assert.equal(g.s.enemies[0].charmed,0);
 });
-test('victory still arrives at twenty minutes with a surviving strengthened boss',()=>{
+test('Charles still arrives at twenty minutes with a surviving strengthened boss',()=>{
  const g=new Game();g.s.elapsed=1199.99;g.world.collides=()=>false;g.world.update=()=>{};g.world.chunk=()=>[];
  const e=g.spawnEnemy('matriarch',600,0);g.update(1/60,{x:0,y:0});
- assert.equal(g.s.mode,'victory');assert.equal(e.dead,false);g.continueEndless();assert.equal(g.s.mode,'playing');assert.equal(g.s.endless,true);
+ assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');assert.equal(e.dead,false);g.leaveCharlesEpilogue();g.continueEndless();assert.equal(g.s.mode,'playing');assert.equal(g.s.endless,true);
 });
 
 for(const difficulty of Object.keys(DIFFICULTIES))for(const build of EXTRA_BOSS_BUILDS)for(const type of BOSS_TYPES){

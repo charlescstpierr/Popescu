@@ -160,7 +160,7 @@ export class Game {
     this.spawnWave(dt);if(this.rank('airplane')&&this.timers.airplane<=dt)this.activateAirplane();this.updateCompanion(dt);this.updateEnemies(dt);const trophySpeed=trophySpeedMultiplier(s);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
     if(s.hp>0)delete s.deathCause;
     if(s.hp<=0){s.hp=0;s.mode='gameover';this.sound('defeat');this.emit('gameover',s);return;}
-    if(s.elapsed>=1200 && !s.endless){s.mode='victory';this.sound('victory');this.emit('victory',s);return;}
+    if(s.elapsed>=1200 && !s.endless){startCharles(this);return;}
     this.openTrophy();
     if(s.mode==='playing'&&!this.openEncounterDialogue()){this.flushSpeech();this.story(dt);}
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}

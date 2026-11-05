@@ -1,4 +1,4 @@
-// Optional post-victory encounter. Its clock never changes the survival record.
+// Charles arrives at the survival threshold. His clock never changes the record.
 export const CHARLES={hitsToTransform:18,maxDestroyed:64,waveWidth:18,gapHalfAngle:.52,phases:{intro:8,hover:2.4,shock_warning:2.6,shockwave:1.8,cape_warning:2.2,cape_spin:.85,recover:2,descend:1.25,bend:1.5,scream:1.25,burst:1.4,empowered:2.2,complete:0}};
 export const CHARLES_ARRIVAL=Object.freeze({flightEnd:2.6,prepare:2.95,snap:3.45,clear:4.05,release:4.5});
 // The existing saved intro countdown is the only clock. No extra flags, enemy
@@ -27,11 +27,14 @@ export function charlesWaveSafe(c,x,y,margin=0){const d=Math.hypot(x-c.x,y-c.y);
 function phase(c,name){c.phase=name;c.phaseDuration=CHARLES.phases[name];c.phaseTime=c.phaseDuration;}
 function line(g,text){g.urgentSpeech('CHARLES',text);}
 export function startCharles(g){
- const s=g.s;if(s.mode!=='victory'||s.endless||s.charles||s.elapsed<1200)return false;
+ // Upgrade may have opened earlier in this same simulation step. Keep its
+ // choices for endless mode, but give the arrival priority over that modal.
+ // Victory remains accepted for saves produced before automatic arrival.
+ const s=g.s;if(!['playing','upgrade','victory'].includes(s.mode)||s.endless||s.charles||s.elapsed<1200||s.hp<=0)return false;
  g.clearSpeech();g.cancelEncounterDialogues('survival');
  const offset=Math.max(-30,Math.min(80,g.viewport.height*.48-310));
  s.charles={id:g.id++,type:'charles',x:s.x+(g.viewport.height<650?65:0),y:s.y-offset,r:28,hp:1,maxhp:1,dead:false,charmed:0,hitFlash:0,hits:0,powered:false,phase:'intro',phaseTime:8,phaseDuration:8,elapsed:0,attackCount:0,safeAngle:Math.PI/2,waveMax:300,capeRadius:112,dialogueIndex:0,nextDialogue:0,outcome:'',destroyed:[]};
- // No ordinary enemy or projectile can steal this optional encounter. Rewards
+ // No ordinary enemy or projectile can steal this encounter. Rewards
  // already pending keep their provenance and can be chosen in endless mode.
  // Keep the bounded enemy records as inert painted witnesses until the snap.
  // All dangerous projectiles/effects disappear now, without kills or rewards.

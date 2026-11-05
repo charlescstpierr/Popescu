@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -479,8 +479,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 50103,
-      "sha256": "13d6b71d53d46aae2440050072c309a5a6514a27a00aeb4c0b147e0d89b09386"
+      "bytes": 50178,
+      "sha256": "218b14107339d2f70dfa3243b41d64be2806414be3748995862d437781338881"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -719,8 +719,8 @@
     },
     {
       "path": "dist/charles.js",
-      "bytes": 10047,
-      "sha256": "a739d96841ca74aeacd9d82493fa09cbd3708352dff8c0f0aaa608550ceba2fc"
+      "bytes": 10305,
+      "sha256": "945e2123c8fe340d9a864865ddb3a24d914567af37e96e8d287d7b22709a81f2"
     },
     {
       "path": "dist/city-art.js",
@@ -794,8 +794,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 69890,
-      "sha256": "33a239387c924880b055a65a9de96e302cb67e5408d73f6c911eb963d9c3f988"
+      "bytes": 69847,
+      "sha256": "9108ac14bc1bd4bd926bbb4e99b9eba5e2e4f0744ad162311f27589d9dd5c91d"
     },
     {
       "path": "dist/evolutions.js",
@@ -1078,6 +1078,11 @@
       "sha256": "4ab2e70d70af6b7fd2f25d0321a8270cee2620e87fbcec5f746ce33df591ec9d"
     },
     {
+      "path": "docs/QA-CHARLES-AUTOMATIC-2026-11-05.md",
+      "bytes": 3157,
+      "sha256": "605fcd8d50b15f2095fe3c5ca5ad620d462a6cacae42e94a404e9813ac7969eb"
+    },
+    {
       "path": "docs/QA-CHARLES-EGO-INTEGRATION-2026-11-05.md",
       "bytes": 5700,
       "sha256": "75f163d135680ea9d34acc04379a6b1647e6bd0d3fea9bacb2f7c4c5b725c6d6"
@@ -1319,8 +1324,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 13672,
-      "sha256": "f698c7261eb081fd96cfdc897423dbb00d89ff9620408234444f99e9564304ad"
+      "bytes": 14014,
+      "sha256": "d1928eb161eb10522f23b0ddaa2f038e3b4c5a1051256d03a0b8ea92da6648ac"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -1745,12 +1750,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7147,
-      "sha256": "be85316a75d421533f7dedd17001dbe3bfb0d937956f3e63154a3159a67d8910"
+      "sha256": "c994672a976e91be7e6451ac9ed41f132cb97000a753d0dbb26f975c1ce609c8"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 753790,
-      "sha256": "3f306fa1d272130a43d98232f7cc0db046b6f1bc4f782c059947cc7b43bba5da"
+      "bytes": 754080,
+      "sha256": "6a6fe24ac2560d884aef2214810fc38c62aacfce3f52a18dc094a1f09cc1a43e"
     },
     {
       "path": "release/archives/README.md",
@@ -2019,8 +2024,8 @@
     },
     {
       "path": "scripts/inspect-charles-arrival.mjs",
-      "bytes": 3717,
-      "sha256": "23728687339c9edd884c3b1e4d63411840d0cafc02cf41c208bf3e41d44149ee"
+      "bytes": 3864,
+      "sha256": "81a0396d105ace0138ed1552222dac2b1ab423a1f4297907cef242d794b12e77"
     },
     {
       "path": "scripts/inspect-charles.mjs",
@@ -2374,8 +2379,8 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 27192,
-      "sha256": "d1767b373a97ef6fe20c0a89ee773538d2d4f053a2c2411b3ade3a2a5c3dc67d"
+      "bytes": 27234,
+      "sha256": "c56c3a40262a758c78575013d3eaa13bf66ec7655789e7b07f55d694438115b1"
     },
     {
       "path": "tests/asset-loading-ui.test.js",
@@ -2419,18 +2424,18 @@
     },
     {
       "path": "tests/boss-hardening.test.js",
-      "bytes": 4234,
-      "sha256": "954fd7fc97d50e688c5f5a1f4f5c65c028b9c0c1b7a3347eb08f03b006e0be0a"
+      "bytes": 4299,
+      "sha256": "bcec988a5bfe4d565eafbd7f8ed3d7c39ce066a9e1f991c4f100eac5d5e74372"
     },
     {
       "path": "tests/boss-pursuit.test.js",
-      "bytes": 6563,
-      "sha256": "d2412d470ba6b4c1229aa0c0918b2845c8296ca2456a71a3255f6f9c6429ec53"
+      "bytes": 6631,
+      "sha256": "9efc39d21cc1f89cc0885bf248f0f4d9b88d2270f4204a26bef1c3792d61566c"
     },
     {
       "path": "tests/boss-trophies.test.js",
-      "bytes": 4987,
-      "sha256": "96345aa13250a9d7a2cbbcdd85d4229765507febd0fe659927540b2dc12d9e7d"
+      "bytes": 5052,
+      "sha256": "a1b71795901353c6e09c154d452afdeff590593a734491f65bc94b808ff610e5"
     },
     {
       "path": "tests/charles-arrival-render.test.js",
@@ -2446,6 +2451,11 @@
       "path": "tests/charles-art.test.js",
       "bytes": 5289,
       "sha256": "b9177ebac3bf6fd5b67feb29cea89d7f561ab2204714efe744ff7c2c2f18d9b8"
+    },
+    {
+      "path": "tests/charles-automatic.test.js",
+      "bytes": 5546,
+      "sha256": "43ac81a01e0a39084022930a507425e3e3e685a46203c057a80b4d2ae6f8977e"
     },
     {
       "path": "tests/charles-combat.test.js",
@@ -2464,8 +2474,8 @@
     },
     {
       "path": "tests/charles-engine.test.js",
-      "bytes": 2869,
-      "sha256": "97ba5fb21525fdb182ea4421646357762962045da5bbbc9a0cbda4de1860dcd3"
+      "bytes": 2748,
+      "sha256": "050f8824a5feaae12c36d43a02f7c2636c02b39957d0625e9057a8919af03b7a"
     },
     {
       "path": "tests/charles-framing.test.js",
@@ -2484,8 +2494,8 @@
     },
     {
       "path": "tests/charles-ui.test.js",
-      "bytes": 21516,
-      "sha256": "c38c0c767cfe582e5042ca24d4ba5228f004569ccfa8e735e3c97b13ea8fb4a4"
+      "bytes": 21506,
+      "sha256": "914636b2d9e07f67c5117186ead702e0b1d0f528af7a3e6904eac5d3ae30d2b4"
     },
     {
       "path": "tests/city-variety-visibility.test.js",
@@ -2629,8 +2639,8 @@
     },
     {
       "path": "tests/engine.test.js",
-      "bytes": 28246,
-      "sha256": "8fd6b360979bf507de8f431958a9bcc60b6ecb51d745a2a96ad2efaafa308131"
+      "bytes": 28379,
+      "sha256": "a30b6463a85ead5e8fc7fd2082420db99cf4c2bce1c8883c9ccc6e4cba281b05"
     },
     {
       "path": "tests/evolutions.test.js",
@@ -2884,8 +2894,8 @@
     },
     {
       "path": "tests/progression.test.js",
-      "bytes": 2736,
-      "sha256": "7371e8a4da4fcec6f3706f240883af4ea226e9483fb8e4a06c2abe700c531b8c"
+      "bytes": 2863,
+      "sha256": "e2eb90fe60acff3bc7fc7dff7786a216a713b88f4466a8278fb3acb747ddfe39"
     },
     {
       "path": "tests/prop-geometry.test.js",
@@ -2939,8 +2949,8 @@
     },
     {
       "path": "tests/run-pacing.test.js",
-      "bytes": 8714,
-      "sha256": "2f8a519eaa64f9a36540cec51209e400dc295c7350bbce7ed73919c2848d10aa"
+      "bytes": 8811,
+      "sha256": "d4017580b2cab954d06583b546bece76e5dea22b55579658d9aa9a1a2a5bb950"
     },
     {
       "path": "tests/run-pelican.test.js",
@@ -3044,8 +3054,8 @@
     },
     {
       "path": "tests/story.test.js",
-      "bytes": 4755,
-      "sha256": "e243b05f75f146b696b93a3a9805d6a3adaa78f9834bcf3f0715c9a8f70e2e09"
+      "bytes": 4881,
+      "sha256": "edd00ff8701896f049bea565cf3911bbb2a6dd00cfef304c70bed1066bf2ff3e"
     },
     {
       "path": "tests/travestia-art.test.js",
@@ -3138,7 +3148,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "58c1b50f02f1cb4ffd73c2c111c56a83c9af3161",
+  "base_github_commit": "4911db194ae38fb183a127055d7ea37f58673e72",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3146,5 +3156,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "b55f0c125c0682a1af870d11d4aa66991d8cb6e5"
+  "base_github_tree": "192d99294db4aad556f2083afccc552ade68b2cb"
 }

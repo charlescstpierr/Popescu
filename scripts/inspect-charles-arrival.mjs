@@ -1,4 +1,4 @@
-// Offline QA only: actual Game and Renderer, synthetic victory, no browser storage.
+// Offline QA only: actual Game and Renderer, real threshold crossing, no browser storage.
 import {createRequire} from 'node:module';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
@@ -12,10 +12,10 @@ const times=[1.3,2.8,3.3,3.55,3.85,4.15],includeEgo=process.argv.includes('--ego
 report.scene=includeEgo?'Four active EGO creatures plus ordinary witnesses':'Seven ordinary witnesses';
 for(const [width,height]of [[390,844],[320,568]])for(const reduced of [false,true]){
  const tag=`${width}x${height}${reduced?'-reduced':''}`,frames=resolve(out,tag);mkdirSync(frames,{recursive:true});
- const sounds=[],g=new Game({seed:71,onEvent:(type,value)=>{if(type==='sound')sounds.push({value,time:g.s.charles?.elapsed});}});g.setViewport(width,height);g.s.elapsed=1200;g.s.mode='victory';g.s.companion=true;g.s.upg.girlfriend=1;g.recalculate();
+ const sounds=[],g=new Game({seed:71,onEvent:(type,value)=>{if(type==='sound')sounds.push({value,time:g.s.charles?.elapsed});}});g.setViewport(width,height);g.s.elapsed=1199.99;g.s.invulnerable=10;g.s.shotClock=100;g.s.companion=true;g.s.upg.girlfriend=1;g.recalculate();
  const placements=includeEgo?[['ego_peacock',-110,-50],['ego_toad',104,5],['ego_rat',-70,120],['ego_chameleon',110,165],['normal',-115,190],['orangutan',-102,-134],['jealous',70,-180]]:[['normal',-110,-50],['orangutan',104,5],['gas',-48,85],['sprinter',110,165],['tank',-115,190],['rival_rooster',-102,-134],['jealous',70,-180]];
  for(const [type,x,y]of placements){const e=g.spawnEnemy(type,x,y);if(type.startsWith('ego_'))Object.assign(e,{phase:'ego_active',egoTime:.1,egoDX:1,egoDY:0,egoReveal:2,hp:e.maxhp*.55,hitFlash:.08});}
- g.startCharlesEpilogue();
+ g.update(.01);assert.equal(g.s.mode,'playing');assert.equal(g.s.charles?.phase,'intro');assert.equal(sounds.some(x=>x.value==='victory'),false);
  const canvas=createCanvas(width,height),renderer=new Renderer(canvas);await renderer.ready;renderer.resize(width,height);renderer.reducedEffects=reduced;assert.ok(renderer.charles.arrivalImage);
  const sheet=createCanvas(width*3,height*2+48),sc=sheet.getContext('2d');sc.fillStyle='#171326';sc.fillRect(0,0,sheet.width,sheet.height);
  let next=0;
