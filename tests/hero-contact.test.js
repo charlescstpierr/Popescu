@@ -38,8 +38,8 @@ test('the actual projectile starts at the whole-frame muzzle and follows the tar
   assert.ok(worst.dot>1-1e-8,`bullet and exact target aim must share the same ray: ${JSON.stringify(worst)}`);
 });
 
-test('point-blank and free running clear any far-target illustration lock',()=>{
+test('point-blank and free running replace stale locks with the shared chest or movement view',()=>{
   const game=new Game({seed:42}),s=game.state;
-  s.aimArtView='SE';game.spawnEnemy('tank',0,-24);game.weapons(0);assert.equal(s.aimArtView,null);
-  s.enemies=[];s.aimArtView='NE';s.moveX=-1;s.moveY=0;game.weapons(0);assert.equal(s.aimArtView,null);
+  s.aimArtView='SE';game.spawnEnemy('tank',0,-24);game.weapons(0);assert.equal(s.aimArtView,'S');
+  s.enemies=[];s.aimArtView='NE';s.moveX=-1;s.moveY=0;game.weapons(0);assert.equal(s.aimArtView,'W');
 });

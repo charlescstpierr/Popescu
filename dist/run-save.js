@@ -176,6 +176,7 @@ function validate(snapshot){
   snapshot.version=VERSION;
  }
  check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));check(integer(d.timers.egoIndex)&&finite(d.timers.ego)&&Math.abs(d.timers.ego)<=1e8);
+ if(s.heroMotion!==undefined){const m=s.heroMotion;check(object(m)&&Object.keys(m).length===4&&finite(m.angle)&&Math.abs(m.angle)<=Math.PI&&finite(m.phase)&&m.phase>=0&&m.phase<8&&finite(m.distance)&&m.distance>=0&&typeof m.reverse==='boolean');}
  const director=d.bossDirector;check(object(director));
  check(integer(director.rng)&&director.rng<=4294967295&&BOSS_TYPES.includes(director.nextType));
  check(Array.isArray(director.bag)&&director.bag.length<=2&&new Set(director.bag).size===director.bag.length&&director.bag.every(type=>BOSS_TYPES.includes(type)&&type!==director.nextType));

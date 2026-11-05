@@ -18,7 +18,7 @@ import {ANIMALS,animalLocked,updateAnimal,interruptAnimal,findAnimalEntry} from 
 import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
-import { computeHeroPose, solveHeroAim } from './hero-pose.js';
+import { computeHeroPose, solveHeroAim, advanceHeroMotion } from './hero-pose.js';
 import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 const TAU=Math.PI*2;
@@ -531,13 +531,25 @@ export class Game {
   }
   weapons(dt){
     const s=this.s;s.shotClock-=dt;const target=this.nearest(s.x,s.y,s.stats.range);
+    const aimPoint=target?this.targetPosition(target):null;
+    advanceHeroMotion(s,aimPoint,dt);
     if(target){
-      const point=this.targetPosition(target),d=dist(point,s)||1;s.aimX=(point.x-s.x)/d;s.aimY=(point.y-s.y)/d;
+      const point=aimPoint,d=dist(point,s)||1;
+      if(d+1e-7>=80){const aim=solveHeroAim(s,point);s.aimX=aim.aimX;s.aimY=aim.aimY;}
+      else{s.aimX=(point.x-s.x)/d;s.aimY=(point.y-s.y)/d;}
       if(Math.abs(s.aimX)>.1)s.aimSide=s.aimX<0?-1:1;
-      // At contact distance the enemy may already be under the carried barrel.
-      // Keep facing them; the hit below must not send a bullet back through it.
-      if(d+1e-7>=80){const aim=solveHeroAim(s,point);s.aimX=aim.aimX;s.aimY=aim.aimY;s.aimArtView=aim.aimArtView;}else s.aimArtView=null;
-    }else{s.aimArtView=null;if(length(s.moveX,s.moveY)>.08){const d=length(s.moveX,s.moveY);s.aimX=s.moveX/d;s.aimY=s.moveY/d;if(Math.abs(s.aimX)>.1)s.aimSide=s.aimX<0?-1:1;}}
+    }else if(length(s.moveX,s.moveY)>.08){const d=length(s.moveX,s.moveY);s.aimX=s.moveX/d;s.aimY=s.moveY/d;if(Math.abs(s.aimX)>.1)s.aimSide=s.aimX<0?-1:1;}
+
+    // Finish an exceptional half-turn only when an actual shot would otherwise
+    // leave the painted barrel backwards. Fire timing and target stay unchanged.
+    if(target&&s.shotClock<=0){
+      const pose=computeHeroPose(s),dx=aimPoint.x-pose.muzzle.x,dy=aimPoint.y-pose.muzzle.y;
+      if(dx*pose.barrelAim.x+dy*pose.barrelAim.y<=0){
+        const contact=dist(aimPoint,s)<80;advanceHeroMotion(s,contact?{x:aimPoint.x,y:aimPoint.y-40}:aimPoint,0);
+        if(!contact){const aim=solveHeroAim(s,aimPoint);s.aimX=aim.aimX;s.aimY=aim.aimY;}
+      }
+    }
+
 
     if(target && s.shotClock<=0){s.shotClock=s.stats.fireInterval;const count=1+(this.rank('followers')>=3?1:0)+(this.rank('followers')>=5?1:0);const pose=computeHeroPose(s),muzzle=pose.muzzle,point=this.targetPosition(target);const underBarrel=dist(point,s)<80&&(point.x-muzzle.x)*pose.aim.x+(point.y-muzzle.y)*pose.aim.y<=0;if(underBarrel)this.hurt(target,s.stats.damage*count);else for(let i=0;i<count;i++)this.shoot(muzzle.x,muzzle.y,target,'bullet',s.stats.damage,460,(i-(count-1)/2)*.12);s.faceX=(target.x-s.x)/(dist(target,s)||1);s.faceY=(target.y-s.y)/(dist(target,s)||1);this.sound('shoot');}
     for(const key of ['car','money','airplane','truth','chopper'])this.timers[key]-=dt;

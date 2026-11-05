@@ -8,7 +8,9 @@ import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url);
 const {createCanvas,Image}=require('@napi-rs/canvas');
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const DIRECTIONS=['E','SE','S','SW','W','NW','N','NE'];
+import {HERO_FRAMES} from '../dist/hero-frames.js';
+const VIEWS=Object.entries(HERO_FRAMES.views).flatMap(([id,v])=>['N','S'].includes(id)?[{id,angle:v.angle}]:[{id,angle:v.angle},{id:v.mirrorId||(id==='E'?'W':id==='SE'?'SW':'NW'),angle:Math.PI-v.angle}]).sort((a,b)=>(a.angle+Math.PI*2)%(Math.PI*2)-(b.angle+Math.PI*2)%(Math.PI*2));
+const DIRECTIONS=VIEWS.map(v=>v.id),ROWS=DIRECTIONS.length;
 const SPLIT_PROGRESS=[0,.09,.17,.23,.5,.73,.83,.97];
 const hash=canvas=>createHash('sha256').update(canvas.toBuffer('image/png')).digest('hex');
 
@@ -35,7 +37,7 @@ export async function inspectHero(output='/tmp/toma-hero-qa',{renderer=null}={})
   const widths=[],heights=[],views=new Set();
   let measuredMuzzles=0;
   function stateFor(direction,phase=0,{x=128,y=132,progress=null,moving=true}={}){
-    const angle=direction*Math.PI/4,dx=Math.cos(angle),dy=Math.sin(angle);
+    const angle=VIEWS[direction].angle,dx=Math.cos(angle),dy=Math.sin(angle);
     const s={...template,x,y,elapsed:92,walkDistance:(phase+.1)*HERO_GAIT_STEP,walkMoving:moving,
       moveX:moving?dx:0,moveY:moving?dy:0,faceX:dx,faceY:dy,aimSide:dx<-.1?-1:1,
       shots:[],shotClock:0,invulnerable:0,mode:'playing',stats:{fireInterval:.52},
@@ -78,32 +80,32 @@ export async function inspectHero(output='/tmp/toma-hero-qa',{renderer=null}={})
   const entry=stateFor(0,0,{progress:0}).s,headDrop=held[1].bounds.top-alphaBounds(isolate(entry)).top;
   assert.ok(headDrop>8,'the top of the actual painted head and torso descends with the split');
 
-  const walk=createCanvas(1120,1170),wc=walk.getContext('2d');wc.fillStyle='#242237';wc.fillRect(0,0,1120,1170);
-  wc.fillStyle='#f8d99a';wc.font='bold 15px monospace';wc.fillText('TOMA · 8 DIRECTIONS × 8 PAS · TAILLE RÉELLE',18,24);
-  for(let direction=0;direction<8;direction++)for(let phase=0;phase<8;phase++){
+  const walk=createCanvas(1120,50+ROWS*140),wc=walk.getContext('2d');wc.fillStyle='#242237';wc.fillRect(0,0,1120,50+ROWS*140);
+  wc.fillStyle='#f8d99a';wc.font='bold 15px monospace';wc.fillText(`TOMA · ${ROWS} DIRECTIONS × 8 PAS · TAILLE RÉELLE`,18,24);
+  for(let direction=0;direction<ROWS;direction++)for(let phase=0;phase<8;phase++){
     const sample=stateFor(direction,phase);verifyVisible(sample.s,sample.pose);
     cell(wc,direction,phase,phase*140,38+direction*140,{label:`${DIRECTIONS[direction]} · PAS ${phase+1}`});
   }
-  assert.deepEqual([...views].sort(),[...DIRECTIONS].sort(),'actual target solving must exercise all eight illustrated directions');
+  assert.deepEqual([...views].sort(),[...DIRECTIONS].sort(),'actual target solving must exercise every registered illustrated direction');
   writeFileSync(resolve(output,'hero-walk-phases.png'),walk.toBuffer('image/png'));
-  const splitSheet=createCanvas(1120,1170),sc=splitSheet.getContext('2d');sc.fillStyle='#242237';sc.fillRect(0,0,1120,1170);
+  const splitSheet=createCanvas(1120,50+ROWS*140),sc=splitSheet.getContext('2d');sc.fillStyle='#242237';sc.fillRect(0,0,1120,50+ROWS*140);
   sc.fillStyle='#f8d99a';sc.font='bold 15px monospace';sc.fillText('TOMA · ENTRÉE, GRAND ÉCART, REPRISE · TAILLE RÉELLE',18,24);
-  for(let direction=0;direction<8;direction++)for(let index=0;index<8;index++)cell(sc,direction,0,index*140,38+direction*140,{progress:SPLIT_PROGRESS[index],label:`${DIRECTIONS[direction]} · ${Math.round(SPLIT_PROGRESS[index]*100)} %`});
+  for(let direction=0;direction<ROWS;direction++)for(let index=0;index<8;index++)cell(sc,direction,0,index*140,38+direction*140,{progress:SPLIT_PROGRESS[index],label:`${DIRECTIONS[direction]} · ${Math.round(SPLIT_PROGRESS[index]*100)} %`});
   writeFileSync(resolve(output,'hero-split-phases.png'),splitSheet.toBuffer('image/png'));
-  const contact=createCanvas(640,510),cc=contact.getContext('2d');cc.fillStyle='#242237';cc.fillRect(0,0,640,510);
-  for(let direction=0;direction<8;direction++)cell(cc,direction,2,direction%4*160+10,Math.floor(direction/4)*170+10,{label:`${DIRECTIONS[direction]} · CIBLE RÉELLE`});
-  for(let index=0;index<4;index++)cell(cc,0,0,index*160+10,350,{progress:[0,.17,.5,.83][index],label:`SPLIT ${[0,17,50,83][index]} %`});
+  const contact=createCanvas(640,Math.ceil(ROWS/4)*170+170),cc=contact.getContext('2d');cc.fillStyle='#242237';cc.fillRect(0,0,640,Math.ceil(ROWS/4)*170+170);
+  for(let direction=0;direction<ROWS;direction++)cell(cc,direction,2,direction%4*160+10,Math.floor(direction/4)*170+10,{label:`${DIRECTIONS[direction]} · CIBLE RÉELLE`});
+  for(let index=0;index<4;index++)cell(cc,0,0,index*160+10,Math.ceil(ROWS/4)*170+10,{progress:[0,.17,.5,.83][index],label:`SPLIT ${[0,17,50,83][index]} %`});
   writeFileSync(resolve(output,'hero-directions-split.png'),contact.toBuffer('image/png'));
-  const rays=createCanvas(800,450),rc=rays.getContext('2d');rc.fillStyle='#242237';rc.fillRect(0,0,800,450);
+  const rays=createCanvas(800,50+Math.ceil(ROWS/4)*200),rc=rays.getContext('2d');rc.fillStyle='#242237';rc.fillRect(0,0,800,50+Math.ceil(ROWS/4)*200);
   rc.fillStyle='#70d9ef';rc.font='12px monospace';rc.fillText('CYAN : TIR VERS LA CIBLE',16,20);rc.fillStyle='#f8d99a';rc.fillText('OR : AXE PEINT / FLASH',355,20);
-  for(let direction=0;direction<8;direction++){
+  for(let direction=0;direction<ROWS;direction++){
     const x=direction%4*200,y=42+Math.floor(direction/4)*200,{s,pose}=stateFor(direction,2,{x:x+100,y:y+145});r.hero.draw(rc,s,92,true);
     const m=pose.muzzle,b=pose.barrelAim||pose.aim;
     for(const [a,color,length]of [[b,'#f8d99a',18],[pose.aim,'#70d9ef',30]]){rc.strokeStyle=color;rc.lineWidth=1;rc.beginPath();rc.moveTo(m.x,m.y);rc.lineTo(m.x+a.x*length,m.y+a.y*length);rc.stroke();}
     rc.fillStyle='#baaec8';rc.font='11px monospace';rc.textAlign='center';rc.fillText(`${DIRECTIONS[direction]} · VUE ${pose.art.id}`,x+100,y+175);
   }
   writeFileSync(resolve(output,'hero-aim-rays.png'),rays.toBuffer('image/png'));
-  return {walkFrames:64,splitFrames:64,distinctWalkPhases:8,stationaryStable:true,splitHoldStable:true,
+  return {walkFrames:ROWS*8,splitFrames:ROWS*8,distinctWalkPhases:8,stationaryStable:true,splitHoldStable:true,
     headDrop,muzzlesChecked:measuredMuzzles,
     views:[...views],heightRange:[Math.min(...heights),Math.max(...heights)],widthRange:[Math.min(...widths),Math.max(...widths)],output};
 }
