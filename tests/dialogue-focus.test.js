@@ -1,12 +1,13 @@
 import test from 'node:test';
+import {seedUpgradeOffer} from './helpers/upgrade-offer.js';
 import assert from 'node:assert/strict';
 import {app} from './helpers/focus-controller.js';
 import {EVENTS} from '../dist/content.js';
 
 async function companionDialogue(){
  const a=app();await a.click('play');
- // The real first level offers Blonde IA with this seeded upgrade draw.
- a.game.rng=4;a.game.gainXP(8);
+ // Use a real first-level offer that contains Blonde IA.
+ seedUpgradeOffer(a.game,'girlfriend');a.game.gainXP(8);
  const index=a.game.s.options.findIndex(o=>o.id==='girlfriend');assert.ok(index>=0);
  a.get('upgrade-options').children[index].dispatch('click',{});
  assert.equal(a.controller.screen,'dialogue');assert.equal(a.get('dialogue-text').textContent,EVENTS.companion[0].text);return a;

@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -509,8 +509,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 68483,
-      "sha256": "f584371984c3b46b94937468a3af0b55a25e3eb92a567879d6dbee0eca081ab1"
+      "bytes": 68443,
+      "sha256": "f8bf7251e6cfeef6d00d43203f6ae5f2e3dcda99e3ea29d4b90c63a194bae48c"
     },
     {
       "path": "dist/evolutions.js",
@@ -626,6 +626,11 @@
       "path": "dist/trophy-effects.js",
       "bytes": 6064,
       "sha256": "8d863c8b4e729ade5393e3bf62f22f6225266a9cdc37604a9ea3880d9d603778"
+    },
+    {
+      "path": "dist/upgrade-draft.js",
+      "bytes": 1866,
+      "sha256": "965478fde730addc9132f8bd65a410d5307083edefcefb9b22a5cf697c12119f"
     },
     {
       "path": "dist/world.js",
@@ -876,6 +881,11 @@
       "path": "docs/QA-TRAVESTIA.md",
       "bytes": 2913,
       "sha256": "d57c5323cb2ece2a02eadccee52c5176ccc3e21990521ebbd960fb2c3b5c7af8"
+    },
+    {
+      "path": "docs/QA-UPGRADE-DRAFT.md",
+      "bytes": 8525,
+      "sha256": "569ce5eb3cbcecab498a50b820c6aa5b2d79bc1a585d5791093b57f8b938a64a"
     },
     {
       "path": "docs/QA-V1.3.md",
@@ -1170,12 +1180,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "7f91ea3974aaad12718911427a55f84e4a5dca35b8835d43b779fc91542a92f8"
+      "sha256": "9110ae5724e3ad54dc087fad4f1df9c487c781dcb11b6c66f0ba47d693da59e7"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 643861,
-      "sha256": "bbb4b08379ea61ff678ad56ee6c55c7855a561535b5702831573db997a1ab3b4"
+      "bytes": 645754,
+      "sha256": "fd15a31074ca2c82ef46b1f69946d8ebdd4606ed752e32ee5188927a5140c186"
     },
     {
       "path": "release/archives/README.md",
@@ -1534,8 +1544,8 @@
     },
     {
       "path": "scripts/offline_bundle.py",
-      "bytes": 2119,
-      "sha256": "8637e8c3d5b41b635c13d8f9d5cab3c488cbc9e2b19f1065e06bffbdbbd0ce35"
+      "bytes": 2135,
+      "sha256": "c1e5812b62ebf68a4e26911a6291d437c59015fd1d9cf9f283332a5416bd30bd"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -1621,6 +1631,11 @@
       "path": "scripts/verify-trophy-soak.mjs",
       "bytes": 2366,
       "sha256": "4a6af003ca339ddc155658451677b2c1074e51c14db34cfc5f08d91aec531660"
+    },
+    {
+      "path": "scripts/verify-upgrade-draft.mjs",
+      "bytes": 1231,
+      "sha256": "d12ac400b8c583292bf3c5ed94d6a710a3291544855433b6f4a9a9e47be194e2"
     },
     {
       "path": "tests/actor-loading.test.js",
@@ -1789,8 +1804,8 @@
     },
     {
       "path": "tests/dialogue-focus.test.js",
-      "bytes": 5589,
-      "sha256": "4a715a6946e942f5adb89ee1f3118bc878d47d3bd1ba5b54f2ceb314553e0ebf"
+      "bytes": 5660,
+      "sha256": "83131bfcc4d5187ad0d7696539d830e146b577badb8e0a8cd3cc7fb23110beb7"
     },
     {
       "path": "tests/dialogue-presentation.test.js",
@@ -1973,6 +1988,11 @@
       "sha256": "4a1cec3eb3b7dc58ee70a9456603049bba08a9aa4fad2f8c91cc715795e382d0"
     },
     {
+      "path": "tests/helpers/upgrade-offer.js",
+      "bytes": 542,
+      "sha256": "ea16e7f451f4ca8ef7641ead5172606e11cff56142e378580d8d3575c96626a2"
+    },
+    {
       "path": "tests/hero-art.test.js",
       "bytes": 2242,
       "sha256": "b35c27402041d382400b6737494b8f9000e7900bb4255d6b6b77f398ddd76c9e"
@@ -2039,13 +2059,13 @@
     },
     {
       "path": "tests/paused-dialogue-input.test.js",
-      "bytes": 10210,
-      "sha256": "8c73b20c2dfa415cdee3f8335f11cf5e3b0ee1521309f26d484461ffe5aab4f7"
+      "bytes": 10296,
+      "sha256": "c2052440156f14e15a65177644089a6b35d9f110044abb95a413e69491503a3e"
     },
     {
       "path": "tests/paused-encounters.test.js",
-      "bytes": 17339,
-      "sha256": "5f9a0467d21f13e2eedcdbad9b751f9c51fe0293e8a71a016cbf24757d7309b5"
+      "bytes": 17425,
+      "sha256": "0f96e9d5c7fe44d0c36df4f2be6bf5d3cd990db1d59f8adae37cdebfd79c19ef"
     },
     {
       "path": "tests/pelican-art.test.js",
@@ -2184,8 +2204,8 @@
     },
     {
       "path": "tests/stability-integration.test.js",
-      "bytes": 5335,
-      "sha256": "240c934f8a26a6d790d0bc2584ad55aef318ac92c52cb74f476c1a596e587a01"
+      "bytes": 5421,
+      "sha256": "5f9104cab31388cdd7b19a272544c0f8c1568485023749661d113881625a09e4"
     },
     {
       "path": "tests/standalone-module-order.test.js",
@@ -2248,6 +2268,11 @@
       "sha256": "2579a765ea4ed53c4ae9bbf24a86bf5757eec91e5de6a58d4c0810bf1ecca9e2"
     },
     {
+      "path": "tests/upgrade-draft.test.js",
+      "bytes": 5336,
+      "sha256": "cc4bfbd2187a47f39177d0bb86828cf731dda3378b5c3f211df4a1a5fec48ba6"
+    },
+    {
       "path": "tests/upgrade-rewards.test.js",
       "bytes": 1677,
       "sha256": "4f113fc5c268fa3c5c847c3bfc684215ec8a51d27eee1c0696362ae0212237d3"
@@ -2283,8 +2308,8 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "0cf1b385c5c15fe8c001590b042be29260b04e25",
-  "integration_date": "2026-11-04",
+  "base_github_commit": "f8d698ea4c038191ca4f24c2f855f2c71c009d22",
+  "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
     "entrypoint": "release/Toma_Popescu_JOUER.html",

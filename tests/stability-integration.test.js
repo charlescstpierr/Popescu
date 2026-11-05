@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {seedUpgradeOffer} from './helpers/upgrade-offer.js';
 import assert from 'node:assert/strict';
 import {app} from './helpers/asset-controller.js';
 import {ActorArt} from '../dist/actor-art.js';
@@ -12,7 +13,7 @@ function loader(){
  return {art,pending,success(index=pending.length-1){pending[index].resolve({width:1254,height:1254});},timeout(){for(const callback of [...timers.values()])callback();}};
 }
 async function savedCompanion(){
- const a=app();await a.click('play');a.game.rng=4;a.game.gainXP(8);const index=a.game.s.options.findIndex(o=>o.id==='girlfriend');assert(index>=0);a.get('upgrade-options').children[index].dispatch('click',{});a.click('next-dialogue');assert.equal(progress(a),'2 / 5');await a.controller.persistRun();return new Map(a.values);
+ const a=app();await a.click('play');seedUpgradeOffer(a.game,'girlfriend');a.game.gainXP(8);const index=a.game.s.options.findIndex(o=>o.id==='girlfriend');assert(index>=0);a.get('upgrade-options').children[index].dispatch('click',{});a.click('next-dialogue');assert.equal(progress(a),'2 / 5');await a.controller.persistRun();return new Map(a.values);
 }
 for(const interrupt of ['blur','hidden'])test(`${interrupt} cancels image-gated dialogue recovery and later AUTO still respects focus`,async t=>{
  t.mock.timers.enable({apis:['setTimeout']});const values=await savedCompanion(),before=[...values],l=loader(),a=app(values,undefined,undefined,undefined,{actors:l.art});

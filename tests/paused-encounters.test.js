@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {seedUpgradeOffer} from './helpers/upgrade-offer.js';
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {EVENTS} from '../dist/content.js';
@@ -105,7 +106,7 @@ test('companion invocation retains actor context through every speaker and deriv
  assert.equal(g.encounters.outcomes['companion:invocation'],'completed');assert.equal(g.startDialogue(EVENTS.companion),false);
 });
 test('first companion invocation waits behind reward choices and survives a queued checkpoint exactly once',()=>{
- const g=new Game({seed:42});g.rng=4;g.gainXP(8);g.s.xp=100;assert.equal(g.chooseUpgrade('girlfriend'),true);assert.equal(g.s.mode,'upgrade');assert.equal(g.startDialogue(EVENTS.companion),true);assert.equal(g.s.mode,'upgrade');assert.equal(g.encounters.queue.length,1);
+ const g=new Game({seed:42});seedUpgradeOffer(g,'girlfriend');g.gainXP(8);g.s.xp=100;assert.equal(g.chooseUpgrade('girlfriend'),true);assert.equal(g.s.mode,'upgrade');assert.equal(g.startDialogue(EVENTS.companion),true);assert.equal(g.s.mode,'upgrade');assert.equal(g.encounters.queue.length,1);
  const b=restoreRun(captureRun(g));b.s.xp=0;b.chooseUpgrade(b.s.options[0].id);assert.equal(b.s.mode,'playing');b.update(.01);assert.equal(b.s.mode,'dialogue');assert.equal(b.encounters.active.id,'companion:invocation');b.finishDialogue(true);assert.equal(b.encounters.outcomes['companion:invocation'],'skipped');assert.equal(b.startDialogue(EVENTS.companion),false);
 });
 test('saved v13 companion invocation gains stable context without moving its cursor or changing old gameplay',()=>{
