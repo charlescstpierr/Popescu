@@ -1,5 +1,7 @@
 # Reprise dans une nouvelle discussion
 
+Mise à jour Toma du 5 novembre 2026 : lire [QA-TOMA-MOTION.md](QA-TOMA-MOTION.md) pour les quatorze directions, les virages continus et les sauvegardes compatibles. Les détails v1.5 ci-dessous restent la provenance des peintures d’origine, pas le décompte actuel des vues.
+
 Le projet est prêt à être continué à partir de la v1.5 approuvée le 3 novembre 2026. L'utilisateur donnera le prochain objectif. Lire aussi [AGENTS.md](../AGENTS.md) pour les contraintes qui ont évité les régressions précédentes.
 
 ## Provenance et état

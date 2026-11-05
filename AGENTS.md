@@ -12,11 +12,11 @@ Ce dépôt est une copie portable de la version v1.5 approuvée. Le prochain obj
 ## Graphisme approuvé à conserver
 
 - Chaque image de Toma contient le personnage entier, du crâne aux bottes, avec ses deux mains et son arme. Aucun assemblage de membres, découpage du torse, rotation, cisaillement ou déformation du personnage pour suivre la visée.
-- `hero-frames.js` enregistre des cellules de 144 × 128 px, ancrées en `[65,111]`. Cinq vues peintes donnent huit directions par trois miroirs horizontaux. L'atlas `toma-whole-v5.png` contient 65 entrées complètes; certaines préparations inutilisées sont dupliquées.
+- `hero-frames.js` enregistre des cellules de 144 × 128 px, ancrées en `[65,111]`. Huit vues peintes donnent quatorze directions par six miroirs horizontaux. L'atlas `toma-whole-v6.png` contient 104 entrées complètes, dont les 65 entrées v5 intactes; certaines préparations inutilisées sont dupliquées. Les nouvelles sources et leur préparation sont dans `art/source/toma-turns/` et `scripts/prepare-hero-turns.py`.
 - Les 13 images E approuvées sont conservées pixel par pixel. Les sources haute résolution sont dans `art/source/toma/`. Garder l'identité, les proportions et la palette approuvées; ne pas régénérer ces images pour une simple modification de code.
-- Le pas dépend de la distance réellement parcourue: 10 px par phase, huit phases. Une intention de déplacement contre un mur ne doit pas faire courir le personnage.
+- Le pas dépend de la distance réellement parcourue: 10 px par phase, huit phases. La phase continue change de sens sans inversion instantanée de son indice quand Toma recule. Une intention de déplacement contre un mur ne doit pas faire courir le personnage.
 - Le grand écart utilise les images complètes `run0 → split2 → split3 → split4`, tient exactement la même extension entre 24 % et 69 %, puis revient vers la course. Déplacement, tirs et dégâts continuent; les écrans modaux figent la simulation.
-- Le corps est choisi par un point stable au torse, `y−40`, avec une rétention d'environ 3°. Le déplacement du canon d'une image à l'autre ne doit pas faire alterner la vue du corps.
+- Le corps est choisi par un point stable au torse, `y−40`, y compris au contact, et conserve sa vue à l'arrêt. Les virages sont bornés à 16 rad/s avec une rétention de 0,08 rad entre coûts; un tir imminent termine un demi-tour si le rayon serait à rebours du canon. Le déplacement du canon d'une image à l'autre ne doit pas faire alterner la vue du corps.
 - `computeHeroPose(s).muzzle` est l'origine réelle des balles. `pose.aim` vise la cible depuis ce canon; `pose.barrelAim` suit l'arme peinte pour l'éclat. Ces deux directions peuvent différer. Préserver les peintures natives et la visée exacte.
 
 ## Limites de modification

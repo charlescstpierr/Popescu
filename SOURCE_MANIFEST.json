@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -9,8 +9,8 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 5273,
-      "sha256": "9c1f99d4dd87df61696e031f1b03142d8afc88f9d23681a0cefdbc90e41ec2bf"
+      "bytes": 5697,
+      "sha256": "6d3f8ac4d7e8fe6ced28fde3c9de1abaa01c60c05ecdd14a3f1383edde4a1021"
     },
     {
       "path": "README.md",
@@ -146,6 +146,36 @@
       "path": "art/source/pelican/registered-preview.png",
       "bytes": 274809,
       "sha256": "7269144ae9d83cae72182c6c61f1a1731a6faf6aab91aecf14f2e229c75ebfea"
+    },
+    {
+      "path": "art/source/toma-turns/README.md",
+      "bytes": 1680,
+      "sha256": "4b5477f3f6e7badf5b0cf14ab5cd9e6a0d29010a6adbc6a1f44e73f8e096ccc0"
+    },
+    {
+      "path": "art/source/toma-turns/north-northeast.png",
+      "bytes": 758222,
+      "sha256": "aa635f37b689e7c3cab75347484286f3f75fc9c57f45b945b49e95831fc7c6ce"
+    },
+    {
+      "path": "art/source/toma-turns/prompts.md",
+      "bytes": 3918,
+      "sha256": "7771d8834cf55dd4a21e89c45bbdf613553fb25c1b7d9f9c90a83de75ae6cd5f"
+    },
+    {
+      "path": "art/source/toma-turns/registration.json",
+      "bytes": 7600,
+      "sha256": "89642cbe56c571420137143d599706c6d15ecf767c8b52f2f7faff1ca732e089"
+    },
+    {
+      "path": "art/source/toma-turns/south-southeast.png",
+      "bytes": 964302,
+      "sha256": "6d38421ee9fe62ca279d9dd17cfdd782ba3a6053653a3f6b9b28f004635d7a08"
+    },
+    {
+      "path": "art/source/toma-turns/southeast-mid.png",
+      "bytes": 892279,
+      "sha256": "a3bdb4ce5260d9a69aa4e51ce3dadd2e53d0c6d1efe53fa973f4bfaa72209459"
     },
     {
       "path": "art/source/toma/north.png",
@@ -403,6 +433,11 @@
       "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
     },
     {
+      "path": "dist/assets/toma-whole-v6.png",
+      "bytes": 660651,
+      "sha256": "b7dca0a8a499694f12cacb1822cdabc6cc802c390267fbeeb390a51579254140"
+    },
+    {
       "path": "dist/assets/travestia-dash.png",
       "bytes": 184441,
       "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
@@ -509,8 +544,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 68780,
-      "sha256": "210566551c2acb68e71b9151dcce1ff55c3509bb918b0f1cc7177afb1432ae76"
+      "bytes": 69221,
+      "sha256": "d0b43d233689981da06a8fa1d7d3b2745538be03af719f04f050434e24588d70"
     },
     {
       "path": "dist/evolutions.js",
@@ -520,17 +555,17 @@
     {
       "path": "dist/hero-art.js",
       "bytes": 3454,
-      "sha256": "b9e9944287282070f9a077dc7472b6f15216c5b6dbdf14ea43a72838a207f65d"
+      "sha256": "d440bfc9c0bff2b8dc37940f474ffd98a1e361cc944df664c7d411a52a291944"
     },
     {
       "path": "dist/hero-frames.js",
-      "bytes": 63380,
-      "sha256": "3fc5e7e10eed4c3f448baef204be0ae470dfe840c11be91af8e0de9cc389678b"
+      "bytes": 71482,
+      "sha256": "e7601b20afe8960df3c25c0a90cb5e357d200016a6980e6d2ec30e30430e0522"
     },
     {
       "path": "dist/hero-pose.js",
-      "bytes": 5238,
-      "sha256": "19b78535ec59ab5641bf599e9c5c2f30e775deddd9b206d62641d2107b5de749"
+      "bytes": 7215,
+      "sha256": "2dc6f4a5f918c95badf7d986653775af286719fe4b6ca726c042c8b46ff94c5e"
     },
     {
       "path": "dist/index.html",
@@ -589,8 +624,8 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 36166,
-      "sha256": "4c0ffe68c392208b3fdc276be361155b54e9911eddc94b88e5e99251022da66b"
+      "bytes": 36413,
+      "sha256": "2339da5cbe86aee2151250f2d8ea71290f72ccaf072c667a22fe858b22292091"
     },
     {
       "path": "dist/scenery-presentation.js",
@@ -933,6 +968,11 @@
       "sha256": "9e60352f1a1f587208412888eccc30942f1edab0ee1df14da2ab50d2059e4ba3"
     },
     {
+      "path": "docs/QA-TOMA-MOTION.md",
+      "bytes": 8928,
+      "sha256": "b5aa12f94781644c7f60796a503982c8c9767fde33a5f8c12d998e0bc0a261ca"
+    },
+    {
       "path": "docs/QA-TRAVESTIA.md",
       "bytes": 2913,
       "sha256": "d57c5323cb2ece2a02eadccee52c5176ccc3e21990521ebbd960fb2c3b5c7af8"
@@ -969,8 +1009,8 @@
     },
     {
       "path": "docs/REPRISE.md",
-      "bytes": 12287,
-      "sha256": "749d77f704589edf46220a3885fca19f9df6e5ddb423cb0ec2d44739a11adca1"
+      "bytes": 12566,
+      "sha256": "49e9fd7fa26094186e953adcd5fd28cac8e5e0aec60922a9c245eae3b205a65c"
     },
     {
       "path": "docs/RUN-PACING.md",
@@ -1234,13 +1274,13 @@
     },
     {
       "path": "release/OFFLINE_MANIFEST.json",
-      "bytes": 5663,
-      "sha256": "8d0b8f193e8d7413ebb67ef969a34a366fe30556b3ca0edc2d3ab620d26a3a76"
+      "bytes": 5824,
+      "sha256": "183ada78639d41b47c150aae88510bd9401e6be338d6c1bf4d106849c8108f5e"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 652559,
-      "sha256": "73139b6558ebf142a5588ecc9caa7fcba12c3a5eda0c85f6ae3abb6545b47622"
+      "bytes": 663337,
+      "sha256": "fbc712783330e7636bbebc2fecf7e51b43fdf7291a6792fd8a4abf871bf731c7"
     },
     {
       "path": "release/archives/README.md",
@@ -1403,6 +1443,11 @@
       "sha256": "f03570bb54b7ad556e8491f486a525cc8e0678e5c30f6e80b7fcbb09532ef9a8"
     },
     {
+      "path": "release/assets/toma-whole-v6.png",
+      "bytes": 660651,
+      "sha256": "b7dca0a8a499694f12cacb1822cdabc6cc802c390267fbeeb390a51579254140"
+    },
+    {
       "path": "release/assets/travestia-dash.png",
       "bytes": 184441,
       "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
@@ -1513,9 +1558,19 @@
       "sha256": "a3dcc15f2130ab1cdf252415b490227502894a722baf74452a4f6e11b99a4ecc"
     },
     {
+      "path": "scripts/inspect-hero-card.mjs",
+      "bytes": 2292,
+      "sha256": "05374968018c8f695fc212e8c5d34cf6569635165b4665443b68c78fd5b9a288"
+    },
+    {
+      "path": "scripts/inspect-hero-motion.mjs",
+      "bytes": 3730,
+      "sha256": "164c5bff5517be3fcf9299a7a9672dcf677781cc6a4175a9174364730d7efd2b"
+    },
+    {
       "path": "scripts/inspect-hero.mjs",
-      "bytes": 8929,
-      "sha256": "54e877b6f14616280ab6d8cb711a28a22c4804313333551727df5e8a3f702865"
+      "bytes": 9437,
+      "sha256": "efe1e7d8d96808e2e417076df6351e67adf98bf43237c18a48743ce42642f8c1"
     },
     {
       "path": "scripts/inspect-lamborghini-standalone.cjs",
@@ -1621,6 +1676,11 @@
       "path": "scripts/prepare-companion-art.py",
       "bytes": 2826,
       "sha256": "80650a5464acabdd3727149f431d9c628155801ea8362ef6ffd6aab5e2628dcc"
+    },
+    {
+      "path": "scripts/prepare-hero-turns.py",
+      "bytes": 4286,
+      "sha256": "d98010cb4911ecff99ddc2b30b716c6eedcf372e644ccdac0033e1b24260446c"
     },
     {
       "path": "scripts/prepare-hero-whole.py",
@@ -2079,8 +2139,8 @@
     },
     {
       "path": "tests/hero-contact.test.js",
-      "bytes": 2765,
-      "sha256": "50c95f819c5f679c5038986c017fbcba7ea5dd2c883c7107cd303fcd3088b8d9"
+      "bytes": 2783,
+      "sha256": "195000318fa22c8ebb5505a167d4db8d4bd9655f4397e66226a2c5468df48ad2"
     },
     {
       "path": "tests/hero-gait.test.js",
@@ -2088,9 +2148,19 @@
       "sha256": "7a5f28514a4d8139217547b58f0bac88940cb1acd2291accf85c995424ae0363"
     },
     {
+      "path": "tests/hero-motion.test.js",
+      "bytes": 4724,
+      "sha256": "c25cd48478bf76e15147669e3aea5cd5553545b686cf6ee1e11948d6644ce358"
+    },
+    {
       "path": "tests/hero-pose.test.js",
-      "bytes": 6120,
-      "sha256": "bd8490aeaa542128ab3979b4c1598ed84c5fbb5757bf99aeda63827414161c0f"
+      "bytes": 6121,
+      "sha256": "c2affa212524fe76d39bd4c0fde3d045862f099189a7aec2b9d8197462073c65"
+    },
+    {
+      "path": "tests/hero-turn-art.test.js",
+      "bytes": 795,
+      "sha256": "3460df221474334c1f75cf68aef4119c7fb89038c731c3e79d9f1d91f620a53d"
     },
     {
       "path": "tests/hud-space-activation.test.js",
@@ -2418,7 +2488,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "196365e2a1f221d869500fb4ba2359bb09b528c9",
+  "base_github_commit": "3681edd08e7581dd3fb33ab76fbc9d7d47594bff",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",

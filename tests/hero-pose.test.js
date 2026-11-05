@@ -20,7 +20,7 @@ test('one undeformed native frame maps its painted muzzle and both grips togethe
     assert.ok(distance(mapped(p,p.art.frame.muzzle),p.muzzle)<1e-8);assert.ok(distance(mapped(p,p.art.frame.rearHand),p.weapon.grips.main)<1e-8);assert.ok(distance(mapped(p,p.art.frame.frontHand),p.weapon.grips.support)<1e-8);assert.ok(distance(mapped(p,p.art.frame.hip),p.body.hip)<1e-8);
     assert.ok(near(distance(p.weapon.pivot,p.muzzle),31));assert.ok(near((p.muzzle.x-p.weapon.pivot.x)*p.aim.y-(p.muzzle.y-p.weapon.pivot.y)*p.aim.x,0));
   }
-  assert.equal(ids.size,8);
+  assert.equal(ids.size,14);
 });
 
 test('run frame is linked to actual distance, reverses backwards, and is independent of elapsed time',()=>{

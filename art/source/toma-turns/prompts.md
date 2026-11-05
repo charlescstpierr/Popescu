@@ -1,0 +1,19 @@
+# Prompts finaux
+
+## Vue presque frontale
+
+Edit this sprite sheet, preserve this exact bald short-bearded Toma, clothes, proportions and pixel-art style. Rotate each WHOLE PERSON slightly about his vertical body axis: from direct front to only 20 DEGREES to viewer's RIGHT. All eight drawings must still show BOTH eyes and the FRONT of the chest almost symmetrically. The compact rifle is pointed TOWARD THE CAMERA and a little to screen right, its barrel is FORESHORTENED, not a long horizontal side-view. The muzzle is BELOW and just RIGHT of the hands, not level with them. This is a new view between straight front and front three-quarter. Keep walking cycle poses, body complete with boots and both hands. Repaint organically, never 2D rotate/stretch. Draw high-resolution crisp illustrated pixel art, matching exact identity. NO hair bun, ponytail, new outfit. Expand to 4 columns x 3 rows: first 8 full-body drawings same running phases as reference, last4 drawings the same view standing, half-split, deeper split, full wide Van Damme split while aiming same rifle toward camera. All bodies aligned by ground line, equal scale, plenty transparent margin, NO text/shadows/grid. Transparent background. Critical: do not turn him side-on. The front face remains fully visible, weapon strongly shortened by perspective.
+
+Référence : huit poses de course S v5, agrandies sans interpolation.
+
+## Vue presque arrière
+
+Edit the reference sprite sheet, preserve exact Toma identity, stocky body proportions, bald back of head with very short side hair, black/purple jacket gold piping, dark pants/boots and pixel-art style. New viewpoint: keep ALMOST DIRECT BACK VIEW, rotate the body just 20 DEGREES toward screen RIGHT about its vertical axis. Only the back of his head and jacket are visible; NO face or nose/profile should be visible. The far arm largely hides behind the shoulder. Rifle points AWAY FROM CAMERA and slightly screen right. Gun screen-space axis must point strongly UP and only slightly RIGHT, i.e. around 65 degrees above horizontal, not the shallow angle of a side view. The muzzle is above and slightly right of the bald dome, the rifle is foreshortened and short. Organically repaint complete figures, no 2D rotation/shear/parts assembly. 4 columns x 3 rows:8 chronological walking phases matching reference contact/down/pass/up then opposite contact/down/pass/up, plus final row standing, half split, deeper split, full wide Van Damme split with lowered head and hips, same almost-back angle and gun. Equal scale, ground-aligned, full bodies and both boots, connected complete silhouettes. Detailed illustrated pixel-art with crisp edges. Transparent background, no text, shadows or grid. Critical: this is an ALMOST STRAIGHT BACK VIEW, never side profile; near symmetric shoulders, no face, and barrel steeply UP.
+
+Référence : huit poses de course N v5, agrandies sans interpolation.
+
+## Vue intermédiaire avant : correction finale
+
+Precise identity correction of this production sprite sheet. Remove ONLY the small hair bun / topknot from the top and back of Toma's skull in EVERY one of the 12 cells. He has a bald dome and close short side hair, NOT a bun, ponytail, crest or long hair. Keep his exact face, beard, tan skin, head size, jacket, pants, boots, rifle, down-right aiming angle, body poses, all 8 walking phases and 4 descending split phases unchanged. Keep entire complete figures, exactly 4 columns and 3 rows, same resolution, same transparent background and clean edges. Do not change silhouette except removing the hair buns. Preserve the detailed crisp illustrated pixel-art shading. No extra objects, labels or shadows.
+
+Référence : première feuille bas-droite générée à partir de la planche v5, huit pas et quatre grands écarts. Son angle demandé de 45° a été mesuré visuellement à environ 32°; c'est ce dernier angle qui est enregistré dans le jeu.
