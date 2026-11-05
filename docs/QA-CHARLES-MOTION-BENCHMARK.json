@@ -1,0 +1,485 @@
+{
+  "method": "Three paired process-isolated native Canvas render/readback repetitions, taskset -c 0, not browser or physical mobile",
+  "rows": [
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 11.533681000000115,
+      "p95": 18.431498000000033,
+      "max": 30.404217000000017,
+      "rssMiB": 366.6328125,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 7.838737999999921,
+      "p95": 9.490617000000043,
+      "max": 9.566929999999957,
+      "rssMiB": 368.140625,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 34.88484799999992,
+      "p95": 52.88554999999997,
+      "max": 52.88554999999997,
+      "rssMiB": 438.11328125,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 38.952400000000125,
+      "p95": 65.89747699999998,
+      "max": 65.89747699999998,
+      "rssMiB": 442.796875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 6.540061000000037,
+      "p95": 35.09051199999999,
+      "max": 55.89238799999998,
+      "rssMiB": 365.140625,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 6.097987999999987,
+      "p95": 9.200513,
+      "max": 17.469437000000084,
+      "rssMiB": 366.89453125,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 39.417011999999886,
+      "p95": 50.5082809999999,
+      "max": 50.5082809999999,
+      "rssMiB": 436.9921875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 38.61832400000003,
+      "p95": 45.53192600000011,
+      "max": 45.53192600000011,
+      "rssMiB": 443.30859375,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 8.692500999999993,
+      "p95": 14.828065000000038,
+      "max": 15.30026399999997,
+      "rssMiB": 366.71875,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 8.202593999999976,
+      "p95": 9.822874000000184,
+      "max": 9.987070000000017,
+      "rssMiB": 368.078125,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 40.710296999999855,
+      "p95": 52.67225099999996,
+      "max": 52.67225099999996,
+      "rssMiB": 442.65625,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 40.71752699999979,
+      "p95": 47.40055200000006,
+      "max": 47.40055200000006,
+      "rssMiB": 443.8984375,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 11.078487999999993,
+      "p95": 17.783727,
+      "max": 25.865199000000075,
+      "rssMiB": 365.44921875,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 6.987341000000015,
+      "p95": 11.69184800000005,
+      "max": 21.132940000000076,
+      "rssMiB": 367.140625,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 37.73647599999981,
+      "p95": 45.528864999999996,
+      "max": 45.528864999999996,
+      "rssMiB": 442.1640625,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 36.75546399999985,
+      "p95": 47.847492999999986,
+      "max": 47.847492999999986,
+      "rssMiB": 442.6796875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 8.44521999999995,
+      "p95": 12.881204999999909,
+      "max": 24.39929300000017,
+      "rssMiB": 366.515625,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 8.044748000000027,
+      "p95": 15.85019699999998,
+      "max": 23.324369000000047,
+      "rssMiB": 367.74609375,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 45.02203600000007,
+      "p95": 51.43287299999997,
+      "max": 51.43287299999997,
+      "rssMiB": 442.79296875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": false,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 39.70101399999999,
+      "p95": 48.84838599999989,
+      "max": 48.84838599999989,
+      "rssMiB": 444.421875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 11.232509000000164,
+      "p95": 23.01047799999992,
+      "max": 23.88422800000012,
+      "rssMiB": 364.109375,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "after",
+      "enemies": 0,
+      "p50": 6.832209000000034,
+      "p95": 22.953381000000036,
+      "max": 23.319640999999933,
+      "rssMiB": 364.7265625,
+      "cache": {
+        "actors": 0,
+        "terrain": 8
+      },
+      "frames": 24,
+      "warmup": 4,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "baseline",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 41.52630799999997,
+      "p95": 56.870959000000084,
+      "max": 56.870959000000084,
+      "rssMiB": 437.16796875,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    },
+    {
+      "variant": "candidate",
+      "reduced": true,
+      "kind": "cap",
+      "enemies": 300,
+      "p50": 39.153268000000025,
+      "p95": 48.99514199999999,
+      "max": 48.99514199999999,
+      "rssMiB": 445.0078125,
+      "cache": {
+        "actors": 5,
+        "terrain": 8
+      },
+      "frames": 8,
+      "warmup": 2,
+      "width": 390,
+      "height": 844,
+      "dpr": 1,
+      "limitation": "Short native render + full RGBA readback sample, not browser or phone. At 8 frames p95 is just the maximum."
+    }
+  ]
+}

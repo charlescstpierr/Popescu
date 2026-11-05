@@ -1,5 +1,7 @@
 # Reprise dans une nouvelle discussion
 
+Animations de Charles du 5 novembre 2026 : douze peintures de corps entier animent désormais sa cape, son freinage en vol, le redressement et le geste du claquement. Le visage et l’effet de main suivent les points mesurés des peintures, sans déformer le corps ni changer le moteur ou les sauvegardes. Lire [QA-CHARLES-MOTION-2026-11-05.md](QA-CHARLES-MOTION-2026-11-05.md).
+
 Arrivée automatique du 5 novembre 2026 : à 20:00, Charles entre directement en volant, claque des doigts et fait disparaître les ennemis avant tout écran de victoire. Le dialogue et le combat suivent. Les anciens résultats sauvegardés restent compatibles. Lire [QA-CHARLES-AUTOMATIC-2026-11-05.md](QA-CHARLES-AUTOMATIC-2026-11-05.md).
 
 Cohérence des portraits au démarrage du 5 novembre 2026 : le HUD, les répliques compactes et le résultat utilisent désormais un petit recadrage du nouveau portrait fidèle. Le grand portrait de chaque locuteur et les sauvegardes sont inchangés. Lire [QA-START-PORTRAITS-2026-11-05.md](QA-START-PORTRAITS-2026-11-05.md).

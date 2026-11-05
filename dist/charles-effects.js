@@ -55,10 +55,10 @@ function drawBeam(ctx,c,reduced){
  }
  ctx.restore();
 }
-export function drawCharlesGround(ctx,c,reduced=false){
+export function drawCharlesGround(ctx,c,reduced=false,bodyPose=null){
  if(!c||c.phase==='complete')return;ctx.save();
  const arrival=charlesArrival(c);
- if(arrival){const pose=charlesPose(c,c.elapsed,reduced);ctx.globalAlpha=.18;ctx.fillStyle='#0b0b1d';ctx.beginPath();ctx.ellipse(pose.x,c.y+7,24,7,0,0,TAU);ctx.fill();}
+ if(arrival){const pose=bodyPose||charlesPose(c,c.elapsed,reduced);ctx.globalAlpha=.18;ctx.fillStyle='#0b0b1d';ctx.beginPath();ctx.ellipse(pose.x,c.y+7,24,7,0,0,TAU);ctx.fill();}
  if(c.phase==='shock_warning'||c.phase==='shockwave'){
   // Green opening and both its boundary rays persist even with effects reduced.
   ctx.globalAlpha=.16;ctx.fillStyle='#48e8a1';wedge(ctx,c,c.waveMax);ctx.fill();ctx.globalAlpha=.85;ctx.strokeStyle='#8bffbf';ctx.lineWidth=2;
@@ -83,13 +83,13 @@ export function drawCharlesGround(ctx,c,reduced=false){
  }
  ctx.restore();
 }
-export function drawCharlesForeground(ctx,c,reduced=false){
+export function drawCharlesForeground(ctx,c,reduced=false,bodyPose=null){
  if(!c||c.phase==='complete')return;ctx.save();
 
  const arrival=charlesArrival(c);
  if(arrival?.stage==='snap'){
-  const pose=charlesPose(c,c.elapsed,reduced),p=(arrival.time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap);
-  const x=Math.round(pose.x)+66.725-CHARLES_ART.anchorX,y=Math.round(pose.y)+54.365-CHARLES_ART.anchorY;
+  const pose=bodyPose||charlesPose(c,c.elapsed,reduced),p=(arrival.time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap);
+  const x=pose.hand?.x??Math.round(pose.x)+66.725-CHARLES_ART.anchorX,y=pose.hand?.y??Math.round(pose.y)+54.365-CHARLES_ART.anchorY;
   // A local hand pulse makes the tiny painted gesture readable. No whiteout,
   // strobe, particles, allocations or screen-wide wave; retained in reduced mode.
   ctx.globalAlpha=(1-p)*(reduced?.55:.8);ctx.strokeStyle='#ffe6a0';ctx.lineWidth=2;circle(ctx,x,y,4+p*(reduced?15:32));ctx.stroke();

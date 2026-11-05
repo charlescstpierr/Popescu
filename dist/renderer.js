@@ -730,7 +730,8 @@ this._shadow(x,y+7,40,8);
     // Old checkpoints can contain legacy power rings. Do not replay them as
     // travelling attacks: truth damages at once and airplane is defensive.
     for(const p of s.pulses||[]){if(p.color==='#c9a8ff'||p.color==='#8adce6')continue;const alpha=Math.min(1,(p.life||0)/(p.maxlife||1));ctx.save();ctx.globalAlpha=alpha*.7;ring(ctx,p.color||'#fdd447',p.x,p.y,p.r||1,.055,3,0,1);if(!this.reducedEffects)ring(ctx,'#fff6c2',p.x,p.y,Math.max(0,(p.r||1)-4),.09,1,0,1);ctx.restore();}
-    drawCharlesGround(ctx,s.charles,this.reducedEffects);
+    const charlesBodyPose=s.charles?this.charles.pose(s.charles,s.charles.elapsed,this.reducedEffects):null;
+    drawCharlesGround(ctx,s.charles,this.reducedEffects,charlesBodyPose);
     drawTrophyGround(ctx,s,this.reducedEffects);
     this.powers.drawGround(ctx,s,game.powerEffects||[],this.reducedEffects);
     if(s.airplane?.active) {
@@ -777,7 +778,7 @@ this._shadow(x,y+7,40,8);
     drawTrophyForeground(ctx,s,this.reducedEffects);
     // Airborne arrival paints above scenery; later combat retains ordinary depth.
     if(arrival)this.charles.draw(ctx,s.charles,s.charles.elapsed,this.reducedEffects);
-    drawCharlesForeground(ctx,s.charles,this.reducedEffects);
+    drawCharlesForeground(ctx,s.charles,this.reducedEffects,charlesBodyPose);
     this._shield(s);
     if(raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();

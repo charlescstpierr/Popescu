@@ -32,9 +32,9 @@ test('Charles reduced effects remove idle bob and do not alter phase timing',()=
  assert.equal(api.charlesPose(state('descend',.5),0,true).progress,.5);
 });
 
-test('Charles art loads two small atlases and paints one intact frame with translation only',async()=>{
+test('Charles art loads three small atlases and paints one intact frame with translation only',async()=>{
  need();const urls=[],art=new api.CharlesArt({loadImage:async src=>{urls.push(src);return {width:880,height:176};}});assert.equal(await art.ready,true);
- assert.equal(urls.length,2);assert.match(urls[1],/assets\/charles-arrival-v1\.png$/);assert.match(urls[0],/assets\/charles-whole-v1\.png$/);
+ assert.equal(urls.length,3);assert.match(urls[2],/assets\/charles-motion-v1\.png$/);assert.match(urls[1],/assets\/charles-arrival-v1\.png$/);assert.match(urls[0],/assets\/charles-whole-v1\.png$/);
  for(const phase of ['intro','hover','shock_warning','shockwave','cape_warning','cape_spin','recover','descend','bend','scream','burst','empowered']){
   const c=state(phase),before=JSON.stringify(c),r=recording();assert.equal(art.draw(r.ctx,c,4,false),true);
   assert.equal(r.calls.filter(c=>c[0]==='drawImage').length,1,phase);
