@@ -22,10 +22,11 @@ function dom(){
 const context=actorType=>({actorType,sceneId:actorType==='companion'?'companion:invocation':actorType==='charles'?'charles:0':`boss:${actorType}`,companionRank:actorType==='companion'?1:null});
 const line={who:'TOMA',text:'Une réplique de Toma.'};
 for(const [actorType,name]of [['charles','CHARLES'],['pelican','PÉLI ZODIAQUE'],['travestia','TRAVESTIA'],['companion','BLONDE IA']]){
- test(`${actorType}: approved scene keeps encounter identity on a Toma reply`,()=>{
+ test(`${actorType}: approved scene keeps context but shows Toma on his reply`,()=>{
   const document=dom(),game=Object.freeze({state:Object.freeze({mode:'dialogue'}),dialoguePresentation:()=>context(actorType)}),before=JSON.stringify(game);
   assert.equal(renderEncounterPresentation({game,line,index:1,total:5,document}),true);
-  assert.equal(document.nodes.get('encounter-name').textContent,name);
+  assert.equal(document.nodes.get('encounter-name').textContent,'TOMA POPESCU');
+  assert.equal(document.nodes.get('encounter-portrait').src,'assets/dialogue-toma.png');
   assert.equal(document.nodes.get('speaker').textContent,'TOMA POPESCU');
   assert.match(document.nodes.get('encounter-description').textContent,/Scène en pause/);
   assert.match(document.nodes.get('encounter-description').textContent,/Toma Popescu répond/);
@@ -39,25 +40,26 @@ for(const [actorType,name]of [['charles','CHARLES'],['pelican','PÉLI ZODIAQUE']
 }
 test('all five companion ranks select their own approved appearance, never another rank',()=>{
  for(let rank=1;rank<=5;rank++){
-  const model=encounterPresentation({context:{...context('companion'),companionRank:rank},line});
+  const model=encounterPresentation({context:{...context('companion'),companionRank:rank},line:{who:'BLONDE IA',text:'Réplique'}});
   assert.equal(model.rank,rank);assert.match(model.subtitle,new RegExp(`NIVEAU ${rank}$`));
   assert.deepEqual(model.portraits,rank===1?['assets/dialogue-companion-1.png','assets/companion-portrait-1.png']:[`assets/companion-portrait-${rank}.png`]);
  }
 });
-test('regular, opening, unknown and unscoped dialogue never receive the encounter variant',()=>{
+test('only closing a dialogue resets the speaker presentation; scene metadata never substitutes its actor',()=>{
+ assert.equal(encounterPresentation({context:context('charles'),line:null}),null);
  for(const c of [null,{actorType:'companion',sceneId:null},{actorType:'gorilla',sceneId:'boss:gorilla'},{actorType:'charles',sceneId:'boss:pelican'}]){
-  assert.equal(encounterPresentation({context:c,line}),null);
+  const model=encounterPresentation({context:c,line});assert.equal(model.speakerType,'toma');assert.equal(model.sceneName,null);
  }
 });
 test('failed portrait falls back safely and stale callbacks cannot resurrect old portraits',()=>{
  const document=dom(),portrait=document.nodes.get('encounter-portrait'),root=document.nodes.get('dialogue');
- renderEncounterPresentation({context:context('companion'),line,document});
+ renderEncounterPresentation({context:context('companion'),line:{who:'BLONDE IA',text:'Réplique'},document});
  assert.equal(document.nodes.get('encounter-framed-portrait').getAttribute('hidden'),'');
  const staleLoad=portrait.onload;portrait.onerror();
  assert.equal(portrait.src,'assets/companion-portrait-1.png');portrait.onerror();
  assert.ok(root.classList.contains('encounter-no-art'));assert.equal(portrait.hidden,true);assert.equal(document.nodes.get('encounter-framed-portrait').getAttribute('hidden'),'');
  staleLoad();assert.equal(portrait.hidden,true);
- renderEncounterPresentation({context:context('pelican'),line,document});
+ renderEncounterPresentation({context:context('pelican'),line:{who:'PÉLI ZODIAQUE',text:'Réplique'},document});
  portrait.naturalWidth=400;portrait.onload();assert.equal(portrait.hidden,false);
  const oldLoad=portrait.onload;renderEncounterPresentation({context:null,line:null,document});oldLoad();
  assert.equal(root.classList.contains('encounter-dialogue'),false);assert.equal(portrait.hidden,true);assert.equal(document.nodes.get('encounter-framed-portrait').getAttribute('hidden'),'');
@@ -105,10 +107,19 @@ test('existing companion portraits and level atlas retain fixed approved SHA-256
 });
 test('SVG frames normalize transparent margins without editing the approved assets',()=>{
  for(const actor of ['charles','pelican','travestia','companion']){
-  const document=dom(),model=encounterPresentation({line,context:context(actor)});
-  renderEncounterPresentation({line,context:context(actor),document});document.nodes.get('encounter-portrait').onload();
+  const current={who:{charles:'CHARLES',pelican:'PÉLI ZODIAQUE',travestia:'TRAVESTIA',companion:'BLONDE IA'}[actor],text:'Réplique'},document=dom(),model=encounterPresentation({line:current,context:context(actor)});
+  renderEncounterPresentation({line:current,context:context(actor),document});document.nodes.get('encounter-portrait').onload();
   const framed=document.nodes.get('encounter-framed-portrait'),image=document.nodes.get('encounter-framed-image'),frame=encounterPortraitFrame(model.portraits[0]);
   assert.equal(framed.hidden,false);assert.equal(framed.getAttribute('hidden'),null);assert.equal(framed.getAttribute('viewBox'),frame.viewBox.join(' '));assert.equal(image.getAttribute('href'),model.portraits[0]);
   assert.ok(frame.viewBox[3]>frame.viewBox[2]);
  }
+});
+
+test('speaker change hides the previous face while loading and rejects late callbacks',()=>{
+ const document=dom(),portrait=document.nodes.get('encounter-portrait'),framed=document.nodes.get('encounter-framed-portrait');
+ renderEncounterPresentation({line:{who:'PÉLI ZODIAQUE',text:'Boss'},context:context('pelican'),document});portrait.onload();assert.equal(framed.hidden,false);const bossLoad=portrait.onload,bossError=portrait.onerror;
+ renderEncounterPresentation({line,context:context('pelican'),index:1,total:2,document});assert.equal(framed.hidden,true);assert.equal(portrait.hidden,true);assert.equal(portrait.src,'assets/dialogue-toma.png');
+ bossLoad();bossError();assert.equal(framed.hidden,true);assert.equal(portrait.src,'assets/dialogue-toma.png');
+ portrait.onerror();assert.equal(document.nodes.get('encounter-art-status').textContent,'Portrait indisponible');assert.equal(framed.hidden,true);
+ renderEncounterPresentation({line:{who:'SYSTÈME',text:'Message'},context:context('pelican'),document});assert.equal(framed.hidden,true);assert.equal(document.nodes.get('encounter-framed-image').getAttribute('href'),null);assert.equal(document.nodes.get('encounter-name').textContent,'SYSTÈME');
 });

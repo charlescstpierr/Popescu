@@ -49,7 +49,7 @@ function cancelHudSpacePress(){if(hudSpacePress)hudSpacePress.cancelled=true;}
 function resetInput(){cancelHudSpacePress();input={x:0,y:0};keys.clear();if(pointer!==null){try{app.releasePointerCapture(pointer)}catch{}}pointer=null;$('stick').style.transform='';$('joystick').classList.remove('active');$('joystick').style.removeProperty('left');$('joystick').style.removeProperty('top');$('joystick').style.removeProperty('bottom');}
 function cancelStartAttempt(navigated=false){if(startAttempt){startAttempt.cancelled=true;startAttempt.navigated ||=navigated;}}
 function show(name){cancelStartAttempt(true);const leavingDialogue=screen==='dialogue'&&name!=='dialogue';if(name!=='dialogue')renderEncounterPresentation({context:null,line:null});cancelAssetWait();resetInput();screen=name;$('charles-leave').classList.toggle('hidden',!charlesActive());if(name==='hud')nextTrophyToast();$('trophy-toast').classList.toggle('hidden',name!=='hud'||trophyToastRemaining<=0);for(const id of screens)$(id).classList.toggle('hidden',id!==name);$('hud').classList.toggle('hidden',name!=='hud'&&name!=='trophies');$('hud').classList.toggle('trophy-backdrop',name==='trophies');syncAudio();if(name!=='dialogue')clearTimeout(autoTimer);if(name!=='hud')$('banter').classList.add('hidden');else{game?.setBanterEnabled(prefs.banter);game?.presentSpeech();}if(leavingDialogue&&name==='hud')$('pause').focus?.();}
-function resize(){const r=app.getBoundingClientRect();width=Math.round(r.width);height=Math.round(r.height);renderer.resize(width,height);game?.setViewport(width,height);}
+function resize(){resetInput();const r=app.getBoundingClientRect();width=Math.round(r.width);height=Math.round(r.height);renderer.resize(width,height);game?.setViewport(width,height);}
 window.addEventListener('resize',resize);new ResizeObserver(resize).observe(app);resize();
 function updateRecordMenu(){setText('best',format(best));setText('lifetime',`${lifetime.toLocaleString('fr-CA')} singe${lifetime===1?'':'s'} vaincu${lifetime===1?'':'s'}`)}
 function syncPrefs(){game?.setBanterEnabled(prefs.banter);audio.setEnabled(prefs.sound);audio.setVolume(prefs.volume/100);app.classList.toggle('reduced-fx',prefs.reduced);renderer.reducedEffects=prefs.reduced;document.querySelectorAll('.sound-button').forEach(b=>{b.textContent=prefs.sound?'♫':'♪̸';b.setAttribute('aria-label',prefs.sound?'Couper le son':'Activer le son');b.setAttribute('aria-pressed',String(prefs.sound));});$('sound-setting').checked=prefs.sound;$('volume').value=prefs.volume;setText('volume-text',`${prefs.volume} %`);$('reduced-fx').checked=prefs.reduced;$('banter-setting').checked=prefs.banter;}
@@ -288,12 +288,24 @@ async function renderResult(win){if(!game)return;const current=game,s=game.state
 function updateHud(force=false){if(!game)return;const s=game.state;const help=tutorialText(game);$('opening-help').classList.toggle('hidden',!help);setText('opening-help-text',help);audio.setIntensity?.(Math.min(1,s.elapsed/1000+s.enemies.length/650));setText('level',`NIV. ${s.level}`);setText('time',format(s.elapsed));setText('time-goal',charlesActive()?'SURVIE DÉJÀ GAGNÉE':s.endless?'SURVIE INFINIE':'OBJECTIF 20:00');setText('health-text',`${Math.max(0,Math.ceil(s.hp))} / ${s.maxhp}${s.shield>0?' + ◇':''}`);$('health-fill').style.width=`${Math.max(0,s.hp)/s.maxhp*100}%`;$('xp-fill').style.width=`${Math.min(100,s.xp/s.xpNeed*100)}%`;setText('xp-text',`EXPÉRIENCE ${Math.floor(s.xp)} / ${s.xpNeed}`);setText('coins',s.coins);setText('gems',s.gems);setText('kills',s.kills);setText('coordinates',`SECTEUR ${Math.floor(s.x/512)} · ${Math.floor(s.y/512)}  /  ${DIFFICULTIES[s.difficulty]?.label||s.difficulty}`);$('companion').classList.toggle('unlocked',s.companion);const companion=companionLevel(s.upg.girlfriend);setText('companion-status',s.companion?`NIV. ${companion.rank}/5 · ${s.girl?.down>0?`RETOUR ${Math.ceil(s.girl.down)} s`:companion.short}`:'SIGNAL VERROUILLÉ');$('companion').setAttribute('aria-label',s.companion?`Blonde IA, niveau ${companion.rank} sur 5. ${companion.description}`:'Blonde IA, signal verrouillé');const portrait=$('companion-portrait'),portraitPath=s.companion?COMPANION_PORTRAITS[companion.rank-1]:'assets/portrait-blonde-ia.webp';if(portrait.getAttribute?.('src')!==portraitPath)portrait.setAttribute('src',portraitPath);setText('companion-lock',s.companion?'♥':'◇');const sig=JSON.stringify([s.upg,s.evolutions,s.trophies?.chosen]);if(sig!==powerSignature||force){powerSignature=sig;$('powers').replaceChildren();for(const [id,rank] of Object.entries(s.upg)){if(!rank)continue;const u=UPGRADES.find(u=>u.id===id);if(!u)continue;const el=document.createElement('span');el.className='power-icon';const evolved=EVOLUTIONS.find(def=>s.evolutions[def.id]&&def.requires.includes(id));el.title=`${u.name} · Niveau ${rank}${evolved?` · ${evolved.name}`:''}`;const c=document.createElement('canvas');c.width=26;c.height=26;drawIcon(c.getContext('2d'),u.icon||id,0,0,26);const n=document.createElement('small');n.textContent=rank;el.append(c,n);$('powers').append(el);}}updateTrophyHud();updateDiscoveryHud();updateCharlesHud();drawArrows();}
 function updateDiscoveryHud(){
   const discovery=game.state.discovery,active=discovery?.active,site=active||discovery?.nearby;
-  $('discovery-status').classList.toggle('hidden',!site);
+  const visible=Boolean(site)&&!charlesActive();
+  $('discovery-status').classList.toggle('hidden',!visible);
+  $('discovery-summary').classList.toggle('hidden',!visible);
+  $('time-goal').classList.toggle('hidden',visible);
   if(!site)return;
+  const kind=site.kind||site.discoveryType;
+  const names={cabin:'CABANE',ruin:'RUINES',altar:'AUTEL',wreck:'ÉPAVE',anomaly:'FAILLE'};
+  const effects={cabin:'SOIN',ruin:'DÉGÂTS',altar:'AIMANT',wreck:'VITESSE',anomaly:'CADENCE'};
+  const summary=active?`${effects[kind]||'BONUS'} · ${Math.ceil(active.remaining)} s`:site.cooldown>0?'LIEU ÉPUISÉ':`${names[kind]||'LIEU'} PROCHE`;
+  const description=active?site.description:discoveryPrompt(site);
+  setText('discovery-summary',summary);
+  const detail=`${site.name||'Découverte'}. ${active?`${Math.ceil(active.remaining)} secondes. `:''}${description} Détails en pause.`;
+  $('discovery-summary').setAttribute('aria-label',detail);
+  $('discovery-summary').setAttribute('title',detail);
   $('discovery-status').style.setProperty('--discovery-color',site.color||'#c6bbff');
   setText('discovery-name',site.name||'Découverte');
   setText('discovery-time',active?`${Math.ceil(active.remaining)} s`:site.cooldown>0?`${Math.ceil(site.cooldown)} s`:'◇');
-  setText('discovery-description',active?site.description:discoveryPrompt(site));
+  setText('discovery-description',description);
   $('discovery-fill').style.width=active?`${Math.max(0,Math.min(100,active.remaining/active.duration*100))}%`:'100%';
 }
 function drawArrows(){const s=game.state;const targets=s.chests.filter(c=>!c.open).sort((a,b)=>Math.hypot(a.x-s.x,a.y-s.y)-Math.hypot(b.x-s.x,b.y-s.y)).slice(0,1);if(s.companionItem)targets.push({...s.companionItem,isGirl:true});$('offscreen').replaceChildren();for(const target of targets){const dx=target.x-s.x,dy=target.y-s.y,halfW=width/2-28,halfH=height*.34;if(Math.abs(dx)<halfW&&Math.abs(dy)<halfH)continue;const scale=Math.min(halfW/Math.abs(dx||.001),halfH/Math.abs(dy||.001));const el=document.createElement('span');el.className=`target-arrow ${target.isGirl?'girl-arrow':''}`;el.textContent=target.isGirl?'♥':'▣';el.style.left=`${width/2+dx*scale-14}px`;el.style.top=`${height*.48+dy*scale-14}px`;el.title=target.isGirl?'Blonde IA':'Coffre';$('offscreen').append(el);}}
@@ -318,7 +330,23 @@ window.addEventListener('keydown',e=>{const key=e.key.toLowerCase();if(assetWait
 // Space belongs to its original HUD button until release. A screen/input reset
 // cancels native keyup activation instead of transferring it to a new control.
 window.addEventListener('keyup',e=>{const key=e.key.toLowerCase();keys.delete(key);if(key===' '&&hudSpacePress){const press=hudSpacePress;hudSpacePress=null;if(press.cancelled||screen!=='hud'||e.target?.closest?.('button')!==press.button)e.preventDefault();}});
-app.addEventListener('pointerdown',e=>{if(assetWait||screen!=='hud'||e.target.closest('button')||pointer!==null)return;const r=app.getBoundingClientRect();const x=e.clientX-r.left,y=e.clientY-r.top;if(y<height*.35||x>width*.75)return;pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};try{app.setPointerCapture(pointer)}catch{}$('joystick').classList.add('active');$('joystick').style.left=`${Math.max(3,Math.min(width-113,x-55))}px`;$('joystick').style.top=`${Math.max(height*.35,Math.min(height-135,y-55))}px`;$('joystick').style.bottom='auto';e.preventDefault();});
+// The invisible CSS box resolves env(safe-area-inset-*) to real pixels. Use
+// untransformed DOM metrics so both the base and the thumb's full 33px travel
+// fit, including the smaller joystick on narrow screens and its border.
+function joystickPlacement(x,y,r){
+ const area=$('control-safe-area').getBoundingClientRect(),joy=$('joystick'),stick=$('stick');
+ const left=Math.max(0,area.left-r.left),top=Math.max(height*.35,area.top-r.top);
+ const right=Math.min(width,area.left+area.width-r.left),bottom=Math.min(height,area.top+area.height-r.top);
+ if(x<left||x>Math.min(right,width*.75)||y<top||y>bottom)return null;
+ const w=joy.offsetWidth,h=joy.offsetHeight,tx=joy.clientLeft+stick.offsetLeft,ty=joy.clientTop+stick.offsetTop;
+ if(!(w>0&&h>0&&stick.offsetWidth>0&&stick.offsetHeight>0))return null;
+ const minX=Math.min(0,tx-33),minY=Math.min(0,ty-33);
+ const maxX=Math.max(w,tx+stick.offsetWidth+33),maxY=Math.max(h,ty+stick.offsetHeight+33);
+ const lowX=left-minX,highX=right-maxX,lowY=top-minY,highY=bottom-maxY;
+ if(lowX>highX||lowY>highY)return null;
+ return {left:Math.max(lowX,Math.min(highX,x-w/2)),top:Math.max(lowY,Math.min(highY,y-h/2))};
+}
+app.addEventListener('pointerdown',e=>{if(assetWait||screen!=='hud'||e.target.closest('button')||pointer!==null)return;const bounds=app.getBoundingClientRect(),r={left:bounds.left+(app.clientLeft||0),top:bounds.top+(app.clientTop||0)};const placement=joystickPlacement(e.clientX-r.left,e.clientY-r.top,r);if(!placement)return;pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};try{app.setPointerCapture(pointer)}catch{}$('joystick').classList.add('active');$('joystick').style.left=`${placement.left}px`;$('joystick').style.top=`${placement.top}px`;$('joystick').style.bottom='auto';e.preventDefault();});
 app.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;const dx=e.clientX-origin.x,dy=e.clientY-origin.y,d=Math.hypot(dx,dy)||1;const k=Math.min(1,d/40);input={x:dx/d*k,y:dy/d*k};$('stick').style.transform=`translate(${input.x*33}px,${input.y*33}px)`;e.preventDefault();});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(event,e=>{if(e.pointerId===pointer)resetInput();});
 window.addEventListener('blur',()=>{windowFocused=false;cancelStartAttempt();clearTimeout(autoTimer);cancelAssetWait();resetInput();if(screen==='hud')pause();});

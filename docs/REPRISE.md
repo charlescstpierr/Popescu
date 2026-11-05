@@ -1,5 +1,9 @@
 # Reprise dans une nouvelle discussion
 
+Portraits de dialogue du 5 novembre 2026 : le grand portrait suit chaque locuteur, indépendamment de l’acteur propriétaire de la scène sauvegardée. Toma utilise `dialogue-toma.png`, cohérent avec le visage des sprites v7. Lire [QA-SPEAKER-PORTRAITS-2026-11-05.md](QA-SPEAKER-PORTRAITS-2026-11-05.md).
+
+Correction de ressemblance du 5 novembre 2026 : le personnage courant utilise `toma-whole-v7.png`, peint d'après les quatre nouvelles photos fournies par l'utilisateur. Lire [QA-TOMA-LIKENESS.md](QA-TOMA-LIKENESS.md). Les huit vues (quatorze directions avec miroirs), les cellules, les commandes et les règles de mouvement restent les mêmes. Les mentions ci-dessous de pixels E intacts décrivent l'historique v1.5, pas la correction explicitement demandée depuis.
+
 Mise à jour Toma du 5 novembre 2026 : lire [QA-TOMA-MOTION.md](QA-TOMA-MOTION.md) pour les quatorze directions, les virages continus et les sauvegardes compatibles. Les détails v1.5 ci-dessous restent la provenance des peintures d’origine, pas le décompte actuel des vues.
 
 Le projet est prêt à être continué à partir de la v1.5 approuvée le 3 novembre 2026. L'utilisateur donnera le prochain objectif. Lire aussi [AGENTS.md](../AGENTS.md) pour les contraintes qui ont évité les régressions précédentes.
