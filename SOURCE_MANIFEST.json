@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -14,8 +14,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 9520,
-      "sha256": "ef27d67f5a292afbc1480e55ed34ef307f602ab40bf479c0b35a92fa8877a948"
+      "bytes": 9572,
+      "sha256": "68e27cded942deba5e5593f6e61fd92def51c14cfa3c532351aa988c1fe1d67f"
     },
     {
       "path": "art/requirements.txt",
@@ -464,8 +464,8 @@
     },
     {
       "path": "dist/content.js",
-      "bytes": 35106,
-      "sha256": "d3a5d0f630eb48b8731c9a37e9e25df3ae790a37efec67de6bef166ffcdf9e7e"
+      "bytes": 35102,
+      "sha256": "d268bd23c3e884f9c4491c400987016b34b0a76f470942f321b709040e769de3"
     },
     {
       "path": "dist/dialogue-presentation.js",
@@ -549,8 +549,8 @@
     },
     {
       "path": "dist/opening.js",
-      "bytes": 2476,
-      "sha256": "a9c3de2e3c771ea080020f27b5e742b8957f57705fe2f7d257c3996c1e9ab348"
+      "bytes": 2610,
+      "sha256": "df42de2246ab85b98f2f04c1dd4b4cc3f9101f5ec3d1c82c17cacb744f1eb52b"
     },
     {
       "path": "dist/pelican-art.js",
@@ -599,8 +599,8 @@
     },
     {
       "path": "dist/speech.js",
-      "bytes": 5568,
-      "sha256": "4e09c64b1ca73522de502cf4fb983e49c266981a2ffcc67481a3d88f657c8812"
+      "bytes": 6420,
+      "sha256": "8548d7b0a9f48ce031635aeab640905286aad88fe0a57b55f798eb34b8b2e4cf"
     },
     {
       "path": "dist/styles.css",
@@ -679,8 +679,8 @@
     },
     {
       "path": "docs/EXPORTS-HORS-LIGNE.md",
-      "bytes": 5366,
-      "sha256": "1c9a9c110965eb7d00d956fdc47a13a4a0ec6f26c9c534536353c03d7044db12"
+      "bytes": 5946,
+      "sha256": "051c64e27f650dee435d4833c4393593aaf2cad73298027f951e7f70ef3c6420"
     },
     {
       "path": "docs/FORETS-ET-RUINES.md",
@@ -696,6 +696,11 @@
       "path": "docs/GRAPHICS.md",
       "bytes": 3488,
       "sha256": "f46411e68b22af3aa84c19590fb8621db9b35a24429192de19f20f20acc0e7b7"
+    },
+    {
+      "path": "docs/HISTOIRE-ET-PERSONNAGES.md",
+      "bytes": 14572,
+      "sha256": "8233a8a8dd891c3b228efd49a38a0ce16313c2d77ece0c2881b54406e1385bd9"
     },
     {
       "path": "docs/ORANGS-OUTANS-ROSES.md",
@@ -916,6 +921,11 @@
       "path": "docs/QA-STORY-CONVERSATIONS.md",
       "bytes": 4041,
       "sha256": "98ec18ac19f93426276ef1fa143141f9cc392c5687b73a008fda90879a8708b8"
+    },
+    {
+      "path": "docs/QA-STORY-ONBOARDING-2026-11-05.md",
+      "bytes": 5187,
+      "sha256": "4e476e06ff5e3a2a93e662eadd443fb9d0a6a8cbbc235aa6f6a152fc06da05a6"
     },
     {
       "path": "docs/QA-TAIL-DASH.md",
@@ -1225,12 +1235,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "bae392f8698d5dad26a25bb4a657659fc7281d0dff64b4e586027b584a1fe3c8"
+      "sha256": "8d0b8f193e8d7413ebb67ef969a34a366fe30556b3ca0edc2d3ab620d26a3a76"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 651577,
-      "sha256": "f92703804a0348b9bb150d59626621b846f9a29450ce40e15bac45f783a55764"
+      "bytes": 652559,
+      "sha256": "73139b6558ebf142a5588ecc9caa7fcba12c3a5eda0c85f6ae3abb6545b47622"
     },
     {
       "path": "release/archives/README.md",
@@ -1746,6 +1756,11 @@
       "path": "tests/boss-dialogue-acceptance.test.js",
       "bytes": 2892,
       "sha256": "7a5e0f16ef6ff7c6bd02ba2d362817f37b9867b37016b0a14e6ca9dc61492b90"
+    },
+    {
+      "path": "tests/boss-dialogue-dismissal.test.js",
+      "bytes": 3597,
+      "sha256": "30e9823f78df1521265f5c6609aba8b63e13e41aa39ff126bdce853d353ecf99"
     },
     {
       "path": "tests/boss-director.test.js",
@@ -2306,6 +2321,11 @@
       "path": "tests/story-conversations.test.js",
       "bytes": 11513,
       "sha256": "258973d4cacf95e9971cba393f1c51ddd74e178983ec8a7a486d145df5fb93d0"
+    },
+    {
+      "path": "tests/story-onboarding.test.js",
+      "bytes": 1613,
+      "sha256": "61684dc3a17a0c7b1f8ad519d7b6694e4ed38bc227917975362babee72152c74"
     },
     {
       "path": "tests/story.test.js",

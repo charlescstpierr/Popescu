@@ -39,7 +39,9 @@ export function updateTutorial(game,input){
 }
 export function tutorialText(game){
  const phase=game.s.opening?.phase;
- return phase==='move'?'Glisse le pouce ou utilise les flèches / WASD / ZQSD.':phase==='shoot'?'Le tir est automatique. Garde tes distances.':'';
+ if(phase==='move')return 'Glisse le pouce ou utilise les flèches / WASD / ZQSD.';
+ if(phase!=='shoot')return '';
+ return game.s.elapsed-game.s.opening.startedAt<4?'Le tir est automatique. Garde tes distances.':'Éclats bleus = expérience. Ramasse-les pour choisir un pouvoir.';
 }
 
 // Only the new-run UI calls this. Restore uses the exact recorded position.

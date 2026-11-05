@@ -7,7 +7,7 @@ Jeu web original en français québécois. Un seul monde procédural infini, aut
 ## Jouer hors ligne
 Télécharger le dépôt complet en ZIP, l'extraire, puis ouvrir `release/Toma_Popescu_JOUER.html` dans un navigateur de bureau. Garder `release/assets/` à côté du HTML. Ne pas télécharger le HTML seul ni l'ouvrir dans l'aperçu du ZIP. Aucun serveur, Node.js ou accès réseau n'est nécessaire pour cette version.
 
-Le HTML courant ne pèse plus que 643 861 octets; les images sont réparties en fichiers de moins de 3 Mo, sans recompression ni perte. [Instructions de mise à jour et sauvegardes](docs/EXPORTS-HORS-LIGNE.md). Les anciennes versions dans `release/archives/` sont historiques, pas la version courante.
+Le HTML et les images sont séparés, sans recompression ni perte. Les tailles et empreintes de la version courante figurent dans [le manifeste hors ligne](release/OFFLINE_MANIFEST.json). [Instructions de mise à jour et sauvegardes](docs/EXPORTS-HORS-LIGNE.md). Les anciennes versions dans `release/archives/` sont historiques, pas la version courante.
 
 Le lien déployé du Site reste une autre copie; sa présence ne garantit pas qu'il contient cette version. Sur téléphone: glisser le pouce dans la partie inférieure gauche. Sur ordinateur: WASD, ZQSD ou flèches; Échap: pause; M: son. Les tirs sont automatiques. L'introduction et les événements peuvent être passés.
 

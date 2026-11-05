@@ -95,4 +95,19 @@ export function enqueueSpeech(g,who,text,{queue=false,urgent=false,encounter=fal
  }
  state.nextId++;start(g,line);return true;
 }
-export function dismissSpeech(g){if(g.speech.active?.sceneId){if(g.speech.scene?.remember)g.eventSeen.add(`skip:${g.speech.scene.id}`);cancelScene(g);}else g.speech.active=null;}
+// Compact boss pairs use legacy delayed-reply fields rather than scene cursors.
+// Closing their visible setup must cancel both a still-timed answer and one
+// already queued behind an interruption. Combat clocks remain unchanged.
+function cancelCompactBossReply(g,line){
+ if(!line||line.encounter||line.sceneId||line.actorId===null)return;
+ const boss=g.s.enemies.find(e=>e.id===line.actorId);
+ const prefix=boss?.type==='pelican'&&line.who==='PÉLI ZODIAQUE'?'peli':boss?.type==='travestia'&&line.who==='TRAVESTIA'?'tail':null;
+ if(!prefix)return;
+ boss[`${prefix}ReplyPending`]=false;
+ if(prefix==='peli')boss.peliReplyTime=0;
+ g.speech.queue=g.speech.queue.filter(queued=>!(queued.actorId===boss.id&&queued.who==='TOMA'&&queued.text===boss[`${prefix}Reply`]&&!queued.encounter&&!queued.sceneId));
+}
+export function dismissSpeech(g){
+ if(g.speech.active?.sceneId){if(g.speech.scene?.remember)g.eventSeen.add(`skip:${g.speech.scene.id}`);cancelScene(g);}
+ else{cancelCompactBossReply(g,g.speech.active);g.speech.active=null;}
+}
