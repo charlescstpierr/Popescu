@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -249,8 +249,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 47204,
-      "sha256": "90db02b55afb0af8f04644afaaafbe216a310c8bd7643a73a7fa549604caded3"
+      "bytes": 47333,
+      "sha256": "7851dd6c911a815da06ea0c2f414d8c7991f066d56185d87420c964d1d3dfe0d"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -509,13 +509,13 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 68670,
-      "sha256": "00ecb3682e77e148cc775633f0f4761949f7f554b102086585d34b3000ed5457"
+      "bytes": 68780,
+      "sha256": "210566551c2acb68e71b9151dcce1ff55c3509bb918b0f1cc7177afb1432ae76"
     },
     {
       "path": "dist/evolutions.js",
-      "bytes": 1993,
-      "sha256": "ed52a5949e8dee585ac673dba05d0778af95805f48e21b5b88c2db119bd93b4a"
+      "bytes": 2035,
+      "sha256": "e96ea8a1c2765fbdde1bffa395dae91f1365692a422b7ac660d831386160aa44"
     },
     {
       "path": "dist/hero-art.js",
@@ -534,8 +534,8 @@
     },
     {
       "path": "dist/index.html",
-      "bytes": 15620,
-      "sha256": "9ce00feebbffabe1796fcecea888863c49bb911c6efffb944865a27906c45cc9"
+      "bytes": 16327,
+      "sha256": "64fbb15fa1a5e4472fdfb6e62c3218b638ff5b7862cdf38df8261a6a6c8b8367"
     },
     {
       "path": "dist/lamborghini-art.js",
@@ -559,8 +559,8 @@
     },
     {
       "path": "dist/pelican.js",
-      "bytes": 6659,
-      "sha256": "c893802e796ef47ae01a9dbc067846a81785b52f2aebcfb3b68bce04e7af0b73"
+      "bytes": 6866,
+      "sha256": "9e1b925c8b88dd2ec45f1790cc6a8c81e47507675ea736ef6f667c36f955f10a"
     },
     {
       "path": "dist/power-art.js",
@@ -614,8 +614,8 @@
     },
     {
       "path": "dist/travestia.js",
-      "bytes": 3583,
-      "sha256": "65afe032c804b0c5eddc9fbe04af91dec0b2140318ead24c550f7fe12749050e"
+      "bytes": 3707,
+      "sha256": "3d3ed90833182ec757c1ab070c535201b4c5c0c58fabaaf770f50905a5954006"
     },
     {
       "path": "dist/trophy-art.js",
@@ -788,6 +788,16 @@
       "sha256": "a85e3b20a8f3e744f79fc78f9e872c43e7a6e58d1eff1803fff7e8e182abca0b"
     },
     {
+      "path": "docs/QA-CONTROL-SYMBOLS-2026-11-04.md",
+      "bytes": 3553,
+      "sha256": "95dd9e3a0fa5efa7db7a53ee2fe3f8b2e3afd1b33aac5017d3f31b9e2bf1e3f2"
+    },
+    {
+      "path": "docs/QA-DIALOGUE-CONSISTENCY-2026-11-04.md",
+      "bytes": 4403,
+      "sha256": "53dc768fea14847b4e205ab8c0cdb54d14b83198eefea59c38f4a429ad56ac57"
+    },
+    {
       "path": "docs/QA-DIALOGUE.md",
       "bytes": 1579,
       "sha256": "7ac503c58e4b333392b4eed81bc7a7799e9ccd63af522243443f32611bdc3716"
@@ -826,6 +836,16 @@
       "path": "docs/QA-PAUSED-PRESENTATION.md",
       "bytes": 3667,
       "sha256": "0c384c6c09186bc9cd89ac2add61125a79fa00d435a59c1e6dee0c4346a3b102"
+    },
+    {
+      "path": "docs/QA-PLAYTEST-FIXES-2026-11-04.md",
+      "bytes": 4847,
+      "sha256": "967bb8ff85c50dabf9f6df6018d6719dc1b61a59850f39da206d72e6d76dd3b1"
+    },
+    {
+      "path": "docs/QA-PLAYTEST-INTEGRATION-2026-11-05.md",
+      "bytes": 6419,
+      "sha256": "1638372da24b0a69bccbe67f744b93f7dcbf7a9aaa1bfc63af11c8dd416a8a6f"
     },
     {
       "path": "docs/QA-POWER-ANIMATIONS.md",
@@ -871,6 +891,11 @@
       "path": "docs/QA-SAVE-V13.md",
       "bytes": 3568,
       "sha256": "c4153a82c0f31192843059c1c0d7f0962181a12e54fda6b9d9f92204ba129b62"
+    },
+    {
+      "path": "docs/QA-SETTINGS-ESCAPE-2026-11-04.md",
+      "bytes": 2621,
+      "sha256": "cc9c4be15853967417a6d24eaa10a33c14ae5f191e91b54c42b29c9300c0fc49"
     },
     {
       "path": "docs/QA-START-LOCK-CANCELLATION.md",
@@ -1190,12 +1215,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "0a2c33e6300f27d7cdbfd0e924a59c174df3c5eb287865d419706f3d253bbff1"
+      "sha256": "132d20eec7edfe370077fb7588dd168d6849b9fd59d23c7b2df09227e3131326"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 649392,
-      "sha256": "6ef1952ab008611c1d80e26419287e51caf9d6fa9f186d58bb7b05d24f85b681"
+      "bytes": 650711,
+      "sha256": "0c5a450263a484c7fb88159ea12d0a2be54d6cd9126ec43ee5ca8a1996007c1b"
     },
     {
       "path": "release/archives/README.md",
@@ -1421,6 +1446,11 @@
       "path": "scripts/inspect-companion.mjs",
       "bytes": 2985,
       "sha256": "dd35b0eee48b2333418456267ae87b7aa4b3af3cfd2e54aeebe9e4268b5a3041"
+    },
+    {
+      "path": "scripts/inspect-control-symbols.mjs",
+      "bytes": 1919,
+      "sha256": "bc54551e4ce8be5382e51db43cfd3c5f4bb6a6c77dffd9f64ad3a0586b7f2d11"
     },
     {
       "path": "scripts/inspect-decor-correction.mjs",
@@ -1703,6 +1733,11 @@
       "sha256": "421710e78b096e9b3b702dfde8d046b5012028ff00aea8e630de3c5bfe9832a5"
     },
     {
+      "path": "tests/boss-dialogue-acceptance.test.js",
+      "bytes": 2892,
+      "sha256": "7a5e0f16ef6ff7c6bd02ba2d362817f37b9867b37016b0a14e6ca9dc61492b90"
+    },
+    {
       "path": "tests/boss-director.test.js",
       "bytes": 12107,
       "sha256": "4046db0db2652bca2a317d4eddd1f025548b3ef33b857b8505f7b491a527732f"
@@ -1796,6 +1831,11 @@
       "path": "tests/companion-levels.test.js",
       "bytes": 7158,
       "sha256": "72eb420ac346c317e47085ca098122c740016a88e6460e9a1d66b164997d470d"
+    },
+    {
+      "path": "tests/control-symbols.test.js",
+      "bytes": 3108,
+      "sha256": "25c5346fa21e4e6f39cfe9738987f32ef7a18719b42c6c83d8cf3661e3fff030"
     },
     {
       "path": "tests/crowd-performance.test.js",
@@ -1999,8 +2039,8 @@
     },
     {
       "path": "tests/helpers/focus-controller.js",
-      "bytes": 4791,
-      "sha256": "4a1cec3eb3b7dc58ee70a9456603049bba08a9aa4fad2f8c91cc715795e382d0"
+      "bytes": 5058,
+      "sha256": "85c48e0474f474631b1c49f55e57fc7eaf9396abca86943d5610b1b904d88183"
     },
     {
       "path": "tests/helpers/upgrade-offer.js",
@@ -2218,6 +2258,16 @@
       "sha256": "5a943f0af196db6336ae00a17c6c5f2bbba982e63384b27c654015cff70c23ec"
     },
     {
+      "path": "tests/settings-escape.test.js",
+      "bytes": 3410,
+      "sha256": "d0e7fc7861cef90e8ad442d21fdabcf02e4d3b75f331c981e5ef176740a01744"
+    },
+    {
+      "path": "tests/settings-start-integration.test.js",
+      "bytes": 4810,
+      "sha256": "f12fe2271a102a48e0f829af6bdc8fd646b96268493d413d52a5be70109a68a2"
+    },
+    {
       "path": "tests/stability-integration.test.js",
       "bytes": 5421,
       "sha256": "5f9104cab31388cdd7b19a272544c0f8c1568485023749661d113881625a09e4"
@@ -2303,6 +2353,11 @@
       "sha256": "d77fb9b0a1b4b0479d9e4bae017a7edba01eb63550cf9bdff7858b944479680d"
     },
     {
+      "path": "tests/viral-heart-altitude.test.js",
+      "bytes": 3511,
+      "sha256": "e2031007cfa739df217825756308e922e1f2c8a244e5073d2ea85c20f99dbf08"
+    },
+    {
       "path": "tests/world-performance.test.js",
       "bytes": 2478,
       "sha256": "b7b227c87508e05d31c1daab4f824be672df4200202d9c6bdb0e5d3029187bc7"
@@ -2328,7 +2383,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "451dedfbc12f1958c22673325bc489f31334c093",
+  "base_github_commit": "dc2519e8e5b67552ddea4a1d5e3b520de531dfc9",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",

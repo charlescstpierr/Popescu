@@ -8,14 +8,14 @@ export function evolutionReady(state,def){return !state.evolutions[def.id]&&def.
 // Derived from one spendable balance plus an append-only spending counter.
 // Spending must never reduce lifetime records or make their credit markers invalid.
 export function totalEarnedCoins(state){return state.coins+state.coinsSpent;}
-export function bounceHeart(game,shot,enemy){
+export function bounceHeart(game,shot,origin){
  if(!shot.viral)return false;
  if(shot.hitIds.size>=3){shot.life=0;return true;}
  let target=null,best=260*260;
- for(const next of game.s.enemies){if(next.dead||next.charmed>0||shot.hitIds.has(next.id))continue;const d=(next.x-enemy.x)**2+(next.y-enemy.y)**2;if(d<best){best=d;target=next;}}
+ for(const next of game.s.enemies){if(next.dead||next.charmed>0||shot.hitIds.has(next.id))continue;const point=game.targetPosition(next),d=(point.x-origin.x)**2+(point.y-origin.y)**2;if(d<best){best=d;target=point;}}
  if(!target){shot.life=0;return true;}
- game.powerEffect?.('viralLove','bounce',enemy.x,enemy.y,0,{tx:target.x,ty:target.y});
- shot.linkX=enemy.x;shot.linkY=enemy.y;
+ game.powerEffect?.('viralLove','bounce',origin.x,origin.y,0,{tx:target.x,ty:target.y});
+ shot.linkX=origin.x;shot.linkY=origin.y;
  const angle=Math.atan2(target.y-shot.y,target.x-shot.x);shot.vx=Math.cos(angle)*240;shot.vy=Math.sin(angle)*240;
  return true;
 }
