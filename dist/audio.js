@@ -159,7 +159,7 @@ export function getMusicStepEvents(scene, step, intensity = 0.35) {
 }
 
 const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9 };
-const IMPORTANT_SFX = new Set(['chest', 'level', 'victory', 'defeat', 'split', 'rooster']);
+const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster']);
 
 export class AudioManager {
   constructor({ enabled = true, volume = 0.5 } = {}) {
@@ -324,7 +324,9 @@ export class AudioManager {
     }
     if (this._voices.size >= MAX_VOICES) {
       // Even a frantic burst of effects cannot steal the melody or bass channel.
-      const victim = [...this._voices].filter(voice => voice.kind === 'sfx' || voice.priority < priority)
+      const victim = [...this._voices].filter(voice => kind === 'sfx'
+        ? voice.kind === 'sfx' && voice.priority <= priority
+        : voice.kind === 'sfx' || voice.priority < priority)
         .sort((a, b) => (a.kind === 'sfx' ? -1 : 0) - (b.kind === 'sfx' ? -1 : 0) || a.priority - b.priority)[0];
       if (!victim || kind === 'sfx' && victim.kind === 'music') return dispose();
       this._retire(victim);
@@ -435,7 +437,8 @@ export class AudioManager {
       if (this._sfxTokens < 1) return;
       this._sfxTokens--;
     }
-    this._sfxPriority = IMPORTANT_SFX.has(name) ? 3 : 0;
+    // Damage survives routine bursts, but never steals a higher-priority cue.
+    this._sfxPriority = name === 'hit' ? 1 : IMPORTANT_SFX.has(name) ? 3 : 0;
     this._lastSfx.set(name, now);
     switch (name) {
       case 'shoot':
