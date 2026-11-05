@@ -9,8 +9,8 @@
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 753748,
-      "sha256": "a3e3d6bb7d9eb3af9d4042998f28fc5e3f7a59479a23ab941711d42ea27c3e5d"
+      "bytes": 753790,
+      "sha256": "3f306fa1d272130a43d98232f7cc0db046b6f1bc4f782c059947cc7b43bba5da"
     },
     {
       "path": "assets/actors-v2.json",
@@ -141,6 +141,11 @@
       "path": "assets/portrait-blonde-ia.webp",
       "bytes": 16712,
       "sha256": "de9b4ef9a040be0ee652a79a75d2c45b889b4d5d0068af91c1c9bd553c5ee531"
+    },
+    {
+      "path": "assets/portrait-toma-current.webp",
+      "bytes": 15772,
+      "sha256": "163945ba7b57c86b44aa47d91d3c2ca67f05dfe2b5dfc918a74645dc41cd586b"
     },
     {
       "path": "assets/portrait-toma-v4.svg",

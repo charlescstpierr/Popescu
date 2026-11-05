@@ -162,7 +162,7 @@ function showBanter(payload){
   $('banter-portrait').classList.toggle('hidden',Boolean(rival)||charles);$('banter-rival').classList.toggle('hidden',!rival&&!charles);
   if(charles){const c=$('banter-rival').getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#252238';c.fillRect(0,0,62,76);c.save();c.translate(31,193);c.scale(1.25,1.25);renderer.charles?.draw(c,{...game?.s.charles,x:0,y:0,phase:'hover',phaseTime:0},0,prefs.reduced);c.restore();}
   else if(rival){const c=$('banter-rival').getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#252238';c.fillRect(0,0,62,76);const boss=rival==='travestia'||rival==='pelican';if(boss){c.save();c.scale(.55,.55);renderer.actors[rival==='pelican'?'drawPelican':'drawTravestia'](c,{x:56,y:130,phase:'chase',faceX:1},0);c.restore();}const frame=boss?null:renderer.actors.frame('enemy',0,false,rival);if(frame)c.drawImage(frame,38,6,64,80,0,0,62,76);else if(!boss){c.fillStyle='#ffd27c';c.font='bold 28px monospace';c.fillText(rival==='rival_goat'?'B':'C',22,46);}}
-  else $('banter-portrait').src=payload.who==='BLONDE IA'?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-v4.svg';
+  else $('banter-portrait').src=payload.who==='BLONDE IA'?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-current.webp';
   banterSpeechId=payload.speechId??null;$('banter').classList.remove('hidden');banterUntil=performance.now()+Math.max(4300,payload.text.length*39);
 }
 function openDialogue(lines,done,index=0){if(!lines.length){done?.();return;}dialogueSession++;dialogueLines=lines;dialogueIndex=index;dialogueDone=done;auto=false;$('auto-dialogue').setAttribute('aria-pressed','false');setText('auto-dialogue','AUTO : NON');show('dialogue');renderDialogue();$('next-dialogue').focus?.();}
@@ -173,7 +173,7 @@ function renderDialogue(){
  $('dialogue').classList.toggle('opening',Boolean(stage));$('auto-dialogue').classList.toggle('hidden',Boolean(stage));
  $('opening-reply').classList.toggle('hidden',!stage);$('opening-avatar').classList.toggle('hidden',stage!=='fantasy');setText('opening-reply-text',l.reply||'');
  setText('speaker',l.who==='TOMA'?'TOMA POPESCU':l.who);setText('dialogue-text',l.text);setText('dialogue-progress',`${dialogueIndex+1} / ${dialogueLines.length}`);
- $('portrait').src=girl?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-v4.svg';$('scene-art').src=girl?'assets/portrait-blonde-ia.webp':l.who==='SYSTÈME'?'assets/scene-gorilles.webp':'assets/couverture-personnages.webp';
+ $('portrait').src=girl?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-current.webp';$('scene-art').src=girl?'assets/portrait-blonde-ia.webp':l.who==='SYSTÈME'?'assets/scene-gorilles.webp':'assets/couverture-personnages.webp';
  setText('next-dialogue',l.action||(dialogueIndex===dialogueLines.length-1?'C’EST PARTI ›':'SUITE ›'));
  setText('scene-label',stage==='fantasy'?'LA VIE PARFAITE · SELON TOMA':stage==='offline'?'CONNEXION PERDUE':stage==='street'?'LA RÉALITÉ · SANS FILTRE':'UNE RÉALITÉ TRÈS RELATIVE');
  renderEncounterPresentation({game,line:l,context:game?.dialoguePresentation(l),index:dialogueIndex,total:dialogueLines.length});
