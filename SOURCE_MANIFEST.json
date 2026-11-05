@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-explosive-warning-radius",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -544,8 +544,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 69221,
-      "sha256": "d0b43d233689981da06a8fa1d7d3b2745538be03af719f04f050434e24588d70"
+      "bytes": 69411,
+      "sha256": "70f23bb6f62a21a8bfc9844f10e5f00d52c0117bb2eb301e9874f6fc42b2a964"
     },
     {
       "path": "dist/evolutions.js",
@@ -609,8 +609,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 54139,
-      "sha256": "f566a522f8c1f0b0bc116bad991689d3b51f6568a8c44ee883fe779f54b8ebdc"
+      "bytes": 54735,
+      "sha256": "a73abb700ed81a5bb3c2a33a9ad0828deb7bf2afac5160db491e158a5a71fa9b"
     },
     {
       "path": "dist/river-art.js",
@@ -851,6 +851,11 @@
       "path": "docs/QA-EVOLUTIONS.md",
       "bytes": 2768,
       "sha256": "bf874e722e1dfccde9ff1291c6ac7d56fd65f62ce58cb768c53433e25ef7c3d3"
+    },
+    {
+      "path": "docs/QA-EXPLOSIVE-WARNING-2026-11-05.md",
+      "bytes": 3090,
+      "sha256": "d57884d6da45b5ebbec85137e84d6a64d9bbe592a6549756c071ef884039d6d7"
     },
     {
       "path": "docs/QA-FOUR-BEASTS.md",
@@ -1275,12 +1280,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5824,
-      "sha256": "183ada78639d41b47c150aae88510bd9401e6be338d6c1bf4d106849c8108f5e"
+      "sha256": "257c261f6ccf350644d5966bd1bd4e6f33709cefaee2e49ba9423597d4f87341"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 663337,
-      "sha256": "fbc712783330e7636bbebc2fecf7e51b43fdf7291a6792fd8a4abf871bf731c7"
+      "bytes": 664135,
+      "sha256": "04d5baee1ae496f77498c12d825e720320f6799d03a3b6f37031a058832894c8"
     },
     {
       "path": "release/archives/README.md",
@@ -2018,6 +2023,11 @@
       "sha256": "d66ac7c0e26abdd446d5a4b360e4765db8521f17bdae1a29d223c0c586f8e261"
     },
     {
+      "path": "tests/explosive-warning.test.js",
+      "bytes": 2946,
+      "sha256": "7f2c25dcbd8a67c0bc78952730862ace2c8bf833b3149f7c99d7cdf554f41479"
+    },
+    {
       "path": "tests/fixtures/paused-charles-v13-recover.json",
       "bytes": 2689,
       "sha256": "157733b940e64ca6c7408ee02679ee429f2cc547c7489b26daa35a41d4b7b17c"
@@ -2184,8 +2194,8 @@
     },
     {
       "path": "tests/lamborghini-art.test.js",
-      "bytes": 2188,
-      "sha256": "b970bf225bc3ab7c15209a22ed6005f60ffeb3d940cb0a7162804ad8cc2c2ea5"
+      "bytes": 2190,
+      "sha256": "fcf1502068a96207dc5efd9b8f9c7df1235b97c04933838fbdd4dfbbd8956211"
     },
     {
       "path": "tests/lamborghini-levels.test.js",
@@ -2488,7 +2498,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "3681edd08e7581dd3fb33ab76fbc9d7d47594bff",
+  "base_github_commit": "8e6e230516597ba7f06d1ec7f5312e5163a29498",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",

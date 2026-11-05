@@ -1,3 +1,4 @@
+import {EXPLOSIVE_BLAST} from './engine.js';
 import {EGO_BEASTS,egoCamoRatio} from './ego-beasts.js';
 import {drawEgoGround,drawEgoForeground} from './ego-art.js';
 import {drawLamborghini} from './lamborghini-art.js';
@@ -679,9 +680,19 @@ this._shadow(x,y+7,40,8);
   _dangerWarnings(enemies,shockwaves){
     const ctx=this.ctx;
     for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
-      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
-      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
-      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      if(e.type==='explosive'){
+        // This boundary marks safe player-center positions, including the same
+        // contact margin as Game.explode. Never pulse it into damaging space.
+        const radius=EXPLOSIVE_BLAST.radius+EXPLOSIVE_BLAST.playerPadding;
+        ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,radius,0,TAU);
+        ctx.globalAlpha=.12;ctx.fillStyle=C.orange;ctx.fill();
+        ctx.globalAlpha=.9;ctx.strokeStyle='#ffbd6b';ctx.lineWidth=2;
+        ctx.setLineDash([6,5]);ctx.stroke();ctx.restore();
+      }else{
+        const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
+        ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
+        ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      }
       rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
     }
     for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawEgoGround(ctx,e,this.reducedEffects);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
