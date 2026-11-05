@@ -1,9 +1,11 @@
 import {EXPLOSIVE_BLAST} from './engine.js';
-import {EGO_BEASTS,egoCamoRatio} from './ego-beasts.js';
+import {enemyGaitFrame} from './enemy-gait.js';
+import {EGO_BEASTS,egoCamoRatio,egoHeight} from './ego-beasts.js';
 import {drawEgoGround,drawEgoForeground} from './ego-art.js';
 import {drawLamborghini} from './lamborghini-art.js';
 import {pickupAttraction} from './drops.js';
 import {CompanionArt} from './companion-art.js';
+import {charlesArrival} from './charles.js';
 import {CharlesArt} from './charles-art.js';
 import {charlesProp,drawCharlesGround,drawCharlesForeground} from './charles-effects.js';
 import {drawTrophyIcon,drawTrophyGround,drawTrophyForeground} from './trophy-art.js';
@@ -386,7 +388,7 @@ export class Renderer {
   }
 
   _shadow(x,y,w=25,h=8,alpha=.48) {
-    const ctx=this.ctx;ctx.save();ctx.globalAlpha=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
+    const ctx=this.ctx;ctx.save();ctx.globalAlpha*=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
   }
   _car(p,moving=false) {
     if(moving&&p.carRank!==undefined){drawLamborghini(this.ctx,p,this.reducedEffects);return;}
@@ -564,24 +566,29 @@ this._shadow(x,y+7,40,8);
     const fx=actor.faceX??s.faceX??1,fy=actor.faceY??s.faceY??0,back=gas||fy<-.45;
     const scale=isEnemy?(ENEMY_SCALE[type]||.84):(isGirl?.82:.88);
     if(['travestia','pelican'].includes(type)&&!this.actors.availableFor(actor,kind)){ctx.save();ctx.fillStyle='#ffbd6b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(type==='pelican'?'PÉLI ZODIAQUE':'TRAVESTIA',actor.x,actor.y-35);ctx.restore();return;}
-    if(EGO_BEASTS[type]){ctx.save();if(egoCamoRatio(actor)===0)this._shadow(Math.round(actor.x),Math.round(actor.y)+8,36,9);this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);drawEgoForeground(ctx,actor);ctx.restore();return;}
+    if(EGO_BEASTS[type]){ctx.save();if(egoCamoRatio(actor)===0)this._shadow(Math.round(actor.x),Math.round(actor.y)+8,36,9);this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);if(!charlesArrival(s.charles)?.locked)drawEgoForeground(ctx,actor,this.reducedEffects);ctx.restore();this._enemyStatus(actor,scale);return;}
     const sprite=this.actors.availableFor(actor,kind)?null:this._sprite(kind==='enemy'?'gorilla':kind,phase,back,type);
     if(!sprite&&!this.actors.availableFor(actor,kind))return;
     const x=Math.round(actor.x),y=Math.round(actor.y),flip=fx<-.1&&!gas;
     this._shadow(x,y+11,isEnemy?49*scale:isGirl?28:33,isEnemy?13:9);
-    ctx.save();if(isEnemy)ctx.globalAlpha=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
+    ctx.save();if(isEnemy)ctx.globalAlpha*=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
     const raster=kind==='girl'&&this.companion.draw(ctx,actor,s,this.time,this.reducedEffects)||this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);ctx.restore();
     ctx.save();ctx.translate(x,y+10);if(flip)ctx.scale(-1,1);
     if(!raster&&actor.down){ctx.rotate(-Math.PI/2);ctx.globalAlpha=.6;ctx.drawImage(sprite,-34*scale,-45*scale,68*scale,76*scale);}
     else if(!raster){if(!isEnemy&&!isGirl&&(s.invulnerable||0)>0&&Math.floor(this.time*14)%2)ctx.globalAlpha=.58;ctx.drawImage(sprite,-34*scale,-71*scale,68*scale,76*scale);}
     ctx.restore();
-    if(!raster&&isEnemy&&(actor.hitFlash||0)>0){ctx.save();ctx.globalAlpha=.35;oval(ctx,'#ffe8bf',x-12,y-22,24,31,2);ctx.restore();}
-    if(isEnemy&&(actor.charmed||0)>0){heart(ctx,x-4,y-45*scale+Math.sin(this.time*5)*2,C.pink,.7);ring(ctx,'#ed70ca',x,y+9,24*scale,.45,1,this.time*.5);}
+    if(!raster&&isEnemy&&(actor.hitFlash||0)>0){ctx.save();ctx.globalAlpha*=.35;oval(ctx,'#ffe8bf',x-12,y-22,24,31,2);ctx.restore();}
+    if(isEnemy)this._enemyStatus(actor,scale);
     if(isGirl&&!actor.down){rect(ctx,C.ink,x-14,y+15,29,5);rect(ctx,'#58d68e',x-13,y+16,Math.max(0,27*(actor.hp/(actor.maxhp||100))),3);}
-    if(isEnemy&&!['travestia','pelican'].includes(type)&&actor.hp<actor.maxhp){const w=type==='matriarch'?39:24;rect(ctx,C.ink,x-w/2,y-72*scale,w,4);rect(ctx,type==='matriarch'?'#ff579f':'#d14b83',x-w/2+1,y-72*scale+1,Math.max(0,(w-2)*actor.hp/actor.maxhp),2);}
     if(type==='travestia'){ctx.save();ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff0cb';ctx.fillText('TRAVESTIA',x,y-135);rect(ctx,C.ink,x-31,y-130,62,6);rect(ctx,'#f65f9f',x-30,y-129,60*Math.max(0,actor.hp/actor.maxhp),4);ctx.restore();}
     if(type==='pelican'){ctx.save();ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.strokeText('PÉLI ZODIAQUE',x,y-142);ctx.fillStyle='#ffe5a3';ctx.fillText('PÉLI ZODIAQUE',x,y-142);rect(ctx,C.ink,x-36,y-137,72,6);rect(ctx,'#d58af5',x-35,y-136,70*Math.max(0,actor.hp/actor.maxhp),4);ctx.restore();}
     if(gas){const a=this.time*7;for(let i=0;i<3;i++){const px=x-7+i*8+Math.sin(a+i)*3,py=y+3+(this.time*19+i*8)%21;oval(ctx,i%2?'#c2fa34':'#8dbb20',px-5,py-3,11,8,2);}}
+  }
+  _enemyStatus(actor,scale){
+    const type=actor.type,ego=Boolean(EGO_BEASTS[type]);if(ego&&egoCamoRatio(actor)>0)return;
+    const ctx=this.ctx,x=Math.round(actor.x),y=Math.round(actor.y)+(ego?11-egoHeight(actor):0),head=ego?({ego_peacock:93,ego_toad:62,ego_rat:66,ego_chameleon:55}[type]):72*scale;
+    if((actor.charmed||0)>0){heart(ctx,x-4,y-(ego?head+9:45*scale)+(ego&&this.reducedEffects?0:Math.sin(this.time*5)*2),C.pink,.7);ring(ctx,'#ed70ca',x,Math.round(actor.y)+(ego?20:9),24*scale,.45,1,ego&&this.reducedEffects?0:this.time*.5);}
+    if(!['travestia','pelican'].includes(type)&&actor.hp<actor.maxhp){const w=type==='matriarch'?39:24;rect(ctx,C.ink,x-w/2,y-head,w,4);rect(ctx,type==='matriarch'?'#ff579f':'#d14b83',x-w/2+1,y-head+1,Math.max(0,(w-2)*actor.hp/actor.maxhp),2);}
   }
   _travestiaDash(e){
     if(e.phase==='tail_dash_recover')return;
@@ -613,8 +620,7 @@ this._shadow(x,y+7,40,8);
       line(ctx,'#df8058',e.x,e.y,e.x+Math.cos(aim-half)*reach,e.y+Math.sin(aim-half)*reach,1);line(ctx,'#df8058',e.x,e.y,e.x+Math.cos(aim+half)*reach,e.y+Math.sin(aim+half)*reach,1);
       rect(ctx,C.ink,e.x-5,e.y-82,11,17);rect(ctx,'#ffce90',e.x-1,e.y-79,3,8);rect(ctx,'#ff8d55',e.x-1,e.y-68,3,3);
     }else{
-      const progress=1-Math.max(0,Math.min(1,e.swipe/.28)),angle=aim-half+progress*half*2,hx=e.x+Math.cos(angle)*61,hy=e.y+Math.sin(angle)*61;
-      ctx.globalAlpha=.9;line(ctx,C.ink,e.x+dx*12,e.y-20,hx,hy,11);line(ctx,'#b85429',e.x+dx*12,e.y-20,hx,hy,8);line(ctx,'#ee9a46',e.x+dx*12-1,e.y-22,hx-1,hy-2,3);oval(ctx,C.ink,hx-6,hy-5,12,10,1);oval(ctx,'#b88157',hx-4,hy-3,8,6,1);
+      const progress=1-Math.max(0,Math.min(1,e.swipe/.28)),angle=aim-half+progress*half*2;
       if(!this.reducedEffects){ctx.globalAlpha=.65;for(let a=angle-.35;a<angle;a+=.05)rect(ctx,'#ffe1a2',e.x+Math.cos(a)*67,e.y+Math.sin(a)*67,3,2);}
     }ctx.restore();
   }
@@ -699,7 +705,7 @@ this._shadow(x,y+7,40,8);
     for(const p of shockwaves||[])this._shockwave(p);
   }
   render(game,time=0) {
-    const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
+    const state=game.state||game.s;if(!state)return;const arrival=charlesArrival(state.charles);const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
     const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects,state);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
@@ -733,8 +739,8 @@ this._shadow(x,y+7,40,8);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
     const raisedCarWarnings=(s.vehicles||[]).some(v=>v.carRank!==undefined&&v.carDelay<=0&&v.life>0);
-    if(!raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
-    const items=[];if(s.charles&&s.charles.phase!=='complete')items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
+    if(!raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
+    const items=[];if(s.charles&&s.charles.phase!=='complete'&&!arrival)items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
     for(const v of s.vehicles||[])items.push({y:v.y+13,kind:'vehicle',data:v});
@@ -750,24 +756,30 @@ this._shadow(x,y+7,40,8);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {
-        const a=item.data,moving=item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
-        // Enemy phase names describe attacks. Only a numeric phase may offset gait.
+        const a=item.data,moving=arrival?.locked?false:item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
+        // The simulation records only actual chase travel in a transient cache.
+        // Repeated/paused renders cannot advance it, and blocked feet stay planted.
+        // Preserve the gait input of creatures owned by another animation system.
         const gaitOffset=typeof a.phase==='number'&&Number.isFinite(a.phase)?a.phase*3:0;
-        const actorPhase=moving?(item.kind==='enemy'?Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8:phase):0;
-        this._actor(a,item.kind,(actorPhase+8)%8,s);
+        const legacyPhase=Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8;
+        const actorPhase=arrival?.locked?0:item.kind==='enemy'?enemyGaitFrame(a,game.enemyGait?.get(a),legacyPhase):moving?phase:0;
+        if(item.kind==='enemy'&&arrival){ctx.save();ctx.globalAlpha*=arrival.enemyOpacity;this._actor(a,item.kind,(actorPhase+8)%8,s);ctx.restore();}
+        else this._actor(a,item.kind,(actorPhase+8)%8,s);
       }
     }
     for(const p of shots)this._shot(p,s);
-    for(const e of enemies)if(!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
-    for(const e of enemies)if(!e.dead)this._rivalAttack(e,true);
+    for(const e of enemies)if(!arrival?.locked&&!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
+    for(const e of enemies)if(!arrival?.locked&&!e.dead)this._rivalAttack(e,true);
     if(!this.reducedEffects)for(const p of clouds)this._cloud(p,true);
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
     drawTrophyForeground(ctx,s,this.reducedEffects);
+    // Airborne arrival paints above scenery; later combat retains ordinary depth.
+    if(arrival)this.charles.draw(ctx,s.charles,s.charles.elapsed,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects);
     this._shield(s);
-    if(raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
+    if(raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}

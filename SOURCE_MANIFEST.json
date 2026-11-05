@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-explosive-warning-radius",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -21,6 +21,46 @@
       "path": "art/requirements.txt",
       "bytes": 42,
       "sha256": "b6fecdd0e86fbc0277badc3d6fa6e28f92f33799c4e174e70e5037dbeaa76681"
+    },
+    {
+      "path": "art/source/charles-arrival/README.md",
+      "bytes": 3271,
+      "sha256": "b6905d12f95d0ad3af381b70e477221cec8291d55a6993ac46d9f0c1b4b530ca"
+    },
+    {
+      "path": "art/source/charles-arrival/atlas-metadata.json",
+      "bytes": 3841,
+      "sha256": "bb73a3e2c255d5fb7c2d727b27ac7cfcafff8a257bfa3923eea85d53d3a4ee66"
+    },
+    {
+      "path": "art/source/charles-arrival/imagegen-prompt.txt",
+      "bytes": 3529,
+      "sha256": "42eec981d001679665ec1228288973347287bab76aec23f5bdefea7884b04de7"
+    },
+    {
+      "path": "art/source/charles-arrival/imagegen-refinement-prompt.txt",
+      "bytes": 2102,
+      "sha256": "b86f18a508b6e18671a88c709529f68d80e94a2c391053048a3d923d641bbf25"
+    },
+    {
+      "path": "art/source/charles-arrival/imagegen-snap-refinement-prompt.txt",
+      "bytes": 1343,
+      "sha256": "9a905d060320cde285fab48758860fb76e76d207291e5fd56b6cafa6dd493657"
+    },
+    {
+      "path": "art/source/charles-arrival/native-pose-review.png",
+      "bytes": 210911,
+      "sha256": "174fc20b798dfa67e58997b0e1b4a1a2c0dd656d5c826bc7a9018ce9bfe0e9e4"
+    },
+    {
+      "path": "art/source/charles-arrival/poses-transparent-source.png",
+      "bytes": 1422632,
+      "sha256": "6bda7ccde130a12f7f6c8c07658bc544f76084d039f645933a0a273fd1122380"
+    },
+    {
+      "path": "art/source/charles-arrival/register-atlas.mjs",
+      "bytes": 5477,
+      "sha256": "b2323660da94220c2f65db200d1980db82b80711ada7614d6871a0d3d7c7c2f4"
     },
     {
       "path": "art/source/charles/README.md",
@@ -74,8 +114,18 @@
     },
     {
       "path": "art/source/ego-beasts/README.md",
-      "bytes": 3077,
-      "sha256": "2c28b49edd5e8b217438a658c7571d14d870dc58ca5f38ab5f4481b261be0ba9"
+      "bytes": 4932,
+      "sha256": "886d99a7a966d1fa49a0f1e884b938865713a5006390f2d2062d92830a730141"
+    },
+    {
+      "path": "art/source/ego-beasts/animation-registration-v2.json",
+      "bytes": 8292,
+      "sha256": "b6f7d39a5a6b9780f7963cc88f4edfced45170a28372305050082b3beedf4fe5"
+    },
+    {
+      "path": "art/source/ego-beasts/animation-source-v2.png",
+      "bytes": 2556317,
+      "sha256": "2b5f0356c769d37fb66f5c3899f6dcf6893d2d415698a2a043f9468fccc6e421"
     },
     {
       "path": "art/source/ego-beasts/poses-opaque.png",
@@ -118,6 +168,41 @@
       "sha256": "cf28cc428ccbeac656286807e71a8dccfd34109c2a9fc9dd1184d932f9b54ac0"
     },
     {
+      "path": "art/source/orangutan-slap/README.md",
+      "bytes": 3869,
+      "sha256": "55dcda38010a1ae39a37deaa2ecfd98221d06c83510d84edec47c59f7e24e084"
+    },
+    {
+      "path": "art/source/orangutan-slap/atlas-metadata.json",
+      "bytes": 4380,
+      "sha256": "4a5df217bc126068b9c6a1cb4069dc91ebf33785725975ffc8d35a3a23359c85"
+    },
+    {
+      "path": "art/source/orangutan-slap/imagegen-correction-prompt.txt",
+      "bytes": 1355,
+      "sha256": "2e89107cd9d32f98e81ec07390fdce0ce0bec7b0250e52f28dcd98b490cbbc11"
+    },
+    {
+      "path": "art/source/orangutan-slap/imagegen-prompt.txt",
+      "bytes": 1747,
+      "sha256": "7ab0f10a4a429031054fd5b2e1a351f3328b3ac2c8ab2f58d74b3816701323e2"
+    },
+    {
+      "path": "art/source/orangutan-slap/poses-transparent-source-v1.png",
+      "bytes": 1694078,
+      "sha256": "20c51424b646ebc8964311fd8f3085adc3778031c382ac51f97297d9241a7d97"
+    },
+    {
+      "path": "art/source/orangutan-slap/poses-transparent-source-v2.png",
+      "bytes": 1679796,
+      "sha256": "e20f98f0e54b567c124111c3f2c9bb670096636828dd2a9acd669efb4d37511c"
+    },
+    {
+      "path": "art/source/orangutan-slap/register-atlas.mjs",
+      "bytes": 4225,
+      "sha256": "0726652cf5569e86d9cf4c4465cb8b9b426ac1ce85bd67dc203a40d45cd3ee99"
+    },
+    {
       "path": "art/source/pelican/atlas-metadata.json",
       "bytes": 3836,
       "sha256": "3a4270ef2de7741a9750ed396dca7061cb02349aad19ae87e9e4e83cb51f81ff"
@@ -146,6 +231,61 @@
       "path": "art/source/pelican/registered-preview.png",
       "bytes": 274809,
       "sha256": "7269144ae9d83cae72182c6c61f1a1731a6faf6aab91aecf14f2e229c75ebfea"
+    },
+    {
+      "path": "art/source/rival-attacks/README.md",
+      "bytes": 3817,
+      "sha256": "dd68a666ad27e6b0958334a7315a7b6be6b6c152af7b247a42b2bda01b4b1d30"
+    },
+    {
+      "path": "art/source/rival-attacks/prompts-v1.txt",
+      "bytes": 3560,
+      "sha256": "bdcb0cad644dc0169a83e38d9cab15da5b0dcc5e63fc7d8e05b8abde38d52c15"
+    },
+    {
+      "path": "art/source/rival-attacks/register-rival-attacks-v1.py",
+      "bytes": 4281,
+      "sha256": "3a83d24e9b0c4e21c972d032f87e7d33a6e9c7c1d8b4cbd6985334b8b812f458"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-goat-attack-preview-v1.gif",
+      "bytes": 55147,
+      "sha256": "663e0d6d351e5ac258256d30d4e4193b754df7304a6fd42ba78e8e77443741bd"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-goat-attack-source-v1.png",
+      "bytes": 1652149,
+      "sha256": "0c72d236c1de13b7e08da4367e496e0e7450f6ed3b17c10d0632390b0377b5ba"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-goat-preview-88px-v1.png",
+      "bytes": 77422,
+      "sha256": "e90032981858f189878b32b35231959716e0fc2d1da29c74e773c884ec38ff35"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-rooster-attack-preview-v1.gif",
+      "bytes": 37288,
+      "sha256": "54f43ba02d745b4ffbff178dc8cd4b4ccf38840bc08267773a3a4d202c47f182"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-rooster-attack-source-v1.png",
+      "bytes": 1959756,
+      "sha256": "2cbfec1f639ca7be68e74789e0f720095c263c63944ffc76c857dbaceb1adc9e"
+    },
+    {
+      "path": "art/source/rival-attacks/rival-rooster-preview-78px-v1.png",
+      "bytes": 75514,
+      "sha256": "4fddbf759f42036f2bbf2ff80ed263e103f1d22a8fdcaeb8c38b49888e25a09d"
+    },
+    {
+      "path": "art/source/rival-attacks/rival_goat-attack-v1.json",
+      "bytes": 5592,
+      "sha256": "f3406d8d685d5d14d0d5948962d7a767fa8ac716f54eb9a6b7b0b8bf1f1f8e1f"
+    },
+    {
+      "path": "art/source/rival-attacks/rival_rooster-attack-v1.json",
+      "bytes": 5579,
+      "sha256": "7c7899864bfaac50b4460d48a929a9fa1f0a01426bb52cf25327d5f3cf99aa44"
     },
     {
       "path": "art/source/toma-turns/README.md",
@@ -269,8 +409,8 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 11552,
-      "sha256": "d11073b6d3b218678e88a8e06a1f8d9b6eb20f5176c2629d146a6274b5abdcdd"
+      "bytes": 12508,
+      "sha256": "a87629ca2cf0f389674b2808cdd707bea76b107229185d116544e2349b309b15"
     },
     {
       "path": "dist/animals.js",
@@ -291,6 +431,11 @@
       "path": "dist/assets/animals-approved.png",
       "bytes": 1928857,
       "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "dist/assets/charles-arrival-v1.png",
+      "bytes": 62650,
+      "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
     },
     {
       "path": "dist/assets/charles-whole-v1.png",
@@ -353,6 +498,11 @@
       "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
     },
     {
+      "path": "dist/assets/ego-beasts-v2.png",
+      "bytes": 1515523,
+      "sha256": "07a0cf393bfd9496d5efbf893d7b61346b9afba046d9a02e1bca6dc690241209"
+    },
+    {
       "path": "dist/assets/ego-beasts.png",
       "bytes": 1027672,
       "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
@@ -376,6 +526,11 @@
       "path": "dist/assets/opening-approved.png",
       "bytes": 2798954,
       "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
+    },
+    {
+      "path": "dist/assets/orangutan-slap-v1.png",
+      "bytes": 167188,
+      "sha256": "22c4d5f19dd231675cbe70629d1c179bac13abd8cf5b197cd42cc947189d61e3"
     },
     {
       "path": "dist/assets/orangutan-walk-v3.png",
@@ -403,9 +558,19 @@
       "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
     },
     {
+      "path": "dist/assets/rival_goat-attack-v1.png",
+      "bytes": 195254,
+      "sha256": "7697fc562da5619b1e261cf86c2cc3bd56bdc8e0a01eb3997f46181f200da907"
+    },
+    {
       "path": "dist/assets/rival_goat-walk-v3.png",
       "bytes": 128805,
       "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "dist/assets/rival_rooster-attack-v1.png",
+      "bytes": 231071,
+      "sha256": "0a1839a341bff28f81b99c649f33fa9abd2474e5d6b55b5f786c6995048d8254"
     },
     {
       "path": "dist/assets/rival_rooster-walk-v3.png",
@@ -449,8 +614,8 @@
     },
     {
       "path": "dist/audio.js",
-      "bytes": 23980,
-      "sha256": "e391d94c883d348e08843e2bbb2409dcef97114f134420d10f47d7b1485af6e5"
+      "bytes": 24284,
+      "sha256": "bbbef1a981bd9e0db4326d6eaa18612756c0e8a1c069a698ea81f9c8920d95f7"
     },
     {
       "path": "dist/biomes.js",
@@ -469,18 +634,18 @@
     },
     {
       "path": "dist/charles-art.js",
-      "bytes": 2589,
-      "sha256": "57713e114d7f0f869ee1f4f269c4863e8cd6e27c45c0157ae8ec5cfd24e46d8c"
+      "bytes": 3632,
+      "sha256": "8272e7fc049f8f50b560a3a322cc0c335ff16016375fe246e9766eea6bdd0f9a"
     },
     {
       "path": "dist/charles-effects.js",
-      "bytes": 7517,
-      "sha256": "4f511d808ad896675ac7d0d651d88233726ce7ec167cc634daa52eaff59aa103"
+      "bytes": 8486,
+      "sha256": "998487827e0f8b0bc2cbdf18524e1ce256d06ddffa8726c14ee536c601ee3b4a"
     },
     {
       "path": "dist/charles.js",
-      "bytes": 8686,
-      "sha256": "ed0f6ca8985cd9abf8a42962b0f35cd0dc225d290a4c0060b018ac1ed23bac94"
+      "bytes": 10047,
+      "sha256": "a739d96841ca74aeacd9d82493fa09cbd3708352dff8c0f0aaa608550ceba2fc"
     },
     {
       "path": "dist/city-art.js",
@@ -524,8 +689,8 @@
     },
     {
       "path": "dist/ego-art.js",
-      "bytes": 4924,
-      "sha256": "42a75d41d5ba04e2f194fab0fdd0deab7d6b74e1361687fc6d2b6ba5e5acebdc"
+      "bytes": 6250,
+      "sha256": "479c8dd4de317b2a181afa5b4cd92caa2a6b3d9d4a6435f6dc4817fb9a5fd0ed"
     },
     {
       "path": "dist/ego-beasts.js",
@@ -543,9 +708,19 @@
       "sha256": "cdbcd65c354bca7200660c6ad239b4ab7213d95abe82157c020a1b89ccf22629"
     },
     {
+      "path": "dist/enemy-attack-pose.js",
+      "bytes": 1199,
+      "sha256": "6f2ec4452d26e50a631c1ea601811f55f7d693147f86510b17da3b62da99b5dd"
+    },
+    {
+      "path": "dist/enemy-gait.js",
+      "bytes": 959,
+      "sha256": "604e50843daf351d165907664b787058f276f26b8495a4285144cad2dd2da51c"
+    },
+    {
       "path": "dist/engine.js",
-      "bytes": 69411,
-      "sha256": "70f23bb6f62a21a8bfc9844f10e5f00d52c0117bb2eb301e9874f6fc42b2a964"
+      "bytes": 69890,
+      "sha256": "33a239387c924880b055a65a9de96e302cb67e5408d73f6c911eb963d9c3f988"
     },
     {
       "path": "dist/evolutions.js",
@@ -609,8 +784,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 54735,
-      "sha256": "a73abb700ed81a5bb3c2a33a9ad0828deb7bf2afac5160db491e158a5a71fa9b"
+      "bytes": 55800,
+      "sha256": "56f56c6dc8d08989fd23b754dad84644d4e9fff2e7abea9692d7e57e55e434e7"
     },
     {
       "path": "dist/river-art.js",
@@ -648,6 +823,11 @@
       "sha256": "527579248dd7df2331b929faedd4e7812219eeeb6b8ebf9ebf67606c58313e45"
     },
     {
+      "path": "dist/travestia-pose.js",
+      "bytes": 1281,
+      "sha256": "1e5cccda5299973fe73f39778124303f8798d26a097afcc57d8085836faaf4fb"
+    },
+    {
       "path": "dist/travestia.js",
       "bytes": 3707,
       "sha256": "3d3ed90833182ec757c1ab070c535201b4c5c0c58fabaaf770f50905a5954006"
@@ -659,8 +839,8 @@
     },
     {
       "path": "dist/trophy-effects.js",
-      "bytes": 6064,
-      "sha256": "8d863c8b4e729ade5393e3bf62f22f6225266a9cdc37604a9ea3880d9d603778"
+      "bytes": 6405,
+      "sha256": "16abeb63420f7540bde183ca1cb82d987f0f405043397839bd3d102f324f9895"
     },
     {
       "path": "dist/upgrade-draft.js",
@@ -671,6 +851,11 @@
       "path": "dist/world.js",
       "bytes": 10653,
       "sha256": "d391b56db1dd1194abc797ed0031095b77fdb9af02c73657f7eff7c3464c0bd8"
+    },
+    {
+      "path": "docs/ANIMATIONS-ENNEMIS-2026-11-05.md",
+      "bytes": 8975,
+      "sha256": "53a9b57ac35e5f4bc00428db2d641732322036a3e2d068ce6e71051f147bfda8"
     },
     {
       "path": "docs/BOSS-ALEATOIRES.md",
@@ -711,6 +896,11 @@
       "path": "docs/DIALOGUE-AUDIT-AND-STORY-PROPOSAL.md",
       "bytes": 12685,
       "sha256": "acf83dbea88a5823b50fc18c145bcb95844de336feea16e4bd6fe1fca9e0faf5"
+    },
+    {
+      "path": "docs/DIRECTION-QUATRE-CREATURES.md",
+      "bytes": 2410,
+      "sha256": "831eec5c083d3dd5827b410653c349e0efbf34bd704eef1b1e8001be8e23c4dd"
     },
     {
       "path": "docs/EXPORTS-HORS-LIGNE.md",
@@ -778,6 +968,11 @@
       "sha256": "d39a94e696eb6434222b3da6328b20c30d165e84e36823289769b26968fc9e0d"
     },
     {
+      "path": "docs/QA-ALL-ANIMATIONS-2026-11-05.md",
+      "bytes": 5591,
+      "sha256": "9e1eaa9fb9a359b1099e7cd128fd488c05301178abce157aedfb14c7886a1b56"
+    },
+    {
       "path": "docs/QA-ANIMAL-ENTRY.md",
       "bytes": 5558,
       "sha256": "782171db3eecca84bb8263748b36ed5bebb10e5045577c37526aaf804561ba6a"
@@ -796,6 +991,16 @@
       "path": "docs/QA-BOSS-TROPHIES.md",
       "bytes": 6603,
       "sha256": "368dff3f5995195e33aa3dca18167f8e70f4535b90948142d7cffd6e2cfc7ae9"
+    },
+    {
+      "path": "docs/QA-CHARLES-ARRIVAL-2026-11-05.md",
+      "bytes": 9783,
+      "sha256": "4ab2e70d70af6b7fd2f25d0321a8270cee2620e87fbcec5f746ce33df591ec9d"
+    },
+    {
+      "path": "docs/QA-CHARLES-EGO-INTEGRATION-2026-11-05.md",
+      "bytes": 5700,
+      "sha256": "75f163d135680ea9d34acc04379a6b1647e6bd0d3fea9bacb2f7c4c5b725c6d6"
     },
     {
       "path": "docs/QA-CHARLES.md",
@@ -846,6 +1051,11 @@
       "path": "docs/QA-DIALOGUE.md",
       "bytes": 1579,
       "sha256": "7ac503c58e4b333392b4eed81bc7a7799e9ccd63af522243443f32611bdc3716"
+    },
+    {
+      "path": "docs/QA-EGO-ANIMATION-V2.md",
+      "bytes": 5762,
+      "sha256": "699c9b75f7ffbc552c5c74982e3d8a737e78a1d2d8c6c69c4b8de40445f00838"
     },
     {
       "path": "docs/QA-EVOLUTIONS.md",
@@ -1038,6 +1248,16 @@
       "sha256": "8b91ec90478e524263f42b4f903de8f60b6ec284b02838c2ab4a6d257b319cce"
     },
     {
+      "path": "docs/characters/ego-beasts-v2.png",
+      "bytes": 321381,
+      "sha256": "009fa99247d15449bbad90922a13da352766d0eb7ac6e3fbb85cd8cd29052ab8"
+    },
+    {
+      "path": "docs/characters/ego-beasts.md",
+      "bytes": 2520,
+      "sha256": "3206802dc96d9bd1e3a1fe06f708ea3bcd4123d71fa0d59e2901850e100db950"
+    },
+    {
       "path": "docs/superpowers/plans/2026-11-03-approved-upgrades.md",
       "bytes": 1613,
       "sha256": "e22f949142d8023e2155afa1caa751fa06d5b19fd25bd8a7fe658bb0c9f5ca39"
@@ -1073,9 +1293,104 @@
       "sha256": "19bcb5821ffbe99660472650fd37b03b30a28998fc3030252711c4db6deb1093"
     },
     {
+      "path": "docs/superpowers/plans/2026-11-05-charles-arrival.md",
+      "bytes": 2718,
+      "sha256": "b89a7fca1cc707ec7440ff023d564ae1d7ed1779cf0808e889d14dcffbca5357"
+    },
+    {
       "path": "package.json",
       "bytes": 129,
       "sha256": "07b478a06661487d0485ce60622bb744bc2f8b4b07c53eafda3d961cf82b1216"
+    },
+    {
+      "path": "proof/all-animations/README.md",
+      "bytes": 811,
+      "sha256": "929dd5bfaf3003ec45aae334a4aed754aaf56b5056bfcb1c67dfe1d60303d681"
+    },
+    {
+      "path": "proof/all-animations/Toma-fiche-personnage.png",
+      "bytes": 280326,
+      "sha256": "26061e7d9442a273694073b320ec9690d941b28491c7ebdb35797560212fd802"
+    },
+    {
+      "path": "proof/all-animations/all-arrival-contact.png",
+      "bytes": 762944,
+      "sha256": "673cb053b580a56de1e8866861b8284fac6f0f4de59b6783126ca1fd2040fe33"
+    },
+    {
+      "path": "proof/all-animations/all-arrival-reduced.mp4",
+      "bytes": 177077,
+      "sha256": "a9a16e156f6eab2c6bfc2696fe0451fbcc9c53f6e7d4f56ca05efc0bf37b5c38"
+    },
+    {
+      "path": "proof/all-animations/all-arrival-small-reduced.png",
+      "bytes": 493866,
+      "sha256": "ec0e66436d57767bf19de09e06096e96f1f35e53f0925f96aa7a0462ad953d36"
+    },
+    {
+      "path": "proof/all-animations/all-arrival.mp4",
+      "bytes": 189511,
+      "sha256": "cf5e0acea117bc22a95873dd4a611e0492dfa1b8f90d1ac24b88e15b62202da6"
+    },
+    {
+      "path": "proof/all-animations/animals.png",
+      "bytes": 195477,
+      "sha256": "d564c631806b01d16ff8f0b7cf24aac8bd064e9fb467edb49324c974d3e12960"
+    },
+    {
+      "path": "proof/all-animations/arrival-report.json",
+      "bytes": 11829,
+      "sha256": "23c617732543cbbe267f42c045d54ef87b6cfe46b0daabce82a67305de860d92"
+    },
+    {
+      "path": "proof/all-animations/attacks.mp4",
+      "bytes": 269022,
+      "sha256": "f59eca62ca430f268512932a8e2c0db01e5541d81e36dfd8e9776b6301c7e872"
+    },
+    {
+      "path": "proof/all-animations/ego-character-cards.png",
+      "bytes": 321381,
+      "sha256": "009fa99247d15449bbad90922a13da352766d0eb7ac6e3fbb85cd8cd29052ab8"
+    },
+    {
+      "path": "proof/all-animations/ego-sequence.mp4",
+      "bytes": 189706,
+      "sha256": "db72f127f9dd89c062a8e41a7155451f43317881ddb8a681b4f3827986175af6"
+    },
+    {
+      "path": "proof/all-animations/ego-status-feedback.png",
+      "bytes": 116377,
+      "sha256": "9de01beb1bee145360853881b9ecbd328a6bb518481f4a557ddcbbfb0ae6a423"
+    },
+    {
+      "path": "proof/all-animations/gorillas.png",
+      "bytes": 284795,
+      "sha256": "310ad9bfd1267fd73bd6540f768dc60811c02ff4d6451bbe72497638dbb8f2af"
+    },
+    {
+      "path": "proof/all-animations/orangutan-rivals.png",
+      "bytes": 120744,
+      "sha256": "966c8e899275dd8b4fbae47859055559f3f66aa985e96b1a91ea9ce7ef9a44d4"
+    },
+    {
+      "path": "proof/all-animations/pelican.png",
+      "bytes": 260214,
+      "sha256": "8a6328b4346e7face634b14bb683ebc4670073ae36b1807acc97570caab7ed5a"
+    },
+    {
+      "path": "proof/all-animations/toma-preservation.json",
+      "bytes": 149692,
+      "sha256": "a389ef166a33bb8e528d44eb5ec8681555ee7e235f8c3112762f916cecba6e14"
+    },
+    {
+      "path": "proof/all-animations/toma-preservation.mp4",
+      "bytes": 1500343,
+      "sha256": "3053a9144c611a4f660e2800573df94c7f9e01f5b3a7deb3b0f03fa984cb14e3"
+    },
+    {
+      "path": "proof/all-animations/travestia.png",
+      "bytes": 264399,
+      "sha256": "661cdb16fc0a29643d2314281852ace680bcec3cef1017357140d8768f8686bf"
     },
     {
       "path": "proof/charles/banter-portrait.png",
@@ -1233,6 +1548,61 @@
       "sha256": "8730c71693ba61f45a3d3144fe65aafe26e4b0083c21f8dd32fdd236cd793ec3"
     },
     {
+      "path": "proof/enemy-animations/README.md",
+      "bytes": 1771,
+      "sha256": "e6785427eba07ca752191a542730c9bee92d0779dfc2319bdc17f7c64d1016c0"
+    },
+    {
+      "path": "proof/enemy-animations/blocked-locomotion.json",
+      "bytes": 1118,
+      "sha256": "2c39e7eec348dd793e539fd1cec68157655f71a4c9bab0c502fb2083c7449aa9"
+    },
+    {
+      "path": "proof/enemy-animations/blocked-locomotion.png",
+      "bytes": 112442,
+      "sha256": "dd8208405303f12f6474aeed1e09d3f5bd89a08c8a271a0728972cb384843a17"
+    },
+    {
+      "path": "proof/enemy-animations/contact.png",
+      "bytes": 668679,
+      "sha256": "c426abb59a3150cdf2aa8f2a892c0e2a9ceccd8f6f04f8bfb295a02f89f01f26"
+    },
+    {
+      "path": "proof/enemy-animations/replay.json",
+      "bytes": 80543,
+      "sha256": "27d330b1c3b92606b735faf1fc6f5fe188cbf9c3206ce361ba68210b723d04ac"
+    },
+    {
+      "path": "proof/enemy-animations/sequence.mp4",
+      "bytes": 269022,
+      "sha256": "f59eca62ca430f268512932a8e2c0db01e5541d81e36dfd8e9776b6301c7e872"
+    },
+    {
+      "path": "proof/enemy-animations/toma-main53-integration.json",
+      "bytes": 149689,
+      "sha256": "4602e6a2e95f79c3f5bc35472d61ed3bc14cb7fe3822a5f9710a332bc1997777"
+    },
+    {
+      "path": "proof/enemy-animations/toma-main53-integration.mp4",
+      "bytes": 1500343,
+      "sha256": "3053a9144c611a4f660e2800573df94c7f9e01f5b3a7deb3b0f03fa984cb14e3"
+    },
+    {
+      "path": "proof/enemy-animations/toma-main53-integration.png",
+      "bytes": 126171,
+      "sha256": "68aa0864d5d89bd7f77128f396f38cfdf4bfe261803fa903bb7d6be6fc88e06a"
+    },
+    {
+      "path": "proof/enemy-animations/travestia-contact.png",
+      "bytes": 858872,
+      "sha256": "83f9424af5cd9decd7d0fe4170d0e0f675b94141b461957f0377ed86a5c54d6a"
+    },
+    {
+      "path": "proof/enemy-animations/travestia-sequence.mp4",
+      "bytes": 256338,
+      "sha256": "ef7e5879191fa98d3c105fb3ef0cca4675a386333b84a1c40b5c156558861667"
+    },
+    {
       "path": "proof/trophies/effects-320-reduced.png",
       "bytes": 95320,
       "sha256": "ba96ad559acdb043a78c3716e5a27989d3f994e01c5ca24bf2c66d24a344d7b0"
@@ -1279,13 +1649,13 @@
     },
     {
       "path": "release/OFFLINE_MANIFEST.json",
-      "bytes": 5824,
-      "sha256": "257c261f6ccf350644d5966bd1bd4e6f33709cefaee2e49ba9423597d4f87341"
+      "bytes": 6655,
+      "sha256": "3f1b5e6d4b9bc01a5e9c739c1a74f56c345e53f52219e2aa25f9a7b3d2b6a6f9"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 664135,
-      "sha256": "04d5baee1ae496f77498c12d825e720320f6799d03a3b6f37031a058832894c8"
+      "bytes": 675618,
+      "sha256": "c8665ce5db157eb08b6332475a6a7f9c76208c926f5cbcd7c4854269969749b2"
     },
     {
       "path": "release/archives/README.md",
@@ -1306,6 +1676,11 @@
       "path": "release/assets/animals-approved.png",
       "bytes": 1928857,
       "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "release/assets/charles-arrival-v1.png",
+      "bytes": 62650,
+      "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
     },
     {
       "path": "release/assets/charles-whole-v1.png",
@@ -1368,6 +1743,11 @@
       "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
     },
     {
+      "path": "release/assets/ego-beasts-v2.png",
+      "bytes": 1515523,
+      "sha256": "07a0cf393bfd9496d5efbf893d7b61346b9afba046d9a02e1bca6dc690241209"
+    },
+    {
       "path": "release/assets/ego-beasts.png",
       "bytes": 1027672,
       "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
@@ -1391,6 +1771,11 @@
       "path": "release/assets/opening-approved.png",
       "bytes": 2798954,
       "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
+    },
+    {
+      "path": "release/assets/orangutan-slap-v1.png",
+      "bytes": 167188,
+      "sha256": "22c4d5f19dd231675cbe70629d1c179bac13abd8cf5b197cd42cc947189d61e3"
     },
     {
       "path": "release/assets/orangutan-walk-v3.png",
@@ -1418,9 +1803,19 @@
       "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
     },
     {
+      "path": "release/assets/rival_goat-attack-v1.png",
+      "bytes": 195254,
+      "sha256": "7697fc562da5619b1e261cf86c2cc3bd56bdc8e0a01eb3997f46181f200da907"
+    },
+    {
       "path": "release/assets/rival_goat-walk-v3.png",
       "bytes": 128805,
       "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "release/assets/rival_rooster-attack-v1.png",
+      "bytes": 231071,
+      "sha256": "0a1839a341bff28f81b99c649f33fa9abd2474e5d6b55b5f786c6995048d8254"
     },
     {
       "path": "release/assets/rival_rooster-walk-v3.png",
@@ -1463,9 +1858,19 @@
       "sha256": "4ac27a4c475a56b61004044ac4ed05d92a164edd6763f960139a43308c218eea"
     },
     {
+      "path": "scripts/benchmark-charles-arrival.mjs",
+      "bytes": 2783,
+      "sha256": "c3a4cc95a0bea81315b673ee1aab6a3a418e933b70dbcfdd3503a6868525517e"
+    },
+    {
       "path": "scripts/benchmark-crowd.mjs",
       "bytes": 1667,
       "sha256": "86e56b9a66f4acb86de00b5464feb6ee24b4f5b32b9e439d9a89d56698e407d1"
+    },
+    {
+      "path": "scripts/benchmark-ego-render.mjs",
+      "bytes": 2814,
+      "sha256": "283e5a3ed66fa0cf5efcf91519850d7ffe8eaf83c4eef9ae3e06fa3f83079529"
     },
     {
       "path": "scripts/benchmark-saves.mjs",
@@ -1493,9 +1898,19 @@
       "sha256": "a229a7d8b6702be309117bc87d0e6d01772a16eb0113a3cb7db3bdfc799f8cc1"
     },
     {
+      "path": "scripts/inspect-all-animation-arrival.mjs",
+      "bytes": 4379,
+      "sha256": "7e43d65baf785d2b96db00712a4ab37235615c6b89c88f231968b5c4fd62195f"
+    },
+    {
       "path": "scripts/inspect-animals.mjs",
       "bytes": 1291,
       "sha256": "4e3c5b3f82f14a693ae6c34fff935ce6132f93de942c900da620ff59bd399bed"
+    },
+    {
+      "path": "scripts/inspect-charles-arrival.mjs",
+      "bytes": 3717,
+      "sha256": "23728687339c9edd884c3b1e4d63411840d0cafc02cf41c208bf3e41d44149ee"
     },
     {
       "path": "scripts/inspect-charles.mjs",
@@ -1538,6 +1953,11 @@
       "sha256": "7871a86ca4a821b11360f38bdc2531b2733a0855f00563e6888851121493915f"
     },
     {
+      "path": "scripts/inspect-ego-animation.mjs",
+      "bytes": 5835,
+      "sha256": "f91870897a61a2ec8415c4899b557392de6c192c12304179d1da6d2e0bc9e1f9"
+    },
+    {
       "path": "scripts/inspect-ego-arrivals.mjs",
       "bytes": 2271,
       "sha256": "4032da7bc8d9a0fe02e8964bd121148bdec7e929ab75277e97fdbc87daec2fed"
@@ -1551,6 +1971,16 @@
       "path": "scripts/inspect-ego.mjs",
       "bytes": 3491,
       "sha256": "e6676a115b8acbbd269575f8733265c419665c4c350c9ee487d2dc3cfda3014d"
+    },
+    {
+      "path": "scripts/inspect-enemy-attack-transitions.mjs",
+      "bytes": 3226,
+      "sha256": "6fe04064baab783c1668ec95ec3454e90e5b6c0454a2779d7cf550cc5b9a5f39"
+    },
+    {
+      "path": "scripts/inspect-enemy-gait.mjs",
+      "bytes": 2977,
+      "sha256": "7e5d05648ee46b8ce52a996a5de2bdd1400a47f595a0bb211a6097b680de0563"
     },
     {
       "path": "scripts/inspect-evolutions.mjs",
@@ -1598,6 +2028,11 @@
       "sha256": "e25c8b7514845b9a1755c2555953fb56bca0785cb5126e59fc4781acb46d15da"
     },
     {
+      "path": "scripts/inspect-ordinary-character-cards.mjs",
+      "bytes": 3966,
+      "sha256": "d153bca0a238aeb6ea9dd705487082524787d9f27d50a575f47f4e72c5ba54c6"
+    },
+    {
       "path": "scripts/inspect-pelican.mjs",
       "bytes": 6493,
       "sha256": "9deac1aa2c5c785ab939e14c3e9d4c9e4780c2d51c78f99263ae378807a2622d"
@@ -1633,6 +2068,16 @@
       "sha256": "bc33c947e3a663026175978c924f9533c8b1f9741fb5fd7901c3589e2118b03e"
     },
     {
+      "path": "scripts/inspect-toma-enemy-integration.mjs",
+      "bytes": 4043,
+      "sha256": "94ced95fe5a02b6e4d58cb053c03302dd8562320717bc235bf480012d15825d6"
+    },
+    {
+      "path": "scripts/inspect-travestia-transitions.mjs",
+      "bytes": 2791,
+      "sha256": "b78b21e31270ca14f9a7bebb71dac5c58d3273bae589a2756ae18b08dff69861"
+    },
+    {
       "path": "scripts/inspect-travestia.mjs",
       "bytes": 2625,
       "sha256": "0f1600d4271a87d9615a43d39f75326140ff1d339520b4de70b6d5cabd367a7a"
@@ -1664,13 +2109,18 @@
     },
     {
       "path": "scripts/offline_bundle.py",
-      "bytes": 2135,
-      "sha256": "dfbb54aaf015db0bd1bb145813d8e6c5e59b3c5eac60118be3db524a459e8530"
+      "bytes": 2185,
+      "sha256": "43a1f7a21092c2ddd590f8e54a6c16cd31212fa19ffccdc615cda48cbd8579bc"
     },
     {
       "path": "scripts/pack-actors.py",
       "bytes": 2396,
       "sha256": "1c037ef3e8a5dbeacdc6adef4165f5f5fb02a1d6a65d28eaff2b070fb6a026a2"
+    },
+    {
+      "path": "scripts/pack-ego-animation.mjs",
+      "bytes": 2221,
+      "sha256": "805111735e774987842ba78edec9b52a6152a782e42178715565923408449e14"
     },
     {
       "path": "scripts/pack-hero-approved.py",
@@ -1768,6 +2218,11 @@
       "sha256": "c99d699124fdce456b2b60fe448babe62ba53a73e16a95c7d67c0665dd32f233"
     },
     {
+      "path": "tests/all-animation-integration.test.js",
+      "bytes": 2655,
+      "sha256": "a02f61ef34a1d581e1d445c669435396a928b11203074268da259127d14641b5"
+    },
+    {
       "path": "tests/animal-entry.test.js",
       "bytes": 8196,
       "sha256": "7019b0340fc5133237b43dedc65cb82142118527680abd0ffcc44171cd85a600"
@@ -1804,8 +2259,8 @@
     },
     {
       "path": "tests/audio.test.js",
-      "bytes": 20709,
-      "sha256": "26dee410fddf4be2cf99551f9243e8c2bd102c60e5f56b586578e3477160feaf"
+      "bytes": 21703,
+      "sha256": "18957f0939887935567bcee3e7d530accb7e4d12d53c2fe3d9d71bae3f9ab80d"
     },
     {
       "path": "tests/biomes.test.js",
@@ -1853,9 +2308,19 @@
       "sha256": "96345aa13250a9d7a2cbbcdd85d4229765507febd0fe659927540b2dc12d9e7d"
     },
     {
+      "path": "tests/charles-arrival-render.test.js",
+      "bytes": 4615,
+      "sha256": "5ad45a2061bb8d7d776dbcc028aef3ce4b122504beeff46d07a5917c8e868299"
+    },
+    {
+      "path": "tests/charles-arrival.test.js",
+      "bytes": 5016,
+      "sha256": "60fcd4ba546d3850db3845c9030ba5be30a34b1dca36fc25ec1de654a2e06144"
+    },
+    {
       "path": "tests/charles-art.test.js",
-      "bytes": 4169,
-      "sha256": "137440b7999944986a2989788355c9661da2678643ac93c89e35cf9e69a8fcf2"
+      "bytes": 5289,
+      "sha256": "b9177ebac3bf6fd5b67feb29cea89d7f561ab2204714efe744ff7c2c2f18d9b8"
     },
     {
       "path": "tests/charles-combat.test.js",
@@ -1866,6 +2331,11 @@
       "path": "tests/charles-effects.test.js",
       "bytes": 2920,
       "sha256": "0db01bb7fa3b0388a343ec69eaf24a8128e22286064faa339e574e884d1f8166"
+    },
+    {
+      "path": "tests/charles-ego-integration.test.js",
+      "bytes": 2287,
+      "sha256": "76a3a47e95053ae53c0e088908ee6b35e60eb1e16972f5c30eb375ab448db802"
     },
     {
       "path": "tests/charles-engine.test.js",
@@ -1973,9 +2443,14 @@
       "sha256": "134d0c15bcc7f62bdcb52f9a3e24d53c0e4e34a47c24019eb30d4321f650b301"
     },
     {
+      "path": "tests/ego-animation.test.js",
+      "bytes": 8220,
+      "sha256": "e904dd5ef73fe1a38d5a392d2b8e0d40ce0e555f5ad57bab4f92cf17f8269b37"
+    },
+    {
       "path": "tests/ego-art.test.js",
-      "bytes": 5055,
-      "sha256": "027bca3b9cab84df94da096756e3752086793dabc022cb558b68d1a3059bb982"
+      "bytes": 5065,
+      "sha256": "9564ee7a3e8a1fe1cadaab64a53e304ce5573c1b5d89753b8bcc77f64ec1009a"
     },
     {
       "path": "tests/ego-asset-ui.test.js",
@@ -2011,6 +2486,16 @@
       "path": "tests/ego-spawn.test.js",
       "bytes": 3519,
       "sha256": "ff4064f3645c58d01eb5d668857bdc9275ec2f5b65f545fdb77f02eb3d9f8872"
+    },
+    {
+      "path": "tests/enemy-attack-art.test.js",
+      "bytes": 5349,
+      "sha256": "3d9d86d703c3d1aa5429f543d46414e63d8b3fb56c6f011973fafcd9f8b96124"
+    },
+    {
+      "path": "tests/enemy-gait.test.js",
+      "bytes": 3387,
+      "sha256": "47da9b37e6abecf3ae009a4b10f44f41e756ddde83da407203bf639724f039fa"
     },
     {
       "path": "tests/engine.test.js",
@@ -2138,6 +2623,11 @@
       "sha256": "e8d9082451f4999f7af509cf9e727686a7254d1a5c0ad441e0efea563f3b9d25"
     },
     {
+      "path": "tests/helpers/read-rgba-png.js",
+      "bytes": 1341,
+      "sha256": "4737db5a34c3a23b023a6fe0675eece0566be5319a9511251136077d02cf682d"
+    },
+    {
       "path": "tests/helpers/upgrade-offer.js",
       "bytes": 542,
       "sha256": "ea16e7f451f4ca8ef7641ead5172606e11cff56142e378580d8d3575c96626a2"
@@ -2229,8 +2719,8 @@
     },
     {
       "path": "tests/paused-encounters.test.js",
-      "bytes": 17425,
-      "sha256": "0f96e9d5c7fe44d0c36df4f2be6bf5d3cd990db1d59f8adae37cdebfd79c19ef"
+      "bytes": 17538,
+      "sha256": "61c6fc38c7dbdc705aea35e9c210f430f0daef59ffb58aad268abd57305236ff"
     },
     {
       "path": "tests/pelican-art.test.js",
@@ -2380,7 +2870,7 @@
     {
       "path": "tests/stability-integration.test.js",
       "bytes": 5421,
-      "sha256": "5f9104cab31388cdd7b19a272544c0f8c1568485023749661d113881625a09e4"
+      "sha256": "a5f1fdad690ea19d983886ef0cb15960708e233ae826aba4b664243c8fea7752"
     },
     {
       "path": "tests/standalone-module-order.test.js",
@@ -2421,6 +2911,11 @@
       "path": "tests/travestia-dash.test.js",
       "bytes": 3997,
       "sha256": "84ff7ea78e44ab5a3607c496e0e29588759b38e8f146e3b19d4b49fb87a8e920"
+    },
+    {
+      "path": "tests/travestia-pose.test.js",
+      "bytes": 3208,
+      "sha256": "728a8c965d3f1678acf526e20c9381a9bd92f2bd7b474f3df19d985e3bb9df34"
     },
     {
       "path": "tests/travestia.test.js",
@@ -2498,12 +2993,13 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "8e6e230516597ba7f06d1ec7f5312e5163a29498",
+  "base_github_commit": "58b359c10bcec90d77a6c465bc466a965e2eedaf",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
     "entrypoint": "release/Toma_Popescu_JOUER.html",
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
-  }
+  },
+  "base_github_tree": "ea04ae4ee16edf273b4588c3c09c20b4806639c3"
 }

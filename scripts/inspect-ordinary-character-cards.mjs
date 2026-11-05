@@ -1,0 +1,20 @@
+import {resolve} from 'node:path';
+import {mkdirSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import {writeFileSync} from 'node:fs';
+const require=createRequire(import.meta.url),{createCanvas,loadImage}=require('@napi-rs/canvas');
+const root=resolve(import.meta.dirname,'..'),out=resolve(process.argv[2]||'/tmp/popescu-character-cards');mkdirSync(out,{recursive:true});
+const {ActorArt}=await import(root+'/dist/actor-art.js');
+const {Renderer}=await import(root+'/dist/renderer.js');
+const {drawAnimalWarning,ANIMALS}=await import(root+'/dist/animals.js');
+const {drawPelicanGround,drawPelicanCards}=await import(root+'/dist/pelican-art.js');
+globalThis.OffscreenCanvas=class {constructor(w,h){return createCanvas(w,h);}};
+const art=new ActorArt({loadImage:async p=>/gorilla|orangutan|rival_|animals|pelican|travestia/.test(p)?loadImage(root+'/dist/'+p):null});await art.ready;
+const state={};
+function sheet(name,rows,cols,w=240,h=170){const c=createCanvas(w*cols,h*rows.length),ctx=c.getContext('2d');ctx.fillStyle='#292238';ctx.fillRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;rows.forEach((row,j)=>row.forEach((spec,i)=>{const e={id:1,x:i*w+w/2,y:j*h+h-30,faceX:1,faceY:0,hp:100,maxhp:100,...spec};const r=Object.assign(Object.create(Renderer.prototype),{ctx,time:spec.time??10,reducedEffects:false});if(spec.warning){if(ANIMALS[e.type])drawAnimalWarning(ctx,e);else if(e.type==='pelican')drawPelicanGround(ctx,e);else{r._orangutanAttack(e);r._rivalAttack(e);r._travestiaAttack(e);r._dangerWarnings(e.type==='explosive'?[e]:[],[]);}}art.draw(ctx,e,'enemy',spec.frame??i%4,state,spec.time??10);if(e.type==='pelican')drawPelicanCards(ctx,e);if(spec.foreground)r._rivalAttack(e,true);ctx.fillStyle='#f4dbb5';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText(spec.label??`${e.type} ${spec.frame??i}`,i*w+w/2,j*h+17);ctx.strokeStyle='#746379';ctx.beginPath();ctx.moveTo(i*w+5,e.y+11);ctx.lineTo((i+1)*w-5,e.y+11);ctx.stroke();}));writeFileSync(resolve(out,name+'.png'),c.toBuffer('image/png'));}
+const variants=['normal','sprinter','gas','tank','jealous','explosive','matriarch'];sheet('gorillas',variants.map(type=>Array.from({length:4},(_,frame)=>({type,frame}))),4,170,150);
+sheet('orangutan-rivals', ['orangutan','rival_goat','rival_rooster'].map(type=>[{type,frame:0,label:type+' repos'},{type,windup:.55,swipeDirX:1,swipeDirY:0,chargeDirX:1,chargeDirY:0,frame:1,label:'Préparation',warning:true},{type,swipe:type==='orangutan'?.25:0,charge:type==='rival_goat'?.4:0,crow:type==='rival_rooster'?.5:0,swipeDirX:1,swipeDirY:0,chargeDirX:1,chargeDirY:0,frame:2,label:'Attaque début',warning:true,foreground:true},{type,swipe:type==='orangutan'?.07:0,charge:type==='rival_goat'?.2:0,crow:type==='rival_rooster'?.3:0,swipeDirX:1,swipeDirY:0,chargeDirX:1,chargeDirY:0,frame:3,label:'Attaque fin',warning:true,foreground:true}]),4,220,170);
+sheet('animals',Object.keys(ANIMALS).map(type=>['chase','chase','animal_warning','animal_active','animal_recover'].map((phase,frame)=>({type,phase,frame:frame%2,animalDX:1,animalDY:0,animalX:frame*190+95,animalY:150,label:`${type}: ${phase}`}))),5,190,180);
+sheet('pelican',[['chase','chase','chase','chase'],['chase','peli_hug_warning','peli_hug','peli_recover'],['peli_zodiac_warning','peli_zodiac','peli_tarot_warning','peli_tarot']].map((list,row)=>list.map((phase,i)=>({type:'pelican',phase,peliMoving:row===0,peliWalkDistance:i*14,peliTime:.5,peliDX:1,frame:i,label:phase}))),4,190,210);
+sheet('travestia',[['chase','chase','chase','chase'],['tail_windup','tail_windup','tail_windup','tail_spin'],['tail_spin','tail_recover','tail_dash_windup','tail_dash_recover']].map((list,row)=>list.map((phase,i)=>({type:'travestia',phase,tailMoving:row===0,tailWalkDistance:i*14,tailTime:row===1?[1.2,.7,.2,1.4][i]:row===2?[1.3,.9,1,.8][i]:0,tailDashDir:0,frame:i,label:phase}))),4,220,230);
+console.log('Wrote five contact sheets using actual ActorArt and Renderer attack methods.');

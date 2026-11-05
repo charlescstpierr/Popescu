@@ -32,9 +32,9 @@ test('Charles reduced effects remove idle bob and do not alter phase timing',()=
  assert.equal(api.charlesPose(state('descend',.5),0,true).progress,.5);
 });
 
-test('Charles art loads one atlas and paints one intact frame with translation only',async()=>{
+test('Charles art loads two small atlases and paints one intact frame with translation only',async()=>{
  need();const urls=[],art=new api.CharlesArt({loadImage:async src=>{urls.push(src);return {width:880,height:176};}});assert.equal(await art.ready,true);
- assert.equal(urls.length,1);assert.match(urls[0],/assets\/charles-whole-v1\.png$/);
+ assert.equal(urls.length,2);assert.match(urls[1],/assets\/charles-arrival-v1\.png$/);assert.match(urls[0],/assets\/charles-whole-v1\.png$/);
  for(const phase of ['intro','hover','shock_warning','shockwave','cape_warning','cape_spin','recover','descend','bend','scream','burst','empowered']){
   const c=state(phase),before=JSON.stringify(c),r=recording();assert.equal(art.draw(r.ctx,c,4,false),true);
   assert.equal(r.calls.filter(c=>c[0]==='drawImage').length,1,phase);
@@ -57,4 +57,17 @@ test('Charles atlas and metadata retain five full-body cells at a common native 
  const png=fs.readFileSync(new URL('../dist/assets/charles-whole-v1.png',import.meta.url));assert.equal(png.readUInt32BE(16),880);assert.equal(png.readUInt32BE(20),176);assert.equal(png[25],6);
  const m=JSON.parse(fs.readFileSync(new URL('../art/source/charles/atlas-metadata.json',import.meta.url),'utf8'));
  assert.deepEqual(m.anchor,[88,160]);assert.equal(m.frames.length,5);assert.deepEqual([...new Set(m.frames.map(f=>f.scale))],[.26]);
+});
+
+
+test('arrival flies the intact body across the frame, then prepares and releases the snap',()=>{
+ const at=t=>api.charlesPose({...state('intro',8-t,8),elapsed:t},t,true);
+ assert.equal(at(0).x,-160);assert.equal(at(0).lift,48);assert.equal(at(2.61).x,100);assert.equal(at(2.61).lift,26);
+ for(let i=1;i<26;i++)assert.ok(at(i/10).x>at((i-1)/10).x);
+ assert.equal(at(1).arrivalFrame,0);assert.equal(at(3.2).arrivalFrame,1);assert.equal(at(3.5).arrivalFrame,2);assert.equal(at(4.6).arrivalFrame,null);
+ assert.deepEqual(at(1),api.charlesPose({...state('intro',7,8),elapsed:1},1,false),'essential flight stays identical in reduced effects');
+});
+test('missing arrival art falls back to one complete approved painting without blocking the game',async()=>{
+ const old={width:880,height:176},art=new api.CharlesArt({loadImage:async src=>src.endsWith('charles-arrival-v1.png')?null:old});
+ assert.equal(await art.ready,true);const r=recording();assert.equal(art.draw(r.ctx,state('intro',7,8)),true);assert.equal(r.calls.find(x=>x[0]==='drawImage')[1],old);
 });

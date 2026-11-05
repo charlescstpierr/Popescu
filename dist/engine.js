@@ -1,3 +1,4 @@
+import {enemyGaitFrame,recordEnemyWalk} from './enemy-gait.js';
 import {EGO_BEASTS,EGO_LIMITS,initEgoBeast,egoBeastLocked,interruptEgoBeast,egoDamageMultiplier,egoHeight,updateEgoBeast} from './ego-beasts.js';
 import {egoFitsViewport,findEgoEntry} from './ego-entry.js';
 import {biomeForChunk} from './biomes.js';
@@ -6,7 +7,7 @@ import {createEncounterDialogue,queueEncounterDialogue,openEncounterDialogue,adv
 import {carLevel,launchLamborghini,updateLamborghini} from './lamborghini.js';
 import {lethalDamageCause} from './run-history.js';
 import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled} from './speech.js';
-import {charlesActive,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
+import {charlesActive,charlesArrival,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills} from './evolutions.js';
@@ -43,7 +44,7 @@ export class Game {
     // A transient speech cue: restoring a run never invents recent health loss.
     this.recentHealthDamage=null;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
-    this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
+    this.enemyGait=new WeakMap();this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.speech=createSpeech();this.banterEnabled=true;this.recalculate();this.world.update(0,0);
   }
@@ -165,7 +166,8 @@ export class Game {
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
   }
   stepCharles(dt,input){
-    const s=this.s,previous={x:s.x,y:s.y},trophySpeed=trophySpeedMultiplier(s);this.updateDiscoveryEffect(dt);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=Math.max(0,s.invulnerable-dt);
+    const s=this.s,previous={x:s.x,y:s.y},arrivalLocked=charlesArrival(s.charles)?.locked,trophySpeed=trophySpeedMultiplier(s);this.updateDiscoveryEffect(dt);updateTrophyEffects(this,dt,arrivalLocked);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=Math.max(0,s.invulnerable-dt);
+    if(arrivalLocked){s.moveX=0;s.moveY=0;s.walkMoving=false;updateCharles(this,dt,previous);if(!this.openEncounterDialogue())this.flushSpeech();return;}
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0,n=Math.max(1,Math.hypot(mx,my));s.moveX=mx/n;s.moveY=my/n;
     this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=Math.hypot(s.x-previous.x,s.y-previous.y);s.walkMoving=moved>1e-7;
     if(s.walkMoving){s.walkDistance+=moved;s.travelX=(s.x-previous.x)/moved;s.travelY=(s.y-previous.y)/moved;}
@@ -441,7 +443,7 @@ export class Game {
   updateEnemies(dt){
     const s=this.s,g=s.girl;
     for(const e of s.enemies){
-      if(e.dead)continue;if(e.type==='pelican')e.peliMoving=false;if(e.type==='travestia')e.tailMoving=false;e.hitFlash=Math.max(0,e.hitFlash-dt);e.attack=Math.max(0,(e.attack||0)-dt);e.cooldown=Math.max(0,(e.cooldown||0)-dt);e.gasPose=Math.max(0,e.gasPose-dt);e.swipe=Math.max(0,(e.swipe||0)-dt);e.charge=Math.max(0,(e.charge||0)-dt);e.crow=Math.max(0,(e.crow||0)-dt);e.charmed=Math.max(0,e.charmed-dt);
+      if(e.dead)continue;const gait=this.enemyGait.get(e);if(gait)gait.moving=false;if(e.type==='pelican')e.peliMoving=false;if(e.type==='travestia')e.tailMoving=false;e.hitFlash=Math.max(0,e.hitFlash-dt);e.attack=Math.max(0,(e.attack||0)-dt);e.cooldown=Math.max(0,(e.cooldown||0)-dt);e.gasPose=Math.max(0,e.gasPose-dt);e.swipe=Math.max(0,(e.swipe||0)-dt);e.charge=Math.max(0,(e.charge||0)-dt);e.crow=Math.max(0,(e.crow||0)-dt);e.charmed=Math.max(0,e.charmed-dt);
       // Optional on older saves; absent means the first charm can interrupt.
       if(e.bossCharmResistance!==undefined)e.bossCharmResistance=Math.max(0,e.bossCharmResistance-dt);
       if(length(e.x-s.x,e.y-s.y)>1600){if(!isMajorBoss(e.type)){e.dead=true;continue;}if(!this.reenterBoss(e))continue;}
@@ -492,7 +494,7 @@ export class Game {
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,EXPLOSIVE_BLAST.radius,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
-      if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
+      if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}recordEnemyWalk(this.enemyGait,e,length(e.x-ox,e.y-oy));if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
       if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&!EGO_BEASTS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
     }
@@ -599,7 +601,7 @@ export class Game {
     const visible=Math.abs(e.x-s.x)<this.viewport.width/2+80&&e.y>s.y-this.viewport.height*.48-80&&e.y<s.y+this.viewport.height*.52+100;
     if(visible){
       this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);
-      if(this.defeatEffects.length<16)this.defeatEffects.push({actor:{...e},start:s.elapsed,life:.45,phase:Math.floor(s.elapsed*10+(typeof e.phase==='number'?e.phase*3:0)+(Number(e.id)||0))%8});
+      if(this.defeatEffects.length<16)this.defeatEffects.push({actor:{...e},start:s.elapsed,life:.45,phase:enemyGaitFrame(e,this.enemyGait.get(e),Math.floor(s.elapsed*10+(typeof e.phase==='number'?e.phase*3:0)+(Number(e.id)||0))%8)});
       this.sound('kill');
     }
   }

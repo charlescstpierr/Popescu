@@ -1,0 +1,660 @@
+{
+  "renderer": "Actual Game + Renderer on native Canvas; not browser HUD or physical phone",
+  "frames": [
+    {
+      "tag": "390x844",
+      "sounds": [
+        {
+          "value": "snap",
+          "time": 3.449999999999996
+        },
+        {
+          "value": "heart",
+          "time": 4.499999999999998
+        },
+        {
+          "value": "shoot",
+          "time": 4.616666666666665
+        },
+        {
+          "value": "shoot",
+          "time": 5.125000000000003
+        },
+        {
+          "value": "heart",
+          "time": 5.541666666666672
+        },
+        {
+          "value": "shoot",
+          "time": 5.666666666666673
+        }
+      ],
+      "actorCache": 8,
+      "terrainCache": 8
+    },
+    {
+      "tag": "390x844-reduced",
+      "sounds": [
+        {
+          "value": "snap",
+          "time": 3.449999999999996
+        },
+        {
+          "value": "heart",
+          "time": 4.499999999999998
+        },
+        {
+          "value": "shoot",
+          "time": 4.616666666666665
+        },
+        {
+          "value": "shoot",
+          "time": 5.125000000000003
+        },
+        {
+          "value": "heart",
+          "time": 5.541666666666672
+        },
+        {
+          "value": "shoot",
+          "time": 5.666666666666673
+        }
+      ],
+      "actorCache": 8,
+      "terrainCache": 8
+    },
+    {
+      "tag": "320x568",
+      "sounds": [
+        {
+          "value": "snap",
+          "time": 3.449999999999996
+        },
+        {
+          "value": "heart",
+          "time": 4.499999999999998
+        },
+        {
+          "value": "shoot",
+          "time": 4.616666666666665
+        },
+        {
+          "value": "shoot",
+          "time": 5.125000000000003
+        },
+        {
+          "value": "heart",
+          "time": 5.541666666666672
+        },
+        {
+          "value": "shoot",
+          "time": 5.666666666666673
+        }
+      ],
+      "actorCache": 8,
+      "terrainCache": 6
+    },
+    {
+      "tag": "320x568-reduced",
+      "sounds": [
+        {
+          "value": "snap",
+          "time": 3.449999999999996
+        },
+        {
+          "value": "heart",
+          "time": 4.499999999999998
+        },
+        {
+          "value": "shoot",
+          "time": 4.616666666666665
+        },
+        {
+          "value": "shoot",
+          "time": 5.125000000000003
+        },
+        {
+          "value": "heart",
+          "time": 5.541666666666672
+        },
+        {
+          "value": "shoot",
+          "time": 5.666666666666673
+        }
+      ],
+      "actorCache": 8,
+      "terrainCache": 6
+    }
+  ],
+  "checkpoints": [
+    {
+      "tag": "390x844",
+      "time": 1.3333333333333333,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844",
+      "time": 2.8333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844",
+      "time": 3.3333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844",
+      "time": 3.5833333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844",
+      "time": 3.875,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844",
+      "time": 4.166666666666667,
+      "enemies": 0,
+      "types": [],
+      "hitFlashes": []
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 1.3333333333333333,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 2.8333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 3.3333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 3.5833333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 3.875,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "390x844-reduced",
+      "time": 4.166666666666667,
+      "enemies": 0,
+      "types": [],
+      "hitFlashes": []
+    },
+    {
+      "tag": "320x568",
+      "time": 1.3333333333333333,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568",
+      "time": 2.8333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568",
+      "time": 3.3333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568",
+      "time": 3.5833333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568",
+      "time": 3.875,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568",
+      "time": 4.166666666666667,
+      "enemies": 0,
+      "types": [],
+      "hitFlashes": []
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 1.3333333333333333,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 2.8333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 3.3333333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 3.5833333333333335,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 3.875,
+      "enemies": 8,
+      "types": [
+        "ego_peacock",
+        "ego_toad",
+        "ego_rat",
+        "ego_chameleon",
+        "orangutan",
+        "rival_goat",
+        "rival_rooster",
+        "normal"
+      ],
+      "hitFlashes": [
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0.08,
+        0
+      ]
+    },
+    {
+      "tag": "320x568-reduced",
+      "time": 4.166666666666667,
+      "enemies": 0,
+      "types": [],
+      "hitFlashes": []
+    }
+  ],
+  "scene": "Four active EGO creatures plus three new whole attacks and ordinary witness"
+}

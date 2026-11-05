@@ -158,8 +158,8 @@ export function getMusicStepEvents(scene, step, intensity = 0.35) {
   return events;
 }
 
-const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9 };
-const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster']);
+const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9, snap: 1 };
+const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster', 'snap']);
 
 export class AudioManager {
   constructor({ enabled = true, volume = 0.5 } = {}) {
@@ -490,6 +490,12 @@ export class AudioManager {
       case 'defeat':
         this._jingle([76, 74, 71, 67, 63, 59], now, 0.14, 0.25);
         this._tone(43, now + 0.72, 0.48, 0.13, 'sawtooth', 'sfx', 31);
+        break;
+      case 'snap':
+        // One dry finger snap: three short voices, no screen-wide blast.
+        this._noise(now, 0.028, 0.12, 2600);
+        this._tone(67, now, 0.045, 0.09, 'triangle', 'sfx', 46);
+        this._tone(95, now + 0.035, 0.09, 0.045, 'sine', 'sfx', 90);
         break;
       case 'click':
         this._tone(79, now, 0.035, 0.055, 'square', 'sfx', 83);

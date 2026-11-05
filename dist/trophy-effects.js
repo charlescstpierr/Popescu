@@ -28,11 +28,11 @@ function cardPass(game,card,start,end,back){
  candidates.sort((a,b)=>((a.x-b.x)*card.dx+(a.y-b.y)*card.dy)*(back?-1:1)||compareId(a,b));
  for(const e of candidates){if(!known.has(e.id)&&known.size>=3)continue;known.add(e.id);hits.push(e.id);game.hurt(e,18);}
 }
-function updateCard(game,dt){
+function updateCard(game,dt,canHit=true){
  const t=game.s.trophies,c=t.tarot;if(!c)return;
  const end=Math.min(1.6,c.age+dt);
- if(c.age<.8)cardPass(game,c,c.age,Math.min(end,.8),false);
- if(end>.8)cardPass(game,c,Math.max(c.age,.8),end,true);
+ if(canHit&&c.age<.8)cardPass(game,c,c.age,Math.min(end,.8),false);
+ if(canHit&&end>.8)cardPass(game,c,Math.max(c.age,.8),end,true);
  c.age=end;const d=cardDistance(end);c.x=c.originX+c.dx*d;c.y=c.originY+c.dy*d;
  if(end>=1.6-EPS)t.tarot=null;
 }
@@ -61,11 +61,14 @@ function hitSector(game,p){
   }
  }
 }
-export function updateTrophyEffects(game,dt){
+export function updateTrophyEffects(game,dt,passiveOnly=false){
  const s=game.s,t=s.trophies;if(!t||s.mode!=='playing'||!Number.isFinite(dt)||dt<=0)return;
  for(const id of Object.keys(t.cooldowns))t.cooldowns[id]=remaining(t.cooldowns[id],dt);
  t.starLife=remaining(t.starLife,dt);
  if(t.feedback){t.feedback.life=remaining(t.feedback.life,dt);if(!t.feedback.life)t.feedback=null;}
+ // Arrival is cinematic, not an opportunity to farm the frozen survivors.
+ // Timed rewards still expire, but no new attack, hit or charm is issued.
+ if(passiveOnly){updateCard(game,dt,false);if(t.panache){t.panache.life=remaining(t.panache.life,dt);if(!t.panache.life)t.panache=null;}return;}
  for(const e of s.enemies)if(e.trophyCharmLife>0)e.trophyCharmLife=Math.min(Math.max(0,e.charmed),remaining(e.trophyCharmLife,dt));
  if(hasTrophy(s,'tarot')&&!t.tarot&&t.cooldowns.tarot===0){
   const candidates=s.enemies.filter(e=>alive(e)&&distance2(e,s)<=220**2).sort((a,b)=>distance2(a,s)-distance2(b,s)||compareId(a,b));

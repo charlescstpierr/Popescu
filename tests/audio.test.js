@@ -187,7 +187,7 @@ test('dense combat SFX stay throttled and bounded while the lead survives; split
 
 test('all supported effects synthesize and destroy disconnects every source', async t => {
   const audio = await createAudio(t);
-  for (const name of ['shoot', 'heart', 'collect', 'coin', 'chest', 'gas', 'hit', 'level', 'victory', 'defeat', 'click', 'truth', 'split', 'rooster']) {
+  for (const name of ['shoot', 'heart', 'collect', 'coin', 'chest', 'gas', 'hit', 'level', 'victory', 'defeat', 'click', 'truth', 'split', 'rooster', 'snap']) {
     audio.context.advance(2);
     const before = audio.context.sources.length;
     audio.sfx(name);
@@ -373,4 +373,15 @@ for (const [source, shield, expectedHp, expectedShield, invulnerability] of [
   for (let i = 0; i < 300; i++) game.damage(5, source);
   assert.equal(game.s.hp, expectedHp); assert.equal(game.s.shield, expectedShield);
   assert.equal(audio.context.sources.length, after, 'invulnerable contacts remain silent');
+});
+
+
+test('Charles snap is one compact cue, throttles repeats and honors mute and pause',async t=>{
+ const audio=await createAudio(t);audio.setScene('battle');await Promise.resolve();
+ const lead=[...audio._voices].find(voice=>voice.instrument==='lead'),before=audio.context.sources.length;
+ for(let i=0;i<300;i++)audio.sfx('snap');const cue=audio.context.sources.slice(before);
+ assert.equal(cue.length,3);assert.ok(Math.max(...cue.map(s=>s.stopTime))-Math.min(...cue.map(s=>s.startTime))<.2);assert.ok(audio._voices.has(lead));assert.ok(audio._voices.size<=32);
+ const count=audio.context.sources.length;audio.context.advance(.5);audio.sfx('snap');assert.equal(audio.context.sources.length,count);
+ audio.setEnabled(false);await Promise.resolve();const muted=audio.context.sources.length;audio.sfx('snap');assert.equal(audio.context.sources.length,muted);
+ audio.setEnabled(true);audio.setScene('paused');await Promise.resolve();audio.sfx('snap');assert.equal(audio._voices.size,0);
 });

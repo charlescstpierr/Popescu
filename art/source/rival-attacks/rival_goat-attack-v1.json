@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "kind": "goat",
+  "source": "rival-goat-attack-source-v1.png",
+  "sourceSHA256": "0c72d236c1de13b7e08da4367e496e0e7450f6ed3b17c10d0632390b0377b5ba",
+  "atlas": "rival_goat-attack-v1.png",
+  "cellSize": [
+    128,
+    128
+  ],
+  "columns": 5,
+  "rows": 2,
+  "anchor": [
+    60,
+    121
+  ],
+  "drawSize": 88,
+  "sourceUniformScale": 0.3177842565597668,
+  "registration": "Whole painting crop + one common uniform scale per species + translation. Feet bottom edge at y121. Horizontal mirror allowed.",
+  "phases": [
+    "brace",
+    "lower",
+    "chargeA",
+    "chargeB",
+    "recover"
+  ],
+  "frames": [
+    {
+      "name": "front_brace",
+      "index": 0,
+      "rect": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        0,
+        0,
+        397,
+        396
+      ],
+      "sourceBBox": [
+        73,
+        23,
+        322,
+        362
+      ],
+      "sourceFoot": [
+        180.0,
+        361.0
+      ],
+      "registeredBBox": [
+        26,
+        14,
+        105,
+        122
+      ]
+    },
+    {
+      "name": "front_lower",
+      "index": 1,
+      "rect": [
+        128,
+        0,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        397,
+        0,
+        793,
+        396
+      ],
+      "sourceBBox": [
+        75,
+        65,
+        341,
+        362
+      ],
+      "sourceFoot": [
+        181.5,
+        361.0
+      ],
+      "registeredBBox": [
+        26,
+        27,
+        111,
+        121
+      ]
+    },
+    {
+      "name": "front_chargeA",
+      "index": 2,
+      "rect": [
+        256,
+        0,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        793,
+        0,
+        1190,
+        396
+      ],
+      "sourceBBox": [
+        19,
+        83,
+        373,
+        360
+      ],
+      "sourceFoot": [
+        174.5,
+        359.0
+      ],
+      "registeredBBox": [
+        11,
+        33,
+        123,
+        121
+      ]
+    },
+    {
+      "name": "front_chargeB",
+      "index": 3,
+      "rect": [
+        384,
+        0,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        1190,
+        0,
+        1586,
+        396
+      ],
+      "sourceBBox": [
+        83,
+        91,
+        382,
+        362
+      ],
+      "sourceFoot": [
+        253.5,
+        361.0
+      ],
+      "registeredBBox": [
+        6,
+        35,
+        101,
+        121
+      ]
+    },
+    {
+      "name": "front_recover",
+      "index": 4,
+      "rect": [
+        512,
+        0,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        1586,
+        0,
+        1983,
+        396
+      ],
+      "sourceBBox": [
+        98,
+        23,
+        349,
+        362
+      ],
+      "sourceFoot": [
+        204.0,
+        361.0
+      ],
+      "registeredBBox": [
+        26,
+        14,
+        106,
+        122
+      ]
+    },
+    {
+      "name": "back_brace",
+      "index": 5,
+      "rect": [
+        0,
+        128,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        0,
+        396,
+        397,
+        793
+      ],
+      "sourceBBox": [
+        57,
+        24,
+        321,
+        368
+      ],
+      "sourceFoot": [
+        169.0,
+        367.0
+      ],
+      "registeredBBox": [
+        24,
+        12,
+        108,
+        121
+      ]
+    },
+    {
+      "name": "back_lower",
+      "index": 6,
+      "rect": [
+        128,
+        128,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        397,
+        396,
+        793,
+        793
+      ],
+      "sourceBBox": [
+        61,
+        67,
+        326,
+        366
+      ],
+      "sourceFoot": [
+        170.5,
+        365.0
+      ],
+      "registeredBBox": [
+        25,
+        26,
+        109,
+        121
+      ]
+    },
+    {
+      "name": "back_chargeA",
+      "index": 7,
+      "rect": [
+        256,
+        128,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        793,
+        396,
+        1190,
+        793
+      ],
+      "sourceBBox": [
+        17,
+        77,
+        376,
+        366
+      ],
+      "sourceFoot": [
+        168.0,
+        366.0
+      ],
+      "registeredBBox": [
+        12,
+        29,
+        126,
+        121
+      ]
+    },
+    {
+      "name": "back_chargeB",
+      "index": 8,
+      "rect": [
+        384,
+        128,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        1190,
+        396,
+        1586,
+        793
+      ],
+      "sourceBBox": [
+        68,
+        87,
+        382,
+        365
+      ],
+      "sourceFoot": [
+        247.0,
+        365.0
+      ],
+      "registeredBBox": [
+        3,
+        33,
+        103,
+        121
+      ]
+    },
+    {
+      "name": "back_recover",
+      "index": 9,
+      "rect": [
+        512,
+        128,
+        128,
+        128
+      ],
+      "anchor": [
+        60,
+        121
+      ],
+      "sourceCell": [
+        1586,
+        396,
+        1983,
+        793
+      ],
+      "sourceBBox": [
+        92,
+        25,
+        350,
+        372
+      ],
+      "sourceFoot": [
+        197.5,
+        371.0
+      ],
+      "registeredBBox": [
+        26,
+        11,
+        108,
+        121
+      ]
+    }
+  ],
+  "timing": {
+    "windup": 0.8,
+    "charge": 0.55
+  }
+}

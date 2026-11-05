@@ -1,5 +1,15 @@
 // Optional post-victory encounter. Its clock never changes the survival record.
 export const CHARLES={hitsToTransform:18,maxDestroyed:64,waveWidth:18,gapHalfAngle:.52,phases:{intro:8,hover:2.4,shock_warning:2.6,shockwave:1.8,cape_warning:2.2,cape_spin:.85,recover:2,descend:1.25,bend:1.5,scream:1.25,burst:1.4,empowered:2.2,complete:0}};
+export const CHARLES_ARRIVAL=Object.freeze({flightEnd:2.6,prepare:2.95,snap:3.45,clear:4.05,release:4.5});
+// The existing saved intro countdown is the only clock. No extra flags, enemy
+// copies or render-owned state can replay the snap or resurrect a cleared crowd.
+export function charlesArrival(c){
+ if(!c||c.phase!=='intro')return null;
+ const clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>n*n*(3-2*n);
+ const time=CHARLES.phases.intro*clamp(1-(c.phaseTime||0)/(c.phaseDuration||CHARLES.phases.intro));
+ const fade=clamp((time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap));
+ return {time,flight:clamp(time/CHARLES_ARRIVAL.flightEnd),locked:time<CHARLES_ARRIVAL.release,enemyOpacity:1-ease(fade),stage:time<CHARLES_ARRIVAL.flightEnd?'flight':time<CHARLES_ARRIVAL.prepare?'settle':time<CHARLES_ARRIVAL.snap?'prepare':time<CHARLES_ARRIVAL.clear?'snap':'ready'};
+}
 export const CHARLES_LINES=[
  {who:'TOMA',text:"Vingt minutes, Charles. Chuck Norris demande mon programme d'entraînement."},
  {who:'CHARLES',text:"Ton programme ? J'ai surtout la photo de ton char à six roues."},
@@ -23,13 +33,16 @@ export function startCharles(g){
  s.charles={id:g.id++,type:'charles',x:s.x+(g.viewport.height<650?65:0),y:s.y-offset,r:28,hp:1,maxhp:1,dead:false,charmed:0,hitFlash:0,hits:0,powered:false,phase:'intro',phaseTime:8,phaseDuration:8,elapsed:0,attackCount:0,safeAngle:Math.PI/2,waveMax:300,capeRadius:112,dialogueIndex:0,nextDialogue:0,outcome:'',destroyed:[]};
  // No ordinary enemy or projectile can steal this optional encounter. Rewards
  // already pending keep their provenance and can be chosen in endless mode.
- for(const key of ['enemies','shots','drops','clouds','particles','vehicles','pulses','shockwaves'])s[key]=[];
+ // Keep the bounded enemy records as inert painted witnesses until the snap.
+ // All dangerous projectiles/effects disappear now, without kills or rewards.
+ for(const key of ['shots','drops','clouds','particles','vehicles','pulses','shockwaves'])s[key]=[];
  s.airplane.active=false;s.airplane.life=0;s.stunt.active=false;s.stunt.progress=0;s.stunt.time=0;
  g.defeatEffects=[];g.powerEffects=[];g.powerCueCooldowns.clear();g.pendingStuntReply=null;g.pendingRivalReply=null;
  s.hp=Math.max(s.hp,s.maxhp*.5);s.mode='playing';s.moveX=0;s.moveY=0;g.emit('epilogue-start',s.charles);return true;
 }
 export function finishCharles(g,outcome='left'){
  const s=g.s,c=s.charles;if(!charlesActive(s))return false;
+ if(c.phase==='intro')s.enemies=[];
  g.powerEffects=[];g.defeatEffects=[];g.powerCueCooldowns.clear();
  g.clearSpeech();g.cancelEncounterDialogues('charles');c.outcome=outcome;phase(c,'complete');s.mode='victory';s.moveX=0;s.moveY=0;s.walkMoving=false;
  if(outcome==='defeated'){s.hp=0;g.sound('defeat');}g.emit('epilogue-complete',c);return true;
@@ -80,8 +93,9 @@ function nextAttack(g,c){
 }
 export function updateCharles(g,dt,previousPlayer){
  const s=g.s,c=s.charles;if(!charlesActive(s))return;
+ const arrivalBefore=charlesArrival(c);
  c.elapsed+=dt;c.hitFlash=Math.max(0,c.hitFlash-dt);
- if(c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
+ if(!arrivalBefore?.locked&&c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
   const start=c.dialogueIndex;
   if(g.queueEncounterDialogue({id:`charles:${Math.floor(start/2)}`,actorId:c.id,actorType:'charles',scope:'charles',start})){c.dialogueIndex=Math.min(CHARLES_LINES.length,start+2-start%2);c.nextDialogue=c.elapsed+4.8;}
   else if(!g.pausedEncountersEnabled&&!g.encounters.queue.some(scene=>scene.actorType==='charles')){const dialogue=CHARLES_LINES[start];if(g.bark(dialogue.who,dialogue.text,true)){c.dialogueIndex++;c.nextDialogue=c.elapsed+4.8;}}
@@ -89,6 +103,11 @@ export function updateCharles(g,dt,previousPlayer){
  const oldPhase=c.phase,oldRadius=c.phase==='shockwave'?charlesWaveRadius(c):0;
  if(['hover','recover','empowered'].includes(c.phase))follow(g,c,dt);
  c.phaseTime=Math.max(0,c.phaseTime-dt);
+ if(arrivalBefore){
+  const arrival=charlesArrival(c);
+  if(arrivalBefore.time<CHARLES_ARRIVAL.snap&&arrival.time>=CHARLES_ARRIVAL.snap)g.sound('snap');
+  if(arrival.time>=CHARLES_ARRIVAL.clear&&s.enemies.length)s.enemies=[];
+ }
  if(c.phase==='shockwave'){
   const radius=charlesWaveRadius(c);destroyScenery(g,c,radius,true);
   if(charlesWaveHits(c,previousPlayer,s,oldRadius,radius)){finishCharles(g,'defeated');return;}
