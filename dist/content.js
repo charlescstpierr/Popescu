@@ -23,7 +23,7 @@ export const UPGRADES = [
   { id: 'ego', name: 'Ego surdimensionné', desc: '+20 PV maximum et 25 PV récupérés par rang. Ça déborde du cadre.', icon: 'ego', max: 5, color: '#cf83ff' },
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
   { id: 'airplane', name: 'Mode avion', desc: 'Dissipe le gaz, suspend les attaques spéciales proches et ralentit les ennemis. Immunité temporaire au gaz.', icon: 'airplane', max: 5, color: '#a5d8ff' },
-  { id: 'girlfriend', name: 'Blonde IA', desc: 'La même compagne évolue en cinq looks : cœurs, esquive, collecte, protection et drones.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
+  { id: 'girlfriend', name: 'Blonde IA', desc: 'Copie locale hors ligne. Cinq looks : cœurs, esquive, collecte, protection et drones.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
   { id: 'charisma', name: 'Charisme imaginaire', desc: 'Les cœurs charment mieux et plus longtemps. Les boss résistent aux charmes répétés. Vitesse ennemie réduite de 7 % par rang.', icon: 'charisma', max: 5, color: '#fca8d4' },
   { id: 'chopper', name: 'Chopper inexistant', desc: 'Une moto holographique traverse la horde, frappe et repousse. Chaque rang augmente les dégâts et la fréquence.', icon: 'chopper', max: 5, color: '#6ce2cc' },
   { id: 'truth', name: 'Vérité brute', desc: 'Une onde de vérité blesse et repousse les ennemis proches. Les faits cognent fort.', icon: 'truth', max: 5, color: '#ffe193' },
