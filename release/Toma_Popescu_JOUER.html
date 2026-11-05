@@ -162,105 +162,6 @@ body{touch-action:manipulation}#world,.hud{touch-action:none}.panel{touch-action
 (()=>{
 const modules=Object.create(null);
 (()=>{
-// One serializable reading lane for all speakers. Urgent combat cues interrupt
-// immediately; the interrupted line keeps its remaining visible reading time.
-const SPEECH_QUEUE_LIMIT=16;
-function speechDuration(text){return Math.max(4.3,text.length*.039);}
-function createSpeech(){return {active:null,queue:[],nextId:1,scene:null};}
-function speechTime(g){return g.s.elapsed+(g.s.charles?.elapsed||0);}
-function available(g,line){
- if(line.who==='BLONDE IA'&&(!g.s.companion||g.s.girl.down>0))return false;
- if(line.actorId!==null&&!g.s.enemies.some(e=>e.id===line.actorId&&!e.dead))return false;
- if(line.scope==='charles'&&(!g.s.charles||g.s.charles.phase==='complete'||g.s.endless))return false;
- return true;
-}
-function sceneAvailable(g,scene){
- if(scene.companion&&(!g.s.companion||g.s.girl.down>0))return false;
- if(scene.actorId!==null&&!g.s.enemies.some(e=>e.id===scene.actorId&&!e.dead&&e.charmed<=0))return false;
- return scene.scope!=='charles'||Boolean(g.s.charles&&g.s.charles.phase!=='complete'&&!g.s.endless);
-}
-function cancelScene(g){
- const id=g.speech.scene?.id;if(!id)return;
- if(g.speech.active?.sceneId===id)g.speech.active=null;
- g.speech.queue=g.speech.queue.filter(line=>line.sceneId!==id);g.speech.scene=null;
-}
-function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false}={}){
- flushSpeech(g);const state=g.speech;
- if(g.banterEnabled===false||state.active||state.queue.length||state.scene||!lines.length)return false;
- const scene={id,lines:lines.map(({who,text})=>({who,text})),index:0,actorId,scope,remember,companion:lines.some(line=>line.who==='BLONDE IA')};
- if(!sceneAvailable(g,scene))return false;
- state.scene=scene;flushSpeech(g);return true;
-}
-function retainInterrupted(g,line){
- line.remaining=Math.min(speechDuration(line.text),Math.max(0,line.until-speechTime(g)));
- if(line.remaining<=0)return;
- const queue=g.speech.queue;
- if(queue.length>=SPEECH_QUEUE_LIMIT){
-  // A scene owns exactly one active/queued cursor line. Evict disposable
-  // chatter, never that line, or a later save would have an orphan cursor.
-  const discard=queue.findLastIndex(queued=>!queued.sceneId);
-  if(discard>=0)queue.splice(discard,1);
- }
- queue.unshift(line);
-}
-function setSpeechEnabled(g,enabled){
- const next=Boolean(enabled);if(g.banterEnabled===next)return;
- if(g.banterEnabled!==false)flushSpeech(g);
- g.banterEnabled=next;
- if(!next&&g.speech.active&&!g.speech.active.encounter){
-  retainInterrupted(g,g.speech.active);g.speech.active=null;g.speechUntil=g.s.elapsed;
- }
-}
-function payload(g,line){return {who:line.who,text:line.text,encounter:line.encounter,speechId:line.id,actorId:line.actorId,scope:line.scope,sceneId:line.sceneId,readingSeconds:Math.max(0,line.until-speechTime(g))};}
-function start(g,line){line.until=speechTime(g)+line.remaining;g.speech.active=line;g.speechUntil=Math.max(g.speechUntil,g.s.elapsed+line.remaining);g.emit('bark',payload(g,line));}
-function flushSpeech(g){
- const state=g.speech,now=speechTime(g);
- if(state.scene&&!sceneAvailable(g,state.scene))cancelScene(g);
- if(state.active&&now>=state.active.until){
-  const finished=state.active;state.active=null;
-  if(state.scene&&finished.sceneId===state.scene.id){
-   state.scene.index++;
-   if(state.scene.index===state.scene.lines.length){
-    if(state.scene.remember)g.eventSeen.add(`scene:${state.scene.id}`);
-    state.scene=null;
-   }
-  }
- }
- if(state.active||g.banterEnabled===false)return;
- if(state.scene){
-  // An urgent warning may have interrupted the current scene line. Resume its
-  // remaining budget before advancing; unrelated chatter cannot split a pair.
-  const index=state.queue.findIndex(line=>line.sceneId===state.scene.id);
-  if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
-  const scene=state.scene,line=scene.lines[scene.index];
-  start(g,{id:state.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0});return;
- }
- while(state.queue.length){const next=state.queue.shift();if(available(g,next)){start(g,next);break;}}
-}
-function presentSpeech(g){flushSpeech(g);if(g.speech.active)g.emit('bark',payload(g,g.speech.active));}
-function enqueueSpeech(g,who,text,{queue=false,urgent=false,encounter=false,actorId=null,scope='survival'}={}){
- flushSpeech(g);const state=g.speech;
- if(g.banterEnabled===false&&!encounter)return false;
- if(urgent&&state.active?.who===who&&state.active.text===text)return true;
- const line={id:state.nextId,who,text,encounter,actorId,scope,sceneId:null,remaining:speechDuration(text),until:0};
- if(!available(g,line))return false;
- if(!urgent&&state.active){
-  if(!queue||state.queue.length>=SPEECH_QUEUE_LIMIT)return false;
-  state.nextId++;state.queue.push(line);return true;
- }
- if(urgent&&state.active){
-  // A fresh warning supersedes older time-sensitive warnings. Never replay an
-  // obsolete "in five seconds" instruction after that attack has happened.
-  const interrupted=state.active;
-  if(!interrupted.encounter)retainInterrupted(g,interrupted);
- }
- state.nextId++;start(g,line);return true;
-}
-function dismissSpeech(g){if(g.speech.active?.sceneId){if(g.speech.scene?.remember)g.eventSeen.add(`skip:${g.speech.scene.id}`);cancelScene(g);}else g.speech.active=null;}
-
-modules["./speech.js"]={SPEECH_QUEUE_LIMIT,speechDuration,createSpeech,speechTime,beginSpeechScene,setSpeechEnabled,flushSpeech,presentSpeech,enqueueSpeech,dismissSpeech};
-})();
-(()=>{
 // Tout le monde ici est fictif, surtout la réputation que Toma se donne.
 const DIFFICULTIES = {
   easy: { label: 'Promenade de star', hp: 1.3, damage: 0.75, spawn: 0.8, speed: 0.9 },
@@ -342,6 +243,7 @@ const BARKS = [
   {
     "context": "orangutan",
     "who": "BLONDE IA",
+    "condition": "orangutan-windup",
     "text": "Toma, tasse-toi. L'orang-outan prépare sa claque."
   },
   {
@@ -667,6 +569,7 @@ const BARKS = [
   },
   {
     "who": "BLONDE IA",
+    "condition": "recent-health-damage",
     "text": "Tes PV baissent. Fais ton beau plus loin."
   },
   {
@@ -1309,9 +1212,30 @@ const STORY_MILESTONES = [
     "text": "Encore une minute. Garde une sortie. La victoire est à vingt minutes."
   }
 ];
-function contextualBarks(s){
+// Recover conditions by authored text/actor, including speech saved before these
+// guards existed. Do not persist derived combat context in the speech queue.
+const CONDITIONAL_BARKS=new Map(BARKS.filter(line=>line.condition).map(line=>[line.text,line]));
+function currentBarkContext(s,line,recentHealthDamage=null){
+  const authored=CONDITIONAL_BARKS.get(line.text);
+  if(!authored||authored.who!==line.who||line.sceneId)return true;
+  if(!s.companion||s.girl.down>0)return false;
+  if(authored.condition==='orangutan-windup')return s.enemies.some(e=>{
+    if(e.dead||e.type!=='orangutan'||e.charmed>0||e.phase!=='windup'||!(e.windup>0)||e.target!=='player')return false;
+    const dx=s.x-e.x,dy=s.y-e.y,d=Math.hypot(dx,dy)||1;
+    // Match the windup's approach range and the committed slap's forward arc.
+    return d<84&&(dx*e.swipeDirX+dy*e.swipeDirY)/d>=.55&&!(s.airplane.active&&d<s.airplane.r);
+  });
+  if(authored.condition==='recent-health-damage'){
+    if(!recentHealthDamage)return false;
+    const age=s.elapsed+(s.charles?.elapsed||0)-recentHealthDamage.at;
+    return s.hp>0&&s.hp<s.maxhp&&s.hp<=recentHealthDamage.hp&&age>=0&&age<=3;
+  }
+  return true;
+}
+function contextualBarks(s,recentHealthDamage=null){
   return BARKS.filter(line=>{
     if(line.who==='BLONDE IA'&&(!s.companion||s.girl.down>0))return false;
+    if(!currentBarkContext(s,line,recentHealthDamage))return false;
     if(line.context==='orangutan')return s.enemies.some(e=>!e.dead&&e.type==='orangutan');
     if(line.context==='horde')return s.enemies.filter(e=>!e.dead).length>=12;
     return true;
@@ -1372,7 +1296,109 @@ function storyMilestoneLine(milestone,seen){
   return milestone;
 }
 
-modules["./content.js"]={DIFFICULTIES,COMPANION_LEVELS,companionLevel,UPGRADES,INTRO,GORILLA_NAMES,BARKS,EVENTS,STUNT_BARKS,STUNT_REPLIES,RIVAL_BARKS,ROOSTER_REACTION,RIVAL_REPLIES,RIVAL_COMPANION_REPLIES,WORLD_REMARKS,STORY_MILESTONES,contextualBarks,victoryQuote,STORY_SCENES,STORY_BUILD_IDS,storyMilestoneLine};
+modules["./content.js"]={DIFFICULTIES,COMPANION_LEVELS,companionLevel,UPGRADES,INTRO,GORILLA_NAMES,BARKS,EVENTS,STUNT_BARKS,STUNT_REPLIES,RIVAL_BARKS,ROOSTER_REACTION,RIVAL_REPLIES,RIVAL_COMPANION_REPLIES,WORLD_REMARKS,STORY_MILESTONES,currentBarkContext,contextualBarks,victoryQuote,STORY_SCENES,STORY_BUILD_IDS,storyMilestoneLine};
+})();
+(()=>{
+const {currentBarkContext}=modules['./content.js'];
+// One serializable reading lane for all speakers. Urgent combat cues interrupt
+// immediately; the interrupted line keeps its remaining visible reading time.
+const SPEECH_QUEUE_LIMIT=16;
+function speechDuration(text){return Math.max(4.3,text.length*.039);}
+function createSpeech(){return {active:null,queue:[],nextId:1,scene:null};}
+function speechTime(g){return g.s.elapsed+(g.s.charles?.elapsed||0);}
+function available(g,line){
+ if(!currentBarkContext(g.s,line,g.recentHealthDamage))return false;
+ if(line.who==='BLONDE IA'&&(!g.s.companion||g.s.girl.down>0))return false;
+ if(line.actorId!==null&&!g.s.enemies.some(e=>e.id===line.actorId&&!e.dead))return false;
+ if(line.scope==='charles'&&(!g.s.charles||g.s.charles.phase==='complete'||g.s.endless))return false;
+ return true;
+}
+function sceneAvailable(g,scene){
+ if(scene.companion&&(!g.s.companion||g.s.girl.down>0))return false;
+ if(scene.actorId!==null&&!g.s.enemies.some(e=>e.id===scene.actorId&&!e.dead&&e.charmed<=0))return false;
+ return scene.scope!=='charles'||Boolean(g.s.charles&&g.s.charles.phase!=='complete'&&!g.s.endless);
+}
+function cancelScene(g){
+ const id=g.speech.scene?.id;if(!id)return;
+ if(g.speech.active?.sceneId===id)g.speech.active=null;
+ g.speech.queue=g.speech.queue.filter(line=>line.sceneId!==id);g.speech.scene=null;
+}
+function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false}={}){
+ flushSpeech(g);const state=g.speech;
+ if(g.banterEnabled===false||state.active||state.queue.length||state.scene||!lines.length)return false;
+ const scene={id,lines:lines.map(({who,text})=>({who,text})),index:0,actorId,scope,remember,companion:lines.some(line=>line.who==='BLONDE IA')};
+ if(!sceneAvailable(g,scene))return false;
+ state.scene=scene;flushSpeech(g);return true;
+}
+function retainInterrupted(g,line){
+ line.remaining=Math.min(speechDuration(line.text),Math.max(0,line.until-speechTime(g)));
+ if(line.remaining<=0)return;
+ const queue=g.speech.queue;
+ if(queue.length>=SPEECH_QUEUE_LIMIT){
+  // A scene owns exactly one active/queued cursor line. Evict disposable
+  // chatter, never that line, or a later save would have an orphan cursor.
+  const discard=queue.findLastIndex(queued=>!queued.sceneId);
+  if(discard>=0)queue.splice(discard,1);
+ }
+ queue.unshift(line);
+}
+function setSpeechEnabled(g,enabled){
+ const next=Boolean(enabled);if(g.banterEnabled===next)return;
+ if(g.banterEnabled!==false)flushSpeech(g);
+ g.banterEnabled=next;
+ if(!next&&g.speech.active&&!g.speech.active.encounter){
+  retainInterrupted(g,g.speech.active);g.speech.active=null;g.speechUntil=g.s.elapsed;
+ }
+}
+function payload(g,line){return {who:line.who,text:line.text,encounter:line.encounter,speechId:line.id,actorId:line.actorId,scope:line.scope,sceneId:line.sceneId,readingSeconds:Math.max(0,line.until-speechTime(g))};}
+function start(g,line){line.until=speechTime(g)+line.remaining;g.speech.active=line;g.speechUntil=Math.max(g.speechUntil,g.s.elapsed+line.remaining);g.emit('bark',payload(g,line));}
+function flushSpeech(g){
+ const state=g.speech,now=speechTime(g);
+ if(state.active&&!currentBarkContext(g.s,state.active,g.recentHealthDamage))state.active=null;
+ if(state.scene&&!sceneAvailable(g,state.scene))cancelScene(g);
+ if(state.active&&now>=state.active.until){
+  const finished=state.active;state.active=null;
+  if(state.scene&&finished.sceneId===state.scene.id){
+   state.scene.index++;
+   if(state.scene.index===state.scene.lines.length){
+    if(state.scene.remember)g.eventSeen.add(`scene:${state.scene.id}`);
+    state.scene=null;
+   }
+  }
+ }
+ if(state.active||g.banterEnabled===false)return;
+ if(state.scene){
+  // An urgent warning may have interrupted the current scene line. Resume its
+  // remaining budget before advancing; unrelated chatter cannot split a pair.
+  const index=state.queue.findIndex(line=>line.sceneId===state.scene.id);
+  if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
+  const scene=state.scene,line=scene.lines[scene.index];
+  start(g,{id:state.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0});return;
+ }
+ while(state.queue.length){const next=state.queue.shift();if(available(g,next)){start(g,next);break;}}
+}
+function presentSpeech(g){flushSpeech(g);if(g.speech.active)g.emit('bark',payload(g,g.speech.active));}
+function enqueueSpeech(g,who,text,{queue=false,urgent=false,encounter=false,actorId=null,scope='survival'}={}){
+ flushSpeech(g);const state=g.speech;
+ if(g.banterEnabled===false&&!encounter)return false;
+ if(urgent&&state.active?.who===who&&state.active.text===text)return true;
+ const line={id:state.nextId,who,text,encounter,actorId,scope,sceneId:null,remaining:speechDuration(text),until:0};
+ if(!available(g,line))return false;
+ if(!urgent&&state.active){
+  if(!queue||state.queue.length>=SPEECH_QUEUE_LIMIT)return false;
+  state.nextId++;state.queue.push(line);return true;
+ }
+ if(urgent&&state.active){
+  // A fresh warning supersedes older time-sensitive warnings. Never replay an
+  // obsolete "in five seconds" instruction after that attack has happened.
+  const interrupted=state.active;
+  if(!interrupted.encounter)retainInterrupted(g,interrupted);
+ }
+ state.nextId++;start(g,line);return true;
+}
+function dismissSpeech(g){if(g.speech.active?.sceneId){if(g.speech.scene?.remember)g.eventSeen.add(`skip:${g.speech.scene.id}`);cancelScene(g);}else g.speech.active=null;}
+
+modules["./speech.js"]={SPEECH_QUEUE_LIMIT,speechDuration,createSpeech,speechTime,beginSpeechScene,setSpeechEnabled,flushSpeech,presentSpeech,enqueueSpeech,dismissSpeech};
 })();
 (()=>{
 // Explicit, one-time evolutions. Their prerequisite powers keep their own ranks.
@@ -3002,6 +3028,8 @@ class Game {
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0,ego:9,egoIndex:0};
     this.bossDirector=createBossDirector(this.seed);this.encounters=createEncounterDialogue();this.pausedEncountersEnabled=false;
+    // A transient speech cue: restoring a run never invents recent health loss.
+    this.recentHealthDamage=null;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
@@ -3550,7 +3578,7 @@ class Game {
       this.sound('kill');
     }
   }
-  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
+  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(value>blocked)this.recentHealthDamage={at:s.elapsed+(s.charles?.elapsed||0),hp:s.hp};if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
   explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.knockback(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
   updateVehicles(dt){for(const v of this.s.vehicles){if(v.kind==='car'&&v.carRank!==undefined){updateLamborghini(this,v,dt);continue;}v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.knockback(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
@@ -3676,7 +3704,7 @@ class Game {
       }
     }
     if(this.timers.bark<=0){
-      this.timers.bark=18+this.random()*9;const available=contextualBarks(s);
+      this.timers.bark=18+this.random()*9;const available=contextualBarks(s,this.recentHealthDamage);
       if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}
     }
   }

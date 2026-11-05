@@ -1,3 +1,4 @@
+import {currentBarkContext} from './content.js';
 // One serializable reading lane for all speakers. Urgent combat cues interrupt
 // immediately; the interrupted line keeps its remaining visible reading time.
 export const SPEECH_QUEUE_LIMIT=16;
@@ -5,6 +6,7 @@ export function speechDuration(text){return Math.max(4.3,text.length*.039);}
 export function createSpeech(){return {active:null,queue:[],nextId:1,scene:null};}
 export function speechTime(g){return g.s.elapsed+(g.s.charles?.elapsed||0);}
 function available(g,line){
+ if(!currentBarkContext(g.s,line,g.recentHealthDamage))return false;
  if(line.who==='BLONDE IA'&&(!g.s.companion||g.s.girl.down>0))return false;
  if(line.actorId!==null&&!g.s.enemies.some(e=>e.id===line.actorId&&!e.dead))return false;
  if(line.scope==='charles'&&(!g.s.charles||g.s.charles.phase==='complete'||g.s.endless))return false;
@@ -51,6 +53,7 @@ function payload(g,line){return {who:line.who,text:line.text,encounter:line.enco
 function start(g,line){line.until=speechTime(g)+line.remaining;g.speech.active=line;g.speechUntil=Math.max(g.speechUntil,g.s.elapsed+line.remaining);g.emit('bark',payload(g,line));}
 export function flushSpeech(g){
  const state=g.speech,now=speechTime(g);
+ if(state.active&&!currentBarkContext(g.s,state.active,g.recentHealthDamage))state.active=null;
  if(state.scene&&!sceneAvailable(g,state.scene))cancelScene(g);
  if(state.active&&now>=state.active.until){
   const finished=state.active;state.active=null;

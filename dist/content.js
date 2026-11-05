@@ -79,6 +79,7 @@ export const BARKS = [
   {
     "context": "orangutan",
     "who": "BLONDE IA",
+    "condition": "orangutan-windup",
     "text": "Toma, tasse-toi. L'orang-outan prépare sa claque."
   },
   {
@@ -404,6 +405,7 @@ export const BARKS = [
   },
   {
     "who": "BLONDE IA",
+    "condition": "recent-health-damage",
     "text": "Tes PV baissent. Fais ton beau plus loin."
   },
   {
@@ -1046,9 +1048,30 @@ export const STORY_MILESTONES = [
     "text": "Encore une minute. Garde une sortie. La victoire est à vingt minutes."
   }
 ];
-export function contextualBarks(s){
+// Recover conditions by authored text/actor, including speech saved before these
+// guards existed. Do not persist derived combat context in the speech queue.
+const CONDITIONAL_BARKS=new Map(BARKS.filter(line=>line.condition).map(line=>[line.text,line]));
+export function currentBarkContext(s,line,recentHealthDamage=null){
+  const authored=CONDITIONAL_BARKS.get(line.text);
+  if(!authored||authored.who!==line.who||line.sceneId)return true;
+  if(!s.companion||s.girl.down>0)return false;
+  if(authored.condition==='orangutan-windup')return s.enemies.some(e=>{
+    if(e.dead||e.type!=='orangutan'||e.charmed>0||e.phase!=='windup'||!(e.windup>0)||e.target!=='player')return false;
+    const dx=s.x-e.x,dy=s.y-e.y,d=Math.hypot(dx,dy)||1;
+    // Match the windup's approach range and the committed slap's forward arc.
+    return d<84&&(dx*e.swipeDirX+dy*e.swipeDirY)/d>=.55&&!(s.airplane.active&&d<s.airplane.r);
+  });
+  if(authored.condition==='recent-health-damage'){
+    if(!recentHealthDamage)return false;
+    const age=s.elapsed+(s.charles?.elapsed||0)-recentHealthDamage.at;
+    return s.hp>0&&s.hp<s.maxhp&&s.hp<=recentHealthDamage.hp&&age>=0&&age<=3;
+  }
+  return true;
+}
+export function contextualBarks(s,recentHealthDamage=null){
   return BARKS.filter(line=>{
     if(line.who==='BLONDE IA'&&(!s.companion||s.girl.down>0))return false;
+    if(!currentBarkContext(s,line,recentHealthDamage))return false;
     if(line.context==='orangutan')return s.enemies.some(e=>!e.dead&&e.type==='orangutan');
     if(line.context==='horde')return s.enemies.filter(e=>!e.dead).length>=12;
     return true;

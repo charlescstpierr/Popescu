@@ -38,6 +38,8 @@ export class Game {
     this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0,ego:9,egoIndex:0};
     this.bossDirector=createBossDirector(this.seed);this.encounters=createEncounterDialogue();this.pausedEncountersEnabled=false;
+    // A transient speech cue: restoring a run never invents recent health loss.
+    this.recentHealthDamage=null;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
     this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
@@ -586,7 +588,7 @@ export class Game {
       this.sound('kill');
     }
   }
-  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
+  damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(value>blocked)this.recentHealthDamage={at:s.elapsed+(s.charles?.elapsed||0),hp:s.hp};if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
   explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.knockback(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
   updateVehicles(dt){for(const v of this.s.vehicles){if(v.kind==='car'&&v.carRank!==undefined){updateLamborghini(this,v,dt);continue;}v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.knockback(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
@@ -712,7 +714,7 @@ export class Game {
       }
     }
     if(this.timers.bark<=0){
-      this.timers.bark=18+this.random()*9;const available=contextualBarks(s);
+      this.timers.bark=18+this.random()*9;const available=contextualBarks(s,this.recentHealthDamage);
       if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}
     }
   }

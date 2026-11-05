@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -464,8 +464,8 @@
     },
     {
       "path": "dist/content.js",
-      "bytes": 33757,
-      "sha256": "2c732d886c54a8fcf20ef04cfbcddbe81f19650c22bdb7e8fd7876eaab474b38"
+      "bytes": 35106,
+      "sha256": "d3a5d0f630eb48b8731c9a37e9e25df3ae790a37efec67de6bef166ffcdf9e7e"
     },
     {
       "path": "dist/dialogue-presentation.js",
@@ -509,8 +509,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 68443,
-      "sha256": "f8bf7251e6cfeef6d00d43203f6ae5f2e3dcda99e3ea29d4b90c63a194bae48c"
+      "bytes": 68670,
+      "sha256": "00ecb3682e77e148cc775633f0f4761949f7f554b102086585d34b3000ed5457"
     },
     {
       "path": "dist/evolutions.js",
@@ -599,8 +599,8 @@
     },
     {
       "path": "dist/speech.js",
-      "bytes": 5354,
-      "sha256": "b8425a19599e50a5c68f43e3c827ea954331e334615fbf1e1220bdad07e7bee8"
+      "bytes": 5568,
+      "sha256": "4e09c64b1ca73522de502cf4fb983e49c266981a2ffcc67481a3d88f657c8812"
     },
     {
       "path": "dist/styles.css",
@@ -771,6 +771,11 @@
       "path": "docs/QA-COMBINED-NOV3.md",
       "bytes": 3934,
       "sha256": "0fe9b1e42afdc4d5e7a1b71de5450cb44f476417fb155343f58c8ec5f5a430fb"
+    },
+    {
+      "path": "docs/QA-COMPANION-CONTEXT-2026-11-05.md",
+      "bytes": 5324,
+      "sha256": "a8be57cc7bee9b490e5a7f7617e06cb993e105221a57c2ec87a62cf3de2956e8"
     },
     {
       "path": "docs/QA-COMPANION-LEVELS.md",
@@ -1180,12 +1185,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "9110ae5724e3ad54dc087fad4f1df9c487c781dcb11b6c66f0ba47d693da59e7"
+      "sha256": "0a260d58fb91b190a41f6b15c884b5615f4c1a817b7bfb135106f075db39d447"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 645754,
-      "sha256": "fd15a31074ca2c82ef46b1f69946d8ebdd4606ed752e32ee5188927a5140c186"
+      "bytes": 647559,
+      "sha256": "c966badd17dfff20641ad9780d59cb18b3d313d0bdf1564c6a8b526d321511a9"
     },
     {
       "path": "release/archives/README.md",
@@ -1545,7 +1550,7 @@
     {
       "path": "scripts/offline_bundle.py",
       "bytes": 2135,
-      "sha256": "c1e5812b62ebf68a4e26911a6291d437c59015fd1d9cf9f283332a5416bd30bd"
+      "sha256": "dfbb54aaf015db0bd1bb145813d8e6c5e59b3c5eac60118be3db524a459e8530"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -1776,6 +1781,11 @@
       "path": "tests/companion-art.test.js",
       "bytes": 4148,
       "sha256": "bac11c24433dde58dd67babe10e29722444a9cb5ef0e7b8eeb92cd258541fbe7"
+    },
+    {
+      "path": "tests/companion-context-barks.test.js",
+      "bytes": 9686,
+      "sha256": "7dbbe80e95e9aed9a2d44c38351990adc82169face21fd9b66e37c4df312121f"
     },
     {
       "path": "tests/companion-levels.test.js",
@@ -2308,7 +2318,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "f8d698ea4c038191ca4f24c2f855f2c71c009d22",
+  "base_github_commit": "0b21a187eedf01cd44189ff9b2dc70546f93cdb9",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
