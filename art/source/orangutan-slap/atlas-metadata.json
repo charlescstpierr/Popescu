@@ -1,0 +1,246 @@
+{
+  "image": "dist/assets/orangutan-slap-v1.png",
+  "width": 640,
+  "height": 256,
+  "columns": 4,
+  "rows": 2,
+  "cellWidth": 160,
+  "cellHeight": 128,
+  "anchor": [
+    64,
+    121
+  ],
+  "runtimeSize": 83,
+  "runtimeScale": 0.6484375,
+  "source": "art/source/orangutan-slap/poses-transparent-source-v2.png",
+  "sourceSha256": "e20f98f0e54b567c124111c3f2c9bb670096636828dd2a9acd669efb4d37511c",
+  "atlasSha256": "22c4d5f19dd231675cbe70629d1c179bac13abd8cf5b197cd42cc947189d61e3",
+  "registration": "Whole poses; constant global uniform scale; foot-pair registration; no limb segmentation or deformation.",
+  "transparentPixelFraction": 0.644769287109375,
+  "frames": [
+    {
+      "index": 0,
+      "view": "front",
+      "pose": "windup",
+      "sourceRect": [
+        0,
+        0,
+        443,
+        444
+      ],
+      "sourceBounds": [
+        21,
+        16,
+        403,
+        415
+      ],
+      "footMidpointX": 200,
+      "scale": 0.2775,
+      "translation": [
+        8.499999999999993,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 1,
+      "view": "front",
+      "pose": "impact",
+      "sourceRect": [
+        443,
+        0,
+        477,
+        444
+      ],
+      "sourceBounds": [
+        41,
+        20,
+        440,
+        415
+      ],
+      "footMidpointX": 581,
+      "scale": 0.2775,
+      "translation": [
+        25.705,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 2,
+      "view": "front",
+      "pose": "followThrough",
+      "sourceRect": [
+        920,
+        0,
+        411,
+        444
+      ],
+      "sourceBounds": [
+        28,
+        31,
+        355,
+        415
+      ],
+      "footMidpointX": 1051,
+      "scale": 0.2775,
+      "translation": [
+        27.647499999999994,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 3,
+      "view": "front",
+      "pose": "recovery",
+      "sourceRect": [
+        1331,
+        0,
+        443,
+        444
+      ],
+      "sourceBounds": [
+        26,
+        26,
+        376,
+        415
+      ],
+      "footMidpointX": 1487,
+      "scale": 0.2775,
+      "translation": [
+        20.709999999999994,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 4,
+      "view": "back",
+      "pose": "windup",
+      "sourceRect": [
+        0,
+        444,
+        443,
+        443
+      ],
+      "sourceBounds": [
+        21,
+        20,
+        419,
+        415
+      ],
+      "footMidpointX": 194,
+      "scale": 0.2775,
+      "translation": [
+        10.164999999999992,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 5,
+      "view": "back",
+      "pose": "impact",
+      "sourceRect": [
+        443,
+        444,
+        477,
+        443
+      ],
+      "sourceBounds": [
+        4,
+        25,
+        454,
+        417
+      ],
+      "footMidpointX": 630,
+      "scale": 0.2775,
+      "translation": [
+        12.107499999999995,
+        5.0049999999999955
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 6,
+      "view": "back",
+      "pose": "followThrough",
+      "sourceRect": [
+        920,
+        444,
+        411,
+        443
+      ],
+      "sourceBounds": [
+        18,
+        35,
+        391,
+        415
+      ],
+      "footMidpointX": 1056,
+      "scale": 0.2775,
+      "translation": [
+        26.259999999999998,
+        5.559999999999988
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    },
+    {
+      "index": 7,
+      "view": "back",
+      "pose": "recovery",
+      "sourceRect": [
+        1331,
+        444,
+        443,
+        443
+      ],
+      "sourceBounds": [
+        27,
+        31,
+        378,
+        417
+      ],
+      "footMidpointX": 1477,
+      "scale": 0.2775,
+      "translation": [
+        23.485,
+        5.0049999999999955
+      ],
+      "anchor": [
+        64,
+        121
+      ],
+      "registeredAlphaBottom": 120
+    }
+  ]
+}

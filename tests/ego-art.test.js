@@ -2,19 +2,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ActorArt} from '../dist/actor-art.js';
 test('ego animals never resolve to the gorilla atlas',async()=>{
- const art=new ActorArt({loadImage:async path=>path.includes('ego-beasts')?null:{width:512,height:512}});await art.ready;
+ const art=new ActorArt({loadImage:async path=>path.includes('ego-beasts')?null:{width:1536,height:1024}});await art.ready;
  assert.equal(art.availableFor({type:'ego_toad'},'enemy'),false);
 });
 test('ego atlas readiness is retryable and shared by concurrent callers',async()=>{
- let calls=0;const art=new ActorArt({loadImage:async path=>path.includes('ego-beasts')?(++calls===1?null:{width:512,height:512}):null});await art.ready;
+ let calls=0;const art=new ActorArt({loadImage:async path=>path.includes('ego-beasts')?(++calls===1?null:{width:1536,height:1024}):null});await art.ready;
  assert.equal(typeof art.ensureEgoReady,'function');
  const a=art.ensureEgoReady(),b=art.ensureEgoReady();assert.equal(a,b);assert.deepEqual(await a,{ok:true});assert.equal(calls,2);
 });
 test('ego rendering contract is available separately from simulation',async()=>{
  const art=await import('../dist/ego-art.js').catch(()=>({}));assert.equal(typeof art.egoFrame,'function');
- assert.equal(art.egoFrame({type:'ego_toad',phase:'ego_warning'}),1);
- assert.equal(art.egoFrame({type:'ego_toad',phase:'ego_recover'}),3);
- assert.equal(art.egoFrame({type:'ego_chameleon',phase:'ego_warning'}),2);
+ assert.equal(art.egoFrame({type:'ego_toad',phase:'ego_warning'}),3);
+ assert.equal(art.egoFrame({type:'ego_toad',phase:'ego_recover'}),5);
+ assert.equal(art.egoFrame({type:'ego_chameleon',phase:'ego_warning'}),3);
 });
 test('only approved effect kinds produce ground cues without mutating an actor',async()=>{
  const {drawEgoGround}=await import('../dist/ego-art.js');
@@ -29,13 +29,13 @@ test('malformed ego atlas cannot pass the activation gate',async()=>{const art=n
 test('ego atlas timeout releases loading and ignores a stale late image',async()=>{
  let resolveImage;const ticks=[];const timers={setTimeout(fn){ticks.push(fn);return ticks.length;},clearTimeout(){}};
  const art=new ActorArt({timers,loadImage:path=>path.includes('ego-beasts')?new Promise(resolve=>{resolveImage=resolve;}):Promise.resolve(null)});
- const first=art.ensureEgoReady();ticks[0]();assert.deepEqual(await first,{ok:false,reason:'timeout'});resolveImage({width:512,height:512});await Promise.resolve();assert.equal(art.available('ego'),false);
- art._loadImage=async()=>({width:512,height:512});assert.deepEqual(await art.ensureEgoReady(),{ok:true});await art.ready;
+ const first=art.ensureEgoReady();ticks[0]();assert.deepEqual(await first,{ok:false,reason:'timeout'});resolveImage({width:1536,height:1024});await Promise.resolve();assert.equal(art.available('ego'),false);
+ art._loadImage=async()=>({width:1536,height:1024});assert.deepEqual(await art.ensureEgoReady(),{ok:true});await art.ready;
 });
 test('camouflage selects three bounded surface tints and disappears completely for warning',async()=>{
  const {drawEgoBody}=await import('../dist/ego-art.js');const {initEgoBeast}=await import('../dist/ego-beasts.js');
  const alpha=[];let value=1;const ctx=new Proxy({save(){},restore(){value=1;},drawImage(){alpha.push(value);},get globalAlpha(){return value;},set globalAlpha(v){value=v;}},{get:(o,k)=>k in o?o[k]:()=>{}});
- const cache=new Map(),image={width:512,height:512};
+ const cache=new Map(),image={width:1536,height:1024};
  for(const surface of ['asphalt','building','grass']){const e=initEgoBeast({type:'ego_chameleon',x:1,y:1,phase:'chase'});e.egoReveal=0;e.egoSurface=surface;drawEgoBody(ctx,e,image,cache);assert.ok(alpha.at(-1)<.4);e.phase='ego_warning';drawEgoBody(ctx,e,image,cache);assert.equal(alpha.at(-1),1);}
 });
 test('segment warnings cover complete collision radius including round ends',async()=>{

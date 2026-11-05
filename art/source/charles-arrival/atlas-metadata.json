@@ -1,0 +1,199 @@
+{
+  "image": "dist/assets/charles-arrival-v1.png",
+  "width": 528,
+  "height": 176,
+  "columns": 3,
+  "rows": 1,
+  "cell": 176,
+  "anchor": [
+    88,
+    160
+  ],
+  "source": "art/source/charles-arrival/poses-transparent-source.png",
+  "sourceSha256": "6bda7ccde130a12f7f6c8c07658bc544f76084d039f645933a0a273fd1122380",
+  "atlasSha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706",
+  "approvedAtlasPath": "dist/assets/charles-whole-v1.png",
+  "approvedAtlasSha256": "58d4f2a0e3eb1e12289f767949099721a5874b2464386c57331bd4f7c7ba4583",
+  "registration": "Three intact paintings, common uniform 0.185 scale, translation to foot anchor [88,160]. No cut-out anatomy, rotation, warping or artwork redraw.",
+  "frames": [
+    {
+      "index": 0,
+      "name": "fly",
+      "sourceRect": [
+        0,
+        0,
+        724,
+        724
+      ],
+      "sourceAnchor": [
+        300,
+        710
+      ],
+      "scale": 0.185,
+      "translation": [
+        32.5,
+        28.650000000000006
+      ],
+      "eyes": [
+        [
+          120.005,
+          45.855
+        ],
+        [
+          123.89,
+          45.855
+        ]
+      ],
+      "sourceEyes": [
+        [
+          473,
+          93
+        ],
+        [
+          494,
+          93
+        ]
+      ],
+      "sourceSnapPoint": null,
+      "snapPoint": null
+    },
+    {
+      "index": 1,
+      "name": "snap_ready",
+      "sourceRect": [
+        724,
+        0,
+        724,
+        724
+      ],
+      "sourceAnchor": [
+        1097,
+        708
+      ],
+      "scale": 0.185,
+      "translation": [
+        18.995000000000005,
+        29.02000000000001
+      ],
+      "eyes": [
+        [
+          89.295,
+          46.225
+        ],
+        [
+          93.365,
+          46.225
+        ]
+      ],
+      "sourceEyes": [
+        [
+          1104,
+          93
+        ],
+        [
+          1126,
+          93
+        ]
+      ],
+      "sourceSnapPoint": [
+        982,
+        134
+      ],
+      "snapPoint": [
+        66.725,
+        53.81
+      ]
+    },
+    {
+      "index": 2,
+      "name": "snap_release",
+      "sourceRect": [
+        1448,
+        0,
+        724,
+        724
+      ],
+      "sourceAnchor": [
+        1780,
+        708
+      ],
+      "scale": 0.185,
+      "translation": [
+        26.58,
+        29.02000000000001
+      ],
+      "eyes": [
+        [
+          88.925,
+          46.225
+        ],
+        [
+          92.625,
+          46.225
+        ]
+      ],
+      "sourceEyes": [
+        [
+          1785,
+          93
+        ],
+        [
+          1805,
+          93
+        ]
+      ],
+      "sourceSnapPoint": [
+        1665,
+        137
+      ],
+      "snapPoint": [
+        66.725,
+        54.365
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "frame": "fly",
+      "boundsAlpha16": [
+        51,
+        31,
+        146,
+        159
+      ],
+      "transparentCellBorders": true,
+      "nonzeroPixels": 6734,
+      "mostlyOpaquePixels": 5568
+    },
+    {
+      "frame": "snap_ready",
+      "boundsAlpha16": [
+        40,
+        31,
+        121,
+        159
+      ],
+      "transparentCellBorders": true,
+      "nonzeroPixels": 6205,
+      "mostlyOpaquePixels": 5233
+    },
+    {
+      "frame": "snap_release",
+      "boundsAlpha16": [
+        40,
+        31,
+        121,
+        159
+      ],
+      "transparentCellBorders": true,
+      "nonzeroPixels": 6298,
+      "mostlyOpaquePixels": 5221
+    }
+  ],
+  "limits": [
+    "Native Canvas registration contact sheet only, not a gameplay or phone capture.",
+    "Finger gesture is tiny at native size; the measured local effect point and animation timing should carry the snap beat.",
+    "Flight changes the drawn body lean; blend its world translation when settling, do not rotate or deform the source painting.",
+    "Independent review of integrated animation remains required."
+  ]
+}

@@ -1,0 +1,81 @@
+[
+  {
+    "type": "normal",
+    "actualDistance": 0,
+    "renderPhases": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "uniqueCroppedFrames": 1
+  },
+  {
+    "type": "orangutan",
+    "actualDistance": 0,
+    "renderPhases": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "uniqueCroppedFrames": 1
+  },
+  {
+    "type": "rival_goat",
+    "actualDistance": 0,
+    "renderPhases": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "uniqueCroppedFrames": 1
+  },
+  {
+    "type": "rival_rooster",
+    "actualDistance": 0,
+    "renderPhases": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "uniqueCroppedFrames": 1
+  },
+  {
+    "type": "ostrich",
+    "actualDistance": 0,
+    "renderPhases": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "uniqueCroppedFrames": 1
+  },
+  {
+    "type": "pelican",
+    "actualDistance": 0,
+    "renderPhases": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "uniqueCroppedFrames": 1,
+    "peliWalkDistance": 0
+  },
+  {
+    "type": "travestia",
+    "actualDistance": 0,
+    "renderPhases": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "uniqueCroppedFrames": 1,
+    "tailWalkDistance": 0
+  }
+]

@@ -16,6 +16,7 @@ function run(type='pelican',enabled=true){
  g.nextEvent=1000;g.s.shotClock=1000;const e=g.spawnEnemy(type,100,0);e.cooldown=0;return {g,e,events};
 }
 function charles(index=0){const g=new Game({seed:72});g.setPausedEncountersEnabled(true);g.s.elapsed=1200;g.s.mode='victory';g.startCharlesEpilogue();g.s.charles.dialogueIndex=index;return g;}
+function finishArrival(g){for(let i=0;i<280&&g.s.mode==='playing';i++)g.update(1/60);}
 function snapshot(g){return captureRun(g);}
 function pendingTrophy(g,type='travestia'){const bossId=g.id++,chestId=g.id++;g.s.chests.push({id:chestId,x:500,y:500,open:true,openedAt:g.s.elapsed,bossType:type,bossId});g.s.trophies.pending.push({bossType:type,chestId,bossId});}
 
@@ -57,7 +58,7 @@ test('pending reward priority remains intact before and after a scene',()=>{
  const b=run().g;b.updateEnemies(.01);pendingTrophy(b);assert.deepEqual(captureRun(restoreRun(captureRun(b))),captureRun(b));assert.equal(b.openEncounterDialogue(),false);b.openTrophy();assert.equal(b.s.mode,'trophy');
 });
 test('Charles pauses ordered two-line beats only in safe phases and leaves survival clock unchanged',()=>{
- const g=charles();g.update(.01);assert.equal(g.s.mode,'dialogue');assert.deepEqual(g.encounters.active.lines,CHARLES_LINES.slice(0,2));assert.equal(g.s.elapsed,1200);
+ const g=charles();finishArrival(g);assert.equal(g.s.mode,'dialogue');assert.deepEqual(g.encounters.active.lines,CHARLES_LINES.slice(0,2));assert.equal(g.s.elapsed,1200);
  const first=snapshot(g);g.update(10);assert.deepEqual(snapshot(g),first);g.advanceEncounterDialogue('charles:0',0);assert.equal(g.dialoguePresentation().actorType,'charles');
  g.advanceEncounterDialogue('charles:0',1);assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.dialogueIndex,2);g.s.charles.nextDialogue=0;
  g.s.charles.phase='hover';g.s.charles.phaseTime=.001;g.s.charles.phaseDuration=CHARLES.phases.hover;g.update(.01);
@@ -65,7 +66,7 @@ test('Charles pauses ordered two-line beats only in safe phases and leaves survi
  g.s.charles.phase='recover';g.s.charles.phaseTime=1;g.s.charles.phaseDuration=CHARLES.phases.recover;assert.equal(g.openEncounterDialogue(),true);assert.deepEqual(g.encounters.active.lines,CHARLES_LINES.slice(2,4));assert.equal(g.s.elapsed,1200);
 });
 test('Charles odd legacy cursor never repeats the preceding line; dormant survival rewards remain dormant',()=>{
- const g=charles(1);g.s.options=g.rollUpgradeOptions();pendingTrophy(g,'pelican');g.update(.01);assert.deepEqual(g.encounters.active.lines,[CHARLES_LINES[1]]);assert.deepEqual(captureRun(restoreRun(captureRun(g))),captureRun(g));g.finishDialogue(true);assert.equal(g.s.mode,'playing');assert.equal(g.s.options.length,3);assert.equal(g.s.trophies.pending.length,1);assert.equal(g.s.elapsed,1200);
+ const g=charles(1);g.s.options=g.rollUpgradeOptions();pendingTrophy(g,'pelican');finishArrival(g);assert.deepEqual(g.encounters.active.lines,[CHARLES_LINES[1]]);assert.deepEqual(captureRun(restoreRun(captureRun(g))),captureRun(g));g.finishDialogue(true);assert.equal(g.s.mode,'playing');assert.equal(g.s.options.length,3);assert.equal(g.s.trophies.pending.length,1);assert.equal(g.s.elapsed,1200);
 });
 test('v13 migration preserves every prior gameplay field and exact pending legacy replies',()=>{
  for(const type of ['pelican','travestia']){
@@ -93,7 +94,7 @@ test('v13 migration suppresses only already-started legacy actors and permits a 
 });
 
 test('leaving Charles from a restored modal cancels active and queued scenes before the victory checkpoint',()=>{
- const g=charles();g.update(.01);const restored=restoreRun(captureRun(g));assert.equal(restored.leaveCharlesEpilogue(),true);assert.equal(restored.encounters.active,null);assert.equal(restored.encounters.outcomes['charles:0'],'obsolete');assert.equal(restored.s.mode,'victory');assert.doesNotThrow(()=>captureRun(restored));
+ const g=charles();finishArrival(g);const restored=restoreRun(captureRun(g));assert.equal(restored.leaveCharlesEpilogue(),true);assert.equal(restored.encounters.active,null);assert.equal(restored.encounters.outcomes['charles:0'],'obsolete');assert.equal(restored.s.mode,'victory');assert.doesNotThrow(()=>captureRun(restored));
  const queued=charles();queued.s.charles.phase='hover';queued.s.charles.phaseDuration=CHARLES.phases.hover;queued.s.charles.phaseTime=.001;queued.update(.01);assert.equal(queued.encounters.queue.length,1);queued.leaveCharlesEpilogue();assert.equal(queued.encounters.queue.length,0);assert.equal(queued.encounters.outcomes['charles:0'],'obsolete');assert.doesNotThrow(()=>captureRun(queued));
 });
 test('generic dialogue cannot overwrite an active boss scene or another modal',()=>{
@@ -119,7 +120,7 @@ test('paused scenes freeze populated combat expiry, damage sources, spawn schedu
  const before=captureRun(g);for(let n=0;n<60;n++)g.update(.25,{x:1,y:1});assert.deepEqual(captureRun(g),before);assert.equal(g.s.enemies[0].id,e.id);
 });
 test('all eight Charles lines keep exact order, each speaker checkpoint and one consumption per beat',()=>{
- const g=charles(),seen=[];
+ const g=charles(),seen=[];finishArrival(g);
  for(let beat=0;beat<4;beat++){
   g.s.charles.nextDialogue=0;g.update(.01);assert.equal(g.encounters.active.id,`charles:${beat}`);
   for(let index=0;index<2;index++){const snap=captureRun(g);assert.deepEqual(captureRun(restoreRun(snap)),snap);seen.push(g.encounters.active.lines[index]);g.advanceEncounterDialogue(`charles:${beat}`,index);}

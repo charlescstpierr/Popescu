@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {egoFrame,drawEgoBody,drawEgoForeground,drawEgoGround} from '../dist/ego-art.js';
+import {EGO_BEASTS,initEgoBeast,beginEgoAttack,egoAttackGeometry} from '../dist/ego-beasts.js';
+import {Renderer} from '../dist/renderer.js';
+import {ActorArt} from '../dist/actor-art.js';
+const types=Object.keys(EGO_BEASTS);
+const actor=type=>initEgoBeast({id:30,type,x:100,y:200,r:EGO_BEASTS[type].r,faceX:1,phase:'chase',hp:30,maxhp:100,charmed:0});
+function context(){const calls=[],ctx=new Proxy({globalAlpha:1,save(){},restore(){},setLineDash(v){calls.push(['dash',v]);}},{get:(o,k)=>k in o?o[k]:(...args)=>calls.push([k,...args]),set:(o,k,v)=>(calls.push(['set',k,v]),o[k]=v,true)});return {ctx,calls};}
+for(const type of types)test(`${type} has planted contacts and both opposing walking steps`,()=>{const e=actor(type);assert.deepEqual([0,1,2,3,4,5,6,7].map(step=>egoFrame(e,step)),[0,1,0,2,0,1,0,2]);});
+for(const type of types)test(`${type} uses an authored anticipation, action and recovery without mutating simulation`,()=>{
+ const e=actor(type);beginEgoAttack(e,{x:180,y:200});const before=JSON.stringify(e);assert.equal(egoFrame(e,1),3);assert.equal(JSON.stringify(e),before);
+ e.phase='ego_active';e.egoTime=type==='ego_toad'?.6:EGO_BEASTS[type].duration-.05;assert.equal(egoFrame(e,0),4);
+ e.phase='ego_recover';e.egoTime=EGO_BEASTS[type].recovery;assert.equal(egoFrame(e,1),5);
+});
+test('toad landing keeps its landing drawing after the airborne path reaches the ground',()=>{const e=actor('ego_toad');beginEgoAttack(e,{x:180,y:200});e.phase='ego_active';e.egoTime=.1;assert.equal(egoFrame(e),5);});
+test('rat alternates preparation and emission in the three actual receipt windows',()=>{const e=actor('ego_rat');beginEgoAttack(e,{x:180,y:200});e.phase='ego_active';for(let n=0;n<3;n++){e.egoTime=1.08-(n*.36+.1);assert.equal(egoFrame(e),4);e.egoTime=1.08-(n*.36+.3);assert.equal(egoFrame(e),3);}});
+test('new atlas aspect ratio is accepted while stale square art is rejected',async()=>{const art=new ActorArt({loadImage:async path=>path.includes('ego-beasts')?{width:1536,height:1024}:null});await art.ready;assert.equal(art.available('ego'),true);art.images.ego={width:1024,height:1024};assert.equal(art.available('ego'),false);});
+for(const type of types)test(`${type} receives the shared charm and damaged-health feedback`,()=>{const {ctx,calls}=context(),e=actor(type),renderer=Object.create(Renderer.prototype);Object.assign(renderer,{ctx,time:1,reducedEffects:true,actors:{draw:()=>true},_shadow(){}});renderer._actor(e,'enemy',0,{});assert.ok(calls.some(c=>c[0]==='fillRect'&&c[3]===24&&c[4]===4),'damaged health track');const count=calls.length;e.charmed=2;renderer._actor(e,'enemy',0,{});assert.ok(calls.length>count*2,'charm marker adds visible paint');});
+test('new body atlas selects six-column cells without changing whole-body proportions',()=>{const {ctx,calls}=context(),e=actor('ego_peacock');beginEgoAttack(e,{x:180,y:200});const before=JSON.stringify(e);drawEgoBody(ctx,e,{width:1536,height:1024},new Map());const draw=calls.find(c=>c[0]==='drawImage');assert.deepEqual(draw.slice(2,6),[768,0,256,256]);assert.equal(draw.at(-1),draw.at(-2));assert.equal(JSON.stringify(e),before);});
+test('peacock active frame does not paint an opaque cream curtain over the scene',()=>{const {ctx,calls}=context(),e=actor('ego_peacock');beginEgoAttack(e,{x:180,y:200});e.phase='ego_active';e.egoTime=.1;drawEgoGround(ctx,e,true);assert.ok(!calls.some(c=>c[0]==='set'&&c[1]==='fillStyle'&&c[2]==='#fff1b0'));});
+test('chameleon tongue starts at the painted mouth and mirrors its root without moving damage geometry',()=>{for(const faceX of [-1,1]){const {ctx,calls}=context(),e=actor('ego_chameleon');beginEgoAttack(e,{x:100+faceX*100,y:200});e.faceX=faceX;e.phase='ego_active';e.egoTime=.1;const before=JSON.stringify(egoAttackGeometry(e));drawEgoForeground(ctx,e);const roots=calls.filter(c=>c[0]==='moveTo');assert.ok(roots.some(c=>Math.abs(c[1]-(100+faceX*34))<4&&Math.abs(c[2]-183)<5),'tongue root intersects painted mouth');assert.equal(JSON.stringify(egoAttackGeometry(e)),before);}});
+test('twenty-four authored cells share a per-species scale and planted baseline',async()=>{
+ const {readFile}=await import('node:fs/promises'),png=await readFile(new URL('../dist/assets/ego-beasts-v2.png',import.meta.url));assert.equal(png.readUInt32BE(16),1536);assert.equal(png.readUInt32BE(20),1024);
+ const {frames}=JSON.parse(await readFile(new URL('../art/source/ego-beasts/animation-registration-v2.json',import.meta.url),'utf8'));assert.equal(frames.length,24);
+ for(const f of frames){const d=f.destination;assert.ok(d.x>=f.col*256+19&&d.x+d.w<=(f.col+1)*256-19);assert.ok(d.y>=f.row*256+24);assert.ok(Math.abs(d.y+d.h-(f.row*256+240))<1e-6);assert.ok(Math.abs(d.w/f.w-d.h/f.h)<1e-9);assert.ok(f.opaqueRatio>.7);}
+ for(let row=0;row<4;row++)assert.equal(new Set(frames.filter(f=>f.row===row).map(f=>f.scale)).size,1);
+});
+test('camouflaged damage feedback does not disclose a hidden health bar or charm marker',()=>{const {ctx,calls}=context(),e=actor('ego_chameleon'),renderer=Object.create(Renderer.prototype);e.egoReveal=0;Object.assign(renderer,{ctx,time:1,reducedEffects:false});renderer._enemyStatus(e,1);assert.equal(calls.length,0);e.charmed=2;renderer._enemyStatus(e,1);assert.ok(calls.length>0);});
+test('reduced effects suppress only the optional camera flash, never active attack geometry',()=>{const e=actor('ego_peacock');beginEgoAttack(e,{x:180,y:200});e.phase='ego_active';e.egoTime=.1;const normal=context(),reduced=context();drawEgoForeground(normal.ctx,e,false);drawEgoForeground(reduced.ctx,e,true);assert.ok(normal.calls.some(c=>c[0]==='stroke'));assert.ok(!reduced.calls.some(c=>c[0]==='stroke'));drawEgoGround(reduced.ctx,e,true);assert.equal(reduced.calls.filter(c=>c[0]==='stroke').length,4);});
+test('hit feedback reuses bounded whole-frame tint stamps and respects reduced effects',()=>{
+ const previous=globalThis.OffscreenCanvas;globalThis.OffscreenCanvas=class {getContext(){return context().ctx;}};
+ try{for(const reduced of [false,true]){const cache=new Map(Array.from({length:144},(_,i)=>[`prior:${i}`,{}])),e=actor('ego_toad');e.hitFlash=.12;const before=JSON.stringify(e),{ctx,calls}=context();drawEgoBody(ctx,e,{width:1536,height:1024},cache,1,reduced);assert.equal(cache.size,144);assert.equal(calls.filter(c=>c[0]==='drawImage').length,2);assert.ok(calls.some(c=>c[0]==='set'&&c[1]==='globalAlpha'&&Math.abs(c[2]-(reduced?.25:.6))<1e-8));const stamp=cache.get('ego-hit:1:1');drawEgoBody(ctx,e,{width:1536,height:1024},cache,1,reduced);assert.equal(cache.get('ego-hit:1:1'),stamp);assert.equal(JSON.stringify(e),before);}}
+ finally{if(previous===undefined)delete globalThis.OffscreenCanvas;else globalThis.OffscreenCanvas=previous;}
+});
+test('left-facing bodies mirror the whole painting and a non-finite walk phase uses neutral',()=>{const e=actor('ego_rat');e.faceX=-1;const {ctx,calls}=context();drawEgoBody(ctx,e,{width:1536,height:1024},new Map(),NaN);assert.ok(calls.some(c=>c[0]==='scale'&&c[1]===-1&&c[2]===1));assert.equal(egoFrame(e,NaN),0);assert.equal(egoFrame(e,Infinity),0);});
+for(const [type,scale]of [['normal',.84],['tank',1.04],['orangutan',.84],['rival_rooster',.84],['rival_goat',.84],['matriarch',1.25],['travestia',.84],['pelican',.84]])test(`${type} retains its pre-existing health and charm coordinates`,()=>{
+ const {ctx,calls}=context(),renderer=Object.create(Renderer.prototype);Object.assign(renderer,{ctx,time:1,reducedEffects:true});renderer._enemyStatus({type,x:100,y:200,hp:30,maxhp:100,charmed:2},scale);
+ const ringX=Math.round(100+Math.cos(.5)*24*scale-.5),ringY=Math.round(209+Math.sin(.5)*24*scale*.58-.5);assert.ok(calls.some(c=>c[0]==='fillRect'&&c[1]===ringX&&c[2]===ringY&&c[3]===1&&c[4]===1),'original charm-ring position and phase');
+ const bars=calls.filter(c=>c[0]==='fillRect'&&c[4]===4&&(c[3]===24||c[3]===39));if(['travestia','pelican'].includes(type))assert.equal(bars.length,0,'boss keeps its dedicated health bar');else {const w=type==='matriarch'?39:24;assert.deepEqual(bars,[['fillRect',Math.round(100-w/2),Math.round(200-72*scale),w,4]]);}
+});

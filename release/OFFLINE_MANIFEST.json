@@ -9,8 +9,8 @@
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 664135,
-      "sha256": "04d5baee1ae496f77498c12d825e720320f6799d03a3b6f37031a058832894c8"
+      "bytes": 675618,
+      "sha256": "c8665ce5db157eb08b6332475a6a7f9c76208c926f5cbcd7c4854269969749b2"
     },
     {
       "path": "assets/actors-v2.json",
@@ -21,6 +21,11 @@
       "path": "assets/animals-approved.png",
       "bytes": 1928857,
       "sha256": "cb340775583388e067d00dba9b5879e6b569ce98e88cb87067e5739bc6f60702"
+    },
+    {
+      "path": "assets/charles-arrival-v1.png",
+      "bytes": 62650,
+      "sha256": "fbe869c879dfcada5ce5e1a4637387ba323a7172e1295fca7ddb957402d3f706"
     },
     {
       "path": "assets/charles-whole-v1.png",
@@ -83,6 +88,11 @@
       "sha256": "001f1f23ec2023b7d741575cff8f666eb01de4df75f657ab50d686438a89458b"
     },
     {
+      "path": "assets/ego-beasts-v2.png",
+      "bytes": 1515523,
+      "sha256": "07a0cf393bfd9496d5efbf893d7b61346b9afba046d9a02e1bca6dc690241209"
+    },
+    {
       "path": "assets/ego-beasts.png",
       "bytes": 1027672,
       "sha256": "9f38d055fadb078cced3d2284c5ee966316b3fc17c4088a9f9104f7e4c0f54a7"
@@ -106,6 +116,11 @@
       "path": "assets/opening-approved.png",
       "bytes": 2798954,
       "sha256": "061e39a22217a288b282eae305534638e20cff612b28df1ebd41afbcf6f0fc4c"
+    },
+    {
+      "path": "assets/orangutan-slap-v1.png",
+      "bytes": 167188,
+      "sha256": "22c4d5f19dd231675cbe70629d1c179bac13abd8cf5b197cd42cc947189d61e3"
     },
     {
       "path": "assets/orangutan-walk-v3.png",
@@ -133,9 +148,19 @@
       "sha256": "a44a8efead12d3446288f9a74e296b55b28fffca6d57befe489252afc54d8229"
     },
     {
+      "path": "assets/rival_goat-attack-v1.png",
+      "bytes": 195254,
+      "sha256": "7697fc562da5619b1e261cf86c2cc3bd56bdc8e0a01eb3997f46181f200da907"
+    },
+    {
       "path": "assets/rival_goat-walk-v3.png",
       "bytes": 128805,
       "sha256": "a3b1e12283e78a0bcc7745775b770795081ed66e2ee35b671a52f2daeb51c2f4"
+    },
+    {
+      "path": "assets/rival_rooster-attack-v1.png",
+      "bytes": 231071,
+      "sha256": "0a1839a341bff28f81b99c649f33fa9abd2474e5d6b55b5f786c6995048d8254"
     },
     {
       "path": "assets/rival_rooster-walk-v3.png",

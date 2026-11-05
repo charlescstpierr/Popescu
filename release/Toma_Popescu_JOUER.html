@@ -2661,11 +2661,11 @@ function cardPass(game,card,start,end,back){
  candidates.sort((a,b)=>((a.x-b.x)*card.dx+(a.y-b.y)*card.dy)*(back?-1:1)||compareId(a,b));
  for(const e of candidates){if(!known.has(e.id)&&known.size>=3)continue;known.add(e.id);hits.push(e.id);game.hurt(e,18);}
 }
-function updateCard(game,dt){
+function updateCard(game,dt,canHit=true){
  const t=game.s.trophies,c=t.tarot;if(!c)return;
  const end=Math.min(1.6,c.age+dt);
- if(c.age<.8)cardPass(game,c,c.age,Math.min(end,.8),false);
- if(end>.8)cardPass(game,c,Math.max(c.age,.8),end,true);
+ if(canHit&&c.age<.8)cardPass(game,c,c.age,Math.min(end,.8),false);
+ if(canHit&&end>.8)cardPass(game,c,Math.max(c.age,.8),end,true);
  c.age=end;const d=cardDistance(end);c.x=c.originX+c.dx*d;c.y=c.originY+c.dy*d;
  if(end>=1.6-EPS)t.tarot=null;
 }
@@ -2694,11 +2694,14 @@ function hitSector(game,p){
   }
  }
 }
-function updateTrophyEffects(game,dt){
+function updateTrophyEffects(game,dt,passiveOnly=false){
  const s=game.s,t=s.trophies;if(!t||s.mode!=='playing'||!Number.isFinite(dt)||dt<=0)return;
  for(const id of Object.keys(t.cooldowns))t.cooldowns[id]=remaining(t.cooldowns[id],dt);
  t.starLife=remaining(t.starLife,dt);
  if(t.feedback){t.feedback.life=remaining(t.feedback.life,dt);if(!t.feedback.life)t.feedback=null;}
+ // Arrival is cinematic, not an opportunity to farm the frozen survivors.
+ // Timed rewards still expire, but no new attack, hit or charm is issued.
+ if(passiveOnly){updateCard(game,dt,false);if(t.panache){t.panache.life=remaining(t.panache.life,dt);if(!t.panache.life)t.panache=null;}return;}
  for(const e of s.enemies)if(e.trophyCharmLife>0)e.trophyCharmLife=Math.min(Math.max(0,e.charmed),remaining(e.trophyCharmLife,dt));
  if(hasTrophy(s,'tarot')&&!t.tarot&&t.cooldowns.tarot===0){
   const candidates=s.enemies.filter(e=>alive(e)&&distance2(e,s)<=220**2).sort((a,b)=>distance2(a,s)-distance2(b,s)||compareId(a,b));
@@ -2738,6 +2741,16 @@ modules["./trophy-effects.js"]={updateTrophyEffects,reduceTrophyDamage,notifyTro
 (()=>{
 // Optional post-victory encounter. Its clock never changes the survival record.
 const CHARLES={hitsToTransform:18,maxDestroyed:64,waveWidth:18,gapHalfAngle:.52,phases:{intro:8,hover:2.4,shock_warning:2.6,shockwave:1.8,cape_warning:2.2,cape_spin:.85,recover:2,descend:1.25,bend:1.5,scream:1.25,burst:1.4,empowered:2.2,complete:0}};
+const CHARLES_ARRIVAL=Object.freeze({flightEnd:2.6,prepare:2.95,snap:3.45,clear:4.05,release:4.5});
+// The existing saved intro countdown is the only clock. No extra flags, enemy
+// copies or render-owned state can replay the snap or resurrect a cleared crowd.
+function charlesArrival(c){
+ if(!c||c.phase!=='intro')return null;
+ const clamp=n=>Math.max(0,Math.min(1,n)),ease=n=>n*n*(3-2*n);
+ const time=CHARLES.phases.intro*clamp(1-(c.phaseTime||0)/(c.phaseDuration||CHARLES.phases.intro));
+ const fade=clamp((time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap));
+ return {time,flight:clamp(time/CHARLES_ARRIVAL.flightEnd),locked:time<CHARLES_ARRIVAL.release,enemyOpacity:1-ease(fade),stage:time<CHARLES_ARRIVAL.flightEnd?'flight':time<CHARLES_ARRIVAL.prepare?'settle':time<CHARLES_ARRIVAL.snap?'prepare':time<CHARLES_ARRIVAL.clear?'snap':'ready'};
+}
 const CHARLES_LINES=[
  {who:'TOMA',text:"Vingt minutes, Charles. Chuck Norris demande mon programme d'entraînement."},
  {who:'CHARLES',text:"Ton programme ? J'ai surtout la photo de ton char à six roues."},
@@ -2761,13 +2774,16 @@ function startCharles(g){
  s.charles={id:g.id++,type:'charles',x:s.x+(g.viewport.height<650?65:0),y:s.y-offset,r:28,hp:1,maxhp:1,dead:false,charmed:0,hitFlash:0,hits:0,powered:false,phase:'intro',phaseTime:8,phaseDuration:8,elapsed:0,attackCount:0,safeAngle:Math.PI/2,waveMax:300,capeRadius:112,dialogueIndex:0,nextDialogue:0,outcome:'',destroyed:[]};
  // No ordinary enemy or projectile can steal this optional encounter. Rewards
  // already pending keep their provenance and can be chosen in endless mode.
- for(const key of ['enemies','shots','drops','clouds','particles','vehicles','pulses','shockwaves'])s[key]=[];
+ // Keep the bounded enemy records as inert painted witnesses until the snap.
+ // All dangerous projectiles/effects disappear now, without kills or rewards.
+ for(const key of ['shots','drops','clouds','particles','vehicles','pulses','shockwaves'])s[key]=[];
  s.airplane.active=false;s.airplane.life=0;s.stunt.active=false;s.stunt.progress=0;s.stunt.time=0;
  g.defeatEffects=[];g.powerEffects=[];g.powerCueCooldowns.clear();g.pendingStuntReply=null;g.pendingRivalReply=null;
  s.hp=Math.max(s.hp,s.maxhp*.5);s.mode='playing';s.moveX=0;s.moveY=0;g.emit('epilogue-start',s.charles);return true;
 }
 function finishCharles(g,outcome='left'){
  const s=g.s,c=s.charles;if(!charlesActive(s))return false;
+ if(c.phase==='intro')s.enemies=[];
  g.powerEffects=[];g.defeatEffects=[];g.powerCueCooldowns.clear();
  g.clearSpeech();g.cancelEncounterDialogues('charles');c.outcome=outcome;phase(c,'complete');s.mode='victory';s.moveX=0;s.moveY=0;s.walkMoving=false;
  if(outcome==='defeated'){s.hp=0;g.sound('defeat');}g.emit('epilogue-complete',c);return true;
@@ -2818,8 +2834,9 @@ function nextAttack(g,c){
 }
 function updateCharles(g,dt,previousPlayer){
  const s=g.s,c=s.charles;if(!charlesActive(s))return;
+ const arrivalBefore=charlesArrival(c);
  c.elapsed+=dt;c.hitFlash=Math.max(0,c.hitFlash-dt);
- if(c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
+ if(!arrivalBefore?.locked&&c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
   const start=c.dialogueIndex;
   if(g.queueEncounterDialogue({id:`charles:${Math.floor(start/2)}`,actorId:c.id,actorType:'charles',scope:'charles',start})){c.dialogueIndex=Math.min(CHARLES_LINES.length,start+2-start%2);c.nextDialogue=c.elapsed+4.8;}
   else if(!g.pausedEncountersEnabled&&!g.encounters.queue.some(scene=>scene.actorType==='charles')){const dialogue=CHARLES_LINES[start];if(g.bark(dialogue.who,dialogue.text,true)){c.dialogueIndex++;c.nextDialogue=c.elapsed+4.8;}}
@@ -2827,6 +2844,11 @@ function updateCharles(g,dt,previousPlayer){
  const oldPhase=c.phase,oldRadius=c.phase==='shockwave'?charlesWaveRadius(c):0;
  if(['hover','recover','empowered'].includes(c.phase))follow(g,c,dt);
  c.phaseTime=Math.max(0,c.phaseTime-dt);
+ if(arrivalBefore){
+  const arrival=charlesArrival(c);
+  if(arrivalBefore.time<CHARLES_ARRIVAL.snap&&arrival.time>=CHARLES_ARRIVAL.snap)g.sound('snap');
+  if(arrival.time>=CHARLES_ARRIVAL.clear&&s.enemies.length)s.enemies=[];
+ }
  if(c.phase==='shockwave'){
   const radius=charlesWaveRadius(c);destroyScenery(g,c,radius,true);
   if(charlesWaveHits(c,previousPlayer,s,oldRadius,radius)){finishCharles(g,'defeated');return;}
@@ -2851,7 +2873,7 @@ function updateCharles(g,dt,previousPlayer){
  if(oldPhase==='burst'){c.powered=true;phase(c,'empowered');line(g,'CHARLES ÉVEILLÉ. Même vérité. Beaucoup plus de portée.');}
 }
 
-modules["./charles.js"]={CHARLES,CHARLES_LINES,charlesActive,charlesWaveRadius,charlesWaveSafe,startCharles,finishCharles,hitCharles,charlesWaveHits,updateCharles};
+modules["./charles.js"]={CHARLES,CHARLES_ARRIVAL,charlesArrival,CHARLES_LINES,charlesActive,charlesWaveRadius,charlesWaveSafe,startCharles,finishCharles,hitCharles,charlesWaveHits,updateCharles};
 })();
 (()=>{
 const {EVENTS}=modules['./content.js'];
@@ -3040,6 +3062,27 @@ function recordReplay(replay,id,snapshot,{replaced=false}={}){
 modules["./run-history.js"]={RUN_HISTORY_LIMIT,createReplayState,lethalDamageCause,validateDeathCause,validateReplayState,recordReplay};
 })();
 (()=>{
+// The old supporting atlases have four whole-body steps (two for animals).
+// Distances, rather than elapsed time, register their contact to real AI travel.
+const STEPS=Object.freeze({normal:7,sprinter:8,gas:7,tank:10,jealous:7,explosive:8,matriarch:12,orangutan:9,rival_goat:9,rival_rooster:8,ostrich:14,paparazzi:7,moose:16,disco_chicken:7});
+const TWO_FRAMES=new Set(['ostrich','paparazzi','moose','disco_chicken']);
+function enemyGaitFrame(actor,gait,fallback=0){
+ const step=STEPS[actor.type];
+ if(!step)return fallback;if(!gait?.moving)return 0;
+ return Math.floor(gait.distance/step)%(TWO_FRAMES.has(actor.type)?2:4);
+}
+function recordEnemyWalk(cache,actor,distance){
+ if(!STEPS[actor.type])return;
+ const gait=cache.get(actor)||{distance:0,moving:false};
+ if(distance>1e-7){gait.distance=(gait.distance+distance)%(STEPS[actor.type]*(TWO_FRAMES.has(actor.type)?2:4));gait.moving=true;}
+ else gait.moving=false;
+ cache.set(actor,gait);
+}
+
+modules["./enemy-gait.js"]={enemyGaitFrame,recordEnemyWalk};
+})();
+(()=>{
+const {enemyGaitFrame,recordEnemyWalk}=modules['./enemy-gait.js'];
 const {EGO_BEASTS,EGO_LIMITS,initEgoBeast,egoBeastLocked,interruptEgoBeast,egoDamageMultiplier,egoHeight,updateEgoBeast}=modules['./ego-beasts.js'];
 const {egoFitsViewport,findEgoEntry}=modules['./ego-entry.js'];
 const {biomeForChunk}=modules['./biomes.js'];
@@ -3048,7 +3091,7 @@ const {createEncounterDialogue,queueEncounterDialogue,openEncounterDialogue,adva
 const {carLevel,launchLamborghini,updateLamborghini}=modules['./lamborghini.js'];
 const {lethalDamageCause}=modules['./run-history.js'];
 const {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled}=modules['./speech.js'];
-const {charlesActive,startCharles,finishCharles,hitCharles,updateCharles}=modules['./charles.js'];
+const {charlesActive,charlesArrival,startCharles,finishCharles,hitCharles,updateCharles}=modules['./charles.js'];
 const {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier}=modules['./trophy-effects.js'];
 const {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests}=modules['./boss-trophies.js'];
 const {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills}=modules['./evolutions.js'];
@@ -3085,7 +3128,7 @@ class Game {
     // A transient speech cue: restoring a run never invents recent health loss.
     this.recentHealthDamage=null;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
-    this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
+    this.enemyGait=new WeakMap();this.defeatEffects=[];this.powerEffects=[];this.powerCueCooldowns=new Map();
     this.discoveryCooldowns=new Map();this.discoveryContact=null;this.s.discovery={active:null,count:0,nearby:null};
     this.eventSeen=new Set();this.nextEvent=28;this.lastHit=-10;this.barkIndex=0;this.stuntRng=(this.seed^0x5bd1e995)>>>0;this.stuntCharge=0;this.runStreak=0;this.stuntWait=12+this.stuntRandom()*6;this.pendingStuntReply=null;this.pendingRivalReply=null;this.rivalIndex=0;this.rivalBarkIndex=0;this.lastRivalBark=-100;this.rivalRng=(this.seed^0x7f4a7c15)>>>0;this.speechUntil=0;this.speech=createSpeech();this.banterEnabled=true;this.recalculate();this.world.update(0,0);
   }
@@ -3207,7 +3250,8 @@ class Game {
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
   }
   stepCharles(dt,input){
-    const s=this.s,previous={x:s.x,y:s.y},trophySpeed=trophySpeedMultiplier(s);this.updateDiscoveryEffect(dt);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=Math.max(0,s.invulnerable-dt);
+    const s=this.s,previous={x:s.x,y:s.y},arrivalLocked=charlesArrival(s.charles)?.locked,trophySpeed=trophySpeedMultiplier(s);this.updateDiscoveryEffect(dt);updateTrophyEffects(this,dt,arrivalLocked);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=Math.max(0,s.invulnerable-dt);
+    if(arrivalLocked){s.moveX=0;s.moveY=0;s.walkMoving=false;updateCharles(this,dt,previous);if(!this.openEncounterDialogue())this.flushSpeech();return;}
     const mx=Number.isFinite(input.x)?input.x:0,my=Number.isFinite(input.y)?input.y:0,n=Math.max(1,Math.hypot(mx,my));s.moveX=mx/n;s.moveY=my/n;
     this.move(s,s.moveX*s.stats.speed*dt,s.moveY*s.stats.speed*dt,13);const moved=Math.hypot(s.x-previous.x,s.y-previous.y);s.walkMoving=moved>1e-7;
     if(s.walkMoving){s.walkDistance+=moved;s.travelX=(s.x-previous.x)/moved;s.travelY=(s.y-previous.y)/moved;}
@@ -3483,7 +3527,7 @@ class Game {
   updateEnemies(dt){
     const s=this.s,g=s.girl;
     for(const e of s.enemies){
-      if(e.dead)continue;if(e.type==='pelican')e.peliMoving=false;if(e.type==='travestia')e.tailMoving=false;e.hitFlash=Math.max(0,e.hitFlash-dt);e.attack=Math.max(0,(e.attack||0)-dt);e.cooldown=Math.max(0,(e.cooldown||0)-dt);e.gasPose=Math.max(0,e.gasPose-dt);e.swipe=Math.max(0,(e.swipe||0)-dt);e.charge=Math.max(0,(e.charge||0)-dt);e.crow=Math.max(0,(e.crow||0)-dt);e.charmed=Math.max(0,e.charmed-dt);
+      if(e.dead)continue;const gait=this.enemyGait.get(e);if(gait)gait.moving=false;if(e.type==='pelican')e.peliMoving=false;if(e.type==='travestia')e.tailMoving=false;e.hitFlash=Math.max(0,e.hitFlash-dt);e.attack=Math.max(0,(e.attack||0)-dt);e.cooldown=Math.max(0,(e.cooldown||0)-dt);e.gasPose=Math.max(0,e.gasPose-dt);e.swipe=Math.max(0,(e.swipe||0)-dt);e.charge=Math.max(0,(e.charge||0)-dt);e.crow=Math.max(0,(e.crow||0)-dt);e.charmed=Math.max(0,e.charmed-dt);
       // Optional on older saves; absent means the first charm can interrupt.
       if(e.bossCharmResistance!==undefined)e.bossCharmResistance=Math.max(0,e.bossCharmResistance-dt);
       if(length(e.x-s.x,e.y-s.y)>1600){if(!isMajorBoss(e.type)){e.dead=true;continue;}if(!this.reenterBoss(e))continue;}
@@ -3534,7 +3578,7 @@ class Game {
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,EXPLOSIVE_BLAST.radius,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
-      if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
+      if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}recordEnemyWalk(this.enemyGait,e,length(e.x-ox,e.y-oy));if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
       if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&!EGO_BEASTS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
     }
@@ -3641,7 +3685,7 @@ class Game {
     const visible=Math.abs(e.x-s.x)<this.viewport.width/2+80&&e.y>s.y-this.viewport.height*.48-80&&e.y<s.y+this.viewport.height*.52+100;
     if(visible){
       this.defeatEffects=this.defeatEffects.filter(effect=>s.elapsed-effect.start<effect.life);
-      if(this.defeatEffects.length<16)this.defeatEffects.push({actor:{...e},start:s.elapsed,life:.45,phase:Math.floor(s.elapsed*10+(typeof e.phase==='number'?e.phase*3:0)+(Number(e.id)||0))%8});
+      if(this.defeatEffects.length<16)this.defeatEffects.push({actor:{...e},start:s.elapsed,life:.45,phase:enemyGaitFrame(e,this.enemyGait.get(e),Math.floor(s.elapsed*10+(typeof e.phase==='number'?e.phase*3:0)+(Number(e.id)||0))%8)});
       this.sound('kill');
     }
   }
@@ -3880,6 +3924,33 @@ function drawPelicanCards(ctx,e,reduced=false){
 modules["./pelican-art.js"]={PELICAN_ART,pelicanFrame,pelicanHazards,drawPelicanGround,drawPelicanCards};
 })();
 (()=>{
+const {travestiaFrame}=modules['./travestia.js'];
+const {TAIL_DASH}=modules['./travestia-dash.js'];
+
+// Render-only choreography. Timers come from the simulation, never wall time.
+// The eight directional paintings describe tail/travel direction, not body facing.
+function travestiaPose(e,time=0){
+  const dash=e.phase==='tail_dash'||e.phase==='tail_dash_windup'||e.phase==='tail_dash_recover';
+  let index=travestiaFrame(e,time),directional=false;
+  if(e.phase==='tail_dash_windup'){
+    const elapsed=TAIL_DASH.warning-e.tailTime;
+    if(elapsed<.3)index=5; // turn the complete body
+    else if(elapsed<.7)index=6; // plant the feet and arm the tail
+    else directional=true; // show the exact locked corridor before launch
+  }else if(e.phase==='tail_dash')directional=true;
+  else if(e.phase==='tail_dash_recover'){
+    if(TAIL_DASH.recovery-e.tailTime<.2)directional=true;
+    else index=e.tailTime>.55?10:4; // brake, then stand, even if a walk flag is stale
+  }
+  // Side-view transitions face away from the charge. Vertical views have no
+  // horizontal facing; use the same stable right-facing transition on N/S.
+  const flip=dash?[0,1,7].includes(e.tailDashDir):(e.tailTime>0?e.tailFaceX:e.faceX)<0;
+  return {directional,index:directional?e.tailDashDir:index,flip};
+}
+
+modules["./travestia-pose.js"]={travestiaPose};
+})();
+(()=>{
 // Every atlas cell is a complete painted figure. Only translation and mirroring
 // are used. The renderer owns no simulation state and allocates no frame cache.
 const COMPANION_ART = Object.freeze({
@@ -3944,24 +4015,39 @@ modules["./companion-art.js"]={COMPANION_ART,companionRank,companionFrame,Compan
 (()=>{
 const {EGO_BEASTS,egoAttackGeometry,egoHeight,egoCamoRatio}=modules['./ego-beasts.js'];
 const {EGO_FRAMES}=modules['./ego-entry.js'];
-const EGO_ART=Object.freeze({columns:4,rows:4,types:Object.freeze(['ego_peacock','ego_toad','ego_rat','ego_chameleon'])});
+const EGO_ART=Object.freeze({columns:6,rows:4,types:Object.freeze(['ego_peacock','ego_toad','ego_rat','ego_chameleon'])});
 const EGO_SURFACES=Object.freeze({building:'#776e78',asphalt:'#352c43',grass:'#4e5938'});
 function egoFrame(e,step=0){
- if(e.type==='ego_toad')return e.phase==='ego_warning'?1:e.phase==='ego_recover'?3:e.phase==='ego_active'&&egoHeight(e)>0?2:0;
- return e.phase==='ego_warning'?2:e.phase==='ego_active'?3:Math.abs(Math.floor(step))%2;
+ if(e.phase==='ego_warning')return 3;
+ if(e.phase==='ego_recover')return 5;
+ if(e.phase==='ego_active'){
+  if(e.type==='ego_toad')return egoHeight(e)>0?4:5;
+  if(e.type==='ego_rat'){const age=EGO_BEASTS.ego_rat.duration-e.egoTime;return (age+.0000001)%.36<.24?4:3;}
+  return 4;
+ }
+ return [0,1,0,2][Math.abs(Math.floor(Number.isFinite(step)?step:0))%4];
 }
+// Registered on the complete painted active poses, relative to the ground point.
+const EGO_ANCHORS=Object.freeze({camera:Object.freeze({x:35,y:-56}),mouth:Object.freeze({x:34,y:-17})});
+
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
-function drawEgoBody(ctx,e,image,cache,step=0){
+function drawEgoBody(ctx,e,image,cache,step=0,reduced=false){
  if(!EGO_BEASTS[e.type])return false;
  if(!image){ctx.save();ctx.fillStyle='#ffdd97';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(EGO_BEASTS[e.type].name,e.x,e.y-24);ctx.strokeStyle='#ffdd97';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,Math.max(14,e.r||14),0,Math.PI*2);ctx.stroke();ctx.restore();return true;}
- const frame=egoFrame(e,step),row=EGO_ART.types.indexOf(e.type),cell=image.width/4,f=EGO_FRAMES[e.type],camo=egoCamoRatio(e),surface=Object.hasOwn(EGO_SURFACES,e.egoSurface)?e.egoSurface:'asphalt';
+ const frame=egoFrame(e,step),row=EGO_ART.types.indexOf(e.type),cell=image.width/EGO_ART.columns,f=EGO_FRAMES[e.type],camo=egoCamoRatio(e),surface=Object.hasOwn(EGO_SURFACES,e.egoSurface)?e.egoSurface:'asphalt';
  let sprite=image,sx=frame*cell,sy=row*cell,alpha=1;
  if(camo>0){
   const key=`ego:${frame}:${surface}`;let tint=cache.get(key);
   if(!tint){tint=canvas(cell,cell);if(tint){const c=tint.getContext('2d');c.drawImage(image,sx,sy,cell,cell,0,0,cell,cell);c.globalCompositeOperation='source-atop';c.globalAlpha=.92;c.fillStyle=EGO_SURFACES[surface];c.fillRect(0,0,cell,cell);cache.set(key,tint);if(cache.size>144)cache.delete(cache.keys().next().value);}}
   if(tint){sprite=tint;sx=0;sy=0;}alpha=1-camo*.78;
  }
- ctx.save();ctx.globalAlpha*=alpha;ctx.translate(Math.round(e.x),Math.round(e.y)+f.anchorY-Math.round(egoHeight(e)));if((e.faceX??1)<0)ctx.scale(-1,1);ctx.drawImage(sprite,sx,sy,cell,cell,f.left,f.top,f.size,f.size);ctx.restore();return true;
+ ctx.save();ctx.globalAlpha*=alpha;ctx.translate(Math.round(e.x),Math.round(e.y)+f.anchorY-Math.round(egoHeight(e)));if((e.faceX??1)<0)ctx.scale(-1,1);ctx.drawImage(sprite,sx,sy,cell,cell,f.left,f.top,f.size,f.size);
+ if(e.hitFlash>0){
+  const key=`ego-hit:${row}:${frame}`;let flash=cache.get(key);
+  if(!flash){flash=canvas(cell,cell);if(flash){const c=flash.getContext('2d');c.drawImage(image,frame*cell,row*cell,cell,cell,0,0,cell,cell);c.globalCompositeOperation='source-atop';c.fillStyle='#fff3b3';c.fillRect(0,0,cell,cell);cache.set(key,flash);if(cache.size>144)cache.delete(cache.keys().next().value);}}
+  if(flash){ctx.globalAlpha*=Math.min(reduced?.25:.65,e.hitFlash*5);ctx.drawImage(flash,0,0,cell,cell,f.left,f.top,f.size,f.size);}
+ }
+ ctx.restore();return true;
 }
 function capsule(ctx,g){const a=Math.atan2(g.by-g.ay,g.bx-g.ax),px=Math.sin(a)*g.r,py=-Math.cos(a)*g.r;ctx.beginPath();ctx.moveTo(g.ax+px,g.ay+py);ctx.lineTo(g.bx+px,g.by+py);ctx.arc(g.bx,g.by,g.r,a-Math.PI/2,a+Math.PI/2);ctx.lineTo(g.ax-px,g.ay-py);ctx.arc(g.ax,g.ay,g.r,a+Math.PI/2,a+Math.PI*1.5);ctx.closePath();}
 function drawEgoGround(ctx,e,reduced=false){
@@ -3974,7 +4060,7 @@ function drawEgoGround(ctx,e,reduced=false){
    ctx.beginPath();ctx.moveTo(g.x-7,g.y);ctx.lineTo(g.x+7,g.y);ctx.moveTo(g.x,g.y-7);ctx.lineTo(g.x,g.y+7);ctx.stroke();
    if(g.hot){ctx.strokeStyle='#ffec9b';for(let i=0;i<6;i++){const a=i*Math.PI/3;ctx.beginPath();ctx.moveTo(g.x+Math.cos(a)*13,g.y+Math.sin(a)*13);ctx.lineTo(g.x+Math.cos(a+.1)*25,g.y+Math.sin(a+.1)*25);ctx.lineTo(g.x+Math.cos(a)*36,g.y+Math.sin(a)*36);ctx.stroke();}if(!reduced){ctx.fillStyle='#bca18a';for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.fillRect(g.x+Math.cos(a)*34-3,g.y+Math.sin(a)*25-3,6,5);}}}
   }else if(g.kind==='frame'||g.kind==='receipt'){
-   ctx.strokeStyle=g.hot?'#fff1b0':g.kind==='frame'?'#71e1eb':'#f4ce76';ctx.lineWidth=2;ctx.setLineDash(g.hot?[]:[7,5]);ctx.fillStyle=g.hot?(g.kind==='frame'?'#fff1b0':'#f4ce76'):'#e8ba6a30';capsule(ctx,g);ctx.fill();ctx.stroke();ctx.setLineDash([]);
+   ctx.strokeStyle=g.hot?'#fff1b0':g.kind==='frame'?'#71e1eb':'#f4ce76';ctx.lineWidth=2;ctx.setLineDash(g.hot?[]:[7,5]);ctx.fillStyle=g.hot?(g.kind==='frame'?'#71e1eb55':'#f4ce76'):'#e8ba6a30';capsule(ctx,g);ctx.fill();ctx.stroke();ctx.setLineDash([]);
    if(g.kind==='receipt'&&g.hot){const d=Math.hypot(g.bx-g.ax,g.by-g.ay)||1,dx=(g.bx-g.ax)/d,dy=(g.by-g.ay)/d;ctx.strokeStyle='#554256';ctx.lineWidth=1;for(let n=5;n<d;n+=9){const x=g.ax+dx*n,y=g.ay+dy*n;ctx.beginPath();ctx.moveTo(x-dy*6,y+dx*6);ctx.lineTo(x+dy*6,y-dx*6);ctx.stroke();}}
   }else if(g.kind==='tongue'){
    // Shared short strike corridor is visible for the whole reveal/windup.
@@ -3984,22 +4070,58 @@ function drawEgoGround(ctx,e,reduced=false){
  ctx.restore();
 }
 
-function drawEgoForeground(ctx,e){
+function drawEgoForeground(ctx,e,reduced=false){
+ if(e.type==='ego_peacock'&&e.phase==='ego_active'&&!reduced){
+  const x=e.x+((e.faceX??1)<0?-1:1)*EGO_ANCHORS.camera.x,y=e.y+EGO_ANCHORS.camera.y;
+  ctx.save();ctx.strokeStyle='#fff1b0';ctx.lineWidth=2;for(const [dx,dy]of [[6,0],[0,6],[4,4],[4,-4]]){ctx.beginPath();ctx.moveTo(x-dx,y-dy);ctx.lineTo(x+dx,y+dy);ctx.stroke();}ctx.restore();
+ }
  if(e.type!=='ego_chameleon'||!['ego_warning','ego_active'].includes(e.phase))return;
- ctx.save();ctx.strokeStyle='#ffe19a';ctx.lineWidth=2;const y=e.y-52;for(const [x,dy]of [[-8,-5],[0,-9],[8,-5]]){ctx.beginPath();ctx.moveTo(e.x+x,y);ctx.lineTo(e.x+x*1.5,y+dy);ctx.stroke();}
- for(const g of egoAttackGeometry(e))if(g.kind==='tongue'&&g.hot){ctx.strokeStyle='#8d285d';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(e.x+((e.faceX??1)<0?-1:1)*30,e.y-35);ctx.lineTo(g.bx,g.by-21);ctx.stroke();ctx.strokeStyle='#ff88b1';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#ffd1df';ctx.beginPath();ctx.arc(g.bx,g.by-21,5,0,Math.PI*2);ctx.fill();}ctx.restore();
+ const facing=(e.faceX??1)<0?-1:1;
+ ctx.save();ctx.strokeStyle='#ffe19a';ctx.lineWidth=2;const y=e.y-47;for(const [x,dy]of [[-8,-5],[0,-9],[8,-5]]){ctx.beginPath();ctx.moveTo(e.x+facing*18+x,y);ctx.lineTo(e.x+facing*18+x*1.5,y+dy);ctx.stroke();}
+ for(const g of egoAttackGeometry(e))if(g.kind==='tongue'&&g.hot){ctx.strokeStyle='#8d285d';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(e.x+facing*EGO_ANCHORS.mouth.x,e.y+EGO_ANCHORS.mouth.y);ctx.lineTo(g.bx,g.by-17);ctx.stroke();ctx.strokeStyle='#ff88b1';ctx.lineWidth=4;ctx.stroke();ctx.fillStyle='#ffd1df';ctx.beginPath();ctx.arc(g.bx,g.by-17,5,0,Math.PI*2);ctx.fill();}ctx.restore();
 }
 
-modules["./ego-art.js"]={EGO_ART,EGO_SURFACES,egoFrame,drawEgoBody,drawEgoGround,drawEgoForeground};
+modules["./ego-art.js"]={EGO_ART,EGO_SURFACES,egoFrame,EGO_ANCHORS,drawEgoBody,drawEgoGround,drawEgoForeground};
 })();
 (()=>{
+// Whole paintings selected only by existing simulation timers. No saved visual state.
+const ENEMY_ATTACK_ART=Object.freeze({
+  orangutan:Object.freeze({image:'orangutan_attack',cellWidth:160,anchorX:64,size:83}),
+  rival_goat:Object.freeze({image:'rival_goat_attack',cellWidth:128,anchorX:60,size:88}),
+  rival_rooster:Object.freeze({image:'rival_rooster_attack',cellWidth:128,anchorX:68,size:78}),
+});
+function enemyAttackPose(e){
+  const spec=ENEMY_ATTACK_ART[e.type];if(!spec)return null;
+  let index;
+  if(e.type==='orangutan'){
+    if(e.windup>0)index=0;
+    else if(e.swipe>0){const elapsed=.28-Math.min(.28,e.swipe);index=elapsed<.1?1:elapsed<.2?2:3;}
+    else return null;
+  }else if(e.type==='rival_goat'){
+    if(e.windup>0)index=e.windup>.4?0:1;
+    else if(e.charge>0)index=2+Math.floor(Math.max(0,.55-e.charge)*8)%2;
+    else return null;
+  }else{
+    if(e.windup>0)index=e.windup>.57?0:e.windup>.28?1:2;
+    else if(e.crow>0)index=e.crow>.12?3:4;
+    else return null;
+  }
+  const fx=(e.type==='orangutan'?e.swipeDirX:e.chargeDirX)??e.faceX??1;
+  const fy=(e.type==='orangutan'?e.swipeDirY:e.chargeDirY)??e.faceY??0;
+  return {...spec,index,back:fy<-.45,flip:fx<-.1};
+}
+
+modules["./enemy-attack-pose.js"]={ENEMY_ATTACK_ART,enemyAttackPose};
+})();
+(()=>{
+const {enemyAttackPose}=modules['./enemy-attack-pose.js'];
 const {EGO_BEASTS}=modules['./ego-beasts.js'];
-const {drawEgoBody}=modules['./ego-art.js'];
+const {drawEgoBody,EGO_ART}=modules['./ego-art.js'];
 const {ANIMALS,ANIMAL_FRAMES}=modules['./animals.js'];
-const {travestiaFrame}=modules['./travestia.js'];
+const {travestiaPose}=modules['./travestia-pose.js'];
 const {PELICAN_ART,pelicanFrame}=modules['./pelican-art.js'];
 // Raster actor atlases share one light direction and one registered foot baseline.
-const FILES={ego:'assets/ego-beasts.png',pelican:'assets/pelican-poses.png',animals:'assets/animals-approved.png',travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
+const FILES={orangutan_attack:'assets/orangutan-slap-v1.png',rival_goat_attack:'assets/rival_goat-attack-v1.png',rival_rooster_attack:'assets/rival_rooster-attack-v1.png',ego:'assets/ego-beasts-v2.png',pelican:'assets/pelican-poses.png',animals:'assets/animals-approved.png',travestia_dash:'assets/travestia-dash.png',travestia:'assets/travestia-poses.png',hero:'assets/toma-walk-v2.png',girl:'assets/girl-walk-v2.png',enemy:'assets/gorilla-walk-v2.png',orangutan:'assets/orangutan-walk-v3.png',rival_rooster:'assets/rival_rooster-walk-v3.png',rival_goat:'assets/rival_goat-walk-v3.png'};
 const ENEMY_SIZE={normal:76,sprinter:66,gas:79,tank:96,jealous:76,explosive:80,matriarch:116,orangutan:83,rival_rooster:78,rival_goat:88};
 const sourceKind=(kind,type)=>EGO_BEASTS[type]?'ego':ANIMALS[type]?'animals':kind==='enemy'&&['pelican','travestia','orangutan','rival_rooster','rival_goat'].includes(type)?type:kind;
 function canvas(w,h){if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(w,h);if(typeof document!=='undefined'){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}return null;}
@@ -4016,7 +4138,7 @@ function load(src,registerCancel){return new Promise(resolve=>{
   try{im.src=src;}catch{finish(null);}
 });}
 function usableAnimals(image){return Boolean(image&&image.width>0&&image.height>0&&(image.naturalWidth===undefined||image.naturalWidth>0)&&(image.naturalHeight===undefined||image.naturalHeight>0));}
-function usableEgo(image){return usableAnimals(image)&&image.width===image.height&&image.width%4===0;}
+function usableEgo(image){return usableAnimals(image)&&image.width%EGO_ART.columns===0&&image.height%EGO_ART.rows===0&&image.width/EGO_ART.columns===image.height/EGO_ART.rows;}
 function box(c,color,x,y,w,h){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
 function polygon(c,color,points){c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();}
 class ActorArt {
@@ -4081,6 +4203,19 @@ class ActorArt {
     if(flash){c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,128,128);c.globalCompositeOperation='source-over';}
     this.cache.set(key,frame);if(this.cache.size>144)this.cache.delete(this.cache.keys().next().value);return frame;
   }
+  drawEnemyAttack(ctx,actor){
+    const pose=enemyAttackPose(actor);if(!pose)return false;
+    const image=this.images[pose.image];if(!image)return false;
+    const {cellWidth:w,anchorX,size,index,back,flip}=pose,scale=size/128;
+    ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+11);if(flip)ctx.scale(-1,1);
+    ctx.drawImage(image,index*w,back?128:0,w,128,-anchorX*scale,-121*scale,w*scale,size);
+    if(actor.hitFlash>0){
+      const key=['attack',pose.image,index,back].join(':');let flash=this.cache.get(key);
+      if(!flash){flash=canvas(w,128);if(flash){const c=flash.getContext('2d');c.drawImage(image,index*w,back?128:0,w,128,0,0,w,128);c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,w,128);this.cache.set(key,flash);if(this.cache.size>144)this.cache.delete(this.cache.keys().next().value);}}
+      if(flash){ctx.globalAlpha*=Math.min(.85,actor.hitFlash*5);ctx.drawImage(flash,-anchorX*scale,-121*scale,w*scale,size);}
+    }
+    ctx.restore();return true;
+  }
   drawPelican(ctx,e,time){
     const image=this.images.pelican;if(!image)return false;
     const index=pelicanFrame(e),w=image.width/PELICAN_ART.columns,h=image.height/PELICAN_ART.rows,size=PELICAN_ART.size;
@@ -4090,39 +4225,38 @@ class ActorArt {
     ctx.restore();return true;
   }
   drawTravestia(ctx,e,time){
-    if(e.phase?.startsWith('tail_dash')&&this.images.travestia_dash){const image=this.images.travestia_dash,w=image.width/4,h=image.height/2,index=e.tailDashDir;ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,Math.round(e.x)-100,Math.round(e.y)+11-174,200,200);return true;}
+    const pose=travestiaPose(e,time);
+    if(pose.directional&&this.images.travestia_dash){const image=this.images.travestia_dash,w=image.width/4,h=image.height/2,index=pose.index;ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,Math.round(e.x)-100,Math.round(e.y)+11-174,200,200);return true;}
     const image=this.images.travestia;if(!image)return false;
-    const index=travestiaFrame(e,time),w=image.width/4,h=image.height/3,size=144;
-    ctx.save();ctx.translate(Math.round(e.x),Math.round(e.y)+11);if((e.tailTime>0?e.tailFaceX:e.faceX)<0)ctx.scale(-1,1);
+    const index=pose.directional?4:pose.index,w=image.width/4,h=image.height/3,size=144;
+    ctx.save();ctx.translate(Math.round(e.x),Math.round(e.y)+11);if(pose.flip)ctx.scale(-1,1);
     ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,-72,-132,size,size);
     ctx.restore();return true;
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
-    if(EGO_BEASTS[actor.type])return drawEgoBody(ctx,actor,this.images.ego,this.cache,phase);
+    if(EGO_BEASTS[actor.type])return drawEgoBody(ctx,actor,this.images.ego,this.cache,phase,reduced);
     if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.translate(Math.round(actor.x),Math.round(actor.y)+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);ctx.drawImage(im,index*cell,row*cell,cell,cell,frame.left,frame.top,size,size);ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
     if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
+    if(kind==='enemy'&&this.drawEnemyAttack(ctx,actor))return true;
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
     const gas=enemy&&actor.gasPose>0;const moving=Math.hypot(state.moveX||0,state.moveY||0)>.05;
     const fx=kind==='hero'&&moving?state.moveX:(actor.faceX??state.faceX??1);const fy=kind==='hero'&&moving?state.moveY:(actor.faceY??state.faceY??0);
-    const attacking=enemy&&(actor.windup>0||actor.charge>0||actor.crow>0);
+    const attacking=enemy&&(actor.windup>0||actor.swipe>0||actor.charge>0||actor.crow>0);
     const back=gas||fy<-.45,index=gas?Math.max(0,Math.min(3,Math.floor((.9-actor.gasPose)*4/.9))):attacking?1:phase%4;
     const sprite=this.frame(kind,index,back,type);if(!sprite)return false;
     const size=enemy?ENEMY_SIZE[type]||76:girl?76:80;const scale=size/128,x=Math.round(actor.x),y=Math.round(actor.y)+11;
-    ctx.save();ctx.translate(x,y);if(type==='orangutan'&&actor.windup>0&&!reduced)ctx.translate(Math.sin(time*35)*1.5,-2);if(fx<-.1&&!gas)ctx.scale(-1,1);
-    // Keep the feet registered while the goat lowers his horns into a headbutt.
-    if(type==='rival_goat'&&attacking){const charge=actor.charge>0;ctx.transform(1,0,charge?-.34:-.19,charge?.78:.88,0,0);}
-    if(type==='rival_rooster'&&attacking){const crow=actor.crow>0;ctx.scale(crow?1.06:1.03,crow?1.08:1.025);if(crow&&!reduced)ctx.translate(Math.sin(time*32),0);}
+    ctx.save();ctx.translate(x,y);if(fx<-.1&&!gas)ctx.scale(-1,1);
     if(actor.down||(kind==='hero'&&state.mode==='gameover')){ctx.rotate(-1.35);ctx.globalAlpha=.6;ctx.drawImage(sprite,-size*.5,-size*.5,size,size);}
     else {
       if(kind==='hero'&&state.invulnerable>0&&Math.floor(time*16)%2)ctx.globalAlpha=.55;
       // Atlas padding registers every frame at the same virtual ground point.
       ctx.drawImage(sprite,-size/2,-121*scale,size,size);
-      if(enemy&&actor.hitFlash>0){ctx.globalAlpha=Math.min(.85,actor.hitFlash*5);ctx.drawImage(this.frame(kind,index,back,type,true),-size/2,-121*scale,size,size);}
+      if(enemy&&actor.hitFlash>0){ctx.globalAlpha*=Math.min(.85,actor.hitFlash*5);ctx.drawImage(this.frame(kind,index,back,type,true),-size/2,-121*scale,size,size);}
     }
     ctx.restore();
     // Variant cues remain legible even in the middle of a dense horde.
-    if(enemy&&type==='sprinter'&&!reduced){ctx.save();ctx.globalAlpha=.4;for(let i=0;i<3;i++)box(ctx,'#de8afb',x-(fx>0?36:-27)-i*4,y-21+i*5,11,1);ctx.restore();}
+    if(enemy&&type==='sprinter'&&!reduced){ctx.save();ctx.globalAlpha*=.4;for(let i=0;i<3;i++)box(ctx,'#de8afb',x-(fx>0?36:-27)-i*4,y-21+i*5,11,1);ctx.restore();}
     return true;
   }
 }
@@ -5218,8 +5352,11 @@ function drawDiscovery(ctx,p,time=0,reduced=false){
 modules["./discovery-art.js"]={drawDiscovery};
 })();
 (()=>{
-// Five complete painted figures. Neither animation nor aiming assembles limbs.
+const {charlesArrival}=modules['./charles.js'];
+// Complete painted figures. Neither animation nor aiming assembles limbs.
 const ASSET='assets/charles-whole-v1.png';
+const ARRIVAL_ASSET='assets/charles-arrival-v1.png';
+const ARRIVAL_EYES=[[[120.005,45.855],[123.89,45.855]],[[89.295,46.225],[93.365,46.225]],[[88.925,46.225],[92.625,46.225]]];
 const CHARLES_ART=Object.freeze({cell:176,columns:5,anchorX:88,anchorY:160,hoverHeight:26});
 const EYES=[[[86.44,45.73],[91.12,45.73]],[[86.18,50.15]],[[105.68,83.82],[111.14,84.08]],[[89.82,63.28]],[[89.3,46.64]]];
 const clamp=v=>Math.max(0,Math.min(1,v));
@@ -5238,32 +5375,38 @@ function charlesPose(c,time=0,reduced=false){
  const clock=Number.isFinite(c.elapsed)?c.elapsed:(Number.isFinite(time)?time:0);
  const hover=CHARLES_ART.hoverHeight;
  const frameByPhase={descend:1,bend:2,scream:3,burst:4,empowered:4,cape_warning:4,cape_spin:4};
+ const arrival=charlesArrival(c),arrivalFrame=arrival?.stage==='flight'?0:arrival?.stage==='prepare'?1:arrival?.stage==='snap'?2:null;
  const frame=frameByPhase[c.phase]??(c.powered?4:0);
  let lift=hover;
  if(c.phase==='descend')lift=hover*(1-ease(progress));
  else if(c.phase==='bend'||c.phase==='scream')lift=0;
  else if(c.phase==='burst')lift=hover*ease(progress);
- else if(c.phase==='intro')lift=hover+22*(1-ease(progress));
+ else if(c.phase==='intro')lift=hover+22*(1-ease(arrival.flight));
  else if(!reduced)lift+=Math.sin(clock*2.3)*2;
- return {frame,progress,lift,x:c.x,y:c.y-lift};
+ // The painted flight leans its head 32 px ahead of its feet. Ease that
+ // complete figure back as it straightens, keeping the face steady at settle.
+ const lean=arrivalFrame===0?32*ease(arrival.flight):0;
+ return {frame,arrivalFrame,progress,lift,x:c.x-(arrival?260*(1-ease(arrival.flight)):0)-lean,y:c.y-lift};
 }
 
 class CharlesArt {
  constructor({loadImage=load}={}){
-  this.image=null;this.error=null;
-  this.ready=Promise.resolve().then(()=>loadImage(ASSET)).then(image=>{this.image=image||null;return Boolean(image);}).catch(error=>{this.error=error;return false;});
+  this.image=null;this.arrivalImage=null;this.error=null;this.arrivalError=null;
+  const main=Promise.resolve().then(()=>loadImage(ASSET)).then(image=>{this.image=image||null;return Boolean(image);}).catch(error=>{this.error=error;return false;});
+  const arrival=Promise.resolve().then(()=>loadImage(ARRIVAL_ASSET)).then(image=>{this.arrivalImage=image||null;}).catch(error=>{this.arrivalError=error;});
+  this.ready=Promise.all([main,arrival]).then(([ready])=>ready);
  }
  /** Draw body only; attack footprints, beams and debris belong to effects. */
  draw(ctx,c,time=0,reduced=false){
   if(!this.image||!c||!Number.isFinite(c.x)||!Number.isFinite(c.y))return false;
-  const pose=charlesPose(c,time,reduced),a=CHARLES_ART;
+  const pose=charlesPose(c,time,reduced),a=CHARLES_ART,arrival=pose.arrivalFrame!==null&&this.arrivalImage,frame=arrival?pose.arrivalFrame:pose.frame;
   ctx.save();ctx.imageSmoothingEnabled=false;
   ctx.translate(Math.round(pose.x),Math.round(pose.y));
-  ctx.drawImage(this.image,pose.frame*a.cell,0,a.cell,a.cell,-a.anchorX,-a.anchorY,a.cell,a.cell);
+  ctx.drawImage(arrival||this.image,frame*a.cell,0,a.cell,a.cell,-a.anchorX,-a.anchorY,a.cell,a.cell);
   // Restore the source painting's emerald iris highlight after downsampling.
   // These are one-pixel light glints, not substitute facial/body geometry.
   ctx.fillStyle='#51f48d';
-  for(const [x,y]of EYES[pose.frame])ctx.fillRect(Math.round(x-a.anchorX),Math.round(y-a.anchorY),1,1);
+  for(const [x,y]of (arrival?ARRIVAL_EYES:EYES)[frame])ctx.fillRect(Math.round(x-a.anchorX),Math.round(y-a.anchorY),1,1);
   ctx.restore();return true;
  }
 }
@@ -5271,7 +5414,8 @@ class CharlesArt {
 modules["./charles-art.js"]={CHARLES_ART,charlesPose,CharlesArt};
 })();
 (()=>{
-const {CHARLES,charlesWaveRadius}=modules['./charles.js'];
+const {CHARLES,CHARLES_ARRIVAL,charlesArrival,charlesWaveRadius}=modules['./charles.js'];
+const {charlesPose,CHARLES_ART}=modules['./charles-art.js'];
 const TAU=Math.PI*2;
 function charlesProp(p,destroyed){if(!destroyed?.has(p.id))return p;return {...p,type:'stump',w:20,h:14,r:8,solid:false};}
 function circle(ctx,x,y,r,start=0,end=TAU){ctx.beginPath();ctx.arc(x,y,Math.max(0,r),start,end);}
@@ -5329,6 +5473,8 @@ function drawBeam(ctx,c,reduced){
 }
 function drawCharlesGround(ctx,c,reduced=false){
  if(!c||c.phase==='complete')return;ctx.save();
+ const arrival=charlesArrival(c);
+ if(arrival){const pose=charlesPose(c,c.elapsed,reduced);ctx.globalAlpha=.18;ctx.fillStyle='#0b0b1d';ctx.beginPath();ctx.ellipse(pose.x,c.y+7,24,7,0,0,TAU);ctx.fill();}
  if(c.phase==='shock_warning'||c.phase==='shockwave'){
   // Green opening and both its boundary rays persist even with effects reduced.
   ctx.globalAlpha=.16;ctx.fillStyle='#48e8a1';wedge(ctx,c,c.waveMax);ctx.fill();ctx.globalAlpha=.85;ctx.strokeStyle='#8bffbf';ctx.lineWidth=2;
@@ -5356,6 +5502,15 @@ function drawCharlesGround(ctx,c,reduced=false){
 function drawCharlesForeground(ctx,c,reduced=false){
  if(!c||c.phase==='complete')return;ctx.save();
 
+ const arrival=charlesArrival(c);
+ if(arrival?.stage==='snap'){
+  const pose=charlesPose(c,c.elapsed,reduced),p=(arrival.time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap);
+  const x=Math.round(pose.x)+66.725-CHARLES_ART.anchorX,y=Math.round(pose.y)+54.365-CHARLES_ART.anchorY;
+  // A local hand pulse makes the tiny painted gesture readable. No whiteout,
+  // strobe, particles, allocations or screen-wide wave; retained in reduced mode.
+  ctx.globalAlpha=(1-p)*(reduced?.55:.8);ctx.strokeStyle='#ffe6a0';ctx.lineWidth=2;circle(ctx,x,y,4+p*(reduced?15:32));ctx.stroke();
+  ctx.fillStyle='#fff2c6';ctx.fillRect(x-1,y-5,2,10);ctx.fillRect(x-5,y-1,10,2);
+ }
  if(c.hitFlash>0&&!reduced){ctx.globalAlpha=Math.min(.7,c.hitFlash*5);ctx.strokeStyle='#69ffc0';ctx.lineWidth=2;circle(ctx,c.x,c.y-55,44);ctx.stroke();}
  if(c.powered&&!reduced){ctx.globalAlpha=.6;ctx.fillStyle='#ebc45f';for(let n=0;n<8;n++){const a=n*TAU/8+c.elapsed*.4,x=c.x+Math.cos(a)*56,y=c.y-50+Math.sin(a)*48;ctx.fillRect(x,y,2,4);}}
  ctx.restore();
@@ -5415,11 +5570,13 @@ modules["./lamborghini-art.js"]={drawLamborghini};
 })();
 (()=>{
 const {EXPLOSIVE_BLAST}=modules['./engine.js'];
-const {EGO_BEASTS,egoCamoRatio}=modules['./ego-beasts.js'];
+const {enemyGaitFrame}=modules['./enemy-gait.js'];
+const {EGO_BEASTS,egoCamoRatio,egoHeight}=modules['./ego-beasts.js'];
 const {drawEgoGround,drawEgoForeground}=modules['./ego-art.js'];
 const {drawLamborghini}=modules['./lamborghini-art.js'];
 const {pickupAttraction}=modules['./drops.js'];
 const {CompanionArt}=modules['./companion-art.js'];
+const {charlesArrival}=modules['./charles.js'];
 const {CharlesArt}=modules['./charles-art.js'];
 const {charlesProp,drawCharlesGround,drawCharlesForeground}=modules['./charles-effects.js'];
 const {drawTrophyIcon,drawTrophyGround,drawTrophyForeground}=modules['./trophy-art.js'];
@@ -5802,7 +5959,7 @@ class Renderer {
   }
 
   _shadow(x,y,w=25,h=8,alpha=.48) {
-    const ctx=this.ctx;ctx.save();ctx.globalAlpha=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
+    const ctx=this.ctx;ctx.save();ctx.globalAlpha*=alpha;oval(ctx,'#0b0b1d',x-w/2,y-h/2,w,h,2);ctx.restore();
   }
   _car(p,moving=false) {
     if(moving&&p.carRank!==undefined){drawLamborghini(this.ctx,p,this.reducedEffects);return;}
@@ -5980,24 +6137,29 @@ this._shadow(x,y+7,40,8);
     const fx=actor.faceX??s.faceX??1,fy=actor.faceY??s.faceY??0,back=gas||fy<-.45;
     const scale=isEnemy?(ENEMY_SCALE[type]||.84):(isGirl?.82:.88);
     if(['travestia','pelican'].includes(type)&&!this.actors.availableFor(actor,kind)){ctx.save();ctx.fillStyle='#ffbd6b';ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.fillText(type==='pelican'?'PÉLI ZODIAQUE':'TRAVESTIA',actor.x,actor.y-35);ctx.restore();return;}
-    if(EGO_BEASTS[type]){ctx.save();if(egoCamoRatio(actor)===0)this._shadow(Math.round(actor.x),Math.round(actor.y)+8,36,9);this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);drawEgoForeground(ctx,actor);ctx.restore();return;}
+    if(EGO_BEASTS[type]){ctx.save();if(egoCamoRatio(actor)===0)this._shadow(Math.round(actor.x),Math.round(actor.y)+8,36,9);this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);if(!charlesArrival(s.charles)?.locked)drawEgoForeground(ctx,actor,this.reducedEffects);ctx.restore();this._enemyStatus(actor,scale);return;}
     const sprite=this.actors.availableFor(actor,kind)?null:this._sprite(kind==='enemy'?'gorilla':kind,phase,back,type);
     if(!sprite&&!this.actors.availableFor(actor,kind))return;
     const x=Math.round(actor.x),y=Math.round(actor.y),flip=fx<-.1&&!gas;
     this._shadow(x,y+11,isEnemy?49*scale:isGirl?28:33,isEnemy?13:9);
-    ctx.save();if(isEnemy)ctx.globalAlpha=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
+    ctx.save();if(isEnemy)ctx.globalAlpha*=s.opening&&(s.opening.phase==='move'||s.elapsed<.3)?1:this.combat.alpha(actor.id,s.elapsed);
     const raster=kind==='girl'&&this.companion.draw(ctx,actor,s,this.time,this.reducedEffects)||this.actors.draw(ctx,actor,kind,phase,s,this.time,this.reducedEffects);ctx.restore();
     ctx.save();ctx.translate(x,y+10);if(flip)ctx.scale(-1,1);
     if(!raster&&actor.down){ctx.rotate(-Math.PI/2);ctx.globalAlpha=.6;ctx.drawImage(sprite,-34*scale,-45*scale,68*scale,76*scale);}
     else if(!raster){if(!isEnemy&&!isGirl&&(s.invulnerable||0)>0&&Math.floor(this.time*14)%2)ctx.globalAlpha=.58;ctx.drawImage(sprite,-34*scale,-71*scale,68*scale,76*scale);}
     ctx.restore();
-    if(!raster&&isEnemy&&(actor.hitFlash||0)>0){ctx.save();ctx.globalAlpha=.35;oval(ctx,'#ffe8bf',x-12,y-22,24,31,2);ctx.restore();}
-    if(isEnemy&&(actor.charmed||0)>0){heart(ctx,x-4,y-45*scale+Math.sin(this.time*5)*2,C.pink,.7);ring(ctx,'#ed70ca',x,y+9,24*scale,.45,1,this.time*.5);}
+    if(!raster&&isEnemy&&(actor.hitFlash||0)>0){ctx.save();ctx.globalAlpha*=.35;oval(ctx,'#ffe8bf',x-12,y-22,24,31,2);ctx.restore();}
+    if(isEnemy)this._enemyStatus(actor,scale);
     if(isGirl&&!actor.down){rect(ctx,C.ink,x-14,y+15,29,5);rect(ctx,'#58d68e',x-13,y+16,Math.max(0,27*(actor.hp/(actor.maxhp||100))),3);}
-    if(isEnemy&&!['travestia','pelican'].includes(type)&&actor.hp<actor.maxhp){const w=type==='matriarch'?39:24;rect(ctx,C.ink,x-w/2,y-72*scale,w,4);rect(ctx,type==='matriarch'?'#ff579f':'#d14b83',x-w/2+1,y-72*scale+1,Math.max(0,(w-2)*actor.hp/actor.maxhp),2);}
     if(type==='travestia'){ctx.save();ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff0cb';ctx.fillText('TRAVESTIA',x,y-135);rect(ctx,C.ink,x-31,y-130,62,6);rect(ctx,'#f65f9f',x-30,y-129,60*Math.max(0,actor.hp/actor.maxhp),4);ctx.restore();}
     if(type==='pelican'){ctx.save();ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.strokeStyle=C.ink;ctx.lineWidth=3;ctx.strokeText('PÉLI ZODIAQUE',x,y-142);ctx.fillStyle='#ffe5a3';ctx.fillText('PÉLI ZODIAQUE',x,y-142);rect(ctx,C.ink,x-36,y-137,72,6);rect(ctx,'#d58af5',x-35,y-136,70*Math.max(0,actor.hp/actor.maxhp),4);ctx.restore();}
     if(gas){const a=this.time*7;for(let i=0;i<3;i++){const px=x-7+i*8+Math.sin(a+i)*3,py=y+3+(this.time*19+i*8)%21;oval(ctx,i%2?'#c2fa34':'#8dbb20',px-5,py-3,11,8,2);}}
+  }
+  _enemyStatus(actor,scale){
+    const type=actor.type,ego=Boolean(EGO_BEASTS[type]);if(ego&&egoCamoRatio(actor)>0)return;
+    const ctx=this.ctx,x=Math.round(actor.x),y=Math.round(actor.y)+(ego?11-egoHeight(actor):0),head=ego?({ego_peacock:93,ego_toad:62,ego_rat:66,ego_chameleon:55}[type]):72*scale;
+    if((actor.charmed||0)>0){heart(ctx,x-4,y-(ego?head+9:45*scale)+(ego&&this.reducedEffects?0:Math.sin(this.time*5)*2),C.pink,.7);ring(ctx,'#ed70ca',x,Math.round(actor.y)+(ego?20:9),24*scale,.45,1,ego&&this.reducedEffects?0:this.time*.5);}
+    if(!['travestia','pelican'].includes(type)&&actor.hp<actor.maxhp){const w=type==='matriarch'?39:24;rect(ctx,C.ink,x-w/2,y-head,w,4);rect(ctx,type==='matriarch'?'#ff579f':'#d14b83',x-w/2+1,y-head+1,Math.max(0,(w-2)*actor.hp/actor.maxhp),2);}
   }
   _travestiaDash(e){
     if(e.phase==='tail_dash_recover')return;
@@ -6029,8 +6191,7 @@ this._shadow(x,y+7,40,8);
       line(ctx,'#df8058',e.x,e.y,e.x+Math.cos(aim-half)*reach,e.y+Math.sin(aim-half)*reach,1);line(ctx,'#df8058',e.x,e.y,e.x+Math.cos(aim+half)*reach,e.y+Math.sin(aim+half)*reach,1);
       rect(ctx,C.ink,e.x-5,e.y-82,11,17);rect(ctx,'#ffce90',e.x-1,e.y-79,3,8);rect(ctx,'#ff8d55',e.x-1,e.y-68,3,3);
     }else{
-      const progress=1-Math.max(0,Math.min(1,e.swipe/.28)),angle=aim-half+progress*half*2,hx=e.x+Math.cos(angle)*61,hy=e.y+Math.sin(angle)*61;
-      ctx.globalAlpha=.9;line(ctx,C.ink,e.x+dx*12,e.y-20,hx,hy,11);line(ctx,'#b85429',e.x+dx*12,e.y-20,hx,hy,8);line(ctx,'#ee9a46',e.x+dx*12-1,e.y-22,hx-1,hy-2,3);oval(ctx,C.ink,hx-6,hy-5,12,10,1);oval(ctx,'#b88157',hx-4,hy-3,8,6,1);
+      const progress=1-Math.max(0,Math.min(1,e.swipe/.28)),angle=aim-half+progress*half*2;
       if(!this.reducedEffects){ctx.globalAlpha=.65;for(let a=angle-.35;a<angle;a+=.05)rect(ctx,'#ffe1a2',e.x+Math.cos(a)*67,e.y+Math.sin(a)*67,3,2);}
     }ctx.restore();
   }
@@ -6115,7 +6276,7 @@ this._shadow(x,y+7,40,8);
     for(const p of shockwaves||[])this._shockwave(p);
   }
   render(game,time=0) {
-    const state=game.state||game.s;if(!state)return;const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
+    const state=game.state||game.s;if(!state)return;const arrival=charlesArrival(state.charles);const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
     const seed=game.world?.seed??42;this.combat.prepare(s,seed,game.defeatEffects,state);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
@@ -6149,8 +6310,8 @@ this._shadow(x,y+7,40,8);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
     const raisedCarWarnings=(s.vehicles||[]).some(v=>v.carRank!==undefined&&v.carDelay<=0&&v.life>0);
-    if(!raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
-    const items=[];if(s.charles&&s.charles.phase!=='complete')items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
+    if(!raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
+    const items=[];if(s.charles&&s.charles.phase!=='complete'&&!arrival)items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
     for(const v of s.vehicles||[])items.push({y:v.y+13,kind:'vehicle',data:v});
@@ -6166,24 +6327,30 @@ this._shadow(x,y+7,40,8);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {
-        const a=item.data,moving=item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
-        // Enemy phase names describe attacks. Only a numeric phase may offset gait.
+        const a=item.data,moving=arrival?.locked?false:item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
+        // The simulation records only actual chase travel in a transient cache.
+        // Repeated/paused renders cannot advance it, and blocked feet stay planted.
+        // Preserve the gait input of creatures owned by another animation system.
         const gaitOffset=typeof a.phase==='number'&&Number.isFinite(a.phase)?a.phase*3:0;
-        const actorPhase=moving?(item.kind==='enemy'?Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8:phase):0;
-        this._actor(a,item.kind,(actorPhase+8)%8,s);
+        const legacyPhase=Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8;
+        const actorPhase=arrival?.locked?0:item.kind==='enemy'?enemyGaitFrame(a,game.enemyGait?.get(a),legacyPhase):moving?phase:0;
+        if(item.kind==='enemy'&&arrival){ctx.save();ctx.globalAlpha*=arrival.enemyOpacity;this._actor(a,item.kind,(actorPhase+8)%8,s);ctx.restore();}
+        else this._actor(a,item.kind,(actorPhase+8)%8,s);
       }
     }
     for(const p of shots)this._shot(p,s);
-    for(const e of enemies)if(!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
-    for(const e of enemies)if(!e.dead)this._rivalAttack(e,true);
+    for(const e of enemies)if(!arrival?.locked&&!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
+    for(const e of enemies)if(!arrival?.locked&&!e.dead)this._rivalAttack(e,true);
     if(!this.reducedEffects)for(const p of clouds)this._cloud(p,true);
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
     drawTrophyForeground(ctx,s,this.reducedEffects);
+    // Airborne arrival paints above scenery; later combat retains ordinary depth.
+    if(arrival)this.charles.draw(ctx,s.charles,s.charles.elapsed,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects);
     this._shield(s);
-    if(raisedCarWarnings)this._dangerWarnings(enemies,s.shockwaves);
+    if(raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}
@@ -6355,8 +6522,8 @@ function getMusicStepEvents(scene, step, intensity = 0.35) {
   return events;
 }
 
-const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9 };
-const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster']);
+const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9, snap: 1 };
+const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster', 'snap']);
 
 class AudioManager {
   constructor({ enabled = true, volume = 0.5 } = {}) {
@@ -6687,6 +6854,12 @@ class AudioManager {
       case 'defeat':
         this._jingle([76, 74, 71, 67, 63, 59], now, 0.14, 0.25);
         this._tone(43, now + 0.72, 0.48, 0.13, 'sawtooth', 'sfx', 31);
+        break;
+      case 'snap':
+        // One dry finger snap: three short voices, no screen-wide blast.
+        this._noise(now, 0.028, 0.12, 2600);
+        this._tone(67, now, 0.045, 0.09, 'triangle', 'sfx', 46);
+        this._tone(95, now + 0.035, 0.09, 0.045, 'sine', 'sfx', 90);
         break;
       case 'click':
         this._tone(79, now, 0.035, 0.055, 'square', 'sfx', 83);

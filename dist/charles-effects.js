@@ -1,4 +1,5 @@
-import {CHARLES,charlesWaveRadius} from './charles.js';
+import {CHARLES,CHARLES_ARRIVAL,charlesArrival,charlesWaveRadius} from './charles.js';
+import {charlesPose,CHARLES_ART} from './charles-art.js';
 const TAU=Math.PI*2;
 export function charlesProp(p,destroyed){if(!destroyed?.has(p.id))return p;return {...p,type:'stump',w:20,h:14,r:8,solid:false};}
 function circle(ctx,x,y,r,start=0,end=TAU){ctx.beginPath();ctx.arc(x,y,Math.max(0,r),start,end);}
@@ -56,6 +57,8 @@ function drawBeam(ctx,c,reduced){
 }
 export function drawCharlesGround(ctx,c,reduced=false){
  if(!c||c.phase==='complete')return;ctx.save();
+ const arrival=charlesArrival(c);
+ if(arrival){const pose=charlesPose(c,c.elapsed,reduced);ctx.globalAlpha=.18;ctx.fillStyle='#0b0b1d';ctx.beginPath();ctx.ellipse(pose.x,c.y+7,24,7,0,0,TAU);ctx.fill();}
  if(c.phase==='shock_warning'||c.phase==='shockwave'){
   // Green opening and both its boundary rays persist even with effects reduced.
   ctx.globalAlpha=.16;ctx.fillStyle='#48e8a1';wedge(ctx,c,c.waveMax);ctx.fill();ctx.globalAlpha=.85;ctx.strokeStyle='#8bffbf';ctx.lineWidth=2;
@@ -83,6 +86,15 @@ export function drawCharlesGround(ctx,c,reduced=false){
 export function drawCharlesForeground(ctx,c,reduced=false){
  if(!c||c.phase==='complete')return;ctx.save();
 
+ const arrival=charlesArrival(c);
+ if(arrival?.stage==='snap'){
+  const pose=charlesPose(c,c.elapsed,reduced),p=(arrival.time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap);
+  const x=Math.round(pose.x)+66.725-CHARLES_ART.anchorX,y=Math.round(pose.y)+54.365-CHARLES_ART.anchorY;
+  // A local hand pulse makes the tiny painted gesture readable. No whiteout,
+  // strobe, particles, allocations or screen-wide wave; retained in reduced mode.
+  ctx.globalAlpha=(1-p)*(reduced?.55:.8);ctx.strokeStyle='#ffe6a0';ctx.lineWidth=2;circle(ctx,x,y,4+p*(reduced?15:32));ctx.stroke();
+  ctx.fillStyle='#fff2c6';ctx.fillRect(x-1,y-5,2,10);ctx.fillRect(x-5,y-1,10,2);
+ }
  if(c.hitFlash>0&&!reduced){ctx.globalAlpha=Math.min(.7,c.hitFlash*5);ctx.strokeStyle='#69ffc0';ctx.lineWidth=2;circle(ctx,c.x,c.y-55,44);ctx.stroke();}
  if(c.powered&&!reduced){ctx.globalAlpha=.6;ctx.fillStyle='#ebc45f';for(let n=0;n<8;n++){const a=n*TAU/8+c.elapsed*.4,x=c.x+Math.cos(a)*56,y=c.y-50+Math.sin(a)*48;ctx.fillRect(x,y,2,4);}}
  ctx.restore();
