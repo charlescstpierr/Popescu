@@ -12,21 +12,22 @@ const remaining=(n,dt)=>Math.max(0,n-dt<EPS?0:n-dt);
 // The rendered card is 24 along its locked travel axis and 36 across it.
 // Sweeping that rectangle along the same axis is another rectangle; distance
 // from the enemy's circle center gives exact collision, including rounded corners.
-function cardIntersects(card,e,from,to){
- const x=e.x-card.originX,y=e.y-card.originY;
+function cardIntersects(card,point,radius,from,to){
+ const x=point.x-card.originX,y=point.y-card.originY;
  const along=x*card.dx+y*card.dy,across=-x*card.dy+y*card.dx;
  const low=Math.min(from,to)-12,high=Math.max(from,to)+12;
  const gapX=Math.max(low-along,0,along-high),gapY=Math.max(0,Math.abs(across)-18);
- return gapX*gapX+gapY*gapY<=(e.r||0)**2+EPS;
+ return gapX*gapX+gapY*gapY<=radius**2+EPS;
 }
 const cardDistance=age=>220*(age<=.8?age/.8:(1.6-age)/.8);
 function cardPass(game,card,start,end,back){
  const hits=back?card.hitBack:card.hitOut,known=new Set([...card.hitOut,...card.hitBack]);
  const from=cardDistance(start),to=cardDistance(end);
- const candidates=game.s.enemies.filter(e=>alive(e)&&!hits.includes(e.id)&&cardIntersects(card,e,from,to));
+ // Projectiles share the body's collision center, including a jumping toad.
+ const candidates=game.s.enemies.filter(e=>alive(e)&&!hits.includes(e.id)).map(e=>({enemy:e,point:game.targetPosition(e)})).filter(({enemy,point})=>cardIntersects(card,point,enemy.r||0,from,to));
  // Hit order follows travel, not enemy-array order, including a large timestep.
- candidates.sort((a,b)=>((a.x-b.x)*card.dx+(a.y-b.y)*card.dy)*(back?-1:1)||compareId(a,b));
- for(const e of candidates){if(!known.has(e.id)&&known.size>=3)continue;known.add(e.id);hits.push(e.id);game.hurt(e,18);}
+ candidates.sort((a,b)=>((a.point.x-b.point.x)*card.dx+(a.point.y-b.point.y)*card.dy)*(back?-1:1)||compareId(a.enemy,b.enemy));
+ for(const {enemy:e} of candidates){if(!known.has(e.id)&&known.size>=3)continue;known.add(e.id);hits.push(e.id);game.hurt(e,18);}
 }
 function updateCard(game,dt,canHit=true){
  const t=game.s.trophies,c=t.tarot;if(!c)return;
@@ -71,8 +72,8 @@ export function updateTrophyEffects(game,dt,passiveOnly=false){
  if(passiveOnly){updateCard(game,dt,false);if(t.panache){t.panache.life=remaining(t.panache.life,dt);if(!t.panache.life)t.panache=null;}return;}
  for(const e of s.enemies)if(e.trophyCharmLife>0)e.trophyCharmLife=Math.min(Math.max(0,e.charmed),remaining(e.trophyCharmLife,dt));
  if(hasTrophy(s,'tarot')&&!t.tarot&&t.cooldowns.tarot===0){
-  const candidates=s.enemies.filter(e=>alive(e)&&distance2(e,s)<=220**2).sort((a,b)=>distance2(a,s)-distance2(b,s)||compareId(a,b));
-  if(candidates.length){const e=candidates[0],length=Math.hypot(e.x-s.x,e.y-s.y);t.tarot={x:s.x,y:s.y,originX:s.x,originY:s.y,dx:length?(e.x-s.x)/length:1,dy:length?(e.y-s.y)/length:0,age:0,hitOut:[],hitBack:[]};t.cooldowns.tarot=8;}
+  const candidates=s.enemies.filter(alive).map(e=>({enemy:e,point:game.targetPosition(e)})).filter(({point})=>distance2(point,s)<=220**2).sort((a,b)=>distance2(a.point,s)-distance2(b.point,s)||compareId(a.enemy,b.enemy));
+  if(candidates.length){const {point}=candidates[0],length=Math.hypot(point.x-s.x,point.y-s.y);t.tarot={x:s.x,y:s.y,originX:s.x,originY:s.y,dx:length?(point.x-s.x)/length:1,dy:length?(point.y-s.y)/length:0,age:0,hitOut:[],hitBack:[]};t.cooldowns.tarot=8;}
  }
  updateCard(game,dt);
  if(hasTrophy(s,'panache')&&!t.panache&&t.cooldowns.panache===0){
