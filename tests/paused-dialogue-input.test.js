@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {seedUpgradeOffer} from './helpers/upgrade-offer.js';
 import assert from 'node:assert/strict';
 import {app} from './helpers/focus-controller.js';
 import {EVENTS} from '../dist/content.js';
@@ -6,7 +7,7 @@ import {captureRun} from '../dist/run-save.js';
 const key=(a,value,repeat=false)=>a.events.keydown({key:value,repeat,preventDefault(){}});
 async function boss(){const a=app();await a.click('play');a.game.setPausedEncountersEnabled(true);a.game.world.collides=()=>false;a.game.s.shotClock=1000;const e=a.game.spawnEnemy('pelican',a.game.s.x+100,a.game.s.y);e.cooldown=0;a.game.update(.01);assert.equal(a.controller.screen,'dialogue');return a;}
 const progress=a=>a.get('dialogue-progress').textContent;
-async function companion(){const a=app();await a.click('play');a.game.rng=4;a.game.gainXP(8);const index=a.game.s.options.findIndex(o=>o.id==='girlfriend');a.get('upgrade-options').children[index].dispatch('click',{});return a;}
+async function companion(){const a=app();await a.click('play');seedUpgradeOffer(a.game,'girlfriend');a.game.gainXP(8);const index=a.game.s.options.findIndex(o=>o.id==='girlfriend');a.get('upgrade-options').children[index].dispatch('click',{});return a;}
 
 test('held Enter and Space cannot consume a modal and cannot spill into resumed controls',async()=>{
  const a=await companion();for(const button of ['Enter',' ']){for(let i=0;i<8;i++)key(a,button,true);assert.equal(progress(a),'1 / 5');}key(a,'Enter');assert.equal(progress(a),'2 / 5');for(let i=0;i<8;i++)key(a,'Enter',true);assert.equal(progress(a),'2 / 5');

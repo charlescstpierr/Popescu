@@ -10,6 +10,7 @@ import {charlesActive,startCharles,finishCharles,hitCharles,updateCharles} from 
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
 import {EVOLUTIONS,REROLL_COSTS,evolutionReady,bounceHeart,updateCarBills} from './evolutions.js';
+import {upgradeDrafts,drawUpgradeDraft} from './upgrade-draft.js';
 import {compactDrops,pickupAttraction} from './drops.js';
 import {BOSS_SCHEDULE,createBossDirector,scheduleNextBoss,isMajorBoss} from './boss-director.js';
 import {pelicanLocked,updatePelican,interruptPelican} from './pelican.js';
@@ -123,16 +124,11 @@ export class Game {
     return pool;
   }
   rollUpgradeOptions(previous=[]){
-    const choices=EVOLUTIONS.filter(def=>evolutionReady(this.s,def));
-    const pool=this.upgradePool();
-    while(pool.length&&choices.length<3){
-      const fresh=pool.filter(u=>!previous.some(p=>p.id===u.id));const candidates=fresh.length?fresh:pool;
-      const item=candidates[Math.floor(this.random()*candidates.length)];choices.push(item);pool.splice(pool.indexOf(item),1);
-    }
-    return choices;
+    const fixed=EVOLUTIONS.filter(def=>evolutionReady(this.s,def));
+    return drawUpgradeDraft(upgradeDrafts(this.upgradePool(),fixed,previous),fixed.length,()=>this.random());
   }
   rerollCost(){return REROLL_COSTS[this.s.upgradeRerolls]??null;}
-  canRerollUpgrade(){const s=this.s,cost=this.rerollCost();return s.mode==='upgrade'&&cost!==null&&s.coins>=cost&&this.upgradePool().some(u=>!s.options.some(o=>o.id===u.id));}
+  canRerollUpgrade(){const s=this.s,cost=this.rerollCost();if(s.mode!=='upgrade'||cost===null||s.coins<cost)return false;const fixed=EVOLUTIONS.filter(def=>evolutionReady(s,def));return upgradeDrafts(this.upgradePool(),fixed,s.options).some(draft=>draft.some(u=>!s.options.some(o=>o.id===u.id)));}
   rerollUpgrade(){
     if(!this.canRerollUpgrade())return false;
     const s=this.s,cost=this.rerollCost(),choices=this.rollUpgradeOptions(s.options);
