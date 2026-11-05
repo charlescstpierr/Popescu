@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -249,8 +249,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 45655,
-      "sha256": "93961eb36dfc824915aec61b6e7e22ed42f4545dd656ca2c81b1a291d74c82b1"
+      "bytes": 47204,
+      "sha256": "90db02b55afb0af8f04644afaaafbe216a310c8bd7643a73a7fa549604caded3"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -589,8 +589,8 @@
     },
     {
       "path": "dist/run-save.js",
-      "bytes": 35882,
-      "sha256": "c55029061e7a2ced26f78dfaff37433c1ca7c7b1504d0b77c18ea9d7bb894e11"
+      "bytes": 36166,
+      "sha256": "4c0ffe68c392208b3fdc276be361155b54e9911eddc94b88e5e99251022da66b"
     },
     {
       "path": "dist/scenery-presentation.js",
@@ -871,6 +871,11 @@
       "path": "docs/QA-SAVE-V13.md",
       "bytes": 3568,
       "sha256": "c4153a82c0f31192843059c1c0d7f0962181a12e54fda6b9d9f92204ba129b62"
+    },
+    {
+      "path": "docs/QA-START-LOCK-CANCELLATION.md",
+      "bytes": 4186,
+      "sha256": "ffadcea007aa689905d721791390885e665a80f4bf14fbe9cec50655da4f71b7"
     },
     {
       "path": "docs/QA-STORY-CONVERSATIONS.md",
@@ -1185,12 +1190,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 5663,
-      "sha256": "0a260d58fb91b190a41f6b15c884b5615f4c1a817b7bfb135106f075db39d447"
+      "sha256": "0a2c33e6300f27d7cdbfd0e924a59c174df3c5eb287865d419706f3d253bbff1"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 647559,
-      "sha256": "c966badd17dfff20641ad9780d59cb18b3d313d0bdf1564c6a8b526d321511a9"
+      "bytes": 649392,
+      "sha256": "6ef1952ab008611c1d80e26419287e51caf9d6fa9f186d58bb7b05d24f85b681"
     },
     {
       "path": "release/archives/README.md",
@@ -1984,8 +1989,8 @@
     },
     {
       "path": "tests/helpers/asset-controller.js",
-      "bytes": 4785,
-      "sha256": "192b57871dda385c8c7babbde37e9bbad3273d559ce6e54ea9da12b99f0c247c"
+      "bytes": 4817,
+      "sha256": "fcbf9b144911030786d813156031406aead2e1053fab96dc3a15ae4c7b5c242e"
     },
     {
       "path": "tests/helpers/boss-combat.js",
@@ -2228,6 +2233,11 @@
       "sha256": "eb385a909a7ee9d8d3f0de5ee182dfbad00a2dbff1672d438a83d16c72d491d2"
     },
     {
+      "path": "tests/start-lock-cancellation.test.js",
+      "bytes": 8978,
+      "sha256": "badea6030544213ff2366ff481282383e5d1925989d73f3eeca49ca46773cd25"
+    },
+    {
       "path": "tests/story-conversations.test.js",
       "bytes": 11513,
       "sha256": "258973d4cacf95e9971cba393f1c51ddd74e178983ec8a7a486d145df5fb93d0"
@@ -2318,7 +2328,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "0b21a187eedf01cd44189ff9b2dc70546f93cdb9",
+  "base_github_commit": "451dedfbc12f1958c22673325bc489f31334c093",
   "integration_date": "2026-11-05",
   "offline_release": {
     "format": "offline-folder-v1",
