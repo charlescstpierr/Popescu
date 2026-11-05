@@ -54,7 +54,7 @@ test('chained upgrade renders once and plays one level cue per offer',async()=>{
 test('endless button keeps the earned upgrade screen instead of hiding it behind the HUD',async()=>{
   const a=app();await a.click('play');a.game.s.elapsed=1199.99;
   a.game.s.drops=[{x:a.game.s.x,y:a.game.s.y,kind:'xp',value:50,life:10}];a.game.update(.02);
-  a.click('endless');assert.equal(a.game.s.mode,'upgrade');
+  a.click('pause');a.click('charles-leave');a.click('endless');assert.equal(a.game.s.mode,'upgrade');
   assert.equal(a.controller.screen,'upgrades');
 });
 

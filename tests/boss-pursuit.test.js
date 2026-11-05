@@ -49,8 +49,8 @@ test('returned special attacks keep their full warning before dealing damage',()
 test('pause and checkpoint keep the same boss and deterministic next re-entry',()=>{
  const {game,boss}=quiet('pelican');const saved=captureRun(game),restored=restoreRun(saved);game.pause();game.update(.2,{x:1,y:0});assert.equal(boss.x,-1700);game.resume();for(const run of [game,restored])run.update(1/30,{x:1,y:0});assert.deepEqual(captureRun(game),captureRun(restored));
 });
-test('a living boss never gates the 20-minute victory or optional endless continuation',()=>{
- const {game,boss}=quiet('travestia');game.s.elapsed=1199.99;game.update(.02,{x:1,y:0});assert.equal(game.s.mode,'victory');assert.ok(game.s.enemies.includes(boss));game.continueEndless();assert.equal(game.s.mode,'playing');assert.equal(game.s.endless,true);
+test('a living boss never gates the 20-minute arrival or later endless continuation',()=>{
+ const {game,boss}=quiet('travestia');game.s.elapsed=1199.99;game.update(.02,{x:1,y:0});assert.equal(game.s.mode,'playing');assert.equal(game.s.charles.phase,'intro');assert.ok(game.s.enemies.includes(boss));game.leaveCharlesEpilogue();game.continueEndless();assert.equal(game.s.mode,'playing');assert.equal(game.s.endless,true);
 });
 test('old overlapping boss saves queue distant returns without losing either encounter',()=>{
  const original=JSON.parse(readFileSync(new URL('./fixtures/runstore-v5.json',import.meta.url),'utf8'));

@@ -53,10 +53,10 @@ test('jealous gorillas pursue companion and companion returns after being downed
   tick(g,13);assert.equal(g.s.girl.down,0);assert.ok(g.s.girl.hp>0);
 });
 
-test('twenty minutes leads to victory once and endless resumes active play', () => {
+test('twenty minutes starts Charles once and leaving unlocks endless play', () => {
   const events=[];const g=game({onEvent:t=>events.push(t)});g.s.elapsed=1199.98;g.update(.05);
-  assert.equal(g.s.mode,'victory');assert.equal(events.filter(t=>t==='victory').length,1);
-  tick(g,1);assert.equal(events.filter(t=>t==='victory').length,1);
+  assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');assert.equal(events.filter(t=>t==='epilogue-start').length,1);
+  tick(g,1);assert.equal(events.filter(t=>t==='victory').length,0);assert.equal(events.filter(t=>t==='epilogue-start').length,1);g.leaveCharlesEpilogue();
   g.continueEndless();assert.equal(g.s.endless,true);assert.equal(g.s.mode,'playing');g.update(.05);assert.equal(g.s.mode,'playing');
 });
 

@@ -28,10 +28,10 @@ test('encounter frames retain actual movement, automatic shooting and damage',()
  const {g,events}=fixture();g.world.collides=()=>false;g.spawnWave=()=>{};g.spawnEnemy('normal',g.s.x+90,g.s.y);g.s.shotClock=0;const x=g.s.x,time=g.s.elapsed;g.update(.05,{x:1,y:0});
  assert.ok(g.s.x>x);assert.ok(g.s.elapsed>time);assert.ok(g.s.shots.length);assert.equal(g.s.mode,'playing');assert.ok(events.some(e=>e.type==='bark'));const hp=g.s.hp;g.damage(5,'contact');assert.ok(g.s.hp<hp);
 });
-test('all chapters happen once and victory still happens at twenty minutes',()=>{
+test('all chapters happen once and Charles arrives at twenty minutes',()=>{
  const {g,events}=fixture();g.world.getVisible=()=>[];g.timers.bark=10000;
  for(const m of content.STORY_MILESTONES){g.s.elapsed=m.at;g.story(.01);assert.equal(events.at(-1).payload.text,m.text);assert.equal(g.s.mode,'playing');g.s.elapsed+=5;g.story(.01);}
- assert.equal(events.length,4);g.spawnWave=()=>{};g.s.elapsed=1199.99;g.update(.02);assert.equal(g.s.mode,'victory');g.continueEndless();assert.equal(g.s.mode,'playing');g.update(.02);assert.equal(events.filter(e=>e.type==='victory').length,1);
+ assert.equal(events.length,4);g.spawnWave=()=>{};g.s.elapsed=1199.99;g.update(.02);assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');g.leaveCharlesEpilogue();g.continueEndless();assert.equal(g.s.mode,'playing');g.update(.02);assert.equal(events.filter(e=>e.type==='victory').length,0);assert.equal(events.filter(e=>e.type==='epilogue-start').length,1);
 });
 test('companion shutdown keeps its transition notice but suppresses later chatter',()=>{
  const events=[],g=new Game({onEvent:(type,payload)=>events.push({type,payload})});g.s.companion=true;g.s.girl.hp=0;g.updateCompanion(.1);

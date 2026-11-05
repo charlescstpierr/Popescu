@@ -31,14 +31,14 @@ test('companion dialogue preserves the next earned upgrade and keeps simulation 
 });
 
 
-test('victory at twenty minutes preserves earned upgrade choices for endless continuation',()=>{
+test('automatic Charles arrival preserves earned upgrade choices for endless continuation',()=>{
   const events=[];const g=new Game({onEvent:t=>events.push(t)});
   g.s.elapsed=1199.99;g.s.drops=[{x:0,y:0,kind:'xp',value:50,life:10}];g.update(.02);
-  assert.equal(g.s.mode,'victory');assert.equal(events.filter(t=>t==='victory').length,1);
+  assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');assert.equal(events.filter(t=>t==='epilogue-start').length,1);assert.equal(events.filter(t=>t==='victory').length,0);
   const choices=g.s.options;assert.equal(choices.length,3);assert.equal(g.s.level,2);
-  g.continueEndless();assert.equal(g.s.mode,'upgrade');assert.equal(g.s.options,choices);
+  g.leaveCharlesEpilogue();g.continueEndless();assert.equal(g.s.mode,'upgrade');assert.equal(g.s.options,choices);
   const elapsed=g.s.elapsed;g.update(.1);assert.equal(g.s.elapsed,elapsed);
   g.chooseUpgrade(choices[0].id);assert.equal(g.s.level,3);assert.equal(g.s.mode,'upgrade');
   g.chooseUpgrade(g.s.options[0].id);assert.equal(g.s.mode,'playing');g.update(.02);
-  assert.equal(events.filter(t=>t==='victory').length,1);
+  assert.equal(events.filter(t=>t==='victory').length,0);
 });

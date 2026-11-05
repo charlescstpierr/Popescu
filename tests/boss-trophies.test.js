@@ -21,8 +21,8 @@ test('only one reward per species survives duplicate boss chests and the total n
 test('a level already open has priority and the trophy follows that exact choice before XP backlog',()=>{
  const {g}=quiet();g.s.xpNeed=8;g.gainXP(8);const options=g.s.options.map(o=>o.id);chest(g,'matriarch');g.updateChests(.01);assert.equal(g.s.mode,'upgrade');assert.deepEqual(g.s.options.map(o=>o.id),options);assert.equal(g.s.trophies.pending.length,1);g.s.xp=1000;assert.equal(g.chooseUpgrade(options[0]),true);assert.equal(g.s.mode,'trophy');assert.equal(g.chooseTrophy('fanclub'),true);assert.equal(g.s.mode,'upgrade');
 });
-test('twenty-minute victory outranks a same-step chest and preserves its pending choice for endless',()=>{
- const {g,events}=quiet();g.s.elapsed=1199.99;chest(g,'pelican');g.update(.02);assert.equal(g.s.mode,'victory');assert.equal(g.s.trophies.pending.length,1);assert.equal(events.filter(([t])=>t==='trophy').length,0);assert.equal(g.s.coins,5);g.continueEndless();assert.equal(g.s.mode,'trophy');assert.equal(g.s.endless,true);g.chooseTrophy('tarot');assert.equal(g.s.mode,'playing');assert.equal(g.s.coins,5);
+test('twenty-minute arrival outranks a same-step chest and preserves its pending choice for endless',()=>{
+ const {g,events}=quiet();g.s.elapsed=1199.99;chest(g,'pelican');g.update(.02);assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');assert.equal(g.s.trophies.pending.length,1);assert.equal(events.filter(([t])=>t==='trophy').length,0);assert.equal(g.s.coins,5);g.leaveCharlesEpilogue();g.continueEndless();assert.equal(g.s.mode,'trophy');assert.equal(g.s.endless,true);g.chooseTrophy('tarot');assert.equal(g.s.mode,'playing');assert.equal(g.s.coins,5);
 });
 test('a queued trophy cannot replace gameover or an active dialogue',()=>{
  const {g}=quiet();chest(g,'matriarch');g.updateChests(.01);g.startDialogue([{who:'TOMA',text:'Moi.'}]);g.openTrophy();assert.equal(g.s.mode,'dialogue');g.finishDialogue();assert.equal(g.s.mode,'trophy');

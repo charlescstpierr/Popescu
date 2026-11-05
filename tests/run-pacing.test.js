@@ -47,14 +47,14 @@ test('pausing before a finale boundary freezes its warning and encounter clock',
  const {g,events}=quiet(1129.99);g.pause();g.update(.2);assert.equal(g.s.elapsed,1129.99);assert.equal(events.length,0);
  g.resume();g.update(.02);assert.equal(events.filter(([t,p])=>t==='bark'&&p.text.includes('Dernière minute')).length,1);
 });
-test('full final minute survives deterministic saves and reaches victory once',()=>{
+test('full final minute survives deterministic saves and starts Charles once',()=>{
  const events=[],g=new Game({seed:71,onEvent:(t,p)=>events.push([t,p])});g.s.elapsed=1129.8;g.s.invulnerable=200;g.nextEvent=100000;
  let b=restoreRun(captureRun(g));
- for(let i=0;i<1500&&g.s.mode!=='victory';i++){
+ for(let i=0;i<1500&&!g.s.charles;i++){
   for(const run of [g,b]){if(run.s.mode==='upgrade')run.chooseUpgrade(run.s.options[0].id);if(run.s.mode==='dialogue')run.finishDialogue();run.update(.05,{x:Math.cos(i/50),y:Math.sin(i/50)});}
   if(i%100===0){assert.deepEqual(captureRun(b),captureRun(g));b=restoreRun(captureRun(b));}
  }
- assert.equal(g.s.mode,'victory');assert.equal(events.filter(([t])=>t==='victory').length,1);assert.deepEqual(captureRun(b),captureRun(g));
+ assert.equal(g.s.mode,'playing');assert.equal(g.s.charles.phase,'intro');assert.equal(events.filter(([t])=>t==='epilogue-start').length,1);assert.equal(events.filter(([t])=>t==='victory').length,0);assert.deepEqual(captureRun(b),captureRun(g));
  assert.ok(g.eventSeen.has('finale:1180'));assert.ok(g.s.enemies.length<=300);
 });
 test('a capped final boss retries after space opens and persists the pending encounter',()=>{

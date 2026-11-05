@@ -30,7 +30,7 @@ function app(existingValues,locks,clock=performance){
 async function victory(a){await a.click('play');Object.assign(a.game.s,{mode:'victory',elapsed:1200});await a.controller.renderResult(true);}
 const visible=(a,id)=>!a.get(id).classList.contains('hidden');
 
-test('Charles offer is available only for a normal unplayed victory',async()=>{
+test('legacy Charles offer remains available only for an unplayed saved victory',async()=>{
  const a=app();await a.click('play');await a.controller.renderResult(false);
  assert.equal(visible(a,'charles-choice'),false);
  Object.assign(a.game.s,{mode:'victory',elapsed:1200});await a.controller.renderResult(true);
@@ -39,7 +39,7 @@ test('Charles offer is available only for a normal unplayed victory',async()=>{
  a.game.s.endless=false;a.game.s.charles={phase:'complete'};await a.controller.renderResult(true);assert.equal(visible(a,'charles-choice'),false);
 });
 
-test('Charles requires an explicit confirmation and cancel preserves the earned victory',async()=>{
+test('legacy victory offer keeps its explicit confirmation and cancellation',async()=>{
  const a=app();await victory(a);const before=JSON.stringify(a.game.s);
  a.click('meet-charles');assert.equal(a.controller.screen,'charles-confirm');assert.equal(a.game.s.mode,'victory');assert.equal(a.game.s.charles??null,null);
  a.controller.frame(performance.now()+1000);assert.equal(JSON.stringify(a.game.s),before);
@@ -64,7 +64,7 @@ test('confirmation traps keyboard focus between its two explicit choices',async(
 test('Charles HUD explains invincibility, phase and transformation hits without an HP bar',async()=>{
  const a=app();await a.click('play');a.game.s.charles={phase:'shock_warning',hits:7,powered:false};a.controller.updateHud(true);
  assert.equal(visible(a,'charles-banner'),true);assert.match(a.get('charles-phase').textContent,/onde de choc/i);assert.match(a.get('charles-progress').textContent,/7 \/ 18.*transformation/i);
- assert.equal(a.get('time-goal').textContent,'SURVIE DÉJÀ GAGNÉE');
+ assert.equal(a.get('time-goal').textContent,'CHARLES EST LÀ');
  a.game.s.charles.hits=99;a.game.s.charles.powered=true;a.game.s.charles.phase='empowered';a.controller.updateHud(true);
  assert.match(a.get('charles-progress').textContent,/transformation accomplie/i);assert.doesNotMatch(a.get('charles-progress').textContent,/99|PV|HP/);
  a.game.s.charles.phase='complete';a.controller.updateHud(true);assert.equal(visible(a,'charles-banner'),false);
@@ -214,7 +214,7 @@ for(const native of [false,true])test(`leaving recovered Charles re-enables requ
  let queue=Promise.resolve(),now=100;const locks=native?workers.locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}};
  const clock={now:()=>now},drain=()=>locks.request('toma-popescu-run-v1',()=>{}),record=a=>JSON.parse(a.values.get('toma-popescu-run-v1'));
  const a=app(undefined,locks,clock);await a.click('play');a.game.s.elapsed=1199.99;a.game.update(.02);await a.controller.persistRun(true);
- assert.equal(a.game.s.mode,'victory');a.click('meet-charles');a.click('charles-start');a.click('pause');assert.ok((await a.controller.persistRun()).ok);
+ assert.equal(a.game.s.mode,'playing');assert.equal(a.game.s.charles.phase,'intro');a.click('pause');assert.ok((await a.controller.persistRun()).ok);
  const b=app(a.values,locks,clock);await b.click('resume-saved');assert.equal(b.controller.screen,'pause-screen');
  const untouched=b.values.get('toma-popescu-run-v1');now+=6000;b.controller.frame(now);await drain();assert.equal(b.values.get('toma-popescu-run-v1'),untouched,'recovery pause remains read-only until an explicit choice');
  b.click('charles-leave');await drain();assert.equal(b.controller.screen,'results');assert.equal(b.game.s.charles.phase,'complete');
