@@ -3063,6 +3063,8 @@ const { World }=modules['./world.js'];
 const { computeHeroPose, solveHeroAim, advanceHeroMotion }=modules['./hero-pose.js'];
 const { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION }=modules['./content.js'];
 
+// One footprint for explosive damage and its player-center warning.
+const EXPLOSIVE_BLAST=Object.freeze({radius:87,playerPadding:12});
 const TAU=Math.PI*2;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const length=(x,y)=>Math.hypot(x,y);
@@ -3530,7 +3532,7 @@ class Game {
         else if(d<84&&e.cooldown<=0){e.windup=.6;e.swipeDirX=dx/d;e.swipeDirY=dy/d;e.faceX=e.swipeDirX;e.faceY=e.swipeDirY;e.phase='windup';}
         else e.phase='chase';
       }
-      if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,87,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
+      if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,EXPLOSIVE_BLAST.radius,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
       if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
       if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
       if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&!EGO_BEASTS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
@@ -3644,7 +3646,7 @@ class Game {
     }
   }
   damage(value,source,context){const s=this.s;if(s.invulnerable>0 || s.hp<=0)return;if(source==='gas'){if(s.airplane.active)return;const original=value;value*=s.stats.gasMultiplier;if(this.rank('filter')&&value<original)this.powerEffect('filter','resist',s.x,s.y,0,{amount:original-value});}value=reduceTrophyDamage(this,value,source,context);if(value<=0)return;const blocked=Math.min(s.shield,value);s.shield-=blocked;s.hp-=value-blocked;if(value>blocked)this.recentHealthDamage={at:s.elapsed+(s.charles?.elapsed||0),hp:s.hp};if(s.hp<=0)s.deathCause=lethalDamageCause(source,context,s.elapsed,value-blocked);const trophySpeed=trophySpeedMultiplier(s);notifyTrophyDamage(this);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();s.invulnerable=source==='gas'?.55:.72;this.lastHit=s.elapsed;this.burst(s.x,s.y,blocked?'#73d8ef':'#ff8289',7);this.sound('hit');}
-  explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+12)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
+  explode(e,r,damage){this.pulse(e.x,e.y,r,'#f5a16c',.65);this.burst(e.x,e.y,'#f7a16b',16);if(dist(e,this.s)<r+EXPLOSIVE_BLAST.playerPadding)this.damage(damage*(this.difficulty.damage||1),'explosion',{actorType:e.type,actorId:e.id});if(this.s.companion && this.s.girl.down<=0 && dist(e,this.s.girl)<r)this.s.girl.hp-=damage*.7;}
   areaDamage(x,y,r,damage,knock=false){for(const e of this.combatTargets())if(!e.dead && length(e.x-x,e.y-y)<r+e.r){this.hurt(e,damage);if(knock && !e.dead&&e.type!=='charles'){const d=length(e.x-x,e.y-y)||1;this.knockback(e,(e.x-x)/d*52,(e.y-y)/d*52,e.r*.6);}}}
   updateVehicles(dt){for(const v of this.s.vehicles){if(v.kind==='car'&&v.carRank!==undefined){updateLamborghini(this,v,dt);continue;}v.x+=v.vx*dt;v.y+=v.vy*dt;v.life-=dt;updateCarBills(this,v,dt);for(const e of this.combatTargets())if(!e.dead && !v.hitIds?.has(e.id) && Math.abs(v.x-e.x)<e.r+38 && Math.abs(v.y-e.y)<e.r+23){v.hitIds?.add(e.id);this.hurt(e,v.damage||65);if(v.kind==='bike')this.powerEffect('chopper','impact',e.x,e.y,0,{tx:e.x+v.vx,ty:e.y+v.vy});if(v.knockback && !e.dead&&e.type!=='charles'){const n=length(v.vx,v.vy)||1;this.knockback(e,v.vx/n*v.knockback,v.vy/n*v.knockback,e.r*.6);}this.burst(e.x,e.y,'#f2bd53',4);}}this.s.vehicles=this.s.vehicles.filter(v=>v.life>0);}
   updateClouds(dt){const s=this.s;for(const c of s.clouds){c.life-=dt;c.x+=c.vx*dt;c.y+=c.vy*dt;c.vx*=Math.exp(-dt*.45);c.vy*=Math.exp(-dt*.45);c.r=Math.min(c.maxr||49,c.r+dt*(c.maxr?16:10));c.arm=Math.max(0,(c.arm||0)-dt);if(c.life>0 && c.arm<=0 && length(c.x-s.x,c.y-s.y)<c.r+10)this.damage(7*(this.difficulty.damage||1),'gas');if(c.arm<=0 && s.companion && s.girl.down<=0 && length(c.x-s.girl.x,c.y-s.girl.y)<c.r+8)s.girl.hp-=dt*3*s.stats.gasMultiplier;}s.clouds=s.clouds.filter(c=>c.life>0);}
@@ -3775,7 +3777,7 @@ class Game {
   }
 }
 
-modules["./engine.js"]={Game};
+modules["./engine.js"]={EXPLOSIVE_BLAST,Game};
 })();
 (()=>{
 const {PELICAN,pelicanCards,pelicanRingRadius}=modules['./pelican.js'];
@@ -5412,6 +5414,7 @@ function drawLamborghini(c,v,reduced=false){
 modules["./lamborghini-art.js"]={drawLamborghini};
 })();
 (()=>{
+const {EXPLOSIVE_BLAST}=modules['./engine.js'];
 const {EGO_BEASTS,egoCamoRatio}=modules['./ego-beasts.js'];
 const {drawEgoGround,drawEgoForeground}=modules['./ego-art.js'];
 const {drawLamborghini}=modules['./lamborghini-art.js'];
@@ -6093,9 +6096,19 @@ this._shadow(x,y+7,40,8);
   _dangerWarnings(enemies,shockwaves){
     const ctx=this.ctx;
     for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
-      const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
-      ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
-      ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      if(e.type==='explosive'){
+        // This boundary marks safe player-center positions, including the same
+        // contact margin as Game.explode. Never pulse it into damaging space.
+        const radius=EXPLOSIVE_BLAST.radius+EXPLOSIVE_BLAST.playerPadding;
+        ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,radius,0,TAU);
+        ctx.globalAlpha=.12;ctx.fillStyle=C.orange;ctx.fill();
+        ctx.globalAlpha=.9;ctx.strokeStyle='#ffbd6b';ctx.lineWidth=2;
+        ctx.setLineDash([6,5]);ctx.stroke();ctx.restore();
+      }else{
+        const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
+        ctx.save();ctx.globalAlpha=.12;oval(ctx,C.orange,e.x-radius,e.y-radius,radius*2,radius*2,2);ctx.restore();
+        ring(ctx,'#ff9d3e',e.x,e.y,radius,.3,3,this.time*.4,1);
+      }
       rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
     }
     for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawEgoGround(ctx,e,this.reducedEffects);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
