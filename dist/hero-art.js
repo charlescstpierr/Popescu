@@ -1,7 +1,7 @@
 import {computeHeroPose} from './hero-pose.js';
 import {HERO_FRAMES} from './hero-frames.js';
 
-const ASSET=new URL('./assets/toma-whole-v6.png',import.meta.url).href;
+const ASSET=new URL('./assets/toma-whole-v7.png',import.meta.url).href;
 function load(src){return new Promise(resolve=>{if(typeof Image==='undefined'){resolve(null);return;}const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>resolve(null);image.src=src.startsWith('file:')?decodeURIComponent(new URL(src).pathname):src;});}
 const pt=(x,y)=>({x,y});
 function line(c,color,a,b,width=1){

@@ -9,8 +9,8 @@
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 675618,
-      "sha256": "c8665ce5db157eb08b6332475a6a7f9c76208c926f5cbcd7c4854269969749b2"
+      "bytes": 753748,
+      "sha256": "a3e3d6bb7d9eb3af9d4042998f28fc5e3f7a59479a23ab941711d42ea27c3e5d"
     },
     {
       "path": "assets/actors-v2.json",
@@ -81,6 +81,11 @@
       "path": "assets/dialogue-pelican.png",
       "bytes": 2077658,
       "sha256": "1132f8f0eebbc7ad3d271441f06474f440d29931e64a3175d287a8d48d7cbe1a"
+    },
+    {
+      "path": "assets/dialogue-toma.png",
+      "bytes": 2465772,
+      "sha256": "cf07d6e5afe2c76b796204a433190769eed133a484a8ca4ac6366791503edff6"
     },
     {
       "path": "assets/dialogue-travestia.png",
@@ -191,6 +196,11 @@
       "path": "assets/toma-whole-v6.png",
       "bytes": 660651,
       "sha256": "b7dca0a8a499694f12cacb1822cdabc6cc802c390267fbeeb390a51579254140"
+    },
+    {
+      "path": "assets/toma-whole-v7.png",
+      "bytes": 641449,
+      "sha256": "5005a6f274c1f6a8b8300399edebbd0a5541fdc87c8c450b6a87d8207c34d6a9"
     },
     {
       "path": "assets/travestia-dash.png",

@@ -42,8 +42,8 @@ sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(code,sandbo
  q.game.s.enemies=[];q.game.s.invulnerable=100;q.game.clearSpeech();q.game.s.elapsed=361;
  let peli=q.game.spawnEnemy('pelican',q.game.s.x+100,q.game.s.y);q.game.world.collides=()=>false;q.game.updateEnemies(.01);
  assert(q.game.openEncounterDialogue());assert.equal(q.screen,'dialogue');assert.equal(elements.get('encounter-name').textContent,'PÉLI ZODIAQUE');
- const modalLines=q.game.encounters.active.lines,modalState=JSON.stringify(q.game.s);q.game.update(.25);assert.equal(JSON.stringify(q.game.s),modalState);assert((await q.persistRun()).ok);
- elements.get('next-dialogue').onclick();assert.equal(q.game.encounters.active.index,1);assert.equal(elements.get('encounter-name').textContent,'PÉLI ZODIAQUE');
+ const modalLines=q.game.encounters.active.lines,modalState=JSON.stringify(q.game.s),bossPortraitSource=elements.get('encounter-portrait').src;q.game.update(.25);assert.equal(JSON.stringify(q.game.s),modalState);assert((await q.persistRun()).ok);
+ elements.get('next-dialogue').onclick();assert.equal(q.game.encounters.active.index,1);assert.equal(elements.get('encounter-name').textContent,'TOMA POPESCU');assert(elements.get('encounter-portrait').src!==bossPortraitSource,'Toma must replace the boss portrait');const tomaPortrait=await checkImageSource(elements.get('encounter-portrait').src);assert.equal(tomaPortrait.width,1024);assert.equal(tomaPortrait.height,1536);
  elements.get('next-dialogue').onclick();assert.equal(q.game.s.mode,'playing');assert.equal(q.game.encounters.outcomes['boss:pelican'],'completed');
  // Repeated ambient banter still uses the compact portrait after the first scene.
  q.game.clearSpeech();q.game.bark('PÉLI ZODIAQUE',modalLines[0].text,true,{actorId:peli.id});

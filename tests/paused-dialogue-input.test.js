@@ -43,7 +43,7 @@ test('a queued AUTO callback from before focus recovery or a later scene cannot 
 });
 
 test('real controller applies the approved variant on both speakers and removes it on close',async()=>{
- const a=await boss();assert.equal(a.get('dialogue').classList.contains('encounter-dialogue'),true);assert.equal(a.get('encounter-name').textContent,'PÉLI ZODIAQUE');a.click('next-dialogue');assert.equal(a.get('encounter-name').textContent,'PÉLI ZODIAQUE');assert.match(a.get('encounter-description').textContent,/Toma Popescu répond/);a.click('skip-dialogue');assert.equal(a.get('dialogue').classList.contains('encounter-dialogue'),false);assert.equal(a.get('dialogue').getAttribute('aria-modal'),null);
+ const a=await boss();assert.equal(a.get('dialogue').classList.contains('encounter-dialogue'),true);assert.equal(a.get('encounter-name').textContent,'PÉLI ZODIAQUE');a.click('next-dialogue');assert.equal(a.get('encounter-name').textContent,'TOMA POPESCU');assert.equal(a.get('encounter-portrait').src,'assets/dialogue-toma.png');assert.match(a.get('encounter-description').textContent,/Toma Popescu répond/);a.click('skip-dialogue');assert.equal(a.get('dialogue').classList.contains('encounter-dialogue'),false);assert.equal(a.get('dialogue').getAttribute('aria-modal'),null);
 });
 test('Space in the dialogue reading region scrolls natively rather than skipping a line',async()=>{
  const a=await companion();let prevented=false;a.events.keydown({key:' ',repeat:false,target:a.get('dialogue-text'),preventDefault(){prevented=true;}});assert.equal(progress(a),'1 / 5');assert.equal(prevented,false);
