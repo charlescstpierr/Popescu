@@ -116,3 +116,18 @@ body{touch-action:manipulation}#world,.hud{touch-action:none}.panel{touch-action
 .control-safe-area{position:absolute;left:var(--safe-left);right:var(--safe-right);top:var(--safe-top);bottom:var(--safe-bottom);visibility:hidden;pointer-events:none}
 .joystick{left:max(24px,calc(var(--safe-left) + 6px))}
 @media(max-width:355px){.joystick{left:max(15px,calc(var(--safe-left) + 6px))}}
+
+/* Opening theatre: decorative only; speech, controls and save cursors stay immediate. */
+.encounter-dialogue.opening::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+.encounter-dialogue.opening-fantasy::after{background:radial-gradient(ellipse at 50% 28%,#eab85926,transparent 62%),linear-gradient(90deg,#1d102b40,transparent 24%,transparent 76%,#1d102b40);animation:opening-light .52s ease-out}
+.encounter-dialogue.opening-fantasy #encounter-framed-portrait{animation:opening-pose .38s cubic-bezier(.2,.7,.3,1)}
+.encounter-dialogue.opening-offline::after{background:radial-gradient(ellipse at 50% 30%,#596dba26,transparent 65%),linear-gradient(90deg,#29123455,transparent 30%,transparent 70%,#29123455);animation:opening-outage .24s ease-out}
+.encounter-dialogue.opening-street::after{opacity:0;background:linear-gradient(180deg,#31284b26,transparent 60%);animation:opening-clear .24s ease-out}
+.encounter-dialogue.opening-street #encounter-framed-portrait{animation:opening-return .32s cubic-bezier(.2,.7,.3,1)}
+@keyframes opening-light{from{opacity:0}to{opacity:1}}
+@keyframes opening-pose{from{opacity:.55;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes opening-outage{from{opacity:0}to{opacity:1}}
+@keyframes opening-clear{from{opacity:1}to{opacity:0}}
+@keyframes opening-return{from{opacity:.65;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.reduced-fx .encounter-dialogue.opening::before,.reduced-fx .encounter-dialogue.opening::after,.reduced-fx .encounter-dialogue.opening #encounter-framed-portrait{animation:none!important;transition:none!important}
+@media(prefers-reduced-motion:reduce){.encounter-dialogue.opening::before,.encounter-dialogue.opening::after,.encounter-dialogue.opening #encounter-framed-portrait{animation:none!important;transition:none!important}}
