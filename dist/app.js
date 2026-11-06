@@ -13,7 +13,7 @@ import {companionLevel,INTRO,UPGRADES,DIFFICULTIES,EVENTS,victoryQuote} from './
 
 const COMPANION_PORTRAITS=['assets/companion-portrait-1.png','assets/companion-portrait-2.png','assets/companion-portrait-3.png','assets/companion-portrait-4.png','assets/companion-portrait-5.png'];
 const $=id=>document.getElementById(id);
-const screens=['menu','dialogue','upgrades','trophies','pause-screen','settings','results','charles-confirm','credits'];
+const screens=['menu','dialogue','upgrades','trophies','pause-screen','save-exit','settings','results','charles-confirm','credits'];
 const canvas=$('world'),app=$('app');
 const renderer=new Renderer(canvas);
 const stored=readStorage();
@@ -33,6 +33,7 @@ if(savedRecord.status==='ready'){best=savedRecord.value.totals.best;lifetime=sav
 let creditedKills=0,creditedCoins=0,banterUntil=0,banterSpeechId=null,powerSignature='',settingsReturn='pause-screen',creditsReturn='menu';
 let resultRecorded=false,uiTick=0,lastHud='',trophyToastRemaining=0,trophyToastQueue=[];
 let assetWait=null,assetError=false,startAttempt=null,hudSpacePress=null;
+let navigationVersion=0,runConflict=false,saveExitChoice=null;
 function readStorage(){try{const data=JSON.parse(localStorage.getItem('toma-popescu-v1')||'{}');return data&&typeof data==='object'&&!Array.isArray(data)?data:{}}catch{return {}}}
 function save(){try{localStorage.setItem('toma-popescu-v1',JSON.stringify({...prefs,difficulty,best,lifetime,coins:lifetimeCoins,introSeen:stored.introSeen}));}catch{}}
 function format(t){const n=Math.max(0,Math.floor(t));return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;}
@@ -41,14 +42,14 @@ function format(t){const n=Math.max(0,Math.floor(t));return `${String(Math.floor
 function prepareGame(next,{pausedEncountersEnabled=true,banterEnabled=prefs.banter}={}){next.setPausedEncountersEnabled(pausedEncountersEnabled);next.setBanterEnabled(banterEnabled);return next;}
 function setText(id,value){const el=$(id);const v=String(value);if(el.textContent!==v)el.textContent=v;}
 function sound(name='click'){audio.sfx(name)}
-function syncAudio(){const battle=screen==='hud'||screen==='upgrades'||screen==='trophies'||(screen==='dialogue'&&game&&game.state.elapsed>0);const scene=document.hidden||['pause-screen','settings'].includes(screen)?'paused':battle?'battle':'menu';audio.setScene(scene);audio.setDucked?.(scene==='battle'&&['upgrades','trophies','dialogue'].includes(screen));}
+function syncAudio(){const battle=screen==='hud'||screen==='upgrades'||screen==='trophies'||(screen==='dialogue'&&game&&game.state.elapsed>0);const scene=document.hidden||['pause-screen','save-exit','settings'].includes(screen)?'paused':battle?'battle':'menu';audio.setScene(scene);audio.setDucked?.(scene==='battle'&&['upgrades','trophies','dialogue'].includes(screen));}
 function activateAudio(){audio.unlock();syncAudio();}
 app.addEventListener('pointerdown',activateAudio,{once:true});
 window.addEventListener('keydown',activateAudio,{once:true});
 function cancelHudSpacePress(){if(hudSpacePress)hudSpacePress.cancelled=true;}
 function resetInput(){cancelHudSpacePress();input={x:0,y:0};keys.clear();if(pointer!==null){try{app.releasePointerCapture(pointer)}catch{}}pointer=null;$('stick').style.transform='';$('joystick').classList.remove('active');$('joystick').style.removeProperty('left');$('joystick').style.removeProperty('top');$('joystick').style.removeProperty('bottom');}
 function cancelStartAttempt(navigated=false){if(startAttempt){startAttempt.cancelled=true;startAttempt.navigated ||=navigated;}}
-function show(name){cancelStartAttempt(true);const leavingDialogue=screen==='dialogue'&&name!=='dialogue';if(name!=='dialogue')renderEncounterPresentation({context:null,line:null});cancelAssetWait();resetInput();screen=name;$('charles-leave').classList.toggle('hidden',!charlesActive());if(name==='hud')nextTrophyToast();$('trophy-toast').classList.toggle('hidden',name!=='hud'||trophyToastRemaining<=0);for(const id of screens)$(id).classList.toggle('hidden',id!==name);$('hud').classList.toggle('hidden',name!=='hud'&&name!=='trophies');$('hud').classList.toggle('trophy-backdrop',name==='trophies');syncAudio();if(name!=='dialogue')clearTimeout(autoTimer);if(name!=='hud')$('banter').classList.add('hidden');else{game?.setBanterEnabled(prefs.banter);game?.presentSpeech();}if(leavingDialogue&&name==='hud')$('pause').focus?.();}
+function show(name){navigationVersion++;if(name!=='save-exit')saveExitChoice=null;cancelStartAttempt(true);const leavingDialogue=screen==='dialogue'&&name!=='dialogue';if(name!=='dialogue')renderEncounterPresentation({context:null,line:null});cancelAssetWait();resetInput();screen=name;$('charles-leave').classList.toggle('hidden',!charlesActive());if(name==='hud')nextTrophyToast();$('trophy-toast').classList.toggle('hidden',name!=='hud'||trophyToastRemaining<=0);for(const id of screens)$(id).classList.toggle('hidden',id!==name);$('hud').classList.toggle('hidden',name!=='hud'&&name!=='trophies');$('hud').classList.toggle('trophy-backdrop',name==='trophies');syncAudio();if(name!=='dialogue')clearTimeout(autoTimer);if(name!=='hud')$('banter').classList.add('hidden');else{game?.setBanterEnabled(prefs.banter);game?.presentSpeech();}if(leavingDialogue&&name==='hud')$('pause').focus?.();}
 function resize(){resetInput();const r=app.getBoundingClientRect();width=Math.round(r.width);height=Math.round(r.height);renderer.resize(width,height);game?.setViewport(width,height);}
 window.addEventListener('resize',resize);new ResizeObserver(resize).observe(app);resize();
 function updateRecordMenu(){setText('best',format(best));setText('lifetime',`${lifetime.toLocaleString('fr-CA')} singe${lifetime===1?'':'s'} vaincu${lifetime===1?'':'s'}`)}
@@ -58,7 +59,7 @@ function setDifficulty(id){if(!DIFFICULTIES[id])return;difficulty=id;document.qu
 function showSaveError(reason){
  if(reason===lastSaveError)return;lastSaveError=reason;
  const message=reason==='conflict'?'Partie modifiée dans un autre onglet. Reviens au menu pour charger la dernière sauvegarde.':'Sauvegarde indisponible. Ta progression récente pourrait ne pas être conservée.';
- setText('toast',message);$('toast').classList.remove('hidden');
+ setText('toast',message);if(screen!=='save-exit')$('toast').classList.remove('hidden');
 }
 function dialogueSnapshot(){return game?.s.mode==='dialogue'?{lines:dialogueLines,index:dialogueIndex}:null;}
 function requestSave(){flushRequested=true;}
@@ -66,9 +67,9 @@ async function persistRun(credit=false){
  if(upgradePurchasePending)return {ok:false,reason:'transaction-pending'};
  if(!game||!runId||!runPersistence)return {ok:false,reason:'inactive'};
  const current=game,id=runId;
- const result=await runStore.checkpoint(id,current,{credit,dialogue:dialogueSnapshot()});
+ const result=await runStore.checkpoint(id,current,{credit,dialogue:dialogueSnapshot()},()=>game===current&&runId===id&&runPersistence);
  if(result.ok){if(game===current&&runId===id){savedRecord={status:'ready',value:result.value};best=result.value.totals.best;lifetime=result.value.totals.lifetime;lifetimeCoins=result.value.totals.coins;creditedKills=result.value.run.creditedKills;creditedCoins=result.value.run.creditedCoins;lastSaveError='';$('toast').classList.add('hidden');}}
- else if(game===current&&runId===id){if(result.reason==='conflict')runPersistence=false;showSaveError(result.reason);}
+ else if(game===current&&runId===id){if(result.reason==='conflict'){runPersistence=false;runConflict=true;}showSaveError(result.reason);}
  return result;
 }
 const autosave=new Autosave(()=>persistRun(),()=>performance.now());
@@ -95,7 +96,7 @@ async function ensureAnimalArt(){
  assetError=true;setText('toast',result.reason==='timeout'?'Le chargement des images prend trop de temps. Réessaie.':'Impossible de charger les images des animaux. Réessaie.');$('toast').classList.remove('hidden');return false;
 }
 async function start(){
- if(transitionBusy)return;transitionBusy=true;
+ if(transitionBusy||screen==='save-exit')return;transitionBusy=true;
  const attempt={cancelled:false,navigated:false},previousGame=game,previousId=runId;startAttempt=attempt;
  const mayStart=()=>startAttempt===attempt&&!attempt.cancelled&&windowFocused&&!document.hidden;
  try{
@@ -107,7 +108,7 @@ async function start(){
   const next=prepareGame(new Game({difficulty,seed:(Date.now()>>>0),onEvent:onGameEvent}));positionNewRun(next);next.setViewport(width,height);next.s.reducedEffects=prefs.reduced;
   const needsOpening=!stored.introSeen;if(needsOpening)next.s.mode='dialogue';
   const nextId=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${Math.random().toString(36).slice(2)}`;const begun=await runStore.begin(nextId,next,{best,lifetime,coins:lifetimeCoins},needsOpening?{lines:OPENING,index:0}:null,previous,mayStart);
-  const installNext=()=>{trophyToastQueue=[];trophyToastRemaining=0;creditedKills=0;creditedCoins=0;resultRecorded=false;powerSignature='';lastHud='';recoveryPending=false;game=next;runId=nextId;runPersistence=begun.ok;flushRequested=false;};
+  const installNext=()=>{trophyToastQueue=[];trophyToastRemaining=0;creditedKills=0;creditedCoins=0;resultRecorded=false;powerSignature='';lastHud='';recoveryPending=false;game=next;runId=nextId;runPersistence=begun.ok;runConflict=false;flushRequested=false;};
   const acceptSave=()=>{best=begun.value.totals.best;lifetime=begun.value.totals.lifetime;lifetimeCoins=begun.value.totals.coins;savedRecord={status:'ready',value:begun.value};lastSaveError='';$('toast').classList.add('hidden');};
   if(!mayStart()){
    // The guard inside the lock normally cancels before any write. If the
@@ -135,17 +136,17 @@ async function start(){
  }finally{if(startAttempt===attempt)startAttempt=null;transitionBusy=false;}
 }
 async function resumeSaved(){
- if(transitionBusy)return;transitionBusy=true;
+ if(transitionBusy||screen==='save-exit')return;transitionBusy=true;
  try{if(!allAnimalArtReady()&&!await ensureAnimalArt())return;clearAssetError();
   savedRecord=runStore.read();if(savedRecord.status!=='ready'){updateResumeMenu();showSaveError(savedRecord.status);return;}
   const record=savedRecord.value,snapshot=record.run.snapshot;if(snapshot.game.s.mode==='gameover')return;
-  game=prepareGame(restoreRun(snapshot,{onEvent:onGameEvent}));runId=record.run.id;runPersistence=true;recoveryPending=true;resultRecorded=false;powerSignature='';lastHud='';creditedKills=record.run.creditedKills;creditedCoins=record.run.creditedCoins;
+  game=prepareGame(restoreRun(snapshot,{onEvent:onGameEvent}));runId=record.run.id;runPersistence=true;runConflict=false;recoveryPending=true;resultRecorded=false;powerSignature='';lastHud='';creditedKills=record.run.creditedKills;creditedCoins=record.run.creditedCoins;
   best=record.totals.best;lifetime=record.totals.lifetime;lifetimeCoins=record.totals.coins;game.setViewport(width,height);game.s.reducedEffects=prefs.reduced;
   if(snapshot.dialogue){dialogueLines=snapshot.dialogue.lines;dialogueIndex=snapshot.dialogue.index;dialogueSession++;dialogueDone=openingStage(dialogueLines,dialogueIndex)?finishOpening:skipped=>{game?.finishDialogue(skipped);syncEngineScreen();requestSave();};}
   if(game.s.mode==='playing')game.pause();lastTime=performance.now();updateHud(true);setText('pause-stats',`${format(game.s.elapsed)} · ${game.s.kills} SINGES · NIV. ${game.s.level}`);show('pause-screen');
  }catch{showSaveError('corrupt');}finally{transitionBusy=false;}
 }
-function mainMenu(){trophyToastQueue=[];trophyToastRemaining=0;clearTimeout(autoTimer);game=null;runId=null;runPersistence=false;recoveryPending=false;flushRequested=false;savedRecord=runStore.read();if(savedRecord.status==='ready'){best=savedRecord.value.totals.best;lifetime=savedRecord.value.totals.lifetime;lifetimeCoins=savedRecord.value.totals.coins;}show('menu');updateRecordMenu();updateResumeMenu();}
+function mainMenu(){trophyToastQueue=[];trophyToastRemaining=0;clearTimeout(autoTimer);game=null;runId=null;runPersistence=false;runConflict=false;recoveryPending=false;flushRequested=false;savedRecord=runStore.read();if(savedRecord.status==='ready'){best=savedRecord.value.totals.best;lifetime=savedRecord.value.totals.lifetime;lifetimeCoins=savedRecord.value.totals.coins;}show('menu');updateRecordMenu();updateResumeMenu();}
 function onGameEvent(type,payload){if(['dialogue','upgrade','trophy','trophy-acquired','victory','gameover','epilogue-start','epilogue-complete'].includes(type))requestSave();if(type==='epilogue-start'){show('hud');updateHud(true);return;}if(type==='trophy'){renderTrophies(typeof payload==='string'?payload:payload?.bossType);return;}if(type==='trophy-acquired'){showTrophyToast(payload);return;}if(type==='sound'){const name=typeof payload==='string'?payload:payload?.name;if(!['level','victory','defeat'].includes(name))sound(name);return;}if(type==='bark'){showBanter(payload);return;}if(type==='dialogue'){openDialogue(Array.isArray(payload)?payload:payload?.lines||[],skipped=>{game?.finishDialogue(skipped);syncEngineScreen();},payload?.index??0);return;}if(type==='upgrade'){renderUpgrades(Array.isArray(payload)?payload:payload?.options||game?.state.options||[]);return;}if(type==='victory'||type==='gameover'||type==='epilogue-complete'){renderResult(type!=='gameover');return;}if(type==='wave'){setText('wave',payload?.text||String(payload));$('wave').classList.remove('hidden');setTimeout(()=>$('wave').classList.add('hidden'),3000);}}
 function syncEngineScreen(){
  if(!game)return;const mode=game.state.mode;
@@ -249,7 +250,7 @@ async function rerollUpgrades(){
   const candidate=prepareGame(restoreRun(captureRun(current)),current);if(!candidate.rerollUpgrade())return false;
   const result=await runStore.checkpoint(id,candidate);
   if(game!==current||runId!==id)return false;
-  if(!result.ok){if(result.reason==='conflict')runPersistence=false;showSaveError(result.reason);return false;}
+  if(!result.ok){if(result.reason==='conflict'){runPersistence=false;runConflict=true;}showSaveError(result.reason);return false;}
   candidate.onEvent=onGameEvent;game=candidate;savedRecord={status:'ready',value:result.value};flushRequested=false;lastSaveError='';$('toast').classList.add('hidden');
   renderUpgrades(game.s.options);updateHud(true);return true;
  }catch{showSaveError('write-failed');return false;}
@@ -279,9 +280,50 @@ function updateCharlesHud(){
 }
 
 function pause(){if(!game||game.state.mode!=='playing')return;game.pause();setText('pause-stats',`${format(game.state.elapsed)}  ·  ${game.state.kills} SINGES  ·  NIV. ${game.state.level}`);show('pause-screen');requestSave();}
-function resume(){if(!game||transitionBusy)return;audio.unlock();lastTime=performance.now();resetInput();
+function resume(){if(!game||transitionBusy||screen!=='pause-screen')return;audio.unlock();lastTime=performance.now();resetInput();
  if(recoveryPending){recoveryPending=false;if(game.s.mode==='dialogue'){show('dialogue');renderDialogue();$('next-dialogue').focus?.();return;}}
  game.resume();syncEngineScreen();requestSave();}
+// A live run is released only after a successful checkpoint or an explicit
+// discard. A conflict is not the opt-in nonpersistent mode chosen at start.
+function ownsSaveExitChoice(){return screen==='save-exit'&&saveExitChoice?.game===game&&saveExitChoice?.id===runId;}
+function openSaveExit(reason){
+ const conflict=runConflict||reason==='conflict';
+ saveExitChoice={game,id:runId,conflict};
+ setText('save-exit-title',conflict?'PARTIE MODIFIÉE AILLEURS':'SAUVEGARDE IMPOSSIBLE');
+ setText('save-exit-status',conflict?'La sauvegarde a été modifiée dans un autre onglet.':'Ta progression est encore dans cette session.');
+ setText('save-exit-details',conflict?'Ta session reste en pause. Quitter abandonnera ses progrès récents. Le menu te permettra de vérifier la sauvegarde disponible.':'Réessaie ou reste en pause. Si tu quittes maintenant, les progrès depuis la dernière sauvegarde seront perdus.');
+ $('save-exit-retry').classList.toggle('hidden',conflict);
+ $('save-exit-stay').classList.toggle('primary',conflict);$('save-exit-stay').classList.toggle('secondary',!conflict);
+ $('toast').classList.add('hidden');show('save-exit');$('save-exit-stay').focus?.();
+}
+function stayAfterSaveFailure(){if(!ownsSaveExitChoice())return;show('pause-screen');$('pause-menu').focus?.();}
+function discardAfterSaveFailure(){if(transitionBusy||!ownsSaveExitChoice())return;mainMenu();}
+async function exitPausedRun(retry=false){
+ if(transitionBusy||!game||(retry?!ownsSaveExitChoice()||saveExitChoice.conflict:screen!=='pause-screen'))return;
+ const current=game,id=runId,navigation=navigationVersion;
+ const ownsNavigation=()=>game===current&&runId===id&&navigationVersion===navigation;
+ transitionBusy=true;$('save-exit-retry').disabled=true;$('save-exit-discard').disabled=true;
+ try{
+  if(['gameover','victory'].includes(current.s.mode)||!runPersistence&&!runConflict){
+   await recordRun();if(ownsNavigation())mainMenu();return;
+  }
+  const result=runConflict?{ok:false,reason:'conflict'}:await persistRun(true);
+  // Settings (even an out-and-back visit) or a dismissed choice owns the UI
+  // now. A completed checkpoint may stand, but must not steal navigation.
+  if(!ownsNavigation())return;
+  if(result.ok)mainMenu();else openSaveExit(result.reason);
+ }finally{transitionBusy=false;$('save-exit-retry').disabled=false;$('save-exit-discard').disabled=false;}
+}
+function saveExitKey(e,key){
+ if(screen!=='save-exit')return false;
+ if(key==='escape'){e.preventDefault();if(!e.repeat)stayAfterSaveFailure();return true;}
+ if(key==='tab'){
+  const choices=[$('save-exit-retry'),$('save-exit-stay'),$('save-exit-discard')].filter(button=>!button.disabled&&!button.classList.contains('hidden'));
+  const index=choices.indexOf(document.activeElement),step=e.shiftKey?-1:1;
+  e.preventDefault();choices[index<0?(e.shiftKey?choices.length-1:0):(index+step+choices.length)%choices.length]?.focus?.();return true;
+ }
+ return false;
+}
 async function recordRun(){if(!game)return false;const current=game,id=runId,s=current.s,newRecord=s.elapsed>best;
  const result=await persistRun(true);if(!result.ok&&game===current&&runId===id){best=Math.max(best,s.elapsed);lifetime+=Math.max(0,s.kills-creditedKills);lifetimeCoins+=Math.max(0,totalEarnedCoins(s)-creditedCoins);creditedKills=s.kills;creditedCoins=totalEarnedCoins(s);}return newRecord;}
 async function renderResult(win){if(!game)return;const current=game,s=game.state;const newRecord=s.elapsed>best;resultRecorded=true;show('results');audio.unlock().then(()=>sound(win?'victory':'defeat'));const panel=document.querySelector('.result-panel');panel.classList.toggle('victory',win);panel.classList.toggle('defeat',!win);setText('result-title',win?'VICTOIRE !':'GAME OVER');const epilogueDone=win&&s.charles?.phase==='complete';$('charles-choice').classList.toggle('hidden',!win||!canMeetCharles());$('charles-result').classList.toggle('hidden',!epilogueDone);if(epilogueDone){setText('result-title','VICTOIRE EN SURVIE !');setText('charles-result',s.charles.outcome==='defeated'?'ÉPILOGUE TERMINÉ · Charles a mis Toma K.O. Il reste invaincu. Ta victoire des 20 minutes est conservée.':'ÉPILOGUE TERMINÉ · Charles reste invaincu. Ta victoire des 20 minutes est conservée.');}setText('result-kicker',win?'20 MINUTES. ZÉRO RETOUCHE.':'UNE FIN TRÈS DRAMATIQUE');setText('result-quote',win?victoryQuote(s,current.eventSeen):'FUCKK ! Efface la vidéo. On recommence.');setText('result-time',format(s.elapsed));setText('result-kills',s.kills.toLocaleString('fr-CA'));setText('result-coins',totalEarnedCoins(s).toLocaleString('fr-CA'));setText('result-gems',s.gems.toLocaleString('fr-CA'));setText('record-message',newRecord?'✦ NOUVEAU RECORD PERSONNEL ✦':`RECORD PERSONNEL · ${format(best)}`);$('endless').classList.toggle('hidden',!win);$('retry').classList.toggle('secondary',win);$('retry').classList.toggle('primary',!win);await recordRun();if(game===current&&screen==='results')updateRecordMenu();}
@@ -326,7 +368,7 @@ function dialogueKey(e,key){
  if(buttons.includes(e.target?.closest?.('button')||e.target))return true;
  e.preventDefault();nextDialogue(e);return true;
 }
-window.addEventListener('keydown',e=>{const key=e.key.toLowerCase();if(assetWait&&key==='escape'){if(!e.repeat)cancelAssetWait();return;}if(key===' '&&!e.repeat){const button=e.target?.closest?.('button');hudSpacePress=screen==='hud'&&button?{button,cancelled:false}:null;}if(e.target instanceof HTMLInputElement&&!(key==='escape'&&screen==='settings'&&[$('volume'),$('sound-setting'),$('reduced-fx'),$('banter-setting')].includes(e.target)))return;if(e.repeat&&['enter',' '].includes(key)&&screen!=='dialogue'){e.preventDefault();return;}if(screen==='hud'&&(['arrowup','arrowdown','arrowleft','arrowright'].includes(key)||(key===' '&&!e.target?.closest?.('button'))))e.preventDefault();if(dialogueKey(e,key))return;if(screen==='charles-confirm'&&key==='tab'){e.preventDefault();const choices=[$('charles-cancel'),$('charles-start')],index=choices.indexOf(document.activeElement);choices[(index+1)%choices.length].focus?.();return;}if(screen==='trophies'&&['tab','arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();const cards=Array.from($('trophy-options').children),index=cards.indexOf(document.activeElement),step=e.shiftKey||key==='arrowleft'||key==='arrowup'?-1:1;cards[(index+step+cards.length)%cards.length]?.focus?.();return;}if(key==='escape'){if(e.repeat)return;if(screen==='hud')pause();else if(screen==='pause-screen')resume();else if(screen==='settings')show(settingsReturn);else if(screen==='charles-confirm')cancelCharlesConfirm();else if(screen==='dialogue')finishDialogue(true,e);return;}if(key==='m'&&!e.repeat){toggleSound();return;}if(screen==='hud'&&!assetWait&&(!e.repeat||keys.has(key)))keys.add(key);});
+window.addEventListener('keydown',e=>{const key=e.key.toLowerCase();if(assetWait&&key==='escape'){if(!e.repeat)cancelAssetWait();return;}if(key===' '&&!e.repeat){const button=e.target?.closest?.('button');hudSpacePress=screen==='hud'&&button?{button,cancelled:false}:null;}if(e.target instanceof HTMLInputElement&&!(key==='escape'&&screen==='settings'&&[$('volume'),$('sound-setting'),$('reduced-fx'),$('banter-setting')].includes(e.target)))return;if(e.repeat&&['enter',' '].includes(key)&&screen!=='dialogue'){e.preventDefault();return;}if(screen==='hud'&&(['arrowup','arrowdown','arrowleft','arrowright'].includes(key)||(key===' '&&!e.target?.closest?.('button'))))e.preventDefault();if(saveExitKey(e,key)||dialogueKey(e,key))return;if(screen==='charles-confirm'&&key==='tab'){e.preventDefault();const choices=[$('charles-cancel'),$('charles-start')],index=choices.indexOf(document.activeElement);choices[(index+1)%choices.length].focus?.();return;}if(screen==='trophies'&&['tab','arrowleft','arrowright','arrowup','arrowdown'].includes(key)){e.preventDefault();const cards=Array.from($('trophy-options').children),index=cards.indexOf(document.activeElement),step=e.shiftKey||key==='arrowleft'||key==='arrowup'?-1:1;cards[(index+step+cards.length)%cards.length]?.focus?.();return;}if(key==='escape'){if(e.repeat)return;if(screen==='hud')pause();else if(screen==='pause-screen')resume();else if(screen==='settings')show(settingsReturn);else if(screen==='charles-confirm')cancelCharlesConfirm();else if(screen==='dialogue')finishDialogue(true,e);return;}if(key==='m'&&!e.repeat){toggleSound();return;}if(screen==='hud'&&!assetWait&&(!e.repeat||keys.has(key)))keys.add(key);});
 // Space belongs to its original HUD button until release. A screen/input reset
 // cancels native keyup activation instead of transferring it to a new control.
 window.addEventListener('keyup',e=>{const key=e.key.toLowerCase();keys.delete(key);if(key===' '&&hudSpacePress){const press=hudSpacePress;hudSpacePress=null;if(press.cancelled||screen!=='hud'||e.target?.closest?.('button')!==press.button)e.preventDefault();}});
@@ -351,12 +393,13 @@ app.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;const dx=
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(event,e=>{if(e.pointerId===pointer)resetInput();});
 window.addEventListener('blur',()=>{windowFocused=false;cancelStartAttempt();clearTimeout(autoTimer);cancelAssetWait();resetInput();if(screen==='hud')pause();});
 window.addEventListener('focus',()=>{windowFocused=true;if(screen==='dialogue'&&auto&&!document.hidden)renderDialogue();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelStartAttempt();cancelAssetWait();clearTimeout(autoTimer);resetInput();if(screen==='hud')pause();audio.setScene('paused');if(game)autosave.flush();}else{lastTime=performance.now();syncAudio();if(screen==='dialogue'&&auto)renderDialogue();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelStartAttempt();cancelAssetWait();clearTimeout(autoTimer);resetInput();if(screen==='hud')pause();audio.setScene('paused');if(game&&screen!=='save-exit')autosave.flush();}else{lastTime=performance.now();syncAudio();if(screen==='dialogue'&&auto)renderDialogue();}});
 $('reroll-upgrades').onclick=rerollUpgrades;
 $('resume-saved').onclick=resumeSaved;$('play').onclick=start;$('story').onclick=()=>{runId=null;runPersistence=false;game=prepareGame(new Game({difficulty,seed:42}));game.setViewport(width,height);game.s.mode='dialogue';openDialogue(OPENING,mainMenu);sound();};
 $('next-dialogue').onclick=nextDialogue;$('skip-dialogue').onclick=event=>finishDialogue(true,event);$('auto-dialogue').onclick=()=>{auto=!auto;$('auto-dialogue').setAttribute('aria-pressed',String(auto));setText('auto-dialogue',`AUTO : ${auto?'OUI':'NON'}`);renderDialogue();};
 $('opening-help-skip').onclick=()=>{if(game?.s.opening){game.s.opening.phase='done';requestSave();updateHud(true);}};
-$('pause').onclick=pause;$('resume').onclick=resume;$('restart').onclick=start;$('pause-menu').onclick=async()=>{if(transitionBusy)return;transitionBusy=true;try{if(game)await recordRun();mainMenu();}finally{transitionBusy=false;}};
+$('pause').onclick=pause;$('resume').onclick=resume;$('restart').onclick=start;$('pause-menu').onclick=()=>exitPausedRun();
+$('save-exit-retry').onclick=()=>exitPausedRun(true);$('save-exit-stay').onclick=stayAfterSaveFailure;$('save-exit-discard').onclick=discardAfterSaveFailure;
 $('settings-open').onclick=()=>{settingsReturn='pause-screen';show('settings');syncPrefs();};$('settings-back').onclick=()=>show(settingsReturn);
 $('meet-charles').onclick=openCharlesConfirm;$('charles-cancel').onclick=cancelCharlesConfirm;$('charles-start').onclick=startCharlesEpilogue;$('charles-leave').onclick=leaveCharlesEpilogue;
 $('retry').onclick=start;$('result-menu').onclick=async()=>{if(transitionBusy||screen!=='results')return;transitionBusy=true;try{if(game)await recordRun();mainMenu();}finally{transitionBusy=false;}};$('endless').onclick=()=>{if(transitionBusy||screen!=='results'||game?.s.mode!=='victory')return;game.continueEndless();requestSave();resultRecorded=false;syncEngineScreen();updateHud(true);showBanter({who:'TOMA',text:'Vingt minutes ? C’était juste mon échauffement de légende.'});};
@@ -384,7 +427,7 @@ function refreshAnimalEntryOcclusions(dt){
  }
  game.setViewportOcclusions(rects);
 }
-function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
+function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence&&screen!=='save-exit'){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
 setDifficulty(difficulty);syncPrefs();updateRecordMenu();updateResumeMenu();requestAnimationFrame(frame);
-window.addEventListener('pagehide',()=>{cancelStartAttempt();cancelHudSpacePress();cancelAssetWait();if(game)autosave.flush();});
+window.addEventListener('pagehide',()=>{cancelStartAttempt();cancelHudSpacePress();cancelAssetWait();if(game&&screen!=='save-exit')autosave.flush();});
 window.addEventListener('error',e=>{console.error('Toma runtime:',e.message);$('loading').classList.add('hidden');});

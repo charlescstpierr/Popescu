@@ -38,8 +38,8 @@ test('victory then endless restart credits only the new kills and coins',async()
 test('retry and menu after results never count a completed run twice',async()=>{
   const a=app();await a.click('play');Object.assign(a.game.s,{mode:'gameover',hp:0,elapsed:60,kills:10,coins:5});await a.controller.renderResult(false);await a.click('retry');
   assert.equal(a.saved().lifetime,10);assert.equal(a.saved().coins,5);
-  Object.assign(a.game.s,{elapsed:20,kills:3,coins:2});await a.click('pause-menu');assert.equal(a.saved().best,60);assert.equal(a.saved().lifetime,13);assert.equal(a.saved().coins,7);
-  a.click('play');await a.click('pause-menu');assert.equal(a.saved().lifetime,13);
+  Object.assign(a.game.s,{elapsed:20,kills:3,coins:2});a.click('pause');await a.click('pause-menu');assert.equal(a.saved().best,60);assert.equal(a.saved().lifetime,13);assert.equal(a.saved().coins,7);
+  await a.click('play');a.click('pause');await a.click('pause-menu');assert.equal(a.saved().lifetime,13);
 });
 
 

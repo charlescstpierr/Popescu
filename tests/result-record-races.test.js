@@ -40,7 +40,7 @@ test('native lock: failed old result write cannot credit the new run after Retry
  try{failWrites(a,1);rendered=a.controller.renderResult(true);retried=a.click('retry');}finally{lock.release();}
  await Promise.all([rendered,retried,lock.held]);assert.notEqual(a.game,old);assert.equal(a.controller.screen,'hud');
  assertCredits(a,80,32,0,0);assert.equal(a.saved().lifetime,80);assert.equal(a.saved().coins,32);
- Object.assign(a.game.s,{elapsed:20,kills:3,coins:2});await a.click('pause-menu');
+ Object.assign(a.game.s,{elapsed:20,kills:3,coins:2});a.click('pause');await a.click('pause-menu');
  assert.equal(a.saved().lifetime,83);assert.equal(a.saved().coins,34);
 });
 test('native lock: successful results and Retry retain exact totals and new run credits',native,async()=>{
