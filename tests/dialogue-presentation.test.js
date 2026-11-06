@@ -94,14 +94,14 @@ test('CSS isolates the new view, keeps actual Canvas background and guards short
  assert.match(variant,/\.encounter-dialogue \.dialogue-art[^}]*display:none/s);
  assert.match(variant,/\.encounter-dialogue #dialogue-text[^}]*min-height:0/s);
 });
-test('existing companion portraits and level atlas retain fixed approved SHA-256 hashes',()=>{
+test('companion portraits and reference-redesigned level atlas retain fixed SHA-256 hashes',()=>{
  const expected={
   'companion-portrait-1.png':'9d87f121c42b89a86c46a0bb0f21db00d61ccb2df8810622d98cbc835289c5da',
-  'companion-portrait-2.png':'be0b543820aca9f2e0968159e3819f6c65846164113de1540d585151cbc61605',
-  'companion-portrait-3.png':'c52c74a1b32142e91b13e73ee76bdb9609897a959d3cbd74ccbe83019e991c71',
-  'companion-portrait-4.png':'c712f5a3d516d4cd56492b94d35763d2eedf90c8cf69e7e0e481362966f3e754',
-  'companion-portrait-5.png':'2f483d8b7d7c506778d94e05f967a8ffd2eb7aca0834e6ea5e41c60aa73a0a57',
-  'companion-levels-whole.png':'0c555ef01472de438dc2999c523533ed170cd80155951aff59e3f5bf13e61917'
+  'companion-portrait-2.png':'78adcf93ab605fec65c8d4e0d75f2f668d31f004102c107bd72b2b187ea3630b',
+  'companion-portrait-3.png':'5646d0770f29581ffa9dfe17ab3c395b4187c2127c80a800147a92fc49ed0a6f',
+  'companion-portrait-4.png':'2269b0c83fdc918b6c4c40cef3ad6ea6f8f5a9f2cdeb793e6351fc96f693cd03',
+  'companion-portrait-5.png':'16617f31ce0d031a5872a169ee799cb043fab44ee028f636e0dabed4b8bd7787',
+  'companion-levels-whole.png':'f38d6e910e0e199f1a85aa12100686b322580fe4953e99fd9194bafe9b5f085f'
  };
  for(const [name,hash]of Object.entries(expected))assert.equal(createHash('sha256').update(readFileSync(new URL(`../dist/assets/${name}`,import.meta.url))).digest('hex'),hash,name);
 });

@@ -224,7 +224,7 @@ function renderUpgrades(options){
   const button=document.createElement('button');button.className=`upgrade-card${evolution?' evolution-card':''}`;
   if(evolution)button.style.setProperty('--evolution-color',evolution.color);
   button.setAttribute('aria-label',`${u.name}. ${evolution?`Évolution disponible. ${evolution.requirement}. `:''}${description}. ${permanent?`Niveau ${rank+1}`:evolution?'Évolution permanente':'Récompense immédiate'}`);
-  const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`La même Blonde IA, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
+  const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`Blonde IA, niveau ${companion.rank}, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
   const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:car?`${u.name} · ${car.name}`:u.name;
   const desc=document.createElement('p');desc.textContent=description;const level=document.createElement('span');level.className='upgrade-rank';
   if(evolution){level.textContent='ÉVOLUTION DISPONIBLE';const requirement=document.createElement('p');requirement.className='evolution-requirement';requirement.textContent=evolution.requirement;copy.append(name,level,requirement,desc);}
