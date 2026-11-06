@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -979,8 +979,8 @@
     },
     {
       "path": "dist/renderer.js",
-      "bytes": 55941,
-      "sha256": "dcd6b56ed85ebca1bb8ad87fd27393942533a85b48b30011b4bd61ae237ff3cd"
+      "bytes": 55897,
+      "sha256": "d8c478dab0867145360459683f2419e1ae3c02f9747bfc4c2faae55b636cabba"
     },
     {
       "path": "dist/river-art.js",
@@ -1071,6 +1071,11 @@
       "path": "docs/CHARLES-EPILOGUE.md",
       "bytes": 3800,
       "sha256": "7f486c203936f4bce2153a2b4bd368b3473a2401d459d2413af2c7a2223b7943"
+    },
+    {
+      "path": "docs/COMBAT-LISIBILITE.md",
+      "bytes": 5626,
+      "sha256": "1fe6218f620d5d51892c077c9edef24c785ff2e90601ae0cff2b3640415bc3e2"
     },
     {
       "path": "docs/CONTRACT.md",
@@ -1945,12 +1950,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7473,
-      "sha256": "07a0a29d561a924d754724d3d2255339a447a3599c4ee19bd902964db3f8a1c8"
+      "sha256": "cc68bbbe14732a0f1b887929277034b0204429a01dbfa33862bc2bc6b1335a3d"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 765282,
-      "sha256": "b5206489e8f5f2aa5005f864776ece199d6cb3b6fcc5056bbb0c60e6f44c82ad"
+      "bytes": 765238,
+      "sha256": "9209a20d6ca340a9d1e6c67663dfc60856a3ce591beea6930c5dc4dc95ccc4d9"
     },
     {
       "path": "release/archives/README.md",
@@ -2241,6 +2246,16 @@
       "path": "scripts/inspect-charles.mjs",
       "bytes": 5063,
       "sha256": "c46c57d3f29351e1d3a6a60f1cdfcfb283e57ae6faa3c7abb0697470b3945ce1"
+    },
+    {
+      "path": "scripts/inspect-combat-layers.mjs",
+      "bytes": 3063,
+      "sha256": "34fa79fb720d8afb1938c5d261290e94ae9b01dcef839c6b408d44b8bd60b7db"
+    },
+    {
+      "path": "scripts/inspect-combat-motion.mjs",
+      "bytes": 2717,
+      "sha256": "454602358db1a55c9b77f1bb05fb148abec9cf9e963bf451a49f735d5803b638"
     },
     {
       "path": "scripts/inspect-companion-art.mjs",
@@ -2736,6 +2751,11 @@
       "path": "tests/city-variety-visibility.test.js",
       "bytes": 2321,
       "sha256": "2931623cce537881c0f193b99d15adb451a3355fbd272f4f453786693626ba75"
+    },
+    {
+      "path": "tests/combat-layer-order.test.js",
+      "bytes": 2339,
+      "sha256": "7e578e146599e9dad7b6b83e78a275cc991751fe045a9c918ea424e786f9d258"
     },
     {
       "path": "tests/combat-lifecycle.test.js",
@@ -3413,7 +3433,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "5b2997e1e389e1d2a971b0c6e05f20796be90bd0",
+  "base_github_commit": "60ecb47ab258b09b942232170470356218d05dd1",
   "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3421,5 +3441,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "90af8ef3ed1ae5f4f980431e40322fb2b7ee547f"
+  "base_github_tree": "7a8d1b983f132615be03c24813e2aa2a85949044"
 }
