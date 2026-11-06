@@ -515,7 +515,7 @@ export const EVENTS = {
     },
     {
       "who": "TOMA",
-      "text": "J'avais dit que j'allais le rapporter. Ils sont fatigants."
+      "text": "Expiré ? Mon char est en tournée mondiale."
     }
   ],
   "bench": [
@@ -1092,7 +1092,7 @@ export function victoryQuote(s,seen=new Set()){
 export const STORY_SCENES = {
   'first-horde': [
     {who:'TOMA',text:"Check ça. Même hors ligne, j'attire les foules."},
-    {who:'SYSTÈME',text:"La horde te poursuit. Aucun autographe n'est demandé."},
+    {who:'SYSTÈME',text:"Elles te suivent encore. Aucun autographe demandé."},
     {who:'TOMA',text:"Des fans gênées. J'vais leur laisser de l'espace."},
   ],
   'companion-local': [
@@ -1122,7 +1122,63 @@ export const STORY_SCENES = {
   ],
 };
 export const STORY_BUILD_IDS = ['car','truth','money','followers'];
+// Street scenes already written in EVENTS. They are read only in a lull; the
+// 15-minute chapter pays off the last one read completely.
+export const STREET_SCENE_TYPES = ['phone','vending','trophy','bike','mirror','car','bench'];
+const STREET_CALLBACKS = {
+  phone:"Quinze minutes. Toujours cinq cent trois sur dix.",
+  vending:"Quinze minutes. La machine me doit encore des chips.",
+  trophy:"Quinze minutes. Mon trophée surveille encore le voisin.",
+  bike:"Quinze minutes debout. La selle, c'est pour les touristes.",
+  mirror:"Quinze minutes. Mon téléphone est à 2 %. Mon reflet, à 100.",
+  car:"Quinze minutes. Mon char est encore en tournée.",
+  bench:"Quinze minutes. Le pigeon a toujours pas payé.",
+};
+// Each companion rank is a different woman. Toma reads every change as a
+// tribute; she restates the facts. Rank 1 keeps its existing unlock dialogue.
+export const COMPANION_ARRIVALS = {
+  2:[{who:'TOMA',text:"T'as changé ta coiffure pour moi ?"},{who:'BLONDE IA',text:"J'suis la mise à jour. L'autre a demandé un transfert."}],
+  3:[{who:'TOMA',text:"T'es encore plus belle qu'avant !"},{who:'BLONDE IA',text:"J'suis la troisième. J'ramasse ton argent, pas tes compliments."}],
+  4:[{who:'TOMA',text:"Toujours fidèle au poste !"},{who:'BLONDE IA',text:"Quatrième employée. Les trois autres ont démissionné."}],
+  5:[{who:'TOMA',text:"J'le savais que tu reviendrais."},{who:'BLONDE IA',text:"Cinquième. Pour les cœurs, vois avec mes drones."}],
+};
+// Defeat lines follow the recorded lethal cause. Sources win first: the gas
+// cloud has no actor, while a gas gorilla's touch is an ordinary contact.
+export const DEFEAT_FALLBACK = "FUCKK ! Efface la vidéo. On recommence.";
+const DEFEAT_BY_SOURCE = {
+  gas:"Mon parfum attire même les ambulances.",
+  explosion:"Sortie explosive. Comme mes entrées.",
+  shockwave:"Le coq m'a pas eu. J'me suis couché avant son solo.",
+  tail:"J'suis pas tombé. J'ai fini sur un grand écart.",
+  pelican:"Péli m'a pas battu. Mercure était rétrograde.",
+};
+const DEFEAT_BY_ACTOR = {
+  orangutan:"Elle m'a pas frappé. C'était un câlin de fan.",
+  rival_goat:"Le bouc m'a pas battu. Son odeur m'a endormi.",
+  matriarch:"La Matriarche m'a pas sorti. J'suis parti, la salle était trop petite.",
+};
+const ORDINARY_GORILLAS = ['normal','sprinter','gas','tank','jealous','explosive'];
+const DEFEAT_CONTACT = [
+  "Elles voulaient toutes un selfie en même temps. J'ai dit oui.",
+  "J'suis pas mort. J'signe mes autographes couché.",
+  "Trop de fans, pas assez de Toma.",
+];
+export function defeatQuote(s,seed=0){
+  const cause=s?.deathCause;
+  if(!cause)return DEFEAT_FALLBACK;
+  if(Object.hasOwn(DEFEAT_BY_SOURCE,cause.source))return DEFEAT_BY_SOURCE[cause.source];
+  if(cause.source!=='touch')return DEFEAT_FALLBACK;
+  if(Object.hasOwn(DEFEAT_BY_ACTOR,cause.actorType))return DEFEAT_BY_ACTOR[cause.actorType];
+  if(ORDINARY_GORILLAS.includes(cause.actorType))return DEFEAT_CONTACT[(seed>>>0)%DEFEAT_CONTACT.length];
+  return DEFEAT_FALLBACK;
+}
+export function lastStreetScene(seen){
+  let last=null;
+  for(const flag of seen){const type=flag.startsWith('scene:street:')?flag.slice(13):null;if(type&&Object.hasOwn(STREET_CALLBACKS,type))last=type;}
+  return last;
+}
 export function storyMilestoneLine(milestone,seen){
+  if(milestone.at===900){const street=lastStreetScene(seen);return street?{who:'TOMA',text:STREET_CALLBACKS[street]}:milestone;}
   if(milestone.at!==600)return milestone;
   if(seen.has('scene:build-car'))return {who:'TOMA',text:"Dix minutes. Mon char a pas de siège ? Parfait. J'conduis mon empire à pied."};
   if(seen.has('scene:build-truth'))return {who:'TOMA',text:"Dix minutes. La vérité frappe encore. Elle garde sa job tant qu'elle touche pas à ma bio."};

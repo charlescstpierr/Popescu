@@ -2,6 +2,8 @@ import {currentBarkContext} from './content.js';
 // One serializable reading lane for all speakers. Urgent combat cues interrupt
 // immediately; the interrupted line keeps its remaining visible reading time.
 export const SPEECH_QUEUE_LIMIT=16;
+// Lull-gated scenes wait at most this long (game time) for calm, then cancel.
+export const SCENE_CALM_WAIT=8;
 export function speechDuration(text){return Math.max(4.3,text.length*.039);}
 export function createSpeech(){return {active:null,queue:[],nextId:1,scene:null};}
 export function speechTime(g){return g.s.elapsed+(g.s.charles?.elapsed||0);}
@@ -22,12 +24,30 @@ function cancelScene(g){
  if(g.speech.active?.sceneId===id)g.speech.active=null;
  g.speech.queue=g.speech.queue.filter(line=>line.sceneId!==id);g.speech.scene=null;
 }
-export function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false}={}){
+export function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false,calm=false}={}){
  flushSpeech(g);const state=g.speech;
  if(g.banterEnabled===false||state.active||state.queue.length||state.scene||!lines.length)return false;
  const scene={id,lines:lines.map(({who,text})=>({who,text})),index:0,actorId,scope,remember,companion:lines.some(line=>line.who==='BLONDE IA')};
+ if(calm)scene.calm=true;
  if(!sceneAvailable(g,scene))return false;
  state.scene=scene;flushSpeech(g);return true;
+}
+function sceneCursor(g,scene){const line=scene.lines[scene.index];return {id:g.speech.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0};}
+// A calm-gated scene keeps its next line queued while danger lasts. Other
+// queued lines (a boss taunt, for example) play first; the save invariant of
+// exactly one active-or-queued scene line holds throughout the wait.
+function waitForCalm(g,scene,now){
+ const state=g.speech;
+ if(scene.waitSince===undefined)scene.waitSince=now;
+ if(now-scene.waitSince>=SCENE_CALM_WAIT){if(scene.remember)g.eventSeen.add(`skip:${scene.id}`);cancelScene(g);return false;}
+ if(!state.queue.some(line=>line.sceneId===scene.id)){
+  if(state.queue.length>=SPEECH_QUEUE_LIMIT){const discard=state.queue.findLastIndex(queued=>!queued.sceneId);if(discard>=0)state.queue.splice(discard,1);}
+  state.queue.push(sceneCursor(g,scene));
+ }
+ state.queue=state.queue.filter(line=>line.sceneId||available(g,line));
+ const other=state.queue.findIndex(line=>!line.sceneId);
+ if(other>=0)start(g,state.queue.splice(other,1)[0]);
+ return true;
 }
 function retainInterrupted(g,line){
  line.remaining=Math.min(speechDuration(line.text),Math.max(0,line.until-speechTime(g)));
@@ -69,10 +89,14 @@ export function flushSpeech(g){
  if(state.scene){
   // An urgent warning may have interrupted the current scene line. Resume its
   // remaining budget before advancing; unrelated chatter cannot split a pair.
-  const index=state.queue.findIndex(line=>line.sceneId===state.scene.id);
-  if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
-  const scene=state.scene,line=scene.lines[scene.index];
-  start(g,{id:state.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0});return;
+  const scene=state.scene;
+  if(scene.calm&&typeof g.isCalm==='function'&&!g.isCalm(scene.id)){if(waitForCalm(g,scene,now))return;}
+  else{
+   delete scene.waitSince;
+   const index=state.queue.findIndex(line=>line.sceneId===scene.id);
+   if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
+   start(g,sceneCursor(g,scene));return;
+  }
  }
  while(state.queue.length){const next=state.queue.shift();if(available(g,next)){start(g,next);break;}}
 }
@@ -83,9 +107,11 @@ export function enqueueSpeech(g,who,text,{queue=false,urgent=false,encounter=fal
  if(urgent&&state.active?.who===who&&state.active.text===text)return true;
  const line={id:state.nextId,who,text,encounter,actorId,scope,sceneId:null,remaining:speechDuration(text),until:0};
  if(!available(g,line))return false;
- if(!urgent&&state.active){
+ // While a calm-gated scene waits, ordinary chatter cannot start in its gap.
+ const sceneWaiting=!state.active&&state.scene?.waitSince!==undefined;
+ if(!urgent&&(state.active||sceneWaiting)){
   if(!queue||state.queue.length>=SPEECH_QUEUE_LIMIT)return false;
-  state.nextId++;state.queue.push(line);return true;
+  state.nextId++;state.queue.push(line);if(sceneWaiting)flushSpeech(g);return true;
  }
  if(urgent&&state.active){
   // A fresh warning supersedes older time-sensitive warnings. Never replay an

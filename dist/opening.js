@@ -4,7 +4,7 @@ export const OPENING = [
   {
     "who": "TOMA",
     "opening": "offline",
-    "text": "Hein ? Pourquoi j’ai plus accès à ma vie fake ? Pourquoi ?! WTF ?!",
+    "text": "Hein ? Mon char, mes abonnés, ma blonde… Tout est où ?!",
     "reply": "",
     "action": "SUITE ›"
   },

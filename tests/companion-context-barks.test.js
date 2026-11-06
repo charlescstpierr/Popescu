@@ -12,6 +12,8 @@ function fixture(){
   g.s.companion=true;
   g.recalculate();
   g.s.elapsed=10;
+  // These tests pick a pool line by index; pin the per-seed rotation start.
+  g.storyOffset=()=>0;
   return {g,events};
 }
 const pool=g=>contextualBarks(g.s,g.recentHealthDamage);

@@ -187,7 +187,7 @@ body{touch-action:manipulation}#world,.hud{touch-action:none}.panel{touch-action
  <section id="settings" class="screen overlay hidden" aria-label="Paramètres"><div class="panel"><span class="section-kicker">UN PEU DE CONTRÔLE</span><h2>PARAMÈTRES</h2><label class="setting-row"><span>Son et musique</span><input id="sound-setting" type="checkbox" checked></label><label class="setting-volume" for="volume">Volume <span id="volume-text">50 %</span><input id="volume" type="range" min="0" max="100" value="50"></label><label class="setting-row"><span>Effets visuels réduits<small>Moins de particules et de vibrations</small></span><input id="reduced-fx" type="checkbox"></label><label class="setting-row"><span>Répliques pendant l’action</span><input id="banter-setting" type="checkbox" checked></label><button id="settings-back" class="button primary">RETOUR <span>↩</span></button></div></section>
  <section id="results" class="screen overlay hidden" aria-label="Résultat de la partie"><div class="panel result-panel"><img id="result-portrait" src="assets/portrait-toma-current.webp" alt="Toma"><span id="result-kicker" class="section-kicker">UNE FIN TRÈS DRAMATIQUE</span><h2 id="result-title">GAME OVER</h2><p id="result-quote" class="quote"></p><div class="results-grid"><div><span>TEMPS SURVÉCU</span><b id="result-time">00:00</b></div><div><span>SINGES VAINCUS</span><b id="result-kills">0</b></div><div><span>PIÈCES RÉCOLTÉES</span><b id="result-coins">0</b></div><div><span>GEMMES DE RÉALITÉ</span><b id="result-gems">0</b></div></div><p id="record-message"></p><p id="charles-result" class="charles-result hidden" role="status"></p><div id="charles-choice" class="charles-choice hidden"><button id="meet-charles" class="button secondary" aria-describedby="charles-offer-note">RENCONTRER CHARLES <span>∞</span></button><p id="charles-offer-note">Épilogue optionnel. Charles est invincible et ses attaques tuent en un coup. Ta survie de 20 minutes est déjà gagnée.</p></div><button id="endless" class="button primary hidden">CONTINUER EN INFINI <span>∞</span></button><button id="retry" class="button primary">REJOUER <span>↻</span></button><button id="result-menu" class="button secondary">MENU PRINCIPAL <span>⌂</span></button></div></section>
  <section id="charles-confirm" class="screen overlay hidden" role="dialog" aria-modal="true" aria-labelledby="charles-confirm-title" aria-describedby="charles-confirm-note"><div class="panel charles-confirm-panel"><span class="section-kicker">ÉPILOGUE OPTIONNEL</span><h2 id="charles-confirm-title">CHARLES<br>L’ILLUMINÉ</h2><p class="charles-infinity">INVINCIBLE ∞</p><div id="charles-confirm-note"><p>Charles ne peut pas être vaincu.</p><p>Ses attaques tuent Toma en un coup, même avec des protections.</p><p>Le toucher fait avancer sa transformation, pas baisser sa vie.</p><p class="charles-secured">Ta victoire des 20 minutes est déjà acquise et restera conservée.</p><p>Tu peux quitter l’épilogue depuis la pause.</p></div><button id="charles-start" class="button primary">JE VEUX LE RENCONTRER</button><button id="charles-cancel" class="button secondary">RETOUR À MA VICTOIRE</button></div></section>
- <section id="credits" class="screen overlay hidden" aria-label="Crédits et commandes"><div class="panel credits-panel"><span class="section-kicker">TOUT EST ORIGINAL. SAUF SON EGO.</span><h2>LE PETIT MANUEL</h2><div class="manual"><h3>SURVIVRE, C’EST SIMPLE.</h3><p>Déplace-toi. Toma tire tout seul vers l’ennemie la plus proche. Ramasse les éclats bleus pour gagner de l’expérience et choisir tes pouvoirs.</p><h3>LE VERT, ÇA SENT MAUVAIS.</h3><p>Les orangs-outans roux frappent avec leurs longs bras. Sors du secteur orange avant leur claque. Éloigne-toi des gorilles péteuses dès qu'elles se préparent : le nuage vert fait mal. Les coffres contiennent de l’expérience, des soins et des pièces.</p><h3>TA SEULE ALLIÉE.</h3><p>Choisis « Blonde IA » : la même fille change de coiffure et de tenue sur cinq niveaux. Elle tire des cœurs, puis apprend à éviter les ennemis proches, ramasse plus loin, restaure un peu de bouclier et gagne deux drones. Ses cœurs principaux peuvent charmer; les mini-cœurs des drones ne charment pas.</p><h3>FOUILLE LE QUARTIER.</h3><p>Approche les ruines, cabanes, autels, épaves et failles pour découvrir un effet temporaire. Tu peux avoir un seul effet à la fois. Son compte à rebours s'arrête en pause. Un lieu épuisé se recharge pendant que tu explores. Les épaves ne se conduisent pas.</p><h3>TÉLÉPHONE OU CLAVIER.</h3><p>Pouce gauche pour bouger. Sur ordinateur : WASD, ZQSD ou flèches. Échap pour pause. M pour le son.</p><h3>UNE COMÉDIE FICTIVE.</h3><p>Personnalités et situations volontairement exagérées. Pixel art, musique chiptune et effets originaux. Conçu avec Charles, développé avec @dot.</p><p class="muted">Une partie dure 20 minutes. Ensuite, tu peux continuer à l’infini. Record et préférences sont conservés sur cet appareil.</p></div><button id="credits-back" class="button primary">OK. WATCH-MOI ALLER.</button></div></section>
+ <section id="credits" class="screen overlay hidden" aria-label="Crédits et commandes"><div class="panel credits-panel"><span class="section-kicker">TOUT EST ORIGINAL. SAUF SON EGO.</span><h2>LE PETIT MANUEL</h2><div class="manual"><h3>SURVIVRE, C’EST SIMPLE.</h3><p>Déplace-toi. Toma tire tout seul vers l’ennemie la plus proche. Ramasse les éclats bleus pour gagner de l’expérience et choisir tes pouvoirs.</p><h3>LE VERT, ÇA SENT MAUVAIS.</h3><p>Les orangs-outans roux frappent avec leurs longs bras. Sors du secteur orange avant leur claque. Éloigne-toi des gorilles péteuses dès qu'elles se préparent : le nuage vert fait mal. Les coffres contiennent de l’expérience, des soins et des pièces.</p><h3>TA SEULE ALLIÉE.</h3><p>Choisis « Blonde IA » : cinq femmes différentes se relaient, une par niveau. Elle tire des cœurs, puis apprend à éviter les ennemis proches, ramasse plus loin, restaure un peu de bouclier et gagne deux drones. Ses cœurs principaux peuvent charmer; les mini-cœurs des drones ne charment pas.</p><h3>FOUILLE LE QUARTIER.</h3><p>Approche les ruines, cabanes, autels, épaves et failles pour découvrir un effet temporaire. Tu peux avoir un seul effet à la fois. Son compte à rebours s'arrête en pause. Un lieu épuisé se recharge pendant que tu explores. Les épaves ne se conduisent pas.</p><h3>TÉLÉPHONE OU CLAVIER.</h3><p>Pouce gauche pour bouger. Sur ordinateur : WASD, ZQSD ou flèches. Échap pour pause. M pour le son.</p><h3>UNE COMÉDIE FICTIVE.</h3><p>Personnalités et situations volontairement exagérées. Pixel art, musique chiptune et effets originaux. Conçu avec Charles, développé avec @dot.</p><p class="muted">Une partie dure 20 minutes. Ensuite, tu peux continuer à l’infini. Record et préférences sont conservés sur cet appareil.</p></div><button id="credits-back" class="button primary">OK. WATCH-MOI ALLER.</button></div></section>
  <div id="loading" class="loading hidden">CHARGEMENT DE L’EGO…</div>
  <div id="trophy-toast" class="toast trophy-toast hidden" role="status"><canvas width="32" height="32" id="trophy-toast-icon"></canvas><b id="trophy-toast-text"></b></div>
  <div id="toast" class="toast hidden" role="status"></div>
@@ -714,7 +714,7 @@ const EVENTS = {
     },
     {
       "who": "TOMA",
-      "text": "J'avais dit que j'allais le rapporter. Ils sont fatigants."
+      "text": "Expiré ? Mon char est en tournée mondiale."
     }
   ],
   "bench": [
@@ -1291,7 +1291,7 @@ function victoryQuote(s,seen=new Set()){
 const STORY_SCENES = {
   'first-horde': [
     {who:'TOMA',text:"Check ça. Même hors ligne, j'attire les foules."},
-    {who:'SYSTÈME',text:"La horde te poursuit. Aucun autographe n'est demandé."},
+    {who:'SYSTÈME',text:"Elles te suivent encore. Aucun autographe demandé."},
     {who:'TOMA',text:"Des fans gênées. J'vais leur laisser de l'espace."},
   ],
   'companion-local': [
@@ -1321,7 +1321,63 @@ const STORY_SCENES = {
   ],
 };
 const STORY_BUILD_IDS = ['car','truth','money','followers'];
+// Street scenes already written in EVENTS. They are read only in a lull; the
+// 15-minute chapter pays off the last one read completely.
+const STREET_SCENE_TYPES = ['phone','vending','trophy','bike','mirror','car','bench'];
+const STREET_CALLBACKS = {
+  phone:"Quinze minutes. Toujours cinq cent trois sur dix.",
+  vending:"Quinze minutes. La machine me doit encore des chips.",
+  trophy:"Quinze minutes. Mon trophée surveille encore le voisin.",
+  bike:"Quinze minutes debout. La selle, c'est pour les touristes.",
+  mirror:"Quinze minutes. Mon téléphone est à 2 %. Mon reflet, à 100.",
+  car:"Quinze minutes. Mon char est encore en tournée.",
+  bench:"Quinze minutes. Le pigeon a toujours pas payé.",
+};
+// Each companion rank is a different woman. Toma reads every change as a
+// tribute; she restates the facts. Rank 1 keeps its existing unlock dialogue.
+const COMPANION_ARRIVALS = {
+  2:[{who:'TOMA',text:"T'as changé ta coiffure pour moi ?"},{who:'BLONDE IA',text:"J'suis la mise à jour. L'autre a demandé un transfert."}],
+  3:[{who:'TOMA',text:"T'es encore plus belle qu'avant !"},{who:'BLONDE IA',text:"J'suis la troisième. J'ramasse ton argent, pas tes compliments."}],
+  4:[{who:'TOMA',text:"Toujours fidèle au poste !"},{who:'BLONDE IA',text:"Quatrième employée. Les trois autres ont démissionné."}],
+  5:[{who:'TOMA',text:"J'le savais que tu reviendrais."},{who:'BLONDE IA',text:"Cinquième. Pour les cœurs, vois avec mes drones."}],
+};
+// Defeat lines follow the recorded lethal cause. Sources win first: the gas
+// cloud has no actor, while a gas gorilla's touch is an ordinary contact.
+const DEFEAT_FALLBACK = "FUCKK ! Efface la vidéo. On recommence.";
+const DEFEAT_BY_SOURCE = {
+  gas:"Mon parfum attire même les ambulances.",
+  explosion:"Sortie explosive. Comme mes entrées.",
+  shockwave:"Le coq m'a pas eu. J'me suis couché avant son solo.",
+  tail:"J'suis pas tombé. J'ai fini sur un grand écart.",
+  pelican:"Péli m'a pas battu. Mercure était rétrograde.",
+};
+const DEFEAT_BY_ACTOR = {
+  orangutan:"Elle m'a pas frappé. C'était un câlin de fan.",
+  rival_goat:"Le bouc m'a pas battu. Son odeur m'a endormi.",
+  matriarch:"La Matriarche m'a pas sorti. J'suis parti, la salle était trop petite.",
+};
+const ORDINARY_GORILLAS = ['normal','sprinter','gas','tank','jealous','explosive'];
+const DEFEAT_CONTACT = [
+  "Elles voulaient toutes un selfie en même temps. J'ai dit oui.",
+  "J'suis pas mort. J'signe mes autographes couché.",
+  "Trop de fans, pas assez de Toma.",
+];
+function defeatQuote(s,seed=0){
+  const cause=s?.deathCause;
+  if(!cause)return DEFEAT_FALLBACK;
+  if(Object.hasOwn(DEFEAT_BY_SOURCE,cause.source))return DEFEAT_BY_SOURCE[cause.source];
+  if(cause.source!=='touch')return DEFEAT_FALLBACK;
+  if(Object.hasOwn(DEFEAT_BY_ACTOR,cause.actorType))return DEFEAT_BY_ACTOR[cause.actorType];
+  if(ORDINARY_GORILLAS.includes(cause.actorType))return DEFEAT_CONTACT[(seed>>>0)%DEFEAT_CONTACT.length];
+  return DEFEAT_FALLBACK;
+}
+function lastStreetScene(seen){
+  let last=null;
+  for(const flag of seen){const type=flag.startsWith('scene:street:')?flag.slice(13):null;if(type&&Object.hasOwn(STREET_CALLBACKS,type))last=type;}
+  return last;
+}
 function storyMilestoneLine(milestone,seen){
+  if(milestone.at===900){const street=lastStreetScene(seen);return street?{who:'TOMA',text:STREET_CALLBACKS[street]}:milestone;}
   if(milestone.at!==600)return milestone;
   if(seen.has('scene:build-car'))return {who:'TOMA',text:"Dix minutes. Mon char a pas de siège ? Parfait. J'conduis mon empire à pied."};
   if(seen.has('scene:build-truth'))return {who:'TOMA',text:"Dix minutes. La vérité frappe encore. Elle garde sa job tant qu'elle touche pas à ma bio."};
@@ -1331,13 +1387,15 @@ function storyMilestoneLine(milestone,seen){
   return milestone;
 }
 
-modules["./content.js"]={DIFFICULTIES,COMPANION_LEVELS,companionLevel,UPGRADES,INTRO,GORILLA_NAMES,BARKS,EVENTS,STUNT_BARKS,STUNT_REPLIES,RIVAL_BARKS,ROOSTER_REACTION,RIVAL_REPLIES,RIVAL_COMPANION_REPLIES,WORLD_REMARKS,STORY_MILESTONES,currentBarkContext,contextualBarks,victoryQuote,STORY_SCENES,STORY_BUILD_IDS,storyMilestoneLine};
+modules["./content.js"]={DIFFICULTIES,COMPANION_LEVELS,companionLevel,UPGRADES,INTRO,GORILLA_NAMES,BARKS,EVENTS,STUNT_BARKS,STUNT_REPLIES,RIVAL_BARKS,ROOSTER_REACTION,RIVAL_REPLIES,RIVAL_COMPANION_REPLIES,WORLD_REMARKS,STORY_MILESTONES,currentBarkContext,contextualBarks,victoryQuote,STORY_SCENES,STORY_BUILD_IDS,STREET_SCENE_TYPES,COMPANION_ARRIVALS,DEFEAT_FALLBACK,defeatQuote,lastStreetScene,storyMilestoneLine};
 })();
 (()=>{
 const {currentBarkContext}=modules['./content.js'];
 // One serializable reading lane for all speakers. Urgent combat cues interrupt
 // immediately; the interrupted line keeps its remaining visible reading time.
 const SPEECH_QUEUE_LIMIT=16;
+// Lull-gated scenes wait at most this long (game time) for calm, then cancel.
+const SCENE_CALM_WAIT=8;
 function speechDuration(text){return Math.max(4.3,text.length*.039);}
 function createSpeech(){return {active:null,queue:[],nextId:1,scene:null};}
 function speechTime(g){return g.s.elapsed+(g.s.charles?.elapsed||0);}
@@ -1358,12 +1416,30 @@ function cancelScene(g){
  if(g.speech.active?.sceneId===id)g.speech.active=null;
  g.speech.queue=g.speech.queue.filter(line=>line.sceneId!==id);g.speech.scene=null;
 }
-function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false}={}){
+function beginSpeechScene(g,id,lines,{actorId=null,scope='survival',remember=false,calm=false}={}){
  flushSpeech(g);const state=g.speech;
  if(g.banterEnabled===false||state.active||state.queue.length||state.scene||!lines.length)return false;
  const scene={id,lines:lines.map(({who,text})=>({who,text})),index:0,actorId,scope,remember,companion:lines.some(line=>line.who==='BLONDE IA')};
+ if(calm)scene.calm=true;
  if(!sceneAvailable(g,scene))return false;
  state.scene=scene;flushSpeech(g);return true;
+}
+function sceneCursor(g,scene){const line=scene.lines[scene.index];return {id:g.speech.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0};}
+// A calm-gated scene keeps its next line queued while danger lasts. Other
+// queued lines (a boss taunt, for example) play first; the save invariant of
+// exactly one active-or-queued scene line holds throughout the wait.
+function waitForCalm(g,scene,now){
+ const state=g.speech;
+ if(scene.waitSince===undefined)scene.waitSince=now;
+ if(now-scene.waitSince>=SCENE_CALM_WAIT){if(scene.remember)g.eventSeen.add(`skip:${scene.id}`);cancelScene(g);return false;}
+ if(!state.queue.some(line=>line.sceneId===scene.id)){
+  if(state.queue.length>=SPEECH_QUEUE_LIMIT){const discard=state.queue.findLastIndex(queued=>!queued.sceneId);if(discard>=0)state.queue.splice(discard,1);}
+  state.queue.push(sceneCursor(g,scene));
+ }
+ state.queue=state.queue.filter(line=>line.sceneId||available(g,line));
+ const other=state.queue.findIndex(line=>!line.sceneId);
+ if(other>=0)start(g,state.queue.splice(other,1)[0]);
+ return true;
 }
 function retainInterrupted(g,line){
  line.remaining=Math.min(speechDuration(line.text),Math.max(0,line.until-speechTime(g)));
@@ -1405,10 +1481,14 @@ function flushSpeech(g){
  if(state.scene){
   // An urgent warning may have interrupted the current scene line. Resume its
   // remaining budget before advancing; unrelated chatter cannot split a pair.
-  const index=state.queue.findIndex(line=>line.sceneId===state.scene.id);
-  if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
-  const scene=state.scene,line=scene.lines[scene.index];
-  start(g,{id:state.nextId++,who:line.who,text:line.text,encounter:false,actorId:scene.actorId,scope:scene.scope,sceneId:scene.id,remaining:speechDuration(line.text),until:0});return;
+  const scene=state.scene;
+  if(scene.calm&&typeof g.isCalm==='function'&&!g.isCalm(scene.id)){if(waitForCalm(g,scene,now))return;}
+  else{
+   delete scene.waitSince;
+   const index=state.queue.findIndex(line=>line.sceneId===scene.id);
+   if(index>=0){start(g,state.queue.splice(index,1)[0]);return;}
+   start(g,sceneCursor(g,scene));return;
+  }
  }
  while(state.queue.length){const next=state.queue.shift();if(available(g,next)){start(g,next);break;}}
 }
@@ -1419,9 +1499,11 @@ function enqueueSpeech(g,who,text,{queue=false,urgent=false,encounter=false,acto
  if(urgent&&state.active?.who===who&&state.active.text===text)return true;
  const line={id:state.nextId,who,text,encounter,actorId,scope,sceneId:null,remaining:speechDuration(text),until:0};
  if(!available(g,line))return false;
- if(!urgent&&state.active){
+ // While a calm-gated scene waits, ordinary chatter cannot start in its gap.
+ const sceneWaiting=!state.active&&state.scene?.waitSince!==undefined;
+ if(!urgent&&(state.active||sceneWaiting)){
   if(!queue||state.queue.length>=SPEECH_QUEUE_LIMIT)return false;
-  state.nextId++;state.queue.push(line);return true;
+  state.nextId++;state.queue.push(line);if(sceneWaiting)flushSpeech(g);return true;
  }
  if(urgent&&state.active){
   // A fresh warning supersedes older time-sensitive warnings. Never replay an
@@ -1448,7 +1530,7 @@ function dismissSpeech(g){
  else{cancelCompactBossReply(g,g.speech.active);g.speech.active=null;}
 }
 
-modules["./speech.js"]={SPEECH_QUEUE_LIMIT,speechDuration,createSpeech,speechTime,beginSpeechScene,setSpeechEnabled,flushSpeech,presentSpeech,enqueueSpeech,dismissSpeech};
+modules["./speech.js"]={SPEECH_QUEUE_LIMIT,SCENE_CALM_WAIT,speechDuration,createSpeech,speechTime,beginSpeechScene,setSpeechEnabled,flushSpeech,presentSpeech,enqueueSpeech,dismissSpeech};
 })();
 (()=>{
 // Explicit, one-time evolutions. Their prerequisite powers keep their own ranks.
@@ -3130,6 +3212,7 @@ const {createEncounterDialogue,queueEncounterDialogue,openEncounterDialogue,adva
 const {carLevel,launchLamborghini,updateLamborghini}=modules['./lamborghini.js'];
 const {lethalDamageCause}=modules['./run-history.js'];
 const {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled}=modules['./speech.js'];
+const {BOSS_TYPES}=modules['./boss-director.js'];
 const {charlesActive,charlesArrival,startCharles,finishCharles,hitCharles,updateCharles}=modules['./charles.js'];
 const {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier}=modules['./trophy-effects.js'];
 const {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests}=modules['./boss-trophies.js'];
@@ -3143,7 +3226,7 @@ const { DISCOVERIES, DISCOVERY_COOLDOWN }=modules['./discoveries.js'];
 const { tailLocked, updateTravestia }=modules['./travestia.js'];
 const { World }=modules['./world.js'];
 const { computeHeroPose, solveHeroAim, advanceHeroMotion }=modules['./hero-pose.js'];
-const { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION }=modules['./content.js'];
+const { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STREET_SCENE_TYPES, COMPANION_ARRIVALS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION }=modules['./content.js'];
 
 // One footprint for explosive damage and its player-center warning.
 const EXPLOSIVE_BLAST=Object.freeze({radius:87,playerPadding:12});
@@ -3156,6 +3239,12 @@ const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 %
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
 const BASE={...EGO_BEASTS,...ANIMALS,pelican:{hp:760,speed:42,r:29},travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
+// Lull thresholds for optional story scenes, calibrated by the story simulation.
+const CALM_N=6,CALM_R=180;
+// Dangers are local: an attack or a gas cloud off-screen does not interrupt a
+// reading. Bosses block while on screen or while any of their attacks runs.
+const CALM_DANGER_R=420;
+const isAttackPhase=phase=>typeof phase==='string'&&(phase.endsWith('_warning')||phase.endsWith('_windup')||phase.startsWith('peli_')&&phase!=='peli_recover'||['animal_active','ego_active','windup','swipe','crow','charge','gas','shockwave','tail_dash','tail_spin','cape_spin','peli_hug','peli_tarot'].includes(phase));
 class Game {
   constructor({difficulty='normal',seed=42,onEvent=()=>{}}={}) {
     this.onEvent=onEvent;this.seed=seed|0;this.rng=(seed|0) || 1;this.id=1;this.world=new World(seed);this.viewport={width:390,height:844};
@@ -3232,7 +3321,7 @@ class Game {
     s.upg[id]=this.rank(id)+1;
     if(STORY_BUILD_IDS.includes(id)&&!STORY_BUILD_IDS.some(key=>this.eventSeen.has(`build-choice:${key}`)))this.eventSeen.add(`build-choice:${id}`);
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
-    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;s.girl.walkMoving=false;s.girl.supportFlash=0;if(this.rank(id)===4)s.girl.shieldClock=8;if(this.rank(id)===5)s.girl.droneClock=2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA',"Copie locale prête. J'peux encore tirer, même sans Internet.");}}
+    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;s.girl.walkMoving=false;s.girl.supportFlash=0;if(this.rank(id)===4)s.girl.shieldClock=8;if(this.rank(id)===5)s.girl.droneClock=2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA',"Copie locale prête. J'peux encore tirer, même sans Internet.");}if(COMPANION_ARRIVALS[this.rank(id)])this.eventSeen.add(`companion-rank:${this.rank(id)}`);}
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
@@ -3799,7 +3888,7 @@ class Game {
       const index=stunt.count++,d=length(s.moveX,s.moveY)||1;
       stunt.active=true;stunt.time=0;stunt.progress=0;stunt.faceX=s.moveX/d;stunt.faceY=s.moveY/d;
       this.stuntCharge=0;this.stuntWait=22+this.stuntRandom()*13;this.speechUntil=s.elapsed+3.2;
-      if(STUNT_BARKS.length){const line=STUNT_BARKS[index%STUNT_BARKS.length];
+      if(STUNT_BARKS.length){const line=STUNT_BARKS[(index+this.storyOffset())%STUNT_BARKS.length];
         const lines=s.companion&&s.girl.down<=0?[line,line.reply]:[line];
         beginSpeechScene(this,`stunt:${line.id}`,lines);
       }
@@ -3822,7 +3911,7 @@ class Game {
     if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil||s.elapsed-this.lastRivalBark<10||!RIVAL_BARKS.length)return;
     const rival=s.enemies.find(e=>!e.dead&&e.sex==='male'&&isRival(e.type)&&e.charmed<=0&&e.banterCount<2&&(e.banterCount===0||dist(e,s)<330&&s.elapsed>=e.nextTaunt));
     if(!rival)return;
-    const line=RIVAL_BARKS[this.rivalBarkIndex%RIVAL_BARKS.length];
+    const line=RIVAL_BARKS[(this.rivalBarkIndex+this.storyOffset())%RIVAL_BARKS.length];
     const reply={who:rival.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text:line.replies[rival.type]};
     if(beginSpeechScene(this,`rival:${line.id}`,[line,reply],{actorId:rival.id})){
       this.rivalBarkIndex++;this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
@@ -3830,8 +3919,44 @@ class Game {
   }
   bark(who,text,priority=false,options={}){this.flushSpeech();if(!priority&&this.s.elapsed<this.speechUntil)return false;return enqueueSpeech(this,who,text,{queue:priority,scope:charlesActive(this.s)?'charles':'survival',...options});}
 
+  // Per-run starting point for rotating joke lists. Derived from the seed
+  // without consuming any generator, and never stored in the save.
+  storyOffset(){return ((this.seed^0x9e3779b9)>>>0)%9973;}
+  // A lull: no announced or ongoing attack, no boss, no hazard on the ground,
+  // no contact and no other speech. ownSceneId exempts that scene's cursor.
+  isCalm(ownSceneId=null){
+    const speech=this.speech;
+    if(!this.banterEnabled||this.encounters?.active)return false;
+    if(speech.scene&&speech.scene.id!==ownSceneId)return false;
+    const own=line=>ownSceneId!==null&&line.sceneId===ownSceneId;
+    if(speech.active&&!own(speech.active))return false;
+    if(speech.queue.some(line=>!own(line)))return false;
+    return this.isLull();
+  }
+  // The danger-only half of a lull, measured by the story simulation.
+  isLull(){
+    const s=this.s;
+    if(s.mode!=='playing')return false;
+    if(charlesActive(s)||(!s.endless&&s.elapsed>=1130))return false;
+    if(s.shockwaves.length)return false;
+    if(s.clouds.some(c=>dist(c,s)<CALM_DANGER_R+(c.maxr||c.r||0)))return false;
+    if(s.elapsed-this.lastHit<1)return false;
+    if(s.companion&&s.girl.down>0)return false;
+    let near=0;
+    for(const e of s.enemies){
+      if(e.dead)continue;
+      const d=dist(e,s),attacking=isAttackPhase(e.phase)||e.windup>0||e.swipe>0||e.gasPose>0||e.charge>0||e.crow>0;
+      if(BOSS_TYPES.includes(e.type)&&(attacking||d<CALM_DANGER_R))return false;
+      if(attacking&&d<CALM_DANGER_R)return false;
+      if(d<(e.r||0)+15)return false;
+      if(d<CALM_R&&++near>CALM_N)return false;
+    }
+    return true;
+  }
   story(dt){
     this.flushSpeech();const s=this.s;this.timers.bark-=dt;
+    // Note the first horde peak even while someone is speaking.
+    if(!this.eventSeen.has('horde-peak')&&s.enemies.filter(e=>!e.dead).length>=12)this.eventSeen.add('horde-peak');
     if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil)return;
     // Persist chapter flags in the already bounded, saved event set. A late
     // checkpoint catches up to its current chapter, not several stale speeches.
@@ -3844,28 +3969,41 @@ class Game {
     // an interruption, and callbacks are earned only by complete reading.
     if(s.elapsed>=20&&(s.elapsed<1130||s.endless)){
       const unseen=id=>!this.eventSeen.has(`scene:${id}`)&&!this.eventSeen.has(`skip:${id}`);
+      // A new woman's arrival comes first; only the highest pending rank plays.
+      const pending=[5,4,3,2].find(rank=>this.eventSeen.has(`companion-rank:${rank}`)&&unseen(`arrival:${rank}`));
+      if(pending&&s.companion&&s.girl.down<=0&&this.isCalm()){
+        for(const rank of [2,3,4,5])if(rank<pending&&unseen(`arrival:${rank}`))this.eventSeen.add(`skip:arrival:${rank}`);
+        if(beginSpeechScene(this,`arrival:${pending}`,COMPANION_ARRIVALS[pending],{remember:true,calm:true}))return;
+      }
       let scene=s.companion&&s.girl.down<=0&&unseen('companion-local')?'companion-local':null;
-      if(!scene&&s.enemies.filter(e=>!e.dead).length>=12&&unseen('first-horde'))scene='first-horde';
+      if(!scene&&this.eventSeen.has('horde-peak')&&unseen('first-horde')&&this.isCalm()){
+        if(beginSpeechScene(this,'first-horde',STORY_SCENES['first-horde'],{remember:true,calm:true}))return;
+      }
       const build=STORY_BUILD_IDS.find(id=>this.eventSeen.has(`build-choice:${id}`))||STORY_BUILD_IDS.find(id=>this.rank(id)>0);
       if(!scene&&build&&this.rank(build)>0&&unseen(`build-${build}`))scene=`build-${build}`;
       if(scene&&beginSpeechScene(this,scene,STORY_SCENES[scene],{remember:true}))return;
     }
     if(s.elapsed>=this.nextEvent){
       const props=this.world.getVisible(s.x,s.y,360,360);
-      const prop=props.find(p=>WORLD_REMARKS[p.type]&&!this.eventSeen.has(p.type)&&dist(p,s)<Math.max(55,p.w*.6));
-      if(prop){
+      const street=type=>STREET_SCENE_TYPES.includes(type);
+      const prop=props.find(p=>WORLD_REMARKS[p.type]&&dist(p,s)<Math.max(55,p.w*.6)&&(street(p.type)?!this.eventSeen.has(`scene:street:${p.type}`)&&!this.eventSeen.has(`skip:street:${p.type}`):!this.eventSeen.has(p.type)));
+      if(prop&&street(prop.type)){
+        // Full street scene only in a lull and outside the final minute. Not
+        // calm: nothing is consumed, the next approach tries again.
+        if((s.elapsed<1130||s.endless)&&this.isCalm()&&beginSpeechScene(this,`street:${prop.type}`,EVENTS[prop.type],{remember:true,calm:true})){this.nextEvent=s.elapsed+80;return;}
+      }else if(prop){
         const line=WORLD_REMARKS[prop.type];this.eventSeen.add(prop.type);
         this.nextEvent=s.elapsed+80;this.bark(line.who,line.text);return;
       }
     }
     if(this.timers.bark<=0){
       this.timers.bark=18+this.random()*9;const available=contextualBarks(s,this.recentHealthDamage);
-      if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}
+      if(available.length){const line=available[(this.barkIndex++ +this.storyOffset())%available.length];this.bark(line.who,line.text);}
     }
   }
 }
 
-modules["./engine.js"]={EXPLOSIVE_BLAST,Game};
+modules["./engine.js"]={EXPLOSIVE_BLAST,CALM_N,CALM_DANGER_R,Game};
 })();
 (()=>{
 const {PELICAN,pelicanCards,pelicanRingRadius}=modules['./pelican.js'];
@@ -7319,6 +7457,9 @@ function validateSpeech(s,nextActorId,now){
   check(['survival','charles'].includes(scene.scope)&&typeof scene.remember==='boolean'&&typeof scene.companion==='boolean');
   for(const line of scene.lines)check(object(line)&&typeof line.who==='string'&&line.who.length>0&&line.who.length<=80&&typeof line.text==='string'&&line.text.length>0&&line.text.length<=2000);
   check(scene.companion===scene.lines.some(line=>line.who==='BLONDE IA'));
+  // Optional since the lull-gated story scenes; older saves omit both fields.
+  check(scene.calm===undefined||scene.calm===true);
+  check(scene.waitSince===undefined||scene.calm===true&&finite(scene.waitSince)&&scene.waitSince>=0&&scene.waitSince<=now+1e-6);
  }
  const ids=new Set();check(s.queue.every(object));let sceneLines=0;
  for(const line of [s.active,...s.queue]){if(line===null){check(s.active===null);continue;}
@@ -7586,7 +7727,7 @@ const OPENING = [
   {
     "who": "TOMA",
     "opening": "offline",
-    "text": "Hein ? Pourquoi j’ai plus accès à ma vie fake ? Pourquoi ?! WTF ?!",
+    "text": "Hein ? Mon char, mes abonnés, ma blonde… Tout est où ?!",
     "reply": "",
     "action": "SUITE ›"
   },
@@ -7778,7 +7919,7 @@ const {LockedRunStore,restoreRun,captureRun,Autosave}=modules['./run-save.js'];
 const {Game}=modules['./engine.js'];
 const {Renderer,drawIcon}=modules['./renderer.js'];
 const {AudioManager}=modules['./audio.js'];
-const {companionLevel,INTRO,UPGRADES,DIFFICULTIES,EVENTS,victoryQuote}=modules['./content.js'];
+const {companionLevel,INTRO,UPGRADES,DIFFICULTIES,EVENTS,victoryQuote,defeatQuote}=modules['./content.js'];
 
 const COMPANION_PORTRAITS=['assets/companion-portrait-1.png','assets/companion-portrait-2.png','assets/companion-portrait-3.png','assets/companion-portrait-4.png','assets/companion-portrait-5.png'];
 const $=id=>document.getElementById(id);
@@ -8102,7 +8243,7 @@ function saveExitKey(e,key){
 }
 async function recordRun(){if(!game)return false;const current=game,id=runId,s=current.s,newRecord=s.elapsed>best;
  const result=await persistRun(true);if(!result.ok&&game===current&&runId===id){best=Math.max(best,s.elapsed);lifetime+=Math.max(0,s.kills-creditedKills);lifetimeCoins+=Math.max(0,totalEarnedCoins(s)-creditedCoins);creditedKills=s.kills;creditedCoins=totalEarnedCoins(s);}return newRecord;}
-async function renderResult(win){if(!game)return;const current=game,s=game.state;const newRecord=s.elapsed>best;resultRecorded=true;show('results');audio.unlock().then(()=>sound(win?'victory':'defeat'));const panel=document.querySelector('.result-panel');panel.classList.toggle('victory',win);panel.classList.toggle('defeat',!win);setText('result-title',win?'VICTOIRE !':'GAME OVER');const epilogueDone=win&&s.charles?.phase==='complete';$('charles-choice').classList.toggle('hidden',!win||!canMeetCharles());$('charles-result').classList.toggle('hidden',!epilogueDone);if(epilogueDone){setText('result-title','VICTOIRE EN SURVIE !');setText('charles-result',s.charles.outcome==='defeated'?'ÉPILOGUE TERMINÉ · Charles a mis Toma K.O. Il reste invaincu. Ta victoire des 20 minutes est conservée.':'ÉPILOGUE TERMINÉ · Charles reste invaincu. Ta victoire des 20 minutes est conservée.');}setText('result-kicker',win?'20 MINUTES. ZÉRO RETOUCHE.':'UNE FIN TRÈS DRAMATIQUE');setText('result-quote',win?victoryQuote(s,current.eventSeen):'FUCKK ! Efface la vidéo. On recommence.');setText('result-time',format(s.elapsed));setText('result-kills',s.kills.toLocaleString('fr-CA'));setText('result-coins',totalEarnedCoins(s).toLocaleString('fr-CA'));setText('result-gems',s.gems.toLocaleString('fr-CA'));setText('record-message',newRecord?'✦ NOUVEAU RECORD PERSONNEL ✦':`RECORD PERSONNEL · ${format(best)}`);$('endless').classList.toggle('hidden',!win);$('retry').classList.toggle('secondary',win);$('retry').classList.toggle('primary',!win);await recordRun();if(game===current&&screen==='results')updateRecordMenu();}
+async function renderResult(win){if(!game)return;const current=game,s=game.state;const newRecord=s.elapsed>best;resultRecorded=true;show('results');audio.unlock().then(()=>sound(win?'victory':'defeat'));const panel=document.querySelector('.result-panel');panel.classList.toggle('victory',win);panel.classList.toggle('defeat',!win);setText('result-title',win?'VICTOIRE !':'GAME OVER');const epilogueDone=win&&s.charles?.phase==='complete';$('charles-choice').classList.toggle('hidden',!win||!canMeetCharles());$('charles-result').classList.toggle('hidden',!epilogueDone);if(epilogueDone){setText('result-title','VICTOIRE EN SURVIE !');setText('charles-result',s.charles.outcome==='defeated'?'ÉPILOGUE TERMINÉ · Charles a mis Toma K.O. Il reste invaincu. Ta victoire des 20 minutes est conservée.':'ÉPILOGUE TERMINÉ · Charles reste invaincu. Ta victoire des 20 minutes est conservée.');}setText('result-kicker',win?'20 MINUTES. ZÉRO RETOUCHE.':'UNE FIN TRÈS DRAMATIQUE');setText('result-quote',win?victoryQuote(s,current.eventSeen):defeatQuote(s,current.seed));setText('result-time',format(s.elapsed));setText('result-kills',s.kills.toLocaleString('fr-CA'));setText('result-coins',totalEarnedCoins(s).toLocaleString('fr-CA'));setText('result-gems',s.gems.toLocaleString('fr-CA'));setText('record-message',newRecord?'✦ NOUVEAU RECORD PERSONNEL ✦':`RECORD PERSONNEL · ${format(best)}`);$('endless').classList.toggle('hidden',!win);$('retry').classList.toggle('secondary',win);$('retry').classList.toggle('primary',!win);await recordRun();if(game===current&&screen==='results')updateRecordMenu();}
 function flashExperience(){const gauge=$('xp-gauge');gauge.classList.remove('level-flash');if(prefs.reduced)return;void gauge.offsetWidth;gauge.classList.add('level-flash');}
 $('xp-gauge').addEventListener('animationend',()=>$('xp-gauge').classList.remove('level-flash'));
 function updateHud(force=false){if(!game)return;const s=game.state;const help=tutorialText(game);$('control-hint').classList.toggle('hidden',s.opening?s.opening.phase!=='move':s.walkDistance>0||s.elapsed>8);$('opening-help').classList.toggle('hidden',!help);setText('opening-help-text',help);audio.setIntensity?.(Math.min(1,s.elapsed/1000+s.enemies.length/650));setText('level',`NIV. ${s.level}`);setText('time',format(s.elapsed));setText('time-goal',charlesActive()?'CHARLES EST LÀ':s.endless?'SURVIE INFINIE':'OBJECTIF 20:00');setText('health-text',`${Math.max(0,Math.ceil(s.hp))} / ${s.maxhp}${s.shield>0?' + ◇':''}`);$('health-fill').style.width=`${Math.max(0,s.hp)/s.maxhp*100}%`;$('xp-fill').style.width=`${Math.min(100,s.xp/s.xpNeed*100)}%`;setText('xp-text',`EXPÉRIENCE ${Math.floor(s.xp)} / ${s.xpNeed}`);$('xp-gauge').setAttribute('aria-valuenow',Math.min(s.xpNeed,Math.floor(s.xp)));$('xp-gauge').setAttribute('aria-valuemax',s.xpNeed);setText('coins',s.coins);setText('gems',s.gems);setText('kills',s.kills);setText('coordinates',`SECTEUR ${Math.floor(s.x/512)} · ${Math.floor(s.y/512)}  /  ${DIFFICULTIES[s.difficulty]?.label||s.difficulty}`);$('companion').classList.toggle('unlocked',s.companion);const companion=companionLevel(s.upg.girlfriend);setText('companion-status',s.companion?`NIV. ${companion.rank}/5 · ${s.girl?.down>0?`RETOUR ${Math.ceil(s.girl.down)} s`:companion.short}`:'SIGNAL VERROUILLÉ');$('companion').setAttribute('aria-label',s.companion?`Blonde IA, niveau ${companion.rank} sur 5. ${companion.description}`:'Blonde IA, signal verrouillé');const portrait=$('companion-portrait'),portraitPath=s.companion?COMPANION_PORTRAITS[companion.rank-1]:'assets/portrait-blonde-ia.webp';if(portrait.getAttribute?.('src')!==portraitPath)portrait.setAttribute('src',portraitPath);setText('companion-lock',s.companion?'♥':'◇');const sig=JSON.stringify([s.upg,s.evolutions,s.trophies?.chosen]);if(sig!==powerSignature||force){powerSignature=sig;$('powers').replaceChildren();for(const [id,rank] of Object.entries(s.upg)){if(!rank)continue;const u=UPGRADES.find(u=>u.id===id);if(!u)continue;const el=document.createElement('span');el.className='power-icon';const evolved=EVOLUTIONS.find(def=>s.evolutions[def.id]&&def.requires.includes(id));el.title=`${u.name} · Niveau ${rank}${evolved?` · ${evolved.name}`:''}`;const c=document.createElement('canvas');c.width=26;c.height=26;drawIcon(c.getContext('2d'),u.icon||id,0,0,26);const n=document.createElement('small');n.textContent=rank;el.append(c,n);$('powers').append(el);}}updateTrophyHud();updateDiscoveryHud();updateCharlesHud();drawArrows();}

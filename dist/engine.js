@@ -7,6 +7,7 @@ import {createEncounterDialogue,queueEncounterDialogue,openEncounterDialogue,adv
 import {carLevel,launchLamborghini,updateLamborghini} from './lamborghini.js';
 import {lethalDamageCause} from './run-history.js';
 import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled} from './speech.js';
+import {BOSS_TYPES} from './boss-director.js';
 import {charlesActive,charlesArrival,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
@@ -20,7 +21,7 @@ import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim, advanceHeroMotion } from './hero-pose.js';
-import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
+import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STREET_SCENE_TYPES, COMPANION_ARRIVALS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 // One footprint for explosive damage and its player-center warning.
 export const EXPLOSIVE_BLAST=Object.freeze({radius:87,playerPadding:12});
@@ -33,6 +34,12 @@ const CONSUMABLES=[{id:'recovery',name:'Pause protéinée',desc:'Récupère 30 %
 const isRival=type=>type==='rival_rooster'||type==='rival_goat';
 const BASE={...EGO_BEASTS,...ANIMALS,pelican:{hp:760,speed:42,r:29},travestia:{hp:680,speed:39,r:30},rival_rooster:{hp:150,speed:70,r:20},rival_goat:{hp:220,speed:42,r:23},orangutan:{hp:40,speed:64,r:18},normal:{hp:24,speed:43,r:17},sprinter:{hp:17,speed:86,r:14},gas:{hp:42,speed:31,r:19},tank:{hp:132,speed:27,r:26},jealous:{hp:43,speed:68,r:18},explosive:{hp:33,speed:57,r:19},matriarch:{hp:550,speed:24,r:33}};
 
+// Lull thresholds for optional story scenes, calibrated by the story simulation.
+export const CALM_N=6,CALM_R=180;
+// Dangers are local: an attack or a gas cloud off-screen does not interrupt a
+// reading. Bosses block while on screen or while any of their attacks runs.
+export const CALM_DANGER_R=420;
+const isAttackPhase=phase=>typeof phase==='string'&&(phase.endsWith('_warning')||phase.endsWith('_windup')||phase.startsWith('peli_')&&phase!=='peli_recover'||['animal_active','ego_active','windup','swipe','crow','charge','gas','shockwave','tail_dash','tail_spin','cape_spin','peli_hug','peli_tarot'].includes(phase));
 export class Game {
   constructor({difficulty='normal',seed=42,onEvent=()=>{}}={}) {
     this.onEvent=onEvent;this.seed=seed|0;this.rng=(seed|0) || 1;this.id=1;this.world=new World(seed);this.viewport={width:390,height:844};
@@ -109,7 +116,7 @@ export class Game {
     s.upg[id]=this.rank(id)+1;
     if(STORY_BUILD_IDS.includes(id)&&!STORY_BUILD_IDS.some(key=>this.eventSeen.has(`build-choice:${key}`)))this.eventSeen.add(`build-choice:${id}`);
     if(id==='ego'){s.maxhp+=20;s.hp=Math.min(s.maxhp,s.hp+25);}
-    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;s.girl.walkMoving=false;s.girl.supportFlash=0;if(this.rank(id)===4)s.girl.shieldClock=8;if(this.rank(id)===5)s.girl.droneClock=2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA',"Copie locale prête. J'peux encore tirer, même sans Internet.");}}
+    if(id==='girlfriend'){s.companion=true;s.girl.maxhp=70+25*this.rank(id);s.girl.hp=s.girl.maxhp;s.girl.down=0;s.girl.x=s.x-28;s.girl.y=s.y+24;s.girl.shoot=.2;s.girl.walkMoving=false;s.girl.supportFlash=0;if(this.rank(id)===4)s.girl.shieldClock=8;if(this.rank(id)===5)s.girl.droneClock=2;if(this.rank(id)===1){s.shield+=20;this.bark('BLONDE IA',"Copie locale prête. J'peux encore tirer, même sans Internet.");}if(COMPANION_ARRIVALS[this.rank(id)])this.eventSeen.add(`companion-rank:${this.rank(id)}`);}
     this.recalculate();
     if(id==='validation')s.shield=Math.max(s.shield,s.stats.shieldMax);
     if(['car','money','airplane','truth','chopper'].includes(id))this.timers[id]=Math.min(this.timers[id],id==='airplane'?0:.4);
@@ -676,7 +683,7 @@ export class Game {
       const index=stunt.count++,d=length(s.moveX,s.moveY)||1;
       stunt.active=true;stunt.time=0;stunt.progress=0;stunt.faceX=s.moveX/d;stunt.faceY=s.moveY/d;
       this.stuntCharge=0;this.stuntWait=22+this.stuntRandom()*13;this.speechUntil=s.elapsed+3.2;
-      if(STUNT_BARKS.length){const line=STUNT_BARKS[index%STUNT_BARKS.length];
+      if(STUNT_BARKS.length){const line=STUNT_BARKS[(index+this.storyOffset())%STUNT_BARKS.length];
         const lines=s.companion&&s.girl.down<=0?[line,line.reply]:[line];
         beginSpeechScene(this,`stunt:${line.id}`,lines);
       }
@@ -699,7 +706,7 @@ export class Game {
     if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil||s.elapsed-this.lastRivalBark<10||!RIVAL_BARKS.length)return;
     const rival=s.enemies.find(e=>!e.dead&&e.sex==='male'&&isRival(e.type)&&e.charmed<=0&&e.banterCount<2&&(e.banterCount===0||dist(e,s)<330&&s.elapsed>=e.nextTaunt));
     if(!rival)return;
-    const line=RIVAL_BARKS[this.rivalBarkIndex%RIVAL_BARKS.length];
+    const line=RIVAL_BARKS[(this.rivalBarkIndex+this.storyOffset())%RIVAL_BARKS.length];
     const reply={who:rival.type==='rival_rooster'?'COQ RIVAL':'BOUC RIVAL',text:line.replies[rival.type]};
     if(beginSpeechScene(this,`rival:${line.id}`,[line,reply],{actorId:rival.id})){
       this.rivalBarkIndex++;this.lastRivalBark=s.elapsed;rival.banterCount++;rival.nextTaunt=s.elapsed+22;
@@ -707,8 +714,44 @@ export class Game {
   }
   bark(who,text,priority=false,options={}){this.flushSpeech();if(!priority&&this.s.elapsed<this.speechUntil)return false;return enqueueSpeech(this,who,text,{queue:priority,scope:charlesActive(this.s)?'charles':'survival',...options});}
 
+  // Per-run starting point for rotating joke lists. Derived from the seed
+  // without consuming any generator, and never stored in the save.
+  storyOffset(){return ((this.seed^0x9e3779b9)>>>0)%9973;}
+  // A lull: no announced or ongoing attack, no boss, no hazard on the ground,
+  // no contact and no other speech. ownSceneId exempts that scene's cursor.
+  isCalm(ownSceneId=null){
+    const speech=this.speech;
+    if(!this.banterEnabled||this.encounters?.active)return false;
+    if(speech.scene&&speech.scene.id!==ownSceneId)return false;
+    const own=line=>ownSceneId!==null&&line.sceneId===ownSceneId;
+    if(speech.active&&!own(speech.active))return false;
+    if(speech.queue.some(line=>!own(line)))return false;
+    return this.isLull();
+  }
+  // The danger-only half of a lull, measured by the story simulation.
+  isLull(){
+    const s=this.s;
+    if(s.mode!=='playing')return false;
+    if(charlesActive(s)||(!s.endless&&s.elapsed>=1130))return false;
+    if(s.shockwaves.length)return false;
+    if(s.clouds.some(c=>dist(c,s)<CALM_DANGER_R+(c.maxr||c.r||0)))return false;
+    if(s.elapsed-this.lastHit<1)return false;
+    if(s.companion&&s.girl.down>0)return false;
+    let near=0;
+    for(const e of s.enemies){
+      if(e.dead)continue;
+      const d=dist(e,s),attacking=isAttackPhase(e.phase)||e.windup>0||e.swipe>0||e.gasPose>0||e.charge>0||e.crow>0;
+      if(BOSS_TYPES.includes(e.type)&&(attacking||d<CALM_DANGER_R))return false;
+      if(attacking&&d<CALM_DANGER_R)return false;
+      if(d<(e.r||0)+15)return false;
+      if(d<CALM_R&&++near>CALM_N)return false;
+    }
+    return true;
+  }
   story(dt){
     this.flushSpeech();const s=this.s;this.timers.bark-=dt;
+    // Note the first horde peak even while someone is speaking.
+    if(!this.eventSeen.has('horde-peak')&&s.enemies.filter(e=>!e.dead).length>=12)this.eventSeen.add('horde-peak');
     if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil)return;
     // Persist chapter flags in the already bounded, saved event set. A late
     // checkpoint catches up to its current chapter, not several stale speeches.
@@ -721,23 +764,36 @@ export class Game {
     // an interruption, and callbacks are earned only by complete reading.
     if(s.elapsed>=20&&(s.elapsed<1130||s.endless)){
       const unseen=id=>!this.eventSeen.has(`scene:${id}`)&&!this.eventSeen.has(`skip:${id}`);
+      // A new woman's arrival comes first; only the highest pending rank plays.
+      const pending=[5,4,3,2].find(rank=>this.eventSeen.has(`companion-rank:${rank}`)&&unseen(`arrival:${rank}`));
+      if(pending&&s.companion&&s.girl.down<=0&&this.isCalm()){
+        for(const rank of [2,3,4,5])if(rank<pending&&unseen(`arrival:${rank}`))this.eventSeen.add(`skip:arrival:${rank}`);
+        if(beginSpeechScene(this,`arrival:${pending}`,COMPANION_ARRIVALS[pending],{remember:true,calm:true}))return;
+      }
       let scene=s.companion&&s.girl.down<=0&&unseen('companion-local')?'companion-local':null;
-      if(!scene&&s.enemies.filter(e=>!e.dead).length>=12&&unseen('first-horde'))scene='first-horde';
+      if(!scene&&this.eventSeen.has('horde-peak')&&unseen('first-horde')&&this.isCalm()){
+        if(beginSpeechScene(this,'first-horde',STORY_SCENES['first-horde'],{remember:true,calm:true}))return;
+      }
       const build=STORY_BUILD_IDS.find(id=>this.eventSeen.has(`build-choice:${id}`))||STORY_BUILD_IDS.find(id=>this.rank(id)>0);
       if(!scene&&build&&this.rank(build)>0&&unseen(`build-${build}`))scene=`build-${build}`;
       if(scene&&beginSpeechScene(this,scene,STORY_SCENES[scene],{remember:true}))return;
     }
     if(s.elapsed>=this.nextEvent){
       const props=this.world.getVisible(s.x,s.y,360,360);
-      const prop=props.find(p=>WORLD_REMARKS[p.type]&&!this.eventSeen.has(p.type)&&dist(p,s)<Math.max(55,p.w*.6));
-      if(prop){
+      const street=type=>STREET_SCENE_TYPES.includes(type);
+      const prop=props.find(p=>WORLD_REMARKS[p.type]&&dist(p,s)<Math.max(55,p.w*.6)&&(street(p.type)?!this.eventSeen.has(`scene:street:${p.type}`)&&!this.eventSeen.has(`skip:street:${p.type}`):!this.eventSeen.has(p.type)));
+      if(prop&&street(prop.type)){
+        // Full street scene only in a lull and outside the final minute. Not
+        // calm: nothing is consumed, the next approach tries again.
+        if((s.elapsed<1130||s.endless)&&this.isCalm()&&beginSpeechScene(this,`street:${prop.type}`,EVENTS[prop.type],{remember:true,calm:true})){this.nextEvent=s.elapsed+80;return;}
+      }else if(prop){
         const line=WORLD_REMARKS[prop.type];this.eventSeen.add(prop.type);
         this.nextEvent=s.elapsed+80;this.bark(line.who,line.text);return;
       }
     }
     if(this.timers.bark<=0){
       this.timers.bark=18+this.random()*9;const available=contextualBarks(s,this.recentHealthDamage);
-      if(available.length){const line=available[this.barkIndex++%available.length];this.bark(line.who,line.text);}
+      if(available.length){const line=available[(this.barkIndex++ +this.storyOffset())%available.length];this.bark(line.who,line.text);}
     }
   }
 }

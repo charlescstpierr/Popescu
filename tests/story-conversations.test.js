@@ -4,7 +4,7 @@ import {Game} from '../dist/engine.js';
 import * as content from '../dist/content.js';
 import * as speech from '../dist/speech.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
-function fixture(){const events=[],g=new Game({seed:42,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});g.s.elapsed=30;g.timers.bark=1000;g.world.getVisible=()=>[];return {g,events};}
+function fixture(){const events=[],g=new Game({seed:42,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});g.s.elapsed=30;g.timers.bark=1000;g.world.getVisible=()=>[];g.storyOffset=()=>0;return {g,events};}
 function read(g){g.s.elapsed=g.speech.active.until+.001;g.flushSpeech();}
 
 test('each stunt boast owns a specific answer instead of indexing an unrelated pool',()=>{
@@ -41,8 +41,16 @@ test('offline companion scene never invents an ally and completes once unlocked'
  const {g,events}=fixture();g.story(.01);assert.equal(events.length,0);g.s.companion=true;g.story(.01);assert.match(events[0].text,/locale/i);assert.equal(g.eventSeen.has('scene:companion-local'),false);
  read(g);read(g);read(g);assert.equal(g.eventSeen.has('scene:companion-local'),true);const count=events.length;g.story(.01);assert.equal(events.length,count);
 });
-test('horde reality-check requires a real horde, not elapsed time alone',()=>{
- const {g,events}=fixture();g.story(.01);assert.equal(events.length,0);for(let i=0;i<12;i++)g.spawnEnemy('normal',100+i,0);g.story(.01);assert.equal(g.speech.scene?.id,'first-horde');assert.equal(g.s.mode,'playing');
+test('horde reality-check needs a real horde peak, then plays in the first lull',()=>{
+ const {g,events}=fixture();g.story(.01);assert.equal(events.length,0);
+ const horde=[];for(let i=0;i<12;i++)horde.push(g.spawnEnemy('normal',100+i,0));g.story(.01);
+ assert.ok(g.eventSeen.has('horde-peak'));assert.equal(g.speech.scene,null);assert.equal(g.isCalm(),false);
+ for(const e of horde){e.x=g.s.x+400+e.id;e.y=g.s.y;}g.story(.01);assert.equal(g.speech.scene?.id,'first-horde');assert.equal(g.s.mode,'playing');
+ assert.equal(events.at(-1).text,content.STORY_SCENES['first-horde'][0].text);
+});
+test('a horde peak during another line is still noticed',()=>{
+ const {g}=fixture();g.bark('TOMA','Une phrase qui occupe la voie.');for(let i=0;i<12;i++)g.spawnEnemy('normal',g.s.x+400+i,g.s.y);g.story(.01);
+ assert.equal(g.speech.scene,null);assert.ok(g.eventSeen.has('horde-peak'));
 });
 test('a build scene needs the actual upgrade and its callback needs completed reading',()=>{
  const {g,events}=fixture();g.s.upg.car=1;g.story(.01);assert.equal(g.speech.scene?.id,'build-car');const snapshot=captureRun(g);const early=restoreRun(snapshot);early.s.elapsed=600;early.clearSpeech();early.story(.01);assert.equal(early.speech.active.text,content.STORY_MILESTONES[1].text);

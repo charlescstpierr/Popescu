@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
 import * as content from '../dist/content.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
-function fixture(){const events=[];const g=new Game({onEvent:(type,payload)=>events.push({type,payload})});g.s.elapsed=30;g.timers.bark=100;g.world.getVisible=()=>[{type:'phone',x:g.s.x,y:g.s.y,w:24}];return{g,events};}
+function fixture(){const events=[];const g=new Game({onEvent:(type,payload)=>events.push({type,payload})});g.s.elapsed=30;g.timers.bark=100;g.world.getVisible=()=>[{type:'bin',x:g.s.x,y:g.s.y,w:24}];return{g,events};}
 test('street encounters speak once without pausing movement or combat',()=>{
- const {g,events}=fixture();g.story(.1);assert.equal(g.s.mode,'playing');assert.equal(events.filter(e=>e.type==='bark').length,1);assert.equal(events.filter(e=>e.type==='dialogue').length,0);assert.ok(g.eventSeen.has('phone'));
+ const {g,events}=fixture();g.story(.1);assert.equal(g.s.mode,'playing');assert.equal(events.filter(e=>e.type==='bark').length,1);assert.equal(events.filter(e=>e.type==='dialogue').length,0);assert.ok(g.eventSeen.has('bin'));
  g.s.elapsed=200;g.story(.1);assert.equal(events.length,1);
 });
 test('street remarks wait for priority speech and preserve unseen encounter',()=>{
- const {g,events}=fixture();g.reactToCrow();g.story(.1);assert.equal(g.eventSeen.has('phone'),false);assert.equal(events.at(-1).payload.text,content.ROOSTER_REACTION.text);
- g.s.elapsed+=5;g.story(.1);assert.ok(g.eventSeen.has('phone'));
+ const {g,events}=fixture();g.reactToCrow();g.story(.1);assert.equal(g.eventSeen.has('bin'),false);assert.equal(events.at(-1).payload.text,content.ROOSTER_REACTION.text);
+ g.s.elapsed+=5;g.story(.1);assert.ok(g.eventSeen.has('bin'));
 });
 test('contextual banter requires live relevant enemies and an available companion',()=>{
  assert.equal(typeof content.contextualBarks,'function');const g=new Game();let pool=content.contextualBarks(g.s);assert.ok(pool.every(b=>b.who!=='BLONDE IA'&&b.context!=='orangutan'));
