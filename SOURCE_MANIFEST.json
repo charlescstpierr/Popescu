@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -869,8 +869,8 @@
     },
     {
       "path": "dist/lamborghini.js",
-      "bytes": 6244,
-      "sha256": "ddf94635363bf15b79760849a31703117f2ad1ece228c38a2437921dd1c4f2d6"
+      "bytes": 6249,
+      "sha256": "e62e0af8794eab03fa8221c3518f284c74c2fa4af5139d9c9cb7384edd7f124e"
     },
     {
       "path": "dist/opening.js",
@@ -1226,6 +1226,11 @@
       "path": "docs/QA-INTEGRATION.md",
       "bytes": 2125,
       "sha256": "3ff33cec0c27dda263bc898881d9f8ab4ca7e7d51c26b8de1d26fdc759e7aa98"
+    },
+    {
+      "path": "docs/QA-LAMBORGHINI-KNOCKBACK-2026-11-06.md",
+      "bytes": 3557,
+      "sha256": "703a55ba4a530e10f58557031b71394db8fff1d7ad2b0af00fb2de22727bf50a"
     },
     {
       "path": "docs/QA-LAMBORGHINI-LEVELS.md",
@@ -1810,12 +1815,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7312,
-      "sha256": "2cbfdaeaf35d1dbfbf3d7e99bbca78c76fcaba01fb4e0902d7f1b6d0062fc16e"
+      "sha256": "15faa780665a7ee70533922e64c8c2948c746266eb8064b21546eade9ee5a463"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 759146,
-      "sha256": "e8bab84d9504587b9a60085d0610374c638a27732f0023c7658965ea0d9de57e"
+      "bytes": 759151,
+      "sha256": "2ef28c710163ad10d8c96ed767e12609ba4ffc68566cfdaed8392756a0097b5a"
     },
     {
       "path": "release/archives/README.md",
@@ -2908,6 +2913,11 @@
       "sha256": "fcf1502068a96207dc5efd9b8f9c7df1235b97c04933838fbdd4dfbbd8956211"
     },
     {
+      "path": "tests/lamborghini-knockback.test.js",
+      "bytes": 2318,
+      "sha256": "016c976577b9667f86a2388d0d8228a590aba8f7c25e93cd889ea678677c23f2"
+    },
+    {
       "path": "tests/lamborghini-levels.test.js",
       "bytes": 5851,
       "sha256": "de14087aadab7001bdfe50d547b4c03271b8a33ce38800e5f419b167c153ba63"
@@ -3228,13 +3238,13 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "993b70b5c0cb2ffb2d3c5cf6a7a9843ccd998437",
-  "integration_date": "2026-11-05",
+  "base_github_commit": "74173ad42fc45c9e631266b2ca2575c805e0063d",
+  "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
     "entrypoint": "release/Toma_Popescu_JOUER.html",
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "10defab002c76d4b30370fceff26b2d5f719214b"
+  "base_github_tree": "679f8a774cec132a7bdd3b1cea3ef79c60620a83"
 }
