@@ -3622,9 +3622,13 @@ class Game {
   }
   separateEnemies(dt){
     const buckets=new Map(),size=64;
-    for(const e of this.s.enemies){const key=`${Math.floor(e.x/size)},${Math.floor(e.y/size)}`;if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(e);}
+    // Numeric columns avoid rebuilding coordinate strings for every neighbor.
+    // Keep insertion and traversal order identical, including negative cells.
+    for(const e of this.s.enemies){const cx=Math.floor(e.x/size),cy=Math.floor(e.y/size);let column=buckets.get(cx);if(!column){column=new Map();buckets.set(cx,column);}let cell=column.get(cy);if(!cell){cell=[];column.set(cy,cell);}cell.push(e);}
     for(const e of this.s.enemies){const cx=Math.floor(e.x/size),cy=Math.floor(e.y/size);let pushes=0;
-      neighbors:for(let a=cx-1;a<=cx+1;a++)for(let b=cy-1;b<=cy+1;b++)for(const other of buckets.get(`${a},${b}`)||[]){
+      neighbors:for(let a=cx-1;a<=cx+1;a++){
+       const column=buckets.get(a);if(!column)continue;
+       for(let b=cy-1;b<=cy+1;b++)for(const other of column.get(b)||[]){
         if(other.id<=e.id)continue;let dx=e.x-other.x,dy=e.y-other.y;const gap=(e.r+other.r)*.8;
         // Most neighboring cells do not overlap. Keep the exact distance and
         // push for actual contacts, but reject separated bounds first.
@@ -3632,6 +3636,7 @@ class Game {
         if(d<.001){const angle=e.id*2.399963+other.id*.37;dx=Math.cos(angle);dy=Math.sin(angle);d=1;}
         const push=Math.min((gap-d)*.5,35*dt);if(!animalLocked(e)&&!egoBeastLocked(e)&&!(e.type==='rival_rooster'&&(e.windup>0||e.crow>0)))this.move(e,dx/d*push,dy/d*push,e.r*.64);if(!animalLocked(other)&&!egoBeastLocked(other)&&!(other.type==='rival_rooster'&&(other.windup>0||other.crow>0)))this.move(other,-dx/d*push,-dy/d*push,other.r*.64);
         if(++pushes>=8)break neighbors;
+       }
       }
     }
   }

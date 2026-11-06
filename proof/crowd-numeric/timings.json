@@ -1,0 +1,198 @@
+{
+  "base_commit": "3d82215dd4908fc1485065c6e1a3ce46ea5af0f9",
+  "measurement": "Node simulation only, not phone FPS",
+  "sequence": [
+    {
+      "variant": "before",
+      "pair": 1,
+      "node": "v24.22.1",
+      "framesPerRun": 720,
+      "runs": [
+        {
+          "mean": 1.0330601111111108,
+          "p50": 0.9720190000000457,
+          "p95": 1.5729599999999664,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 1.042812730555545,
+          "p50": 0.9707570000000487,
+          "p95": 1.5897759999998016,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 1.0477265527777933,
+          "p50": 1.0103260000000773,
+          "p95": 1.4918289999995977,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9508756263888882,
+          "p50": 0.9237560000001395,
+          "p95": 1.548244000000068,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9921955111110871,
+          "p50": 0.9400400000004083,
+          "p95": 1.5142020000002958,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "pair": 1,
+      "node": "v24.22.1",
+      "framesPerRun": 720,
+      "runs": [
+        {
+          "mean": 0.92233004305556,
+          "p50": 0.8856190000000197,
+          "p95": 1.3147729999998319,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.8073619263888919,
+          "p50": 0.8354439999998249,
+          "p95": 1.1096450000000004,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9174521763888751,
+          "p50": 0.8520489999996244,
+          "p95": 1.4023940000001858,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9376997333333292,
+          "p50": 0.8764949999999772,
+          "p95": 1.4477719999999863,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.8915904486111161,
+          "p50": 0.8467800000003081,
+          "p95": 1.4277219999999033,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        }
+      ]
+    },
+    {
+      "variant": "after",
+      "pair": 2,
+      "node": "v24.22.1",
+      "framesPerRun": 720,
+      "runs": [
+        {
+          "mean": 0.9815429625000045,
+          "p50": 0.9443159999998443,
+          "p95": 1.4581679999998869,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9333074763889019,
+          "p50": 0.8768860000000132,
+          "p95": 1.3940410000000156,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9275635555555539,
+          "p50": 0.8633049999998548,
+          "p95": 1.442203999999947,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.8696315680555604,
+          "p50": 0.872599999999693,
+          "p95": 1.1662609999998494,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9736888055555603,
+          "p50": 0.8811930000001666,
+          "p95": 1.5286059999998542,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        }
+      ]
+    },
+    {
+      "variant": "before",
+      "pair": 2,
+      "node": "v24.22.1",
+      "framesPerRun": 720,
+      "runs": [
+        {
+          "mean": 1.1829233111111102,
+          "p50": 1.0942030000001068,
+          "p95": 1.8017449999999826,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 1.039774216666655,
+          "p50": 0.9832659999997304,
+          "p95": 1.6548250000000735,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 0.9549011152777811,
+          "p50": 0.9609820000000582,
+          "p95": 1.2942709999997533,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 1.0094175763888933,
+          "p50": 0.9706559999999627,
+          "p95": 1.6039369999998598,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        },
+        {
+          "mean": 1.089852498611105,
+          "p50": 0.9897149999997055,
+          "p95": 1.6155530000005456,
+          "minEnemies": 300,
+          "maxShots": 8,
+          "digest": "27a752da0c328e6dcfb5a2721a464b8e8605cb74bdfb6c9e589a5c4dc10de2d4"
+        }
+      ]
+    }
+  ]
+}
