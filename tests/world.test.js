@@ -77,3 +77,17 @@ test('new street objects leave crossroads and solid footprints clear without blo
     }
   }
 });
+
+test('the seven old decorative props vary by seed and chunk while retaining their identities',()=>{
+ const defaults={lamp:[96,103],bin:[119,321],bench:[255,111],bike:[394,112],mirror:[174,139],phone:[418,334],billboard:[288,411]};
+ const layouts=new Set();let changed=0,total=0;
+ const world=new mod.World(42);
+ for(let x=-4;x<=4;x++)for(let y=-4;y<=4;y++){
+  const props=world.chunk(x,y);if(props.some(p=>p.biome==='forest'))continue;
+  const furniture=props.filter(p=>defaults[p.type]);assert.equal(furniture.length,7);
+  for(const p of furniture){const [a,b]=defaults[p.type];assert.equal(p.solid,false);changed+=Number(p.x!==x*512+a||p.y!==y*512+b);total++;}
+  layouts.add(JSON.stringify(furniture.map(p=>[p.type,p.x-x*512,p.y-y*512])));
+ }
+ assert.ok(layouts.size>20);assert.ok(changed>total*.75);
+ assert.notDeepEqual(new mod.World(42).chunk(0,0).filter(p=>defaults[p.type]),new mod.World(43).chunk(0,0).filter(p=>defaults[p.type]));
+});

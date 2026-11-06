@@ -73,6 +73,20 @@ export class World {
       p.biome='city';p.damage=Math.floor(scenery()*4);
       if(p.type==='building')p.buildingKind=BUILDING_KINDS[Math.floor(scenery()*BUILDING_KINDS.length)];
     }
+    // Dress after generation so colliders, destruction IDs and every other
+    // prop keep the original random stream, including resumed runs.
+    const dressing=generator(hash(cx,cy,this.seed^0x394dc7a1));
+    for(const p of props){
+      if(!['lamp','bin','bench','bike','mirror','phone','billboard'].includes(p.type))continue;
+      for(let trial=0;trial<64;trial++){
+        const vertical=dressing()<.5,edge=dressing()<.5?108:403;
+        const along=105+dressing()*298,jitter=(dressing()-.5)*22;
+        const x=cx*SIZE+(vertical?edge+jitter:along),y=cy*SIZE+(vertical?along:edge+jitter);
+        if(x-p.w/2<cx*SIZE+84||x+p.w/2>cx*SIZE+428||y-p.h/2<cy*SIZE+84||y+p.h/2>cy*SIZE+428)continue;
+        if(props.some(q=>q!==p&&Math.abs(x-q.x)<(p.w+q.w)/2+5&&Math.abs(y-q.y)<(p.h+q.h)/2+5))continue;
+        p.x=Math.round(x);p.y=Math.round(y);break;
+      }
+    }
     this.addDiscovery(props,cx,cy);
     this.chunks.set(key, props);
     return props;

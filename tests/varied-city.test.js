@@ -53,10 +53,10 @@ test('scenery culling keeps visible rooftops while rejecting offscreen sprites b
 
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-test('405 generated chunks remain byte-identical to pre-change saved-world geometry and IDs',()=>{
- const fixture=JSON.parse(readFileSync(new URL('./fixtures/varied-city-legacy-world.json',import.meta.url),'utf8'));
+test('405 chunks keep all original geometry and IDs except seven decorative positions',()=>{
+ const fixture=JSON.parse(readFileSync(new URL('./fixtures/scenery-stable-world.json',import.meta.url),'utf8'));
  for(const {seed,sha256}of fixture.hashes){const world=new World(seed),chunks=[];
-  for(let x=fixture.bounds[0];x<=fixture.bounds[1];x++)for(let y=fixture.bounds[0];y<=fixture.bounds[1];y++)chunks.push(world.chunk(x,y));
+  for(let x=fixture.bounds[0];x<=fixture.bounds[1];x++)for(let y=fixture.bounds[0];y<=fixture.bounds[1];y++)chunks.push(world.chunk(x,y).map(p=>{const q={...p};if(['lamp','bin','bench','bike','mirror','phone','billboard'].includes(p.type)){delete q.x;delete q.y;}return q;}));
   assert.equal(createHash('sha256').update(JSON.stringify(chunks)).digest('hex'),sha256);
  }
 });

@@ -52,3 +52,13 @@ test('presentation never shortens architecture above an unchanged legacy collide
   assert.ok(geometry.buildingGeometry(shown).height>=geometry.buildingGeometry(p).height,`${p.id} cannot paint an invisible-wall strip`);
  }
 });
+
+test('forest crowns vary their art without changing any solid trunk or save field',()=>{
+ const w=new World(42),crowns=new Set();
+ for(let x=2;x<4;x++)for(let y=0;y<2;y++)for(const p of w.chunk(x,y)){
+  if(p.type!=='pine')continue;const before=JSON.stringify(p),shown=presentSceneryProp(p);
+  crowns.add(shown.artVariant);for(const key of Object.keys(p))assert.deepEqual(shown[key],p[key]);
+  assert.equal(JSON.stringify(p),before);assert.equal(shown.solid,true);
+ }
+ assert.ok(crowns.size>=12);
+});
