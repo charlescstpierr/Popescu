@@ -4,10 +4,9 @@ import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
 let opening={};try{opening=await import('../dist/opening.js');}catch{}
 
-test('opening has three concise cards and an explicit improve action',()=>{
- assert.equal(opening.OPENING?.length,3);
- assert.equal(opening.OPENING[0].action,'AMÉLIORER MA VIE');
- assert.deepEqual(opening.OPENING.map(x=>x.opening),['fantasy','offline','street']);
+test('opening has five approved turns in the existing theatre',()=>{
+ assert.equal(opening.OPENING?.length,5);
+ assert.deepEqual(opening.OPENING.map(x=>x.opening),['offline','offline','fantasy','street','street']);
 });
 test('tutorial starts at zero with exactly one existing gorilla and is idempotent',()=>{
  assert.equal(typeof opening.beginTutorial,'function');

@@ -86,19 +86,19 @@ test('saved menu keeps new-game difficulty selectable without changing resumed d
 
 test('first opening checkpoint stores first card before any animation frame',async()=>{
  const a=app(new Map());await a.click('play');const snapshot=JSON.parse(a.values.get('toma-popescu-run-v1')).run.snapshot;
- assert.equal(snapshot.game.s.mode,'dialogue');assert.equal(snapshot.dialogue.lines[0].opening,'fantasy');
- assert.equal(a.get('next-dialogue').textContent,'AMÉLIORER MA VIE');
+ assert.equal(snapshot.game.s.mode,'dialogue');assert.equal(snapshot.dialogue.lines[0].opening,'offline');
+ assert.equal(a.get('next-dialogue').textContent,'SUITE ›');
 });
 test('opening reload keeps exact card and completion stages one tutorial gorilla',async()=>{
  const a=app(new Map());await a.click('play');a.click('next-dialogue');await a.controller.persistRun();
- const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(b.get('dialogue-text').textContent,'IA HORS LIGNE.');
- b.click('next-dialogue');b.click('next-dialogue');assert.equal(b.game.s.mode,'playing');assert.equal(b.game.s.opening.phase,'move');assert.equal(b.game.s.enemies.length,1);
+ const b=app(a.values);await b.click('resume-saved');b.click('resume');assert.equal(b.get('dialogue-text').textContent,'J’existe même pas pis il me tape déjà sur les nerfs.');
+ for(let i=0;i<4;i++)b.click('next-dialogue');assert.equal(b.game.s.mode,'playing');assert.equal(b.game.s.opening.phase,'move');assert.equal(b.game.s.enemies.length,1);
  b.controller.frame(performance.now()+50);assert.equal(b.game.s.elapsed,0);
 });
 test('skip opening starts immediately and replay cannot overwrite saved progress',async()=>{
  const a=app(new Map());await a.click('play');a.click('skip-dialogue');assert.equal(a.game.s.mode,'playing');assert.equal(a.game.s.opening?.phase,'shoot');
  a.game.s.elapsed=30;await a.click('pause-menu');const before=a.values.get('toma-popescu-run-v1');
- a.click('story');a.click('next-dialogue');a.click('next-dialogue');assert.ok(a.game);a.click('next-dialogue');
+ a.click('story');a.click('next-dialogue');a.click('next-dialogue');assert.ok(a.game);for(let i=0;i<3;i++)a.click('next-dialogue');
  assert.equal(a.controller.screen,'menu');assert.equal(a.values.get('toma-popescu-run-v1'),before);
 });
 
