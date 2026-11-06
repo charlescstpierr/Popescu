@@ -362,11 +362,12 @@ export class LockedRunStore {
    const dialogue=method==='begin'?args[3]:args[2]?.dialogue;
    const snapshot=captureRun(args[1],dialogue),options=args[2]===undefined?undefined:copy(args[2]);
    const previous=args[4]===undefined?undefined:copy(args[4]);
-   // A queued new-game request may lose its UI owner before this lock is
-   // granted. Check its runtime guard before replacing or crediting any save.
-   const mayBegin=method==='begin'?args[5]:null;
+   // A queued start or checkpoint may lose its session owner before this
+   // lock is granted. The runtime guard is never serialized; a discarded
+   // or replaced session must not write after newer navigation completes.
+   const mayCommit=method==='begin'?args[5]:args[3];
    return await this.locks.request(this.store.key,()=>{
-    if(mayBegin&&!mayBegin())return {ok:false,reason:'cancelled'};
+    if(mayCommit&&!mayCommit())return {ok:false,reason:'cancelled'};
     return method==='begin'?beginRecord(this.store,args[0],()=>snapshot,options,previous)
      :checkpointRecord(this.store,args[0],()=>snapshot,options);
    });
