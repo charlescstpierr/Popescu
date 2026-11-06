@@ -16,7 +16,7 @@ function polygon(c,color,points){
 /** Each animation frame is one complete painting: head to boots and both hands. */
 export class HeroArt {
   constructor({loadImage=load}={}){
-    this.image=null;this.error=null;this.outlines=new Map();
+    this.image=null;this.error=null;this.outlines=new Map();this.visibility=new Map();
     this.ready=Promise.resolve().then(()=>loadImage(ASSET)).then(image=>{this.image=image||null;return Boolean(image);}).catch(error=>{this.error=error;return false;});
   }
   _wholeFrame(c,pose,reduced){
@@ -30,6 +30,29 @@ export class HeroArt {
     }
     c.transform(t.a,t.b,t.c,t.d,0,0);if(art.mirror)c.scale(-1,1);
     c.drawImage(this.image,f.x,f.y,f.w,f.h,-anchor[0],-anchor[1],f.w,f.h);c.restore();
+  }
+  visibilityFrame(pose){
+    if(!this.image)return null;
+    const art=pose.art,f=art.frame,key=`${f.x}:${f.y}:${Boolean(art.mirror)}`;
+    if(this.visibility.has(key))return this.visibility.get(key);
+    const mask=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(f.w,f.h):typeof document!=='undefined'?document.createElement('canvas'):null;
+    if(!mask)return null;mask.width=f.w;mask.height=f.h;
+    const c=mask.getContext('2d');c.save();if(art.mirror){c.translate(f.w,0);c.scale(-1,1);}c.drawImage(this.image,f.x,f.y,f.w,f.h,0,0,f.w,f.h);c.restore();
+    const pixels=c.getImageData(0,0,f.w,f.h).data;let left=f.w,right=0,top=f.h,bottom=0;
+    for(let y=0;y<f.h;y++)for(let x=0;x<f.w;x++)if(pixels[(y*f.w+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);}
+    const frame={rim:ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#ffe6b0',art.mirror),left,right,top,bottom};
+    this.visibility.set(key,frame);if(this.visibility.size>48)this.visibility.delete(this.visibility.keys().next().value);return frame;
+  }
+  visibilityBounds(s){
+    const pose=computeHeroPose(s),f=this.visibilityFrame(pose);if(!f)return null;
+    const art=pose.art,anchor=art.anchor||HERO_FRAMES.anchor,left=art.ground.x+(art.mirror?anchor[0]-art.frame.w:-anchor[0]),top=art.ground.y-anchor[1];
+    return {left:left+f.left,right:left+f.right,top:top+f.top,foot:top+f.bottom};
+  }
+  drawVisibility(ctx,s){
+    if(s.mode==='gameover')return;
+    const pose=computeHeroPose(s),f=this.visibilityFrame(pose);if(!f)return;
+    const art=pose.art,anchor=art.anchor||HERO_FRAMES.anchor,dest=ActorArt.snap(ctx,art.ground.x+(art.mirror?anchor[0]-art.frame.w:-anchor[0]),art.ground.y-anchor[1]);
+    ctx.save();ctx.strokeStyle='#ffe6b0';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(s.x,s.y+9,18,6,0,0,Math.PI*2);ctx.stroke();ctx.imageSmoothingEnabled=false;if(f.rim)ctx.drawImage(f.rim,dest.x-1,dest.y-1);ctx.restore();
   }
   _fallback(c,pose){
     // The load-failure path also uses a complete approved painting, never limbs.

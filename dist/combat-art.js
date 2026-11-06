@@ -1,4 +1,5 @@
 // Short-lived visual reactions are derived from simulation changes, never written back.
+export const RIMS={normal:'#ce8eae',sprinter:'#8bcbd8',gas:'#b6cf86',tank:'#d9bc7f',jealous:'#da91b5',explosive:'#e6ac7d',matriarch:'#e4c68c'};
 const COLORS={hit:'#ffe293',heart:'#ff8ebc',dust:'#a494a4'};
 export const TELEGRAPH_STYLES=Object.freeze({
   charge:{fill:'#ff472b',edge:'#ff8951',windup:.8},
@@ -7,14 +8,30 @@ export const TELEGRAPH_STYLES=Object.freeze({
   gas:{fill:'#ff472b',edge:'#ff8951',windup:1.05},
   swipe:{fill:'#ff472b',edge:'#ff8951',windup:.6},
   tail:{fill:'#ff472b',edge:'#ff8951',windup:1.2},
-  tailDash:{fill:'#ff472b',edge:'#ff8951',windup:1.3}
+  tailDash:{fill:'#ff472b',edge:'#ff8951',windup:1.3},
+  hug:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  zodiac:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  tarot:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  egoFrame:{fill:'#ff472b',edge:'#ff8951',windup:1.2},
+  egoLane:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  animalLane:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  animalFlash:{fill:'#ff472b',edge:'#ff8951',windup:1},
+  charlesShock:{fill:'#ff472b',edge:'#ff8951',windup:2.6},
+  charlesCape:{fill:'#ff472b',edge:'#ff8951',windup:2.2}
 });
 export function drawTelegraph(ctx,family,remaining,time,reduced,active=false,pass='edge',windup=TELEGRAPH_STYLES[family].windup){
+  if(pass==='both'){drawTelegraph(ctx,family,remaining,time,reduced,active,'ground',windup);drawTelegraph(ctx,family,remaining,time,reduced,active,'edge',windup);return;}
   const style=TELEGRAPH_STYLES[family],progress=Math.max(0,Math.min(1,1-remaining/windup));
   const pulse=reduced?0:(.5+.5*Math.sin(time*8))*progress;
   ctx.save();const alpha=ctx.globalAlpha;ctx.setLineDash([]);ctx.lineWidth=family==='tail'&&active?3:2;
   if(pass==='ground'){ctx.fillStyle=style.fill;ctx.globalAlpha=alpha*(active?(reduced?.32:.38):reduced?.14+progress*.08:.12+progress*.1+pulse*.08);ctx.fill();}
   else{ctx.strokeStyle=style.edge;ctx.globalAlpha=alpha*(active?1:.85+progress*.15);ctx.stroke();}ctx.restore();
+}
+export function enemyAccent(actor,state){
+  if(!Number.isFinite(state.x)||!Number.isFinite(state.y))return 1;
+  if(actor.windup>0||actor.swipe>0||actor.charge>0||actor.crow>0||actor.phase==='animal_warning'||actor.phase==='ego_warning')return 1;
+  const t=Math.max(0,Math.min(1,(Math.hypot(actor.x-state.x,actor.y-state.y)-110)/260));
+  return 1-.78*t*t*(3-2*t);
 }
 export class CombatArt {
   constructor(){this.previous=new Map();this.effects=[];this.appeared=new Map();this.seed=null;this.lastKills=0;this.lastLevel=1;this.lastHP=0;this.started=false;this.defeats=[];this.owner=new WeakSet();this.lastElapsed=0;}
@@ -40,21 +57,21 @@ export class CombatArt {
   drawDefeats(ctx,state,reduced){
     if(reduced)return;
     for(const e of this.defeats){
-      const age=state.elapsed-e.start;if(age<0||age>=.26)continue;
+      const age=state.elapsed-e.start;if(age<0||age>=.34)continue;
       const radius=Math.max(16,Math.min(28,e.actor.r||17));
       ctx.save();ctx.translate(Math.round(e.actor.x),Math.round(e.actor.y-28));
-      if(age<.07){
+      if(age<.04){
         ctx.globalAlpha=.9*(1-age/.09);ctx.fillStyle='#fff4d7';
         ctx.fillRect(-2,-8,4,16);ctx.fillRect(-8,-2,16,4);
       }else{
-        const t=(age-.07)/.19,spread=1-Math.pow(1-t,2);
+        const t=(age-.04)/.3,spread=1-Math.pow(1-t,2);
         ctx.globalAlpha=Math.min(1,(1-t)*2.2);
-        // Eight deterministic chunks; no allocations, blur, RNG or screen shake.
-        for(let i=0;i<8;i++){
-          const a=i*Math.PI/4+(e.actor.id%5)*.17,r=6+spread*radius;
-          const x=Math.round(Math.cos(a)*r),y=Math.round(Math.sin(a)*r*.8-t*6),size=i%3===0?8:6;
+        // Six deterministic shards; no allocations, blur, RNG or screen shake.
+        for(let i=0;i<6;i++){
+          const a=i*Math.PI/3+(e.actor.id%5)*.17,r=6+spread*radius;
+          const x=Math.round(Math.cos(a)*r),y=Math.round(Math.sin(a)*r*.8-t*6),size=i%3===0?4:3;
           ctx.fillStyle='#382344';ctx.fillRect(x-1,y-1,size+2,size+2);
-          ctx.fillStyle=i%2?'#9a5aa7':'#c387d4';ctx.fillRect(x,y,size,size);
+          ctx.fillStyle=RIMS[e.actor.type]||'#c5bec5';ctx.fillRect(x,y,size,size);
           ctx.fillStyle='#61386f';ctx.fillRect(x+1,y+size-2,size-1,2);
           ctx.fillStyle='#e4b4e9';ctx.fillRect(x,y,size-2,2);
         }

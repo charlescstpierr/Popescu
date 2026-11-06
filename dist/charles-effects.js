@@ -1,3 +1,4 @@
+import {drawTelegraph} from './combat-art.js';
 import {CHARLES,CHARLES_ARRIVAL,charlesArrival,charlesWaveRadius} from './charles.js';
 import {charlesPose,CHARLES_ART} from './charles-art.js';
 const TAU=Math.PI*2;
@@ -55,22 +56,33 @@ function drawBeam(ctx,c,reduced){
  }
  ctx.restore();
 }
+export function drawCharlesWarnings(ctx,c,reduced=false,pass='both'){
+ if(!c)return;
+ const edge=pass!=='ground';ctx.save();
+ if(c.phase==='shock_warning'||c.phase==='shockwave'){
+  const warning=c.phase==='shock_warning',start=c.safeAngle+CHARLES.gapHalfAngle,end=c.safeAngle+TAU-CHARLES.gapHalfAngle;
+  if(pass!=='edge'){ctx.globalAlpha=.1;ctx.fillStyle='#b9e7b1';wedge(ctx,c,c.waveMax);ctx.fill();ctx.globalAlpha=1;}
+  if(warning){ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.arc(c.x,c.y,c.waveMax,start,end);ctx.closePath();}
+  else{
+   const r=charlesWaveRadius(c),inner=Math.max(0,r-CHARLES.waveWidth/2),outer=r+CHARLES.waveWidth/2;
+   ctx.beginPath();ctx.arc(c.x,c.y,outer,start,end);ctx.arc(c.x,c.y,inner,end,start,true);ctx.closePath();
+  }
+  drawTelegraph(ctx,'charlesShock',c.phaseTime,c.elapsed,reduced,!warning,pass,CHARLES.phases.shock_warning);
+  if(edge){
+   ctx.strokeStyle='#b9e7b1';ctx.lineWidth=2;
+   for(const side of [-1,1]){const a=c.safeAngle+side*CHARLES.gapHalfAngle;ctx.beginPath();ctx.moveTo(c.x+Math.cos(a)*24,c.y+Math.sin(a)*24);ctx.lineTo(c.x+Math.cos(a)*c.waveMax,c.y+Math.sin(a)*c.waveMax);ctx.stroke();}
+  }
+ }
+ if(c.phase==='cape_warning'||c.phase==='cape_spin'){
+  circle(ctx,c.x,c.y,c.capeRadius);drawTelegraph(ctx,'charlesCape',c.phaseTime,c.elapsed,reduced,c.phase==='cape_spin',pass,CHARLES.phases.cape_warning);
+ }
+ ctx.restore();
+}
 export function drawCharlesGround(ctx,c,reduced=false,bodyPose=null){
  if(!c||c.phase==='complete')return;ctx.save();
  const arrival=charlesArrival(c);
  if(arrival){const pose=bodyPose||charlesPose(c,c.elapsed,reduced);ctx.globalAlpha=.18;ctx.fillStyle='#0b0b1d';ctx.beginPath();ctx.ellipse(pose.x,c.y+7,24,7,0,0,TAU);ctx.fill();}
- if(c.phase==='shock_warning'||c.phase==='shockwave'){
-  // Green opening and both its boundary rays persist even with effects reduced.
-  ctx.globalAlpha=.16;ctx.fillStyle='#48e8a1';wedge(ctx,c,c.waveMax);ctx.fill();ctx.globalAlpha=.85;ctx.strokeStyle='#8bffbf';ctx.lineWidth=2;
-  for(const side of [-1,1]){const a=c.safeAngle+side*CHARLES.gapHalfAngle;ctx.beginPath();ctx.moveTo(c.x+Math.cos(a)*24,c.y+Math.sin(a)*24);ctx.lineTo(c.x+Math.cos(a)*c.waveMax,c.y+Math.sin(a)*c.waveMax);ctx.stroke();}
-  const start=c.safeAngle+CHARLES.gapHalfAngle,end=c.safeAngle+TAU-CHARLES.gapHalfAngle;
-  if(c.phase==='shock_warning'){ctx.strokeStyle='#dca745';ctx.globalAlpha=.62;ctx.lineWidth=3;ctx.setLineDash([7,6]);circle(ctx,c.x,c.y,c.waveMax,start,end);ctx.stroke();ctx.setLineDash([]);}
-  else{const radius=charlesWaveRadius(c);ctx.strokeStyle='#d39725';ctx.globalAlpha=.95;ctx.lineWidth=CHARLES.waveWidth;circle(ctx,c.x,c.y,radius,start,end);ctx.stroke();ctx.strokeStyle='#fff0b0';ctx.lineWidth=3;circle(ctx,c.x,c.y,radius,start,end);ctx.stroke();}
- }
- if(c.phase==='cape_warning'||c.phase==='cape_spin'){
-  ctx.fillStyle='#e6b64e';ctx.globalAlpha=c.phase==='cape_warning'?.13:.2;circle(ctx,c.x,c.y,c.capeRadius);ctx.fill();ctx.globalAlpha=.95;ctx.strokeStyle='#ffe7a2';ctx.lineWidth=3;
-  if(c.phase==='cape_warning')ctx.setLineDash([9,6]);circle(ctx,c.x,c.y,c.capeRadius);ctx.stroke();ctx.setLineDash([]);
- }
+ drawCharlesWarnings(ctx,c,reduced,'ground');
  if(c.phase==='cape_spin'){
   ctx.save();ctx.translate(c.x,c.y-100);const sway=reduced?0:Math.sin(c.elapsed*24)*12;
   ctx.globalAlpha=.95;ctx.fillStyle='#ffedc4';ctx.strokeStyle='#d9a432';ctx.lineWidth=3;
@@ -85,7 +97,7 @@ export function drawCharlesGround(ctx,c,reduced=false,bodyPose=null){
 }
 export function drawCharlesForeground(ctx,c,reduced=false,bodyPose=null){
  if(!c||c.phase==='complete')return;ctx.save();
-
+ drawCharlesWarnings(ctx,c,reduced,'edge');
  const arrival=charlesArrival(c);
  if(arrival?.stage==='snap'){
   const pose=bodyPose||charlesPose(c,c.elapsed,reduced),p=(arrival.time-CHARLES_ARRIVAL.snap)/(CHARLES_ARRIVAL.clear-CHARLES_ARRIVAL.snap);

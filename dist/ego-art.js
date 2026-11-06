@@ -1,3 +1,4 @@
+import {drawTelegraph} from './combat-art.js';
 import {EGO_BEASTS,egoAttackGeometry,egoHeight,egoCamoRatio} from './ego-beasts.js';
 import {EGO_FRAMES} from './ego-entry.js';
 export const EGO_ART=Object.freeze({columns:6,rows:4,types:Object.freeze(['ego_peacock','ego_toad','ego_rat','ego_chameleon'])});
@@ -35,21 +36,23 @@ export function drawEgoBody(ctx,e,image,cache,step=0,reduced=false){
  ctx.restore();return true;
 }
 function capsule(ctx,g){const a=Math.atan2(g.by-g.ay,g.bx-g.ax),px=Math.sin(a)*g.r,py=-Math.cos(a)*g.r;ctx.beginPath();ctx.moveTo(g.ax+px,g.ay+py);ctx.lineTo(g.bx+px,g.by+py);ctx.arc(g.bx,g.by,g.r,a-Math.PI/2,a+Math.PI/2);ctx.lineTo(g.ax-px,g.ay-py);ctx.arc(g.ax,g.ay,g.r,a+Math.PI/2,a+Math.PI*1.5);ctx.closePath();}
-export function drawEgoGround(ctx,e,reduced=false){
+export function drawEgoGround(ctx,e,reduced=false,pass='both',time=0){
  if(!EGO_BEASTS[e.type])return;
  const shapes=egoAttackGeometry(e);if(!shapes.length)return;
- ctx.save();ctx.lineWidth=2;ctx.strokeStyle='#ffbd66';ctx.fillStyle='#ef76462b';
+ const edge=pass!=='ground',windup=EGO_BEASTS[e.type].warning;
+ ctx.save();ctx.lineWidth=2;ctx.strokeStyle='#ff8951';
  for(const g of shapes){
+  const family=g.kind==='frame'?'egoFrame':'egoLane';
+  if(g.kind==='slam'){ctx.beginPath();ctx.arc(g.x,g.y,g.r,0,Math.PI*2);}
+  else capsule(ctx,g);
+  drawTelegraph(ctx,family,e.egoTime,time,reduced,g.hot,pass,windup);
+  if(!edge)continue;
   if(g.kind==='slam'){
-   ctx.setLineDash(g.hot?[]:[7,5]);ctx.beginPath();ctx.arc(g.x,g.y,g.r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.setLineDash([]);
    ctx.beginPath();ctx.moveTo(g.x-7,g.y);ctx.lineTo(g.x+7,g.y);ctx.moveTo(g.x,g.y-7);ctx.lineTo(g.x,g.y+7);ctx.stroke();
-   if(g.hot){ctx.strokeStyle='#ffec9b';for(let i=0;i<6;i++){const a=i*Math.PI/3;ctx.beginPath();ctx.moveTo(g.x+Math.cos(a)*13,g.y+Math.sin(a)*13);ctx.lineTo(g.x+Math.cos(a+.1)*25,g.y+Math.sin(a+.1)*25);ctx.lineTo(g.x+Math.cos(a)*36,g.y+Math.sin(a)*36);ctx.stroke();}if(!reduced){ctx.fillStyle='#bca18a';for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.fillRect(g.x+Math.cos(a)*34-3,g.y+Math.sin(a)*25-3,6,5);}}}
-  }else if(g.kind==='frame'||g.kind==='receipt'){
-   ctx.strokeStyle=g.hot?'#fff1b0':g.kind==='frame'?'#71e1eb':'#f4ce76';ctx.lineWidth=2;ctx.setLineDash(g.hot?[]:[7,5]);ctx.fillStyle=g.hot?(g.kind==='frame'?'#71e1eb55':'#f4ce76'):'#e8ba6a30';capsule(ctx,g);ctx.fill();ctx.stroke();ctx.setLineDash([]);
-   if(g.kind==='receipt'&&g.hot){const d=Math.hypot(g.bx-g.ax,g.by-g.ay)||1,dx=(g.bx-g.ax)/d,dy=(g.by-g.ay)/d;ctx.strokeStyle='#554256';ctx.lineWidth=1;for(let n=5;n<d;n+=9){const x=g.ax+dx*n,y=g.ay+dy*n;ctx.beginPath();ctx.moveTo(x-dy*6,y+dx*6);ctx.lineTo(x+dy*6,y-dx*6);ctx.stroke();}}
-  }else if(g.kind==='tongue'){
-   // Shared short strike corridor is visible for the whole reveal/windup.
-   ctx.save();ctx.setLineDash(g.hot?[]:[5,4]);capsule(ctx,g);ctx.fill();ctx.stroke();ctx.restore();
+   if(g.hot){for(let i=0;i<6;i++){const a=i*Math.PI/3;ctx.beginPath();ctx.moveTo(g.x+Math.cos(a)*13,g.y+Math.sin(a)*13);ctx.lineTo(g.x+Math.cos(a+.1)*25,g.y+Math.sin(a+.1)*25);ctx.lineTo(g.x+Math.cos(a)*36,g.y+Math.sin(a)*36);ctx.stroke();}}
+  }else if(g.kind==='receipt'&&g.hot){
+   const d=Math.hypot(g.bx-g.ax,g.by-g.ay)||1,dx=(g.bx-g.ax)/d,dy=(g.by-g.ay)/d;
+   ctx.lineWidth=1;for(let n=5;n<d;n+=9){const x=g.ax+dx*n,y=g.ay+dy*n;ctx.beginPath();ctx.moveTo(x-dy*6,y+dx*6);ctx.lineTo(x+dy*6,y-dx*6);ctx.stroke();}
   }
  }
  ctx.restore();
