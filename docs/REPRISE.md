@@ -1,3 +1,7 @@
+# Silhouette harmonisée du 6 novembre 2026
+
+Le candidat v8 harmonise les huit feuilles, utilisées dans quatorze directions, sans changer le moteur ni les sauvegardes. Lire [QA-TOMA-CONSISTENCY.md](QA-TOMA-CONSISTENCY.md). Les mentions v7 ci-dessous décrivent l’historique.
+
 # Reprise dans une nouvelle discussion
 
 Animations de Charles du 5 novembre 2026 : douze peintures de corps entier animent désormais sa cape, son freinage en vol, le redressement et le geste du claquement. Le visage et l’effet de main suivent les points mesurés des peintures, sans déformer le corps ni changer le moteur ou les sauvegardes. Lire [QA-CHARLES-MOTION-2026-11-05.md](QA-CHARLES-MOTION-2026-11-05.md).
