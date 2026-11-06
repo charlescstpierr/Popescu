@@ -387,11 +387,11 @@ window.addEventListener('keyup',e=>{const key=e.key.toLowerCase();keys.delete(ke
 // The invisible CSS box resolves env(safe-area-inset-*) to real pixels. Use
 // untransformed DOM metrics so both the base and the thumb's full 33px travel
 // fit, including the smaller joystick on narrow screens and its border.
-function joystickPlacement(x,y,r){
+function joystickPlacement(x,y,r,fromBanter=false){
  const area=$('control-safe-area').getBoundingClientRect(),joy=$('joystick'),stick=$('stick');
- const left=Math.max(0,area.left-r.left),top=Math.max(height*.35,area.top-r.top);
+ const left=Math.max(0,area.left-r.left),top=Math.max(fromBanter?0:height*.35,area.top-r.top);
  const right=Math.min(width,area.left+area.width-r.left),bottom=Math.min(height,area.top+area.height-r.top);
- if(x<left||x>Math.min(right,width*.75)||y<top||y>bottom)return null;
+ if(x<left||x>Math.min(right,fromBanter?width:width*.75)||y<top||y>bottom)return null;
  const w=joy.offsetWidth,h=joy.offsetHeight,tx=joy.clientLeft+stick.offsetLeft,ty=joy.clientTop+stick.offsetTop;
  if(!(w>0&&h>0&&stick.offsetWidth>0&&stick.offsetHeight>0))return null;
  const minX=Math.min(0,tx-33),minY=Math.min(0,ty-33);
@@ -400,7 +400,7 @@ function joystickPlacement(x,y,r){
  if(lowX>highX||lowY>highY)return null;
  return {left:Math.max(lowX,Math.min(highX,x-w/2)),top:Math.max(lowY,Math.min(highY,y-h/2))};
 }
-app.addEventListener('pointerdown',e=>{if(assetWait||screen!=='hud'||e.target.closest('button')||e.target.closest('.hud-top')||e.target.closest('#powers')||pointer!==null)return;const bounds=app.getBoundingClientRect(),r={left:bounds.left+(app.clientLeft||0),top:bounds.top+(app.clientTop||0)};const placement=joystickPlacement(e.clientX-r.left,e.clientY-r.top,r);if(!placement)return;pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};try{app.setPointerCapture(pointer)}catch{}$('joystick').classList.add('active');$('joystick').style.left=`${placement.left}px`;$('joystick').style.top=`${placement.top}px`;$('joystick').style.bottom='auto';e.preventDefault();});
+app.addEventListener('pointerdown',e=>{const fromBanter=Boolean(e.target.closest('#banter'));if(assetWait||screen!=='hud'||e.target.closest('button')||!fromBanter&&e.target.closest('.hud-top')||e.target.closest('#powers')||pointer!==null)return;const bounds=app.getBoundingClientRect(),r={left:bounds.left+(app.clientLeft||0),top:bounds.top+(app.clientTop||0)};const placement=joystickPlacement(e.clientX-r.left,e.clientY-r.top,r,fromBanter);if(!placement)return;pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};try{app.setPointerCapture(pointer)}catch{}$('joystick').classList.add('active');$('joystick').style.left=`${placement.left}px`;$('joystick').style.top=`${placement.top}px`;$('joystick').style.bottom='auto';e.preventDefault();});
 app.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;const dx=e.clientX-origin.x,dy=e.clientY-origin.y,d=Math.hypot(dx,dy)||1;const k=Math.min(1,d/40);input={x:dx/d*k,y:dy/d*k};$('stick').style.transform=`translate(${input.x*33}px,${input.y*33}px)`;e.preventDefault();});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(event,e=>{if(e.pointerId===pointer)resetInput();});
 window.addEventListener('blur',()=>{windowFocused=false;if(!startConfirmation)cancelStartAttempt();clearTimeout(autoTimer);cancelAssetWait();resetInput();if(screen==='hud')pause();});
@@ -439,7 +439,36 @@ function refreshAnimalEntryOcclusions(dt){
  }
  game.setViewportOcclusions(rects);
 }
-function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence&&screen!=='save-exit'){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
+function positionBanter(){
+ const card=$('banter');if(screen!=='hud'||card.classList.contains('hidden')||!(card.offsetHeight>0))return;
+ const bounds=app.getBoundingClientRect(),originY=bounds.top+(app.clientTop||0),s=game.s;
+ const minimum=Math.ceil($('hud-top').getBoundingClientRect().bottom-originY+6),cardHeight=card.offsetHeight;
+ const bottom=$('control-safe-area').getBoundingClientRect().bottom-originY;
+ const inset=charlesActive()?Math.max(0,Math.min(48,430-height*.48)):0;
+ const ox=Math.round(width/2-s.x),oy=Math.round(height*.48-s.y+inset),labels=[];let bossActive=false;
+ // Match the painted name and health bar in Renderer._actor, including its
+ // rounded camera translation. Check every frame so a moving boss stays clear.
+ for(const e of s.enemies){
+  if(e.dead||!['pelican','travestia'].includes(e.type))continue;
+  bossActive=true;
+  const x=Math.round(e.x)+ox,y=Math.round(e.y)+oy;
+  if(x+80<0||x-80>width)continue;
+  const fallback=renderer.actors.availableFor?.(e,'enemy')===false;
+  const start=y-(fallback?49:e.type==='pelican'?156:149),end=y-(fallback?31:e.type==='pelican'?131:124);
+  if(end>0&&start<height)labels.push({start,end});
+ }
+ // During a boss fight, leave its head and the upper combat lane open, as
+ // well as the resting joystick and companion controls below the card.
+ const limit=bossActive?bottom-190:bottom;
+ let top=bossActive?Math.floor(limit-cardHeight):minimum;
+ labels.sort((a,b)=>b.start-a.start);
+ for(const label of labels)if(top+cardHeight>label.start-6&&top<label.end+6)top=label.start-6-cardHeight;
+ const next=`${top}px`;if(card.style.top!==next)card.style.top=next;
+ // On a very short viewport, wait for a gap rather than obscure a boss label.
+ const visibility=top<minimum||top+cardHeight>limit?'hidden':'';
+ if(card.style.visibility!==visibility)card.style.visibility=visibility;
+}
+function frame(now){const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;if(game){if(!assetWait&&screen==='hud'&&game.state.mode==='playing'){const movement=pointer!==null?input:keyVector();if(updateTutorial(game,movement)){refreshAnimalEntryOcclusions(dt);game.update(dt,movement);}}if(!transitionBusy&&!recoveryPending&&runPersistence&&screen!=='save-exit'){if(flushRequested){flushRequested=false;autosave.flush();}else if(screen==='hud')autosave.tick();}renderer.render(game,now/1000);if(now-uiTick>120){uiTick=now;updateHud();}if(banterSpeechId!==null?game.speech.active?.id!==banterSpeechId:banterUntil<now)$('banter').classList.add('hidden');positionBanter();if(screen==='hud'&&game.s.mode==='playing'&&trophyToastRemaining>0){trophyToastRemaining=Math.max(0,trophyToastRemaining-dt);if(trophyToastRemaining===0){$('trophy-toast').classList.add('hidden');nextTrophyToast();}}}else{renderer.ctx.fillStyle='#0d1023';renderer.ctx.fillRect(0,0,width,height);}requestAnimationFrame(frame);}
 setDifficulty(difficulty);syncPrefs();updateRecordMenu();updateResumeMenu();requestAnimationFrame(frame);
 window.addEventListener('pagehide',()=>{cancelStartAttempt();cancelHudSpacePress();cancelAssetWait();if(game&&screen!=='save-exit')autosave.flush();});
 window.addEventListener('error',e=>{console.error('Toma runtime:',e.message);$('loading').classList.add('hidden');});

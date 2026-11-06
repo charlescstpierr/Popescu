@@ -50,12 +50,12 @@ body{touch-action:manipulation}#world,.hud{touch-action:none}.panel{touch-action
 /* Optional Charles epilogue: clear stakes without a fake boss health bar. */
 .charles-choice{border-top:1px solid #82745a;padding-top:12px;margin:12px 0}.charles-choice #meet-charles{font-size:12px;letter-spacing:.3px;border-color:#d8ce91;background:#272939;color:#f7edb9}.charles-choice p{font-size:11px;line-height:1.5;color:#d5cedc;text-align:left;margin:8px 1px 10px}.charles-result{padding:11px;border:1px solid #a49c6e;background:#202738;color:#e6e8c6;font-size:12px;line-height:1.55;margin:12px 0}.result-panel:has(.charles-result:not(.hidden)) h2{font-size:27px}
 .charles-confirm-panel{max-width:370px;overscroll-behavior:contain}.charles-confirm-panel h2{font-size:29px;line-height:1.1}.charles-infinity{font:bold 14px var(--font-ui);color:#f5e9b4;margin:12px 0}.charles-confirm-panel #charles-confirm-note{font-size:12px;line-height:1.55;color:#d7d1df;text-align:left;margin:12px 0 18px}.charles-confirm-panel #charles-confirm-note p+p{margin-top:8px}.charles-confirm-panel .charles-secured{padding:9px 10px;border-left:2px solid #add8a5;background:#243330;color:#d7f0d2}.charles-confirm-panel .button{font-size:12px;letter-spacing:.3px;margin-top:10px;min-height:48px}#meet-charles:focus-visible,#charles-start:focus-visible,#charles-cancel:focus-visible,#charles-leave:focus-visible{outline:2px solid #fff5bd;outline-offset:3px}#charles-leave{font-size:12px;letter-spacing:.3px}
-.charles-banner{margin:6px 8px 0;padding:6px 8px;background:#10182def;border:1px solid #bcb885;border-left:3px solid #e9e3ae;pointer-events:none}.charles-heading{display:flex;justify-content:space-between;align-items:center;gap:6px}.charles-heading b{font-size:11px;letter-spacing:.25px;color:#f5edc2}.charles-heading strong{font:700 10px var(--font-ui);color:#d6f5e5;white-space:nowrap}.charles-banner p{font-size:10px;line-height:1.3;margin-top:3px;color:#e2dfef}.charles-banner #charles-progress{font-size:9px;color:#bfc9dc}.charles-banner .charles-warning{font-size:10px;font-weight:bold;color:#ffc9a8;letter-spacing:.1px}.hud.charles-active .offscreen,.hud.charles-active .hud-details,.hud.charles-active .discovery-status,.hud.charles-active .bottom-hud,.hud.charles-active .world-coordinates,.hud.charles-active .opening-help{display:none}.hud.charles-active .banter{pointer-events:none;padding-top:8px;padding-bottom:8px}.hud.charles-active .banter>button{pointer-events:auto}.hud.charles-active .banter p{line-height:1.4}.hud.charles-active .timer small{font-size:9px;letter-spacing:.3px}
+.charles-banner{margin:6px 8px 0;padding:6px 8px;background:#10182def;border:1px solid #bcb885;border-left:3px solid #e9e3ae;pointer-events:none}.charles-heading{display:flex;justify-content:space-between;align-items:center;gap:6px}.charles-heading b{font-size:11px;letter-spacing:.25px;color:#f5edc2}.charles-heading strong{font:700 10px var(--font-ui);color:#d6f5e5;white-space:nowrap}.charles-banner p{font-size:10px;line-height:1.3;margin-top:3px;color:#e2dfef}.charles-banner #charles-progress{font-size:9px;color:#bfc9dc}.charles-banner .charles-warning{font-size:10px;font-weight:bold;color:#ffc9a8;letter-spacing:.1px}.hud.charles-active .offscreen,.hud.charles-active .hud-details,.hud.charles-active .discovery-status,.hud.charles-active .bottom-hud,.hud.charles-active .world-coordinates,.hud.charles-active .opening-help{display:none}.hud.charles-active .banter{padding-top:8px;padding-bottom:8px}.hud.charles-active .banter>button{pointer-events:auto}.hud.charles-active .banter p{line-height:1.4}.hud.charles-active .timer small{font-size:9px;letter-spacing:.3px}
 @media(max-width:355px){.charles-heading b{font-size:10px;letter-spacing:0}.charles-heading strong{font-size:9px}.charles-banner{margin-left:6px;margin-right:6px}.hud.charles-active .banter{margin-left:6px;margin-right:6px;gap:7px}.charles-confirm-panel h2{font-size:25px}.charles-confirm-panel .button{font-size:11px}.charles-choice #meet-charles{font-size:11px}}
 @media(max-height:620px){#charles-confirm{padding:calc(14px + var(--safe-top)) 12px calc(14px + var(--safe-bottom))}.charles-confirm-panel #charles-confirm-note{margin:9px 0 12px;font-size:11px}.charles-confirm-panel #charles-confirm-note p+p{margin-top:6px}.charles-confirm-panel .charles-infinity{margin:8px 0}.charles-confirm-panel .button{margin-top:8px}.hud.charles-active .banter{padding-top:6px;padding-bottom:6px}.hud.charles-active .banter p{font-size:10px}.charles-choice p{font-size:10px}}
 
 /* Keep Charles and his telegraphs clear of dialogue on every portrait size. */
-.hud.charles-active .banter{margin-top:6px}
+.hud.charles-active .banter{margin-top:0}
 .hud.charles-active .joystick{bottom:calc(110px + var(--safe-bottom))}
 .hud.charles-active .control-hint{bottom:calc(91px + var(--safe-bottom))}
 
@@ -71,15 +71,15 @@ body{touch-action:manipulation}#world,.hud{touch-action:none}.panel{touch-action
 .power-icon small{font-size:10px;line-height:11px;min-width:8px;text-align:center}
 .wallet{display:flex;gap:5px;padding:5px 6px;font-size:10px;flex-shrink:0;border:1px solid #5c4e42}
 .wallet .gem-pixel{margin-left:3px}
-.banter{gap:7px;align-items:center;box-shadow:0 2px 0 #060a1580;border-color:#6d5a66}
+.banter{position:absolute;left:max(10px,var(--safe-left));right:max(10px,var(--safe-right));top:140px;margin:0;touch-action:none;gap:7px;align-items:center;box-shadow:0 2px 0 #060a1580;border-color:#6d5a66}
 .banter>div{min-width:0}
 .banter>img,.banter>canvas{width:28px;height:34px;flex-shrink:0}
 .banter b{display:block;font-size:10px;letter-spacing:.8px}
 .banter p{font-size:12px;line-height:1.35;margin-top:2px;overflow-wrap:anywhere}
 .banter>button{color:#d2bedb}
 .system-icon{display:block;width:32px;height:36px;flex-shrink:0}
-.system-message{border-color:#528294;background:#101e2ef5}
-.system-message b{color:#b3e3f2}
+.system-message{border-color:#a48654;background:#21182ff5}
+.system-message b{color:#efc86c}
 .wave{position:relative;top:auto;left:auto;right:auto;margin:4px 10px;padding:8px;font-size:12px}
 .control-hint{position:relative;top:auto;bottom:auto;left:auto;right:auto;margin:0 10px 5px}
 .hud.charles-active .control-hint{bottom:auto}
