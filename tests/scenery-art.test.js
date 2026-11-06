@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CityArt} from '../dist/city-art.js';
-function fakeCanvas(){const calls=[];const ctx=new Proxy({},{get:(_,key)=>(...args)=>calls.push([key,...args]),set:(_,key,v)=>(calls.push([key,v]),true)});return{calls,getContext:()=>ctx};}
+function fakeCanvas(){const calls=[];const ctx=new Proxy({},{get:(_,key)=>(...args)=>{calls.push([key,...args]);if(key==='createRadialGradient')return{addColorStop:(...stop)=>calls.push(['colorStop',...stop])};},set:(_,key,v)=>(calls.push([key,v]),true)});return{calls,getContext:()=>ctx};}
 test('five city silhouettes and forest props draw distinct cached artwork',()=>{
  const previous=globalThis.OffscreenCanvas;globalThis.OffscreenCanvas=class{constructor(){return fakeCanvas();}};
  try{const city=new CityArt(),base={type:'building',x:100,y:200,w:144,h:180,variant:1,damage:2};

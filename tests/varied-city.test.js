@@ -4,7 +4,7 @@ import * as biomes from '../dist/biomes.js';
 import {CityArt} from '../dist/city-art.js';
 import {World} from '../dist/world.js';
 
-function fakeCanvas(){const calls=[];const ctx=new Proxy({},{get:(_,key)=>(...args)=>calls.push([key,...args]),set:(_,key,value)=>(calls.push([key,value]),true)});return{calls,getContext:()=>ctx};}
+function fakeCanvas(){const calls=[];const ctx=new Proxy({},{get:(_,key)=>(...args)=>{calls.push([key,...args]);if(key==='createRadialGradient')return{addColorStop:(...stop)=>calls.push(['colorStop',...stop])};},set:(_,key,value)=>(calls.push([key,value]),true)});return{calls,getContext:()=>ctx};}
 function withCanvas(fn){const previous=globalThis.OffscreenCanvas;globalThis.OffscreenCanvas=class{constructor(){return fakeCanvas();}};try{return fn();}finally{globalThis.OffscreenCanvas=previous;}}
 
 test('river follows clear corridors, joins continuously and bridges each crossroad',()=>{

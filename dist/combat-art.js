@@ -1,5 +1,21 @@
 // Short-lived visual reactions are derived from simulation changes, never written back.
 const COLORS={hit:'#ffe293',heart:'#ff8ebc',dust:'#a494a4'};
+export const TELEGRAPH_STYLES=Object.freeze({
+  charge:{fill:'#ff472b',edge:'#ff8951',windup:.8},
+  crow:{fill:'#ff472b',edge:'#ff6984',windup:.85},
+  blast:{fill:'#ff472b',edge:'#ff8951',windup:.72},
+  gas:{fill:'#ff472b',edge:'#ff8951',windup:1.05},
+  swipe:{fill:'#ff472b',edge:'#ff8951',windup:.6},
+  tail:{fill:'#ff472b',edge:'#ff8951',windup:1.2},
+  tailDash:{fill:'#ff472b',edge:'#ff8951',windup:1.3}
+});
+export function drawTelegraph(ctx,family,remaining,time,reduced,active=false,pass='edge',windup=TELEGRAPH_STYLES[family].windup){
+  const style=TELEGRAPH_STYLES[family],progress=Math.max(0,Math.min(1,1-remaining/windup));
+  const pulse=reduced?0:(.5+.5*Math.sin(time*8))*progress;
+  ctx.save();const alpha=ctx.globalAlpha;ctx.setLineDash([]);ctx.lineWidth=family==='tail'&&active?3:2;
+  if(pass==='ground'){ctx.fillStyle=style.fill;ctx.globalAlpha=alpha*(active?(reduced?.32:.38):reduced?.14+progress*.08:.12+progress*.1+pulse*.08);ctx.fill();}
+  else{ctx.strokeStyle=style.edge;ctx.globalAlpha=alpha*(active?1:.85+progress*.15);ctx.stroke();}ctx.restore();
+}
 export class CombatArt {
   constructor(){this.previous=new Map();this.effects=[];this.appeared=new Map();this.seed=null;this.lastKills=0;this.lastLevel=1;this.lastHP=0;this.started=false;this.defeats=[];this.owner=new WeakSet();this.lastElapsed=0;}
   prepare(state,seed,defeats=[],source=state){
@@ -52,7 +68,10 @@ export class CombatArt {
     for(const e of this.effects){const t=Math.max(0,(now-e.start)/e.life);ctx.save();ctx.globalAlpha=Math.min(1,(1-t)*1.5);ctx.translate(Math.round(e.x),Math.round(e.y));
       if(e.kind==='hit'||e.kind==='ouch'){
         const y=-t*25;ctx.font=`bold ${e.kind==='ouch'?12:10}px monospace`;ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#121024';ctx.strokeText(e.kind==='ouch'?`−${e.value}`:String(e.value),0,y);ctx.fillStyle=e.color;ctx.fillText(e.kind==='ouch'?`−${e.value}`:String(e.value),0,y);
-        if(!reduced&&e.kind==='hit'){ctx.fillStyle='#fff2ac';for(let i=0;i<4;i++){const a=i*Math.PI/2+t*.5;ctx.fillRect(Math.cos(a)*(7+t*12),20+Math.sin(a)*(7+t*12),2,2);}}
+        if(!reduced&&e.kind==='hit'){
+          if(t<.23){ctx.save();ctx.globalAlpha*=1-t/.23;ctx.strokeStyle='#fff5cf';ctx.lineWidth=1.5;ctx.beginPath();for(let i=0;i<4;i++){const a=i*Math.PI/2+.4,r=3+t*18;ctx.moveTo(Math.cos(a)*r,20+Math.sin(a)*r);ctx.lineTo(Math.cos(a)*(r+5),20+Math.sin(a)*(r+5));}ctx.stroke();ctx.restore();}
+          ctx.fillStyle='#fff2ac';for(let i=0;i<4;i++){const a=i*Math.PI/2+t*.5;ctx.fillRect(Math.cos(a)*(7+t*12),20+Math.sin(a)*(7+t*12),2,2);}
+        }
       }else if(!reduced){
         ctx.fillStyle=e.color;const count=e.kind==='level'?14:6;for(let i=0;i<count;i++){const a=i*Math.PI*2/count,r=6+t*(e.kind==='level'?45:19),x=Math.cos(a)*r,y=Math.sin(a)*r*.6-t*8;ctx.fillRect(Math.round(x),Math.round(y),e.kind==='level'?3:4,2);}
       }ctx.restore();
