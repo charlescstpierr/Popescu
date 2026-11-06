@@ -50,7 +50,7 @@ test('prop cache stays within 8 MiB including cutaways and regenerates evicted i
  const city=new CityArt(),base={type:'building',buildingKind:'apartment',x:0,y:0,w:150,h:180,variant:2};
  const first=city._propImage(base,42),before=JSON.stringify(first.image.calls);
  for(let i=1;i<100;i++){
-  const p={...base,x:i*173},item=city._propImage(p,42);city._cutaway(item,p);
+  const p={...base,x:i*173},item=city._propImage(p,42);city._cutaway(item,p,[{x:p.x,y:p.y-32,r:70,alpha:1}]);
   const bytes=[...city.props.values()].reduce((sum,v)=>sum+(v.image.width*v.image.height+(v.cutaway?v.cutaway.width*v.cutaway.height:0))*4,0);
   assert.equal(city.propBytes,bytes);assert.ok(bytes<=8*1024*1024);assert.ok(city.props.size<=96);
  }
@@ -85,16 +85,21 @@ test('puddle shimmer uses warm tiles and is completely static with reduced effec
 }));
 
 let native;try{native=createRequire(import.meta.url)('@napi-rs/canvas');}catch{}
-test('real cutaway never hides more than the original uniform fade anywhere on short or tall buildings',{skip:!native&&'optional @napi-rs/canvas is not installed'},()=>{
+test('real cutaway reveals a soft local window and leaves the rest of every facade intact',{skip:!native&&'optional @napi-rs/canvas is not installed'},()=>{
  const previous=globalThis.OffscreenCanvas;globalThis.OffscreenCanvas=class{constructor(w,h){return native.createCanvas(w,h);}};
  try{
   for(const reduced of [false,true])for(const buildingKind of ['apartment','garage','warehouse','shop','ruin'])for(const h of [76,180]){
-   const city=new CityArt(),p={type:'building',buildingKind,x:0,y:0,w:h===76?72:150,h,variant:2,damage:0},item=city._propImage(p,42,reduced),cutaway=city._cutaway(item,p);
-   assert.equal(city._cutaway(item,p),cutaway,'masked image is cached');
+   const city=new CityArt(),p={type:'building',buildingKind,x:0,y:0,w:h===76?72:150,h,variant:2,damage:0};
+   const item=city._propImage(p,42,reduced),center={x:0,y:buildingGeometry(p).foot-32,r:70,alpha:1},cutaway=city._cutaway(item,p,[center]);
    const {width,height}=item.image,original=item.image.getContext('2d').getImageData(0,0,width,height).data,cut=cutaway.getContext('2d').getImageData(0,0,width,height).data;
-   let gain=0;
-   for(let i=3;i<original.length;i+=4){assert.ok(cut[i]<=Math.ceil(original[i]*.34),`${buildingKind} ${h}: no opaque roof, fade or doorstep regression`);if(original[i]>240&&cut[i]<50)gain++;}
-   if(h===180&&buildingKind==='apartment')assert.ok(gain>1000,'tall facade retains the clearer central band');
+   let revealed=0,intact=0,soft=0;
+   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const i=(y*width+x)*4,r=Math.hypot(x+item.x-center.x,y+item.y-center.y);
+    if(r>71){assert.deepEqual(cut.slice(i,i+4),original.slice(i,i+4),'no translucent box outside the circle');if(original[i+3]===255)intact++;}
+    if(original[i+3]===255&&r<30){assert.ok(cut[i+3]<25);revealed++;}
+    if(original[i+3]===255&&r>48&&r<63&&cut[i+3]>30&&cut[i+3]<230)soft++;
+   }
+   assert.ok(revealed>100&&(h===76||intact>100)&&soft>10,`${buildingKind} ${h} has clear center, soft edge and opaque architecture`);
   }
  }finally{globalThis.OffscreenCanvas=previous;}
 });

@@ -25,3 +25,17 @@ test('forest floor differs from city, regenerates deterministically and stays bo
  assert.equal(JSON.stringify(city._tile(4,0,42).calls),forest);
  }finally{globalThis.OffscreenCanvas=previous;}
 });
+
+test('forest paths use warm dirt and roots without city paint, and crowns have twenty variations',()=>{
+ const previous=globalThis.OffscreenCanvas;globalThis.OffscreenCanvas=class{constructor(){return fakeCanvas();}};
+ try{
+  const art=new CityArt(),floor=fakeCanvas();art._forestTile(floor.getContext(),4,0,42);
+  const colors=new Set(floor.calls.filter(c=>c[0]==='fillStyle').map(c=>c[1]));
+  assert.ok(colors.has('#604b3b')&&colors.has('#9a7957'),'warm earth and exposed roots');
+  assert.ok(!colors.has('#51434b')&&!colors.has('#b9a58f'),'no mauve paving or city crosswalk paint');
+  const crowns=[];for(let v=0;v<20;v++){const c=fakeCanvas();art._nature(c.getContext(),{type:'pine',w:20,variant:v},42);crowns.push(JSON.stringify(c.calls));}
+  assert.equal(new Set(crowns).size,20);
+  const a=fakeCanvas(),b=fakeCanvas();art._crosswalk(a.getContext(),0,121,false,42);art._crosswalk(b.getContext(),0,121,false,42);assert.deepEqual(a.calls,b.calls);
+  const styles=new Set();for(let x=-3;x<4;x++){const c=fakeCanvas();art._crosswalk(c.getContext(),x*512,121,false,42);styles.add(JSON.stringify(c.calls.filter(v=>v[0]==='fillRect').map(v=>v.slice(3))));}assert.ok(styles.size>=5,'crossing layouts and wear differ');
+ }finally{globalThis.OffscreenCanvas=previous;}
+});
