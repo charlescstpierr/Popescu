@@ -3,7 +3,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Renderer} from '../dist/renderer.js';
 import {Game} from '../dist/engine.js';
+import {drawLamborghini} from '../dist/lamborghini-art.js';
 function fixture(){const calls=[],target={fillStyle:'',strokeStyle:'',globalAlpha:1,fillRect(...p){calls.push(['rect',this.fillStyle,...p]);},fill(){calls.push(['fill',this.fillStyle]);},stroke(){calls.push(['stroke',this.strokeStyle]);},createRadialGradient(){return{addColorStop(){}};}};const ctx=new Proxy(target,{get:(t,k)=>k in t?t[k]:(...p)=>calls.push([k,...p])}),renderer=new Renderer({getContext:()=>ctx});return{ctx,calls,renderer};}
 test('each car rank paints a distinct silhouette or trim, including reduced effects',()=>{for(const reduced of [false,true]){const {renderer,calls}=fixture();renderer.reducedEffects=reduced;const signatures=[];for(let rank=1;rank<=5;rank++){calls.length=0;const v={kind:'car',x:0,y:0,vx:500,vy:0,carRank:rank,carPhase:'out',carDelay:0};const before=JSON.stringify(v);renderer._car(v,true);assert.equal(JSON.stringify(v),before);signatures.push(JSON.stringify(calls));}assert.equal(new Set(signatures).size,5);}});
 test('queued escort is invisible and turning car does not display false speed marks',()=>{const {renderer,calls}=fixture();renderer._car({kind:'car',x:0,y:0,vx:595,carRank:5,carPhase:'out',carDelay:.2},true);assert.equal(calls.length,0);renderer._car({kind:'car',x:0,y:0,vx:0,carRank:4,carPhase:'turn',carDelay:0},true);assert.ok(calls.length>0);assert.ok(!calls.some(c=>c[0]==='rect'&&c[1]==='#ffd634'&&c[2]<-45));});
-test('real render raises hostile warning outlines above a new car without mutating state',()=>{const {renderer,calls}=fixture(),g=new Game({seed:42});g.s.upg.car=3;g.timers.car=0;g.weapons(0);g.s.vehicles[0].x=0;const e=g.spawnEnemy('explosive',0,40);e.windup=.5;renderer._drawGround=()=>{};renderer._actor=()=>{};g.world.getVisible=()=>[];const before=JSON.stringify(g.s);renderer.render(g,1);assert.equal(JSON.stringify(g.s),before);const car=calls.findLastIndex(c=>c[0]==='fill'&&c[1]==='#d6a619');const danger=calls.findLastIndex(c=>c[0]==='stroke'&&c[1]===TELEGRAPH_STYLES.blast.edge);assert.ok(car>=0&&danger>car,'warning contour is painted after the opaque car');});
+test('copper body, white headlights and motion cues stay readable throughout both passes',()=>{
+ for(const reduced of [false,true])for(let rank=1;rank<=5;rank++)for(const phase of ['out','back'])for(const life of [2,.5,.01]){
+  const {ctx,calls}=fixture();const v=Object.freeze({x:0,y:0,vx:phase==='back'?-595:595,carRank:rank,carPhase:phase,carDelay:0,life});
+  drawLamborghini(ctx,v,reduced);
+  assert.ok(calls.some(c=>c[0]==='fill'&&c[1]==='#bc572c'));
+  assert.ok(!calls.some(c=>c[0]==='fill'&&c[1]==='#d6a619'),'street-cab yellow is absent from the body');
+  assert.equal(calls.filter(c=>c[0]==='rect'&&c[1]==='#fffdf0'&&c[4]>=10&&c[5]===2).length,2);
+  assert.equal(calls.filter(c=>c[0]==='rect'&&c[2]<-45&&['#ffd634','#fff3a6'].includes(c[1])).length,reduced?0:3);
+ }
+});
+test('real render raises hostile warning outlines above a new car without mutating state',()=>{const {renderer,calls}=fixture(),g=new Game({seed:42});g.s.upg.car=3;g.timers.car=0;g.weapons(0);g.s.vehicles[0].x=0;const e=g.spawnEnemy('explosive',0,40);e.windup=.5;renderer._drawGround=()=>{};renderer._actor=()=>{};g.world.getVisible=()=>[];const before=JSON.stringify(g.s);renderer.render(g,1);assert.equal(JSON.stringify(g.s),before);const car=calls.findLastIndex(c=>c[0]==='fill'&&c[1]==='#bc572c');const danger=calls.findLastIndex(c=>c[0]==='stroke'&&c[1]===TELEGRAPH_STYLES.blast.edge);assert.ok(car>=0&&danger>car,'warning contour is painted after the opaque car');});
