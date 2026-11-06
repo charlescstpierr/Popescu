@@ -737,8 +737,9 @@ export class CityArt {
     // are below the screen. Avoid constructing offscreen images and cycling
     // through the bounded cache on dense city blocks.
     const building=p.type==='building',w=Math.round(p.w||40),h=Math.round(p.h||40);
-    const cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100;
-    const ch=building?h+190:180,ay=building?Math.ceil(h/2)+110:110;
+    const lamp=p.type==='lamp';
+    const cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):lamp?264:100;
+    const ch=building?h+190:lamp?258:180,ay=building?Math.ceil(h/2)+110:lamp?124:110;
     const x=p.x-Math.floor(cw/2),y=p.y-ay;
     return x+cw>=camera.x-width/2&&x<=camera.x+width/2&&y+ch>=camera.y-height*.48&&y<=camera.y+height*.52;
   }
