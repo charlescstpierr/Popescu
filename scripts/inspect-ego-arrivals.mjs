@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire} from 'node:module';import {resolve,dirname} from 'node:path';import {fileURLToPath} from 'node:url';import {mkdirSync,writeFileSync} from 'node:fs';import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url),{createCanvas,Image}=require(process.env.POPESCU_CANVAS_MODULE||'@napi-rs/canvas'),root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),output=resolve(process.argv[2]||'/tmp/ego-arrival-proof');mkdirSync(output,{recursive:true});process.chdir(resolve(root,'dist'));
 globalThis.OffscreenCanvas=class{constructor(w,h){return createCanvas(w,h);}};globalThis.Image=Image;

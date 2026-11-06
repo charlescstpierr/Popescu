@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import{createRequire}from'node:module';import{fileURLToPath}from'node:url';import{resolve,dirname}from'node:path';import{writeFileSync,mkdirSync}from'node:fs';const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');const{createCanvas,Image}=createRequire(root+'/package.json')('@napi-rs/canvas');globalThis.Image=Image;
 const{HeroArt}=await import(root+'/dist/hero-art.js');const{HERO_FRAMES}=await import(root+'/dist/hero-frames.js');const art=new HeroArt();await art.ready;const views=Object.entries(HERO_FRAMES.views).flatMap(([id,v])=>['N','S'].includes(id)?[{id,a:v.angle}]:[{id,a:v.angle},{id:v.mirrorId||(id==='E'?'W':id==='SE'?'SW':'NW'),a:Math.PI-v.angle}]).sort((x,y)=>(x.a+Math.PI*2)%(Math.PI*2)-(y.a+Math.PI*2)%(Math.PI*2));
 const canvas=createCanvas(1400,1060),c=canvas.getContext('2d');c.fillStyle='#1b192a';c.fillRect(0,0,1400,1060);c.fillStyle='#f7d18c';c.font='bold 44px sans-serif';c.fillText('TOMA POPESCU',48,72);c.font='19px sans-serif';c.fillStyle='#c2b8d3';c.fillText('14 directions • 8 phases de marche • corps entiers, du crâne aux bottes',48,110);

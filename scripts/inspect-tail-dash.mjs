@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire} from 'node:module';import {mkdirSync,writeFileSync} from 'node:fs';import {resolve,dirname} from 'node:path';import {fileURLToPath} from 'node:url';import assert from 'node:assert/strict';
 const require=createRequire(import.meta.url),{createCanvas,Image}=require('@napi-rs/canvas');const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');process.chdir(resolve(root,'dist'));globalThis.OffscreenCanvas=class{constructor(w,h){return createCanvas(w,h);}};globalThis.Image=Image;
 const {Game}=await import('../dist/engine.js'),{Renderer}=await import('../dist/renderer.js'),{captureRun,restoreRun}=await import('../dist/run-save.js');

@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 /** Controlled native Canvas evidence. Not a browser or physical-phone benchmark. */
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';

@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Native Canvas captures exercise the exact gameplay renderer; no CSS mockup.
 import {createRequire} from 'node:module';
 import {mkdirSync,writeFileSync} from 'node:fs';

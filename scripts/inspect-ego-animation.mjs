@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Actual runtime painting, not an illustrated mockup. Optional native Canvas QA.
 import {createRequire} from 'node:module';
 import {resolve,dirname} from 'node:path';

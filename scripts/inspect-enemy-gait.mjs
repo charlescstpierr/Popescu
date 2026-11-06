@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {fileURLToPath} from 'node:url';
 import {HeroArt} from '../dist/hero-art.js';
 import assert from 'node:assert/strict';
