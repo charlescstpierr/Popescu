@@ -223,7 +223,7 @@ test('split progress is bounded, finishes normally, and freezes in every modal m
 test('split cadence and jokes rotate deterministically over later running intervals', () => {
   const boasts=[];const a=quietRun(game({onEvent:(type,payload)=>{if(type==='bark'&&payload.who==='TOMA')boasts.push(payload.text);}})),b=quietRun(game());let previous=0;const intervals=[];
   for(let i=0;i<2200;i++){a.update(.05,{x:1,y:0});b.update(.05,{x:1,y:0});if((a.s.stunt?.count||0)>intervals.length){intervals.push(a.s.elapsed-previous);previous=a.s.elapsed;}assert.deepEqual(a.s.stunt,b.s.stunt);assert.ok(!a.s.stunt||a.s.stunt.progress>=0&&a.s.stunt.progress<=1);}
-  assert.ok(intervals.length>=3);assert.equal(new Set(boasts).size,boasts.length);assert.deepEqual(boasts,awaitedContent.STUNT_BARKS.slice(0,boasts.length).map(b=>b.text));assert.ok(intervals[0]>=12&&intervals[0]<=18.1);assert.ok(intervals.slice(1).every(n=>n>=22&&n<=36.5));
+  assert.ok(intervals.length>=3);assert.equal(new Set(boasts).size,boasts.length);const offset=a.storyOffset();assert.deepEqual(boasts,boasts.map((_,i)=>awaitedContent.STUNT_BARKS[(i+offset)%awaitedContent.STUNT_BARKS.length].text));assert.ok(intervals[0]>=12&&intervals[0]<=18.1);assert.ok(intervals.slice(1).every(n=>n>=22&&n<=36.5));
 });
 
 test('split banter has at least twelve unique Quebec boasts and a delayed companion reply', () => {
