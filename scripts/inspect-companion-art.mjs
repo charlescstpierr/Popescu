@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Native Canvas proof of the exact gameplay draw path, not a CSS mockup.
 import {createCanvas,loadImage} from '@napi-rs/canvas';
 import {mkdirSync,writeFileSync} from 'node:fs';

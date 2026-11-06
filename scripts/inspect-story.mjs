@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Diagnostic story traces, not balance measurements: temporary invulnerability
 // keeps each seeded run alive long enough to inspect every reading interval.
 import assert from 'node:assert/strict';

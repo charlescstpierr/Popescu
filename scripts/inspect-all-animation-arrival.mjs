@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Offline QA only: actual Game and Renderer, synthetic victory, no browser storage.
 import {createRequire} from 'node:module';
 import {mkdirSync,writeFileSync} from 'node:fs';

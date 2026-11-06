@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 /** Native render QA of the shipped atlas, game renderer and exact attack phases. */
 import {createRequire} from 'node:module';
 import {mkdirSync,writeFileSync} from 'node:fs';

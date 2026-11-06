@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
 import {writeFileSync,mkdirSync} from 'node:fs';

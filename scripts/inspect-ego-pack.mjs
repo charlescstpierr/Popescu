@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Pack complete transparent drawings. No segmentation, recoloring or alpha edits.
 import {createRequire} from 'node:module';
 import {writeFileSync,mkdirSync} from 'node:fs';
