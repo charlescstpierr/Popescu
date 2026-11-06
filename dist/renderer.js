@@ -632,7 +632,7 @@ this._shadow(x,y+7,40,8);
     if(e.type!=='travestia'||!['tail_windup','tail_spin'].includes(e.phase))return;
     const ctx=this.ctx,warning=e.phase==='tail_windup',r=TRAVESTIA.radius;
     ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,r,0,TAU);
-    drawTelegraph(ctx,'tail',e.tailTime,this.time,this.reducedEffects,!warning,pass);
+    drawTelegraph(ctx,'tail',e.tailTime,this.time,this.reducedEffects,!warning,pass,e.tailWarning||TELEGRAPH_STYLES.tail.windup);
     if(pass==='ground'){ctx.restore();return;}
     ctx.strokeStyle=TELEGRAPH_STYLES.tail.edge;
     if(warning){ctx.lineWidth=4;ctx.beginPath();ctx.arc(e.x,e.y,r,-Math.PI/2,-Math.PI/2+TAU*(1-e.tailTime/(e.tailWarning||TRAVESTIA.warning)));ctx.stroke();}

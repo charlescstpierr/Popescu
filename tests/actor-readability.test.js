@@ -179,3 +179,7 @@ test('XP and gem halos add light in their own color and disappear with reduced e
   else{assert.ok(r>=37&&g>=34&&b>=56,'a glow cannot darken the pavement');if(kind==='xp')assert.ok(g-34>r-37&&b-56>r-37);else assert.ok(r-37>g-34&&b-56>g-34);}
  }
 });
+test('an extended Travestia taunt windup ramps urgency over its full real duration',options,()=>{
+ const alpha=remaining=>{const canvas=native.createCanvas(40,40),ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(20,20,15,0,Math.PI*2);drawTelegraph(ctx,'tail',remaining,0,true,false,'ground',4.2);return pixels(canvas)[(20*40+20)*4+3];};
+ assert.ok(alpha(2.1)>alpha(4.2),'halfway through a 4.2 s taunt the fill is already stronger than at its start');
+});
