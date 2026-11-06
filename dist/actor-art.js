@@ -99,7 +99,8 @@ export class ActorArt {
   }
   _rim(ctx,image,sx,sy,sw,sh,x,y,w,h,type,key){
     let rim=this.outlines.get(key);
-    if(!rim){rim=ActorArt.outline(image,sx,sy,sw,sh,w,h,RIMS[type]||'#c5bec5');if(!rim)return;this.outlines.set(key,rim);if(this.outlines.size>192)this.outlines.delete(this.outlines.keys().next().value);}
+    if(!rim){rim=ActorArt.outline(image,sx,sy,sw,sh,w,h,RIMS[type]||'#c5bec5');if(!rim)return;this.outlines.set(key,rim);if(this.outlines.size>96)this.outlines.delete(this.outlines.keys().next().value);}
+    this.outlines.delete(key);this.outlines.set(key,rim);
     const dest=ActorArt.snap(ctx,x-1,y-1);ctx.save();ctx.globalAlpha*=.56;ctx.drawImage(rim,dest.x,dest.y);ctx.restore();
   }
   drawEnemyAttack(ctx,actor,reduced=false){
