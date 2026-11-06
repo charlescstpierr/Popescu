@@ -7596,7 +7596,7 @@ let best=Number.isFinite(stored.best)&&stored.best>=0?stored.best:0,lifetime=val
 if(savedRecord.status==='ready'){best=savedRecord.value.totals.best;lifetime=savedRecord.value.totals.lifetime;lifetimeCoins=savedRecord.value.totals.coins;}
 let creditedKills=0,creditedCoins=0,banterUntil=0,banterSpeechId=null,powerSignature='',settingsReturn='pause-screen',creditsReturn='menu';
 let resultRecorded=false,uiTick=0,lastHud='',trophyToastRemaining=0,trophyToastQueue=[];
-let assetWait=null,assetError=false,startAttempt=null,hudSpacePress=null;
+let assetWait=null,assetError=false,startAttempt=null,startConfirmation=false,hudSpacePress=null;
 let navigationVersion=0,runConflict=false,saveExitChoice=null;
 function readStorage(){try{const data=JSON.parse(localStorage.getItem('toma-popescu-v1')||'{}');return data&&typeof data==='object'&&!Array.isArray(data)?data:{}}catch{return {}}}
 function save(){try{localStorage.setItem('toma-popescu-v1',JSON.stringify({...prefs,difficulty,best,lifetime,coins:lifetimeCoins,introSeen:stored.introSeen}));}catch{}}
@@ -7659,13 +7659,20 @@ async function ensureAnimalArt(){
  if(result.ok&&allAnimalArtReady())return true;
  assetError=true;setText('toast',result.reason==='timeout'?'Le chargement des images prend trop de temps. Réessaie.':'Impossible de charger les images des animaux. Réessaie.');$('toast').classList.remove('hidden');return false;
 }
+function confirmStart(message){
+ // A native confirmation can briefly take and restore the page's focus.
+ // Only that synchronous blur is exempt: hidden pages, navigation and any
+ // interruption after the dialog closes still cancel the pending start.
+ startConfirmation=true;
+ try{return window.confirm(message);}finally{startConfirmation=false;}
+}
 async function start(){
  if(transitionBusy||screen==='save-exit')return;transitionBusy=true;
  const attempt={cancelled:false,navigated:false},previousGame=game,previousId=runId;startAttempt=attempt;
  const mayStart=()=>startAttempt===attempt&&!attempt.cancelled&&windowFocused&&!document.hidden;
  try{
   const old=game?.s|| (savedRecord.status==='ready'?savedRecord.value.run.snapshot.game.s:null);
-  if(old&&!['gameover','victory'].includes(old.mode)&&!window.confirm('Commencer une nouvelle partie remplacera la partie sauvegardée. Continuer ?'))return;
+  if(old&&!['gameover','victory'].includes(old.mode)&&!confirmStart('Commencer une nouvelle partie remplacera la partie sauvegardée. Continuer ?'))return;
   audio.unlock();
   if(!allAnimalArtReady()&&!await ensureAnimalArt())return;if(!mayStart())return;clearAssetError();
   const previous=game&&runPersistence?{id:runId,snapshot:captureRun(game,dialogueSnapshot())}:null;
@@ -7692,7 +7699,7 @@ async function start(){
    return;
   }
   if(begun.reason==='cancelled')return;
-  if(!begun.ok&&!window.confirm('La sauvegarde est indisponible. Jouer quand même sans conserver cette partie ni ses records ?')){showSaveError(begun.reason);return;}
+  if(!begun.ok&&!confirmStart('La sauvegarde est indisponible. Jouer quand même sans conserver cette partie ni ses records ?')){showSaveError(begun.reason);return;}
   if(!mayStart())return;
   installNext();if(begun.ok)acceptSave();else showSaveError(begun.reason);
   startAttempt=null;
@@ -7955,7 +7962,7 @@ function joystickPlacement(x,y,r){
 app.addEventListener('pointerdown',e=>{if(assetWait||screen!=='hud'||e.target.closest('button')||pointer!==null)return;const bounds=app.getBoundingClientRect(),r={left:bounds.left+(app.clientLeft||0),top:bounds.top+(app.clientTop||0)};const placement=joystickPlacement(e.clientX-r.left,e.clientY-r.top,r);if(!placement)return;pointer=e.pointerId;origin={x:e.clientX,y:e.clientY};try{app.setPointerCapture(pointer)}catch{}$('joystick').classList.add('active');$('joystick').style.left=`${placement.left}px`;$('joystick').style.top=`${placement.top}px`;$('joystick').style.bottom='auto';e.preventDefault();});
 app.addEventListener('pointermove',e=>{if(e.pointerId!==pointer)return;const dx=e.clientX-origin.x,dy=e.clientY-origin.y,d=Math.hypot(dx,dy)||1;const k=Math.min(1,d/40);input={x:dx/d*k,y:dy/d*k};$('stick').style.transform=`translate(${input.x*33}px,${input.y*33}px)`;e.preventDefault();});
 for(const event of ['pointerup','pointercancel','lostpointercapture'])app.addEventListener(event,e=>{if(e.pointerId===pointer)resetInput();});
-window.addEventListener('blur',()=>{windowFocused=false;cancelStartAttempt();clearTimeout(autoTimer);cancelAssetWait();resetInput();if(screen==='hud')pause();});
+window.addEventListener('blur',()=>{windowFocused=false;if(!startConfirmation)cancelStartAttempt();clearTimeout(autoTimer);cancelAssetWait();resetInput();if(screen==='hud')pause();});
 window.addEventListener('focus',()=>{windowFocused=true;if(screen==='dialogue'&&auto&&!document.hidden)renderDialogue();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelStartAttempt();cancelAssetWait();clearTimeout(autoTimer);resetInput();if(screen==='hud')pause();audio.setScene('paused');if(game&&screen!=='save-exit')autosave.flush();}else{lastTime=performance.now();syncAudio();if(screen==='dialogue'&&auto)renderDialogue();}});
 $('reroll-upgrades').onclick=rerollUpgrades;
