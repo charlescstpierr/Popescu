@@ -304,8 +304,8 @@ export function drawIcon(ctx, id, x, y, size = 32) {
   } else if(id==='car') {
     oval(ctx,C.ink,3,22,9,8);oval(ctx,C.ink,22,22,8,8);r('#66546a',5,24,4,3);r('#66546a',24,24,4,3);
     poly(ctx,C.ink,[[1,19],[6,15],[10,9],[22,8],[29,15],[31,18],[30,25],[2,26]]);
-    poly(ctx,C.gold,[[3,19],[8,16],[11,11],[21,10],[27,16],[29,19],[28,23],[3,24]]);
-    poly(ctx,'#34546c',[[10,15],[13,11],[20,11],[24,15]]);line(ctx,C.goldLight,5,18,26,18,1);r('#fff4b3',4,20,5,2);r('#fff4b3',24,19,4,2);r('#746022',12,22,9,2);
+    poly(ctx,'#bc572c',[[3,19],[8,16],[11,11],[21,10],[27,16],[29,19],[28,23],[3,24]]);
+    poly(ctx,'#34546c',[[10,15],[13,11],[20,11],[24,15]]);line(ctx,'#ffc279',5,18,26,18,1);r('#fff4b3',4,20,5,2);r('#fff4b3',24,19,4,2);r('#633044',12,22,9,2);
   } else if(id==='followers') {
     heart(ctx,1,4,'#ae226d',1.05);heart(ctx,15,4,'#ae226d',1.05);heart(ctx,5,10,C.pink,1.6);sparkle(ctx,28,5,C.goldLight,2);
   } else if(id==='ego') {
@@ -743,6 +743,14 @@ this._shadow(x,y+7,40,8);
     for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e,this.reducedEffects,pass,this.time);drawEgoGround(ctx,e,this.reducedEffects,pass,this.time);drawPelicanGround(ctx,e,this.reducedEffects,pass,this.time);if(e.type==='pelican'&&pass==='ground')drawPelicanCards(ctx,e,this.reducedEffects,'ground');this._travestiaAttack(e,pass);this._orangutanAttack(e,pass);this._rivalAttack(e,false,pass);}
     for(const p of shockwaves||[])this._shockwave(p,pass);
   }
+  _heroVisibility(state,covered){
+    const now=state.elapsed||0,previous=this.heroVisibility;
+    if(!previous||previous.state!==state||now<previous.time)this.heroVisibility={state,time:now,opacity:0};
+    const fade=this.heroVisibility,dt=Math.max(0,Math.min(.05,now-fade.time));fade.time=now;
+    const target=covered?1:0;
+    fade.opacity+=Math.sign(target-fade.opacity)*Math.min(Math.abs(target-fade.opacity),dt/(covered?.12:.2));
+    return fade.opacity;
+  }
   render(game,time=0) {
     const state=game.state||game.s;if(!state)return;const arrival=charlesArrival(state.charles);const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
@@ -792,22 +800,38 @@ this._shadow(x,y+7,40,8);
     for(const e of enemies)if(!e.dead&&e.hp>0&&inView(e.x,e.y))items.push({y:e.y+10,kind:'enemy',data:e});
     for(const effect of game.defeatEffects||[])if(s.elapsed-effect.start<(this.reducedEffects?.16:.14)&&inView(effect.actor.x,effect.actor.y))items.push({y:effect.actor.y+10,kind:'defeat',data:effect});
     if(s.companion&&s.girl)items.push({y:s.girl.y+10,kind:'girl',data:s.girl});
+    const phase=Math.floor((s.elapsed||this.time)*12)%8;
+    const actorFrame=(a,kind)=>{
+      const moving=arrival?.locked?false:kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
+      // The simulation records only actual chase travel in a transient cache.
+      // Repeated/paused renders cannot advance it, and blocked feet stay planted.
+      // Preserve the gait input of creatures owned by another animation system.
+      const gaitOffset=typeof a.phase==='number'&&Number.isFinite(a.phase)?a.phase*3:0;
+      const legacyPhase=Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8;
+      return arrival?.locked?0:kind==='enemy'?enemyGaitFrame(a,game.enemyGait?.get(a),legacyPhase):moving?phase:0;
+    };
     const heroBounds=this.hero.visibilityBounds(s),overlaps=b=>heroBounds&&b&&heroBounds.left<b.right&&heroBounds.right>b.left&&heroBounds.top<b.foot&&heroBounds.foot>b.top;
     const actorBounds=a=>{const scale=ENEMY_SCALE[a.type]||.84,r=a.type==='pelican'?80:a.type==='travestia'?100:EGO_BEASTS[a.type]?56:Math.max(30,34*scale);return {left:a.x-r,right:a.x+r,top:a.y-(a.type==='pelican'?136:a.type==='travestia'?164:a.type==='moose'?94:a.type==='ostrich'?84:100*scale),foot:a.y+14};};
     const girlOverlap=s.companion&&s.girl&&overlaps({left:s.girl.x-32,right:s.girl.x+32,top:s.girl.y-80,foot:s.girl.y+14});
     if(girlOverlap){const girl=items.find(item=>item.kind==='girl');if(girl)girl.y=Math.min(girl.y,s.y+9.9);}
-    const heroCovered=girlOverlap||items.some(item=>{
+    const body=heroBounds?.body,coversBody=b=>{
+      if(!body||!b)return false;
+      const width=Math.max(0,Math.min(body.right,b.right)-Math.max(body.left,b.left)),height=Math.max(0,Math.min(body.foot,b.foot)-Math.max(body.top,b.top));
+      return width*height>=(body.right-body.left)*(body.foot-body.top)*.3;
+    };
+    const heroCovered=items.some(item=>{
       if(item.y<s.y+10)return false;
       const a=item.data;
-      if(item.kind==='enemy'||item.kind==='defeat')return overlaps(actorBounds(item.kind==='defeat'?a.actor:a));
-      if(item.kind==='prop')return overlaps(propForegroundBounds(a)||{left:a.x-(a.w||30)/2,right:a.x+(a.w||30)/2,top:a.y-(a.h||30),foot:a.y+10});
-      if(item.kind==='charles')return overlaps({left:a.x-70,right:a.x+70,top:a.y-170,foot:a.y+10});
-      if(item.kind==='chest'||item.kind==='vehicle')return overlaps({left:a.x-54,right:a.x+54,top:a.y-38,foot:a.y+14});
+      if(item.kind==='enemy'){const actor=a;return coversBody(actorBounds(actor))&&this.actors.occludes(actor,body,(actorFrame(actor,'enemy')+8)%8,s,this.time);}
+      if(item.kind==='prop')return coversBody(propForegroundBounds(a)||{left:a.x-(a.w||30)/2,right:a.x+(a.w||30)/2,top:a.y-(a.h||30),foot:a.y+10});
+      if(item.kind==='charles')return coversBody({left:a.x-70,right:a.x+70,top:a.y-170,foot:a.y+10});
+      if(item.kind==='vehicle')return !(a.carDelay>0||a.life===0)&&coversBody({left:a.x-43,right:a.x+43,top:a.y-(a.kind==='bike'?26:31),foot:a.y+14});
+      if(item.kind==='chest')return coversBody({left:a.x-24,right:a.x+24,top:a.y-32,foot:a.y+14});
       return false;
     });
-    if(heroCovered){ctx.save();ctx.strokeStyle='#ffe6b0';ctx.lineWidth=1.5;ctx.globalAlpha=.85;ctx.beginPath();ctx.ellipse(s.x,s.y+9,18,6,0,0,TAU);ctx.stroke();ctx.restore();}
+    const visibility=this._heroVisibility(state,heroCovered);
+    if(visibility>0){ctx.save();ctx.strokeStyle='#ffe6b0';ctx.lineWidth=1.5;ctx.globalAlpha=.85*visibility*(s.invulnerable>0&&Math.floor(this.time*16)%2?.58:1);ctx.beginPath();ctx.ellipse(s.x,s.y+9,18,6,0,0,TAU);ctx.stroke();ctx.restore();}
     items.push({y:s.y+10,kind:'hero',data:s});items.sort((a,b)=>a.y-b.y);
-    const phase=Math.floor((s.elapsed||this.time)*12)%8;
     for(const item of items){
       if(item.kind==='charles')this.charles.draw(ctx,item.data,item.data.elapsed,this.reducedEffects);
       else if(item.kind==='defeat')this._defeatImpact(item.data,s);
@@ -815,13 +839,7 @@ this._shadow(x,y+7,40,8);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {
-        const a=item.data,moving=arrival?.locked?false:item.kind==='hero'?Math.hypot(s.moveX||0,s.moveY||0)>.05:item.kind==='girl'?Math.hypot(a.x-s.x,a.y-s.y)>32:true;
-        // The simulation records only actual chase travel in a transient cache.
-        // Repeated/paused renders cannot advance it, and blocked feet stay planted.
-        // Preserve the gait input of creatures owned by another animation system.
-        const gaitOffset=typeof a.phase==='number'&&Number.isFinite(a.phase)?a.phase*3:0;
-        const legacyPhase=Math.floor((s.elapsed||this.time)*10+gaitOffset+(Number(a.id)||0))%8;
-        const actorPhase=arrival?.locked?0:item.kind==='enemy'?enemyGaitFrame(a,game.enemyGait?.get(a),legacyPhase):moving?phase:0;
+        const a=item.data,actorPhase=actorFrame(a,item.kind);
         if(item.kind==='enemy'&&arrival){ctx.save();ctx.globalAlpha*=arrival.enemyOpacity;this._actor(a,item.kind,(actorPhase+8)%8,s);ctx.restore();}
         else this._actor(a,item.kind,(actorPhase+8)%8,s);
       }
@@ -840,7 +858,7 @@ this._shadow(x,y+7,40,8);
     this._shield(s);
     // Damage edges stay above allied effects; the matching fills lie under actors.
     if(!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
-    if(heroCovered)this.hero.drawVisibility(ctx,s);
+    if(visibility>0)this.hero.drawVisibility(ctx,s,this.time,visibility);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}
