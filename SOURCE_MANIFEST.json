@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection-native-start-confirmation-focus",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -584,8 +584,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 53642,
-      "sha256": "791e54e960f9a219560db1a3f6e210ab45cc5500086b7948d865bd36347f2cbe"
+      "bytes": 54035,
+      "sha256": "b2a96ceab64e0abf7f7c09e70885b96f609ae9a2563ab56b8050f47f6d5a9145"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -1433,6 +1433,11 @@
       "sha256": "949ca839b3e11ae03ff8e60b3101b4bd76a753394dafb306b0caa96e4d6bd02c"
     },
     {
+      "path": "docs/QA-START-CONFIRMATION-FOCUS.md",
+      "bytes": 3125,
+      "sha256": "7fb7205e1715bcb9ae566dfb40025c34229cfe1230b895b3bf7bd39f7dfa260b"
+    },
+    {
       "path": "docs/QA-START-LOCK-CANCELLATION.md",
       "bytes": 4186,
       "sha256": "ffadcea007aa689905d721791390885e665a80f4bf14fbe9cec50655da4f71b7"
@@ -1965,12 +1970,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7473,
-      "sha256": "af9263e99a41c1a2290ba3d14d035484e5aafe48236bdc471a20c74618198096"
+      "sha256": "53f393247eaa255459add3b8decfc898c56c1cbaf82b27ff5163f1059d64bff5"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 770887,
-      "sha256": "77b3df489ce0e60d5811582c51e04d8fb2fa3670337cd14375bb3481d9781fa3"
+      "bytes": 771280,
+      "sha256": "2b9c4284212780d7d5358a8f292cbc26b615e6a09b4dbb7a7dfa930bb2492814"
     },
     {
       "path": "release/archives/README.md",
@@ -3338,6 +3343,11 @@
       "sha256": "eb385a909a7ee9d8d3f0de5ee182dfbad00a2dbff1672d438a83d16c72d491d2"
     },
     {
+      "path": "tests/start-confirmation-focus.test.js",
+      "bytes": 3744,
+      "sha256": "cdd5c1f9d8d8ba7ee6eac92d21ab2075141ee3b8f76920a81b9339376c889808"
+    },
+    {
       "path": "tests/start-lock-cancellation.test.js",
       "bytes": 8978,
       "sha256": "badea6030544213ff2366ff481282383e5d1925989d73f3eeca49ca46773cd25"
@@ -3458,7 +3468,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "944011975c9bc34c9bec9c7cba42c1348b6fdc45",
+  "base_github_commit": "2fa23c755f594f35735c8521133ff57981d1f76b",
   "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3466,5 +3476,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "0e5f21ab74056468e14d34aaf90993355c4fd568"
+  "base_github_tree": "213582d00cbbb7077110434eda8d6618aa1ec2f2"
 }
