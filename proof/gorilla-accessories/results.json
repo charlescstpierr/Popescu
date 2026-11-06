@@ -1,0 +1,214 @@
+{
+  "kind": "native Canvas, actual Game.update and Renderer.render",
+  "phoneTested": false,
+  "results": [
+    {
+      "width": 320,
+      "reduced": false,
+      "frames": 90,
+      "seconds": 3,
+      "phases": {
+        "jealous": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "gas": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "sprinter": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tank": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "orientations": {
+        "jealous": [
+          "front",
+          "back"
+        ],
+        "gas": [
+          "front",
+          "back"
+        ],
+        "sprinter": [
+          "front",
+          "back"
+        ],
+        "tank": [
+          "front",
+          "back"
+        ]
+      },
+      "cacheSize": 58,
+      "simulationUnchanged": true
+    },
+    {
+      "width": 320,
+      "reduced": true,
+      "frames": 90,
+      "seconds": 3,
+      "phases": {
+        "jealous": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "gas": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "sprinter": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tank": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "orientations": {
+        "jealous": [
+          "front",
+          "back"
+        ],
+        "gas": [
+          "front",
+          "back"
+        ],
+        "sprinter": [
+          "front",
+          "back"
+        ],
+        "tank": [
+          "front",
+          "back"
+        ]
+      },
+      "cacheSize": 58,
+      "simulationUnchanged": true
+    },
+    {
+      "width": 390,
+      "reduced": false,
+      "frames": 90,
+      "seconds": 3,
+      "phases": {
+        "jealous": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "gas": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "sprinter": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tank": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "orientations": {
+        "jealous": [
+          "front",
+          "back"
+        ],
+        "gas": [
+          "front",
+          "back"
+        ],
+        "sprinter": [
+          "front",
+          "back"
+        ],
+        "tank": [
+          "front",
+          "back"
+        ]
+      },
+      "cacheSize": 58,
+      "simulationUnchanged": true
+    },
+    {
+      "width": 390,
+      "reduced": true,
+      "frames": 90,
+      "seconds": 3,
+      "phases": {
+        "jealous": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "gas": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "sprinter": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tank": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "orientations": {
+        "jealous": [
+          "front",
+          "back"
+        ],
+        "gas": [
+          "front",
+          "back"
+        ],
+        "sprinter": [
+          "front",
+          "back"
+        ],
+        "tank": [
+          "front",
+          "back"
+        ]
+      },
+      "cacheSize": 58,
+      "simulationUnchanged": true
+    }
+  ]
+}
