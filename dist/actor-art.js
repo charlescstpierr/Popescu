@@ -1,3 +1,4 @@
+import {drawGorillaAccessories} from './gorilla-accessories.js';
 import {enemyAttackPose} from './enemy-attack-pose.js';
 import {EGO_BEASTS} from './ego-beasts.js';
 import {drawEgoBody,EGO_ART} from './ego-art.js';
@@ -72,17 +73,12 @@ export class ActorArt {
     const frame=canvas(128,128);if(!frame)return null;const c=frame.getContext('2d');c.imageSmoothingEnabled=false;
     c.drawImage(image,(index%4)*128,back?128:0,128,128,0,0,128,128);
     if(kind==='enemy'){
-      if(type==='tank'){
-        for(const [x,y] of [[22,67],[104,67]]){polygon(c,'#14111f',[[x-13,y],[x-8,y-10],[x+7,y-10],[x+13,y],[x+9,y+10],[x-9,y+10]]);polygon(c,'#997633',[[x-11,y],[x-6,y-8],[x+5,y-8],[x+11,y],[x+7,y+7],[x-7,y+7]]);box(c,'#f5cf79',x-7,y-7,11,2);box(c,'#4b3540',x-4,y-2,10,7);}
-      } else if(type==='sprinter'){
-        box(c,'#ff69d4',14,103,20,4);box(c,'#ff69d4',91,103,20,4);box(c,'#ffe2f6',16,103,8,1);
-      } else if(type==='gas'){
-        box(c,'#b8de3a',40,88,6,4);box(c,'#b8de3a',93,79,4,8);box(c,'#697e29',43,93,3,5);
-      } else if(type==='explosive'){
+      drawGorillaAccessories(c,type,index,back);
+      if(type==='explosive'){
         box(c,'#171426',36,92,58,12);for(let x=39;x<92;x+=9){box(c,'#511e36',x-1,88,8,19);box(c,'#d33b54',x,89,6,16);box(c,'#ff8a6e',x,89,2,13);box(c,'#edcda0',x+1,87,4,2);}box(c,'#ffc76b',94,84,2,10);box(c,'#fff3ad',95,81,4,3);
       } else if(type==='matriarch'){
         polygon(c,'#171121',[[58,26],[54,8],[67,15],[78,0],[88,15],[104,7],[99,27]]);polygon(c,'#efbd48',[[61,24],[58,12],[68,19],[78,4],[87,19],[100,12],[97,24]]);box(c,'#fff3b5',62,22,34,2);box(c,'#f860b7',75,16,6,7);box(c,'#f4b9df',76,17,2,2);
-      } else if(type==='jealous'&&!back){polygon(c,'#ff5ba0',[[61,80],[65,76],[69,76],[72,80],[76,76],[81,76],[84,80],[83,85],[72,97],[61,86]]);polygon(c,'#2d193b',[[73,78],[70,84],[75,86],[70,94],[74,85],[69,83]]);}
+      }
     }
     if(flash){c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,128,128);c.globalCompositeOperation='source-over';}
     this.cache.set(key,frame);if(this.cache.size>144)this.cache.delete(this.cache.keys().next().value);return frame;

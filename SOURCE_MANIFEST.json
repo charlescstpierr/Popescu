@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection-native-start-confirmation-focus",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection-native-start-confirmation-focus-approved-gorilla-accessories",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -574,8 +574,8 @@
     },
     {
       "path": "dist/actor-art.js",
-      "bytes": 12508,
-      "sha256": "a87629ca2cf0f389674b2808cdd707bea76b107229185d116544e2349b309b15"
+      "bytes": 11854,
+      "sha256": "1bcb195610ee4ce31d30f3b6b75e26a867780b5441ae281364c6c930279c30d0"
     },
     {
       "path": "dist/animals.js",
@@ -921,6 +921,11 @@
       "path": "dist/evolutions.js",
       "bytes": 2035,
       "sha256": "e96ea8a1c2765fbdde1bffa395dae91f1365692a422b7ac660d831386160aa44"
+    },
+    {
+      "path": "dist/gorilla-accessories.js",
+      "bytes": 3100,
+      "sha256": "a0b67cf2fab5185bd27bcefa7221ab14e8dbb37f9f524863dde6168cb3e18951"
     },
     {
       "path": "dist/hero-art.js",
@@ -1318,6 +1323,11 @@
       "sha256": "2fe7f3e325da4308679b918108562ab763b7c0f3d864f2a6b731fa89b1d401eb"
     },
     {
+      "path": "docs/QA-GORILLA-ACCESSORIES.md",
+      "bytes": 3783,
+      "sha256": "5e5db66297eb7be25d27fbf188ec8568a70bfb218d99f26bbc853aea615dc333"
+    },
+    {
       "path": "docs/QA-GRAPHICS.md",
       "bytes": 2038,
       "sha256": "be657b0cfb966de727f4e448067afef4dbf22412f442d1ca189167073e51e8f6"
@@ -1591,6 +1601,11 @@
       "path": "docs/superpowers/plans/2026-11-05-charles-arrival.md",
       "bytes": 2718,
       "sha256": "b89a7fca1cc707ec7440ff023d564ae1d7ed1779cf0808e889d14dcffbca5357"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-11-06-approved-gorilla-accessories.md",
+      "bytes": 2347,
+      "sha256": "2f3373bb251d30ada405eb38d3b3208db52c9c170890e11dc14d498557f620ac"
     },
     {
       "path": "docs/superpowers/plans/2026-11-06-intro-theatre.md",
@@ -1918,6 +1933,31 @@
       "sha256": "ef7e5879191fa98d3c105fb3ef0cca4675a386333b84a1c40b5c156558861667"
     },
     {
+      "path": "proof/gorilla-accessories/combat-320-reduced.mp4",
+      "bytes": 1510240,
+      "sha256": "e1d45dca03a02867e7c77e1e28c3013ecead83a0a0aca3a3a42d92403abe2e95"
+    },
+    {
+      "path": "proof/gorilla-accessories/combat-320-reduced.png",
+      "bytes": 286288,
+      "sha256": "7cc0cce462ed37e6126e982f32ddd7fa15673fc9e574b0a1d79992b1b62a4bd2"
+    },
+    {
+      "path": "proof/gorilla-accessories/combat-390-standard.png",
+      "bytes": 362370,
+      "sha256": "503874972c0c1abc61e03910d204d3435c71b49cdeeed9790294949a20aa0998"
+    },
+    {
+      "path": "proof/gorilla-accessories/contact.png",
+      "bytes": 276230,
+      "sha256": "f4422ef7db36e18f39037581cd32c2a0e0e23a4cfcd43e83f78df53b9c1af383"
+    },
+    {
+      "path": "proof/gorilla-accessories/results.json",
+      "bytes": 3326,
+      "sha256": "ff18c2bf58bb2a63ac357cada8d44d27f74e80bc5d327d83cf17d23132f4c612"
+    },
+    {
       "path": "proof/intro-theatre/browser-frame-times.json",
       "bytes": 1424,
       "sha256": "a4619f744bc74dd275db42cb4dcfd46fb303220e5f9b3fc027adcf2d29f2bc3c"
@@ -1970,12 +2010,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7473,
-      "sha256": "53f393247eaa255459add3b8decfc898c56c1cbaf82b27ff5163f1059d64bff5"
+      "sha256": "b0326a2c4ad034347cbbe996d9b16b9e5cb8cefee30dbc3bf44735b0a98fddf1"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 771280,
-      "sha256": "2b9c4284212780d7d5358a8f292cbc26b615e6a09b4dbb7a7dfa930bb2492814"
+      "bytes": 773798,
+      "sha256": "27e3b3ee0a6837880d9f346ac9c712439686d126aef9e48d03b7c3160dfdcb1c"
     },
     {
       "path": "release/archives/README.md",
@@ -2353,6 +2393,11 @@
       "sha256": "e3212ddf033471cd90dd8465b273420551703960ac2c5481a6a323bef59680c9"
     },
     {
+      "path": "scripts/inspect-gorilla-accessories.mjs",
+      "bytes": 3877,
+      "sha256": "272a10847d13e4e5c1efa3f8f5a15b3214f0f3dc2bb864b3c986d7c3b0c4beaf"
+    },
+    {
       "path": "scripts/inspect-graphics.mjs",
       "bytes": 8322,
       "sha256": "a3dcc15f2130ab1cdf252415b490227502894a722baf74452a4f6e11b99a4ecc"
@@ -2479,8 +2524,8 @@
     },
     {
       "path": "scripts/offline_bundle.py",
-      "bytes": 2209,
-      "sha256": "d0e767cdd795b714a6c7141eb2caecb5b5a6d6eba282123ae28004349308d367"
+      "bytes": 2231,
+      "sha256": "402cd2470a1ebc5a77ba3423947338243b2cd6ea4b2ea0cba09d5d1b8084f7b9"
     },
     {
       "path": "scripts/pack-actors.py",
@@ -2938,6 +2983,11 @@
       "sha256": "7f2c25dcbd8a67c0bc78952730862ace2c8bf833b3149f7c99d7cdf554f41479"
     },
     {
+      "path": "tests/fixtures/gorilla-approved-frames.json",
+      "bytes": 2786,
+      "sha256": "1650efec8eb8bab3e2a1eae0559108efcf5719d6b2cd67700459bc7f7cd2b288"
+    },
+    {
       "path": "tests/fixtures/paused-charles-v13-recover.json",
       "bytes": 2689,
       "sha256": "157733b940e64ca6c7408ee02679ee429f2cc547c7489b26daa35a41d4b7b17c"
@@ -3031,6 +3081,11 @@
       "path": "tests/fixtures/xp-real-bank-139s.json",
       "bytes": 25076,
       "sha256": "448a027d89ccda4d3a5fd1866c6d685fa97aa64d2b269ab3f82a28a6db73ce9c"
+    },
+    {
+      "path": "tests/gorilla-accessories.test.js",
+      "bytes": 2964,
+      "sha256": "2d0caf12debc424c679c714ee3f5d34b4291c44dffda5e3c2e51026db1d2e144"
     },
     {
       "path": "tests/helpers/asset-controller.js",
@@ -3468,7 +3523,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "2fa23c755f594f35735c8521133ff57981d1f76b",
+  "base_github_commit": "96826bb873fe15de9942dadc064700f5fe2e673c",
   "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3476,5 +3531,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "213582d00cbbb7077110434eda8d6618aa1ec2f2"
+  "base_github_tree": "2c36d4365a1b0c618b2a482824553bc26fcc2149"
 }
