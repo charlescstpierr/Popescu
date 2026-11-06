@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -929,8 +929,8 @@
     },
     {
       "path": "dist/styles.css",
-      "bytes": 45187,
-      "sha256": "9887b598b60ae18f22a2b095a9bf74b774507d3207386afe4c42449acd4bde59"
+      "bytes": 45298,
+      "sha256": "0aa8476dd14d4ea37a0f4acb9824df29f1d4232540ceaa7ae333b2a7af3b8ac8"
     },
     {
       "path": "dist/travestia-dash.js",
@@ -1041,6 +1041,11 @@
       "path": "docs/HISTOIRE-ET-PERSONNAGES.md",
       "bytes": 14572,
       "sha256": "8233a8a8dd891c3b228efd49a38a0ce16313c2d77ece0c2881b54406e1385bd9"
+    },
+    {
+      "path": "docs/INTRO-READABILITY.md",
+      "bytes": 1657,
+      "sha256": "b91b53c266999419e52c91b12e0a19dfde1502196e0bbb3c9e75137045a1f021"
     },
     {
       "path": "docs/ORANGS-OUTANS-ROSES.md",
@@ -1815,12 +1820,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7312,
-      "sha256": "15faa780665a7ee70533922e64c8c2948c746266eb8064b21546eade9ee5a463"
+      "sha256": "888caf19a1028719a54a67ca71d4fa57bc67c5b58777812813c17099c34d9f2a"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 759151,
-      "sha256": "2ef28c710163ad10d8c96ed767e12609ba4ffc68566cfdaed8392756a0097b5a"
+      "bytes": 759262,
+      "sha256": "27a6593a21f8d403aa295d9819cbd4a45c0762b33a79bc32cfe3f4ea7edf44e8"
     },
     {
       "path": "release/archives/README.md",
@@ -2933,6 +2938,11 @@
       "sha256": "6e70b55e0b9ed69bd311984fda0709734962377f27f2f95b947a43f8d5e4ebb6"
     },
     {
+      "path": "tests/opening-layout.test.js",
+      "bytes": 807,
+      "sha256": "7947cba800a5f8dd43e787059e6b1645cfc0f04827247d0223587933c99cd0d6"
+    },
+    {
       "path": "tests/opening.test.js",
       "bytes": 4464,
       "sha256": "288727b0dc232b3eced5be3d988ef03adc185f146b67564c5be312f935593d6d"
@@ -3238,7 +3248,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "74173ad42fc45c9e631266b2ca2575c805e0063d",
+  "base_github_commit": "9e18bfa486856dd302c6828a1a0e1aa294fd8a04",
   "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3246,5 +3256,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "679f8a774cec132a7bdd3b1cea3ef79c60620a83"
+  "base_github_tree": "c1b4b0099f0dbb903d9a10c6205d6412821a74db"
 }
