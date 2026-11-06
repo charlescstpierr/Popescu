@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -914,8 +914,8 @@
     },
     {
       "path": "dist/engine.js",
-      "bytes": 69847,
-      "sha256": "9108ac14bc1bd4bd926bbb4e99b9eba5e2e4f0744ad162311f27589d9dd5c91d"
+      "bytes": 70152,
+      "sha256": "65049b7c649a1a2e0e16c846a4d12646d999f0eddef177585a79a8a8b15e46fc"
     },
     {
       "path": "dist/evolutions.js",
@@ -1161,6 +1161,11 @@
       "path": "docs/PERFORMANCE-CROWD.md",
       "bytes": 3732,
       "sha256": "696608fd9bb0f5632b8423859275587a304194c9bb1e7b30911d2ef16e6ce33b"
+    },
+    {
+      "path": "docs/PERFORMANCE-NUMERIC-CROWD.md",
+      "bytes": 3904,
+      "sha256": "440acce6f342bb9bc8b66af28c794e7d6edeae62283673d90d6f0910f2e3696a"
     },
     {
       "path": "docs/PLAN-TOMA-APPROUVE.md",
@@ -1843,6 +1848,11 @@
       "sha256": "54561496e440ed1efdd52d520e90805c5e89a826dcca823cc6b10f7a769a488e"
     },
     {
+      "path": "proof/crowd-numeric/timings.json",
+      "bytes": 6142,
+      "sha256": "2dab68ad0cedd5a62e0772f23ffd930a7518bf2166f9ba4790f4e1ac91c2f71a"
+    },
+    {
       "path": "proof/enemy-animations/README.md",
       "bytes": 1771,
       "sha256": "e6785427eba07ca752191a542730c9bee92d0779dfc2319bdc17f7c64d1016c0"
@@ -1950,12 +1960,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7473,
-      "sha256": "cc68bbbe14732a0f1b887929277034b0204429a01dbfa33862bc2bc6b1335a3d"
+      "sha256": "8a7c57fc9866f7f645b1c511d5c039126bc5ade7811ecba69d6f96ca4a85f63c"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 765238,
-      "sha256": "9209a20d6ca340a9d1e6c67663dfc60856a3ce591beea6930c5dc4dc95ccc4d9"
+      "bytes": 765543,
+      "sha256": "e8d74464eea932265bf6a9f3628d45f703e78ea54fd37052eea9da04c4569477"
     },
     {
       "path": "release/archives/README.md",
@@ -2793,9 +2803,14 @@
       "sha256": "25c5346fa21e4e6f39cfe9738987f32ef7a18719b42c6c83d8cf3661e3fff030"
     },
     {
+      "path": "tests/crowd-numeric-equivalence.test.js",
+      "bytes": 4081,
+      "sha256": "8e8b65d44585fa94a801497cbee4b27700b085986be33a5a96e45d771d2726a7"
+    },
+    {
       "path": "tests/crowd-performance.test.js",
-      "bytes": 772,
-      "sha256": "f185e60082c4965dffe82071dc85e52f320739d38aaf2876d611781370fa8d9a"
+      "bytes": 1424,
+      "sha256": "722a08c2957be55a68c37c800217dc0675bb1e64e5821d3ce81a516739984f71"
     },
     {
       "path": "tests/death-cause.test.js",
