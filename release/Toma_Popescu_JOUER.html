@@ -6393,8 +6393,6 @@ this._shadow(x,y+7,40,8);
       ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
-    const raisedCarWarnings=(s.vehicles||[]).some(v=>v.carRank!==undefined&&v.carDelay<=0&&v.life>0);
-    if(!raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     const items=[];if(s.charles&&s.charles.phase!=='complete'&&!arrival)items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
@@ -6425,7 +6423,7 @@ this._shadow(x,y+7,40,8);
     for(const p of shots)this._shot(p,s);
     for(const e of enemies)if(!arrival?.locked&&!e.dead&&e.type==='pelican')drawPelicanCards(ctx,e,this.reducedEffects);
     for(const e of enemies)if(!arrival?.locked&&!e.dead)this._rivalAttack(e,true);
-    if(!this.reducedEffects)for(const p of clouds)this._cloud(p,true);
+    // Gas stays on the ground: its decorative foreground puffs hide actor poses.
     for(let i=0;i<particles.length;i++){if(this.reducedEffects&&i%3)continue;const p=particles[i];ctx.save();ctx.globalAlpha=Math.min(1,(p.life||0)/(p.maxlife||.6));if(p.kind==='heart')heart(ctx,p.x-3,p.y-3,p.color||C.pink,.45);else{const size=p.kind==='spark'?2:3;rect(ctx,p.color||C.gold,p.x,p.y,size,size);if(p.kind==='spark')rect(ctx,'#fff0ba',p.x-1,p.y+1,4,1);}ctx.restore();}
     this.combat.draw(ctx,s,this.reducedEffects);
     this.powers.drawForeground(ctx,s,game.powerEffects||[],this.reducedEffects);
@@ -6434,7 +6432,9 @@ this._shadow(x,y+7,40,8);
     if(arrival)this.charles.draw(ctx,s.charles,s.charles.elapsed,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects,charlesBodyPose);
     this._shield(s);
-    if(raisedCarWarnings&&!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
+    // One danger pass above actors and allied effects, using the unchanged
+    // attack geometry. Never duplicate warnings or cover the locked arrival.
+    if(!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}
