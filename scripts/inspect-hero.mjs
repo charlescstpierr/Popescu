@@ -21,6 +21,28 @@ function alphaBounds(canvas){
   return {left,top,right,bottom,width:right-left+1,height:bottom-top+1,count};
 }
 
+/** Measure only the painted lower body, excluding the head and upper torso.
+ * The shared atlas-space cutoff (78) is also used by the v8 alignment regression.
+ * Directional comparisons use identical canvas coordinates and ground anchors.
+ */
+export function inspectSplitGeometry(entry,held,lowerBodyTop){
+  function lower(canvas){
+    const {width,height}=canvas,pixels=canvas.getContext('2d').getImageData(0,0,width,height).data;
+    let count=0,sumY=0,left=width,right=-1,bottom=-1;
+    for(let y=Math.ceil(lowerBodyTop);y<height;y++)for(let x=0;x<width;x++)if(pixels[(y*width+x)*4+3]>64){
+      count++;sumY+=y;left=Math.min(left,x);right=Math.max(right,x);bottom=Math.max(bottom,y);
+    }
+    assert.ok(count>0,'lower body must contain opaque paint');
+    return {centroidY:sumY/count,width:right-left+1,bottom};
+  }
+  const standing=lower(entry),split=lower(held);
+  const centroidDrop=split.centroidY-standing.centroidY,widthIncrease=split.width-standing.width,groundShift=split.bottom-standing.bottom;
+  assert.ok(centroidDrop>0,'painted lower-body mass must descend during the split');
+  assert.ok(widthIncrease>0,'painted lower-body footprint must widen during the split');
+  assert.ok(Math.abs(groundShift)<=2,'split feet must retain their ground within two raster pixels');
+  return {standing,split,centroidDrop,widthIncrease,groundShift};
+}
+
 /** Native Canvas only. The complete body and held weapon are drawn by HeroArt. */
 export async function inspectHero(output='/tmp/toma-hero-qa',{renderer=null}={}){
   process.chdir(resolve(root,'dist'));
@@ -78,7 +100,14 @@ export async function inspectHero(output='/tmp/toma-hero-qa',{renderer=null}={})
   const held=[.24,.5,.69].map(progress=>{const {s,pose}=stateFor(0,0,{progress}),image=isolate(s);return {image:hash(image),bounds:alphaBounds(image),pose};});
   assert.equal(new Set(held.map(item=>item.image)).size,1,'the full split holds one complete painting from 24% through 69%');
   const entry=stateFor(0,0,{progress:0}).s,headDrop=held[1].bounds.top-alphaBounds(isolate(entry)).top;
-  assert.ok(headDrop>8,'the top of the actual painted head and torso descends with the split');
+  // The topmost pixel may belong to glasses, skull or an upward-pointing weapon.
+  // Keep it as descriptive evidence, not as a proxy for torso motion after a
+  // deliberately changed head. Check actual painted legs/feet in every view.
+  const splitGeometry=VIEWS.map((view,direction)=>{
+    const start=stateFor(direction,0,{progress:0}),finish=stateFor(direction,0,{progress:.5});
+    const lowerBodyTop=start.pose.art.ground.y-HERO_FRAMES.anchor[1]+78;
+    return {view:view.id,...inspectSplitGeometry(isolate(start.s),isolate(finish.s),lowerBodyTop)};
+  });
 
   const walk=createCanvas(1120,50+ROWS*140),wc=walk.getContext('2d');wc.fillStyle='#242237';wc.fillRect(0,0,1120,50+ROWS*140);
   wc.fillStyle='#f8d99a';wc.font='bold 15px monospace';wc.fillText(`TOMA · ${ROWS} DIRECTIONS × 8 PAS · TAILLE RÉELLE`,18,24);
@@ -106,7 +135,7 @@ export async function inspectHero(output='/tmp/toma-hero-qa',{renderer=null}={})
   }
   writeFileSync(resolve(output,'hero-aim-rays.png'),rays.toBuffer('image/png'));
   return {walkFrames:ROWS*8,splitFrames:ROWS*8,distinctWalkPhases:8,stationaryStable:true,splitHoldStable:true,
-    headDrop,muzzlesChecked:measuredMuzzles,
+    headDrop,splitGeometry,muzzlesChecked:measuredMuzzles,
     views:[...views],heightRange:[Math.min(...heights),Math.max(...heights)],widthRange:[Math.min(...widths),Math.max(...widths)],output};
 }
 
