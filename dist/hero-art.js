@@ -25,8 +25,8 @@ export class HeroArt {
     c.save();c.translate(dest.x-left,dest.y+anchor[1]);
     if(!reduced){
       const key=`${f.x}:${f.y}:${Boolean(art.mirror)}`;let rim=this.outlines.get(key);
-      if(!rim){rim=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#f7dfb3',art.mirror);if(rim)this.outlines.set(key,rim);}
-      if(rim){const edge=ActorArt.snap(c,left-1,-anchor[1]-1);c.save();c.globalAlpha*=.72;c.drawImage(rim,edge.x,edge.y);c.restore();}
+      if(!rim){rim=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#deb981',art.mirror);if(rim){this.outlines.set(key,rim);if(this.outlines.size>48)this.outlines.delete(this.outlines.keys().next().value);}}
+      if(rim){this.outlines.delete(key);this.outlines.set(key,rim);const edge=ActorArt.snap(c,left-1,-anchor[1]-1);c.save();c.globalAlpha*=.4;c.drawImage(rim,edge.x,edge.y);c.restore();}
     }
     c.transform(t.a,t.b,t.c,t.d,0,0);if(art.mirror)c.scale(-1,1);
     c.drawImage(this.image,f.x,f.y,f.w,f.h,-anchor[0],-anchor[1],f.w,f.h);c.restore();

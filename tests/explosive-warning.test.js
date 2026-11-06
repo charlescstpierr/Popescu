@@ -43,7 +43,7 @@ const require=createRequire(import.meta.url);let native;try{native=require('@nap
 test('actual warning pixels cover the former hidden blast band without painting beyond safety', {skip:!native?'@napi-rs/canvas is not installed':false},()=>{
  const {e}=primed(),canvas=native.createCanvas(260,260),ctx=canvas.getContext('2d');
  const actor={...e,x:130,y:130};const renderer=Object.assign(Object.create(Renderer.prototype),{ctx,time:10,reducedEffects:true});
- renderer._dangerWarnings([actor],[]);
+ renderer._dangerWarnings([actor],[],'ground');renderer._dangerWarnings([actor],[]);
  const alpha=(x,y)=>ctx.getImageData(x,y,1,1).data[3];
  for(const [x,y] of [[220,130],[40,130],[130,220],[130,40],[193,193]])assert.ok(alpha(x,y)>0,'90px inside the damaging zone must be visibly warned');
  for(const [x,y] of [[233,130],[27,130],[130,233],[130,27]])assert.equal(alpha(x,y),0,'103px is safely outside the complete warning');

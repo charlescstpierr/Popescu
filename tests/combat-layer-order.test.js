@@ -8,13 +8,13 @@ function fixture(){
  const ctx=new Proxy(target,{get:(o,k)=>k in o?o[k]:()=>{}}),renderer=new Renderer({getContext:()=>ctx}),game=new Game({seed:42});
  renderer._drawGround=()=>{};game.world.getVisible=()=>[];return{renderer,game};
 }
-for(const reduced of [false,true])for(const car of [false,true])test(`danger geometry has one foreground pass, reduced=${reduced}, car=${car}`,()=>{
+for(const reduced of [false,true])for(const car of [false,true])test(`danger geometry has a ground fill and one foreground edge pass, reduced=${reduced}, car=${car}`,()=>{
  const {renderer,game}=fixture(),calls=[];renderer.reducedEffects=reduced;
  game.spawnEnemy('normal',0,35);game.s.shockwaves=[{x:0,y:0,r:90,width:12,life:1}];
  if(car)game.s.vehicles=[{x:0,y:0,carRank:1,carDelay:0,life:1}];
- renderer._actor=(a,k)=>calls.push(k);renderer._dangerWarnings=(enemies,waves)=>{assert.equal(enemies,game.s.enemies);assert.equal(waves,game.s.shockwaves);calls.push('danger');};
+ renderer._actor=(a,k)=>calls.push(k);renderer._dangerWarnings=(enemies,waves,pass='edge')=>{assert.equal(enemies,game.s.enemies);assert.equal(waves,game.s.shockwaves);calls.push(pass==='ground'?'danger-fill':'danger');};
  renderer.powers.drawForeground=()=>calls.push('ally-effects');renderer.render(game,1);
- assert.equal(calls.filter(c=>c==='danger').length,1);assert.ok(calls.indexOf('danger')>calls.lastIndexOf('enemy'));assert.ok(calls.indexOf('danger')>calls.indexOf('ally-effects'));
+ assert.equal(calls.filter(c=>c==='danger-fill').length,1);assert.ok(calls.indexOf('danger-fill')<calls.indexOf('hero'));assert.ok(calls.indexOf('danger-fill')<calls.indexOf('enemy'));assert.equal(calls.filter(c=>c==='danger').length,1);assert.ok(calls.indexOf('danger')>calls.lastIndexOf('enemy'));assert.ok(calls.indexOf('danger')>calls.indexOf('ally-effects'));
 });
 for(const reduced of [false,true])test(`gas stays at ground depth, reduced=${reduced}`,()=>{
  const {renderer,game}=fixture(),calls=[];renderer.reducedEffects=reduced;game.s.clouds=[{x:0,y:-24,r:42,life:2.2,maxlife:3.2,vx:0,vy:0}];

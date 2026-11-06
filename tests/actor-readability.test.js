@@ -58,7 +58,7 @@ test('hero and atlas actor destinations stay crisp under fractional cameras, DPR
 });
 test('all warning families have a visible warm fill, crisp edge and fixed footprint throughout windup',options,()=>{
  for(const [family,style]of Object.entries(TELEGRAPH_STYLES)){
-  const render=(remaining,time,reduced)=>{const canvas=native.createCanvas(100,100),ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(50,50,30,0,Math.PI*2);drawTelegraph(ctx,family,remaining,time,reduced);return canvas;};
+  const render=(remaining,time,reduced)=>{const canvas=native.createCanvas(100,100),ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(50,50,30,0,Math.PI*2);drawTelegraph(ctx,family,remaining,time,reduced,false,'ground');drawTelegraph(ctx,family,remaining,time,reduced);return canvas;};
   const early=render(style.windup,1,false),late=render(.01,1,false);
   assert.ok(pixels(late)[(50*100+50)*4+3]>pixels(early)[(50*100+50)*4+3]);
   const a=pixels(early),b=pixels(late);for(let i=3;i<a.length;i+=4)assert.equal(a[i]>0,b[i]>0,'urgency never changes the warning footprint');
@@ -75,7 +75,7 @@ test('all warning families have a visible warm fill, crisp edge and fixed footpr
 test('danger fill pulses more strongly near impact and reduced effects retains urgency without pulsing',options,()=>{
  for(const [family,style]of Object.entries(TELEGRAPH_STYLES)){
   const alpha=(remaining,time,reduced=false,active=false)=>{
-   const canvas=native.createCanvas(40,40),ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(20,20,15,0,Math.PI*2);drawTelegraph(ctx,family,remaining,time,reduced,active);return pixels(canvas)[(20*40+20)*4+3];
+   const canvas=native.createCanvas(40,40),ctx=canvas.getContext('2d');ctx.beginPath();ctx.arc(20,20,15,0,Math.PI*2);drawTelegraph(ctx,family,remaining,time,reduced,active,'ground');return pixels(canvas)[(20*40+20)*4+3];
   };
   const high=Math.PI/16,low=3*Math.PI/16;
   assert.equal(alpha(style.windup,high),alpha(style.windup,low));
@@ -93,7 +93,7 @@ test('gas remains translucent over the entire damaging disk and reduced effects 
  const a=render(1,false),b=render(8,false);assert.notDeepEqual(a,b,'puffs drift');
  for(const [x,y]of [[60,60],[28,60],[92,60],[60,28],[60,92]]){
   const [r,g,blue,alpha]=a.slice((y*120+x)*4,(y*120+x)*4+4);
-  assert.ok(alpha>0&&alpha<200,'all damaging ground stays visible through the cloud');
+  assert.ok(alpha>0&&alpha<245,'denser lime lobes remain translucent over the ground');
   assert.ok(g>r+40&&g>blue+100,'the cloud has a saturated toxic green identity');
  }
  for(const reduced of [false,true]){
@@ -106,7 +106,7 @@ test('gas remains translucent over the entire damaging disk and reduced effects 
 test('active goat charge is stronger and its remaining lane ends at the originally announced endpoint',options,()=>{
  for(const reducedEffects of [false,true]){
   const actor={type:'rival_goat',x:40,y:100,r:23,chargeDirX:1,chargeDirY:0},render=e=>{
-   const canvas=native.createCanvas(250,180),before=JSON.stringify(e);Renderer.prototype._rivalAttack.call({ctx:canvas.getContext('2d'),time:Math.PI/16,reducedEffects},e);assert.equal(JSON.stringify(e),before);return pixels(canvas);
+   const canvas=native.createCanvas(250,180),before=JSON.stringify(e);Renderer.prototype._rivalAttack.call({ctx:canvas.getContext('2d'),time:Math.PI/16,reducedEffects},e,false,'ground');Renderer.prototype._rivalAttack.call({ctx:canvas.getContext('2d'),time:Math.PI/16,reducedEffects},e);assert.equal(JSON.stringify(e),before);return pixels(canvas);
   };
   const warning=render({...actor,windup:.01}),active=render({...actor,x:97,charge:.35}),alpha=(data,x,y=110)=>data[(y*250+x)*4+3];
   assert.ok(alpha(active,115)>alpha(warning,115));
@@ -115,36 +115,67 @@ test('active goat charge is stronger and its remaining lane ends at the original
   assert.ok(render({...actor,windup:0,charge:0}).every(v=>v===0),'the lane ends with the attack');
  }
 });
-test('rooster preparation uses a curved gauge and crow uses sound arcs without a text box',options,()=>{
- for(const fields of [{windup:.8},{windup:.2},{crow:.6}]){
-  const ctx=native.createCanvas(250,250).getContext('2d'),calls=[];
-  for(const method of ['arc','fillRect','fillText','strokeText']){const original=ctx[method];ctx[method]=function(...args){calls.push(method);return original.apply(this,args);};}
-  Renderer.prototype._rivalAttack.call({ctx,time:1,reducedEffects:false},{type:'rival_rooster',x:120,y:150,...fields},true);
-  assert.ok(calls.includes('arc'));assert.ok(!calls.some(c=>['fillRect','fillText','strokeText'].includes(c)));
+test('rooster shows a high-contrast preparation marker and COCORICO only at the real crow',options,()=>{
+ for(const reducedEffects of [false,true])for(const fields of [{windup:.8},{windup:.2},{crow:.6},{windup:0,crow:0}]){
+  const canvas=native.createCanvas(250,250),ctx=canvas.getContext('2d'),text=[];
+  const original=ctx.fillText;ctx.fillText=function(value,...args){text.push(value);return original.call(this,value,...args);};
+  Renderer.prototype._rivalAttack.call({ctx,time:1,reducedEffects},{type:'rival_rooster',x:120,y:150,...fields},true);
+  assert.deepEqual(text,fields.crow?['COCORICO!']:[],'an interrupted preparation cannot show the crow');
+  if(fields.windup){const data=pixels(canvas),k=(58*250+120)*4;assert.ok(data[k]>240&&data[k+1]>170&&data[k+3]===255,'the yellow marker stays fully visible throughout preparation');}
  }
 });
 test('rooster shockwave keeps a hollow centre and two closed boundaries without a radial seam',options,()=>{
- const canvas=native.createCanvas(220,220),ctx=canvas.getContext('2d');Renderer.prototype._shockwave.call({ctx},{x:110,y:110,r:70,width:12,life:.5});
+ const canvas=native.createCanvas(220,220),ctx=canvas.getContext('2d');for(const pass of ['ground','edge'])Renderer.prototype._shockwave.call({ctx},{x:110,y:110,r:70,width:12,life:.5},pass);
  const data=pixels(canvas),alpha=(x,y)=>data[(y*220+x)*4+3];
  assert.equal(alpha(110,110),0);assert.equal(alpha(170,110),0);
  for(const [x,y]of [[180,110],[110,180],[40,110],[110,40]])assert.ok(alpha(x,y)>0);
  assert.ok(alpha(180,110)>100,'the active damaging band is stronger than the warning fill');
  assert.ok(Math.abs(alpha(180,110)-alpha(110,180))<3,'the band has no joining spoke on its right edge');
 });
-test('the real hero rim stays readable under overlapping active charge and shockwave fills',options,async()=>{
+test('ground danger fills cannot tint the real hero painting and the softened rim still separates it',options,async()=>{
  const hero=new HeroArt({loadImage:path=>native.loadImage(path.replace('file://',''))});await hero.ready;
  const s={x:130,y:145,shots:[],shotClock:0,stunt:{active:false}};Object.assign(s,solveHeroAim(s,{x:330,y:105}));
  const bare=native.createCanvas(280,220),lit=native.createCanvas(280,220);hero.draw(bare.getContext('2d'),s,0,true);hero.draw(lit.getContext('2d'),s,0,false);
- const a=pixels(bare),b=pixels(lit),render=withHero=>{
-  const canvas=native.createCanvas(280,220),ctx=canvas.getContext('2d');ctx.fillStyle='#252238';ctx.fillRect(0,0,280,220);
-  if(withHero)hero.draw(ctx,s,0,false);
-  const renderer=Object.assign(Object.create(Renderer.prototype),{ctx,time:1,reducedEffects:false});
-  renderer._rivalAttack({type:'rival_goat',x:50,y:120,r:23,charge:.5,chargeDirX:1,chargeDirY:0});
-  renderer._shockwave({x:65,y:120,r:70,width:12,life:.5});return pixels(canvas);
- };
- const withHero=render(true),ground=render(false);let rim=0,readable=0;
- for(let i=0;i<a.length;i+=4)if(a[i+3]===0&&b[i+3]>128){
-  rim++;if(Math.abs(withHero[i]-ground[i])+Math.abs(withHero[i+1]-ground[i+1])+Math.abs(withHero[i+2]-ground[i+2])>90)readable++;
+ const a=pixels(bare),b=pixels(lit),canvas=native.createCanvas(280,220),ctx=canvas.getContext('2d');
+ const renderer=Object.assign(Object.create(Renderer.prototype),{ctx,time:1,reducedEffects:false});
+ renderer._dangerWarnings([{type:'rival_rooster',x:130,y:145,windup:.1},{type:'rival_goat',x:50,y:120,r:23,charge:.5,chargeDirX:1,chargeDirY:0}],[{x:65,y:120,r:70,width:12,life:.5}],'ground');
+ hero.draw(ctx,s,0,false);const withHero=pixels(canvas);let rim=0;
+ for(let i=0;i<a.length;i+=4){
+  if(a[i+3]===255)assert.deepEqual(withHero.slice(i,i+4),a.slice(i,i+4),'red fills remain beneath every opaque painted pixel');
+  if(a[i+3]===0&&b[i+3]>0){rim++;assert.ok(b[i+3]>=85&&b[i+3]<=110,'the rim is a soft light around 40% opacity');}
  }
- assert.ok(rim>60);assert.ok(readable/rim>.85,'translucent danger must preserve contrast along the hero silhouette');
+ assert.ok(rim>60);
+});
+test('rim caches are bounded and retain recently used frames',options,async()=>{
+ const hero=new HeroArt({loadImage:path=>native.loadImage(path.replace('file://',''))});await hero.ready;
+ const ctx=native.createCanvas(280,220).getContext('2d'),s={x:130,y:145,shots:[],shotClock:0,stunt:{active:false}};
+ Object.assign(s,solveHeroAim(s,{x:330,y:105}));const pose=computeHeroPose(s);
+ for(let i=0;i<80;i++)hero._wholeFrame(ctx,{...pose,art:{...pose.art,frame:{...pose.art.frame,x:(i%8)*144,y:Math.floor(i/8)*128}}},false);
+ assert.equal(hero.outlines.size,48);const oldest=hero.outlines.keys().next().value,retained=hero.outlines.get(oldest),[x,y]=oldest.split(':').map(Number);
+ const touch={...pose,art:{...pose.art,frame:{...pose.art.frame,x,y}}};hero._wholeFrame(ctx,touch,false);
+ hero._wholeFrame(ctx,{...pose,art:{...pose.art,mirror:!pose.art.mirror}},false);
+ assert.equal(hero.outlines.size,48);assert.equal(hero.outlines.get(oldest),retained,'recently reused frames survive eviction');
+ const actors=new ActorArt({loadImage:async()=>null});await actors.ready;
+ for(let i=0;i<120;i++)actors._rim(ctx,hero.image,0,0,144,128,0,0,76,76,'normal',String(i));
+ assert.equal(actors.outlines.size,96);const actorRim=actors.outlines.get('24');actors._rim(ctx,hero.image,0,0,144,128,0,0,76,76,'normal','24');actors._rim(ctx,hero.image,0,0,144,128,0,0,76,76,'normal','new');assert.equal(actors.outlines.get('24'),actorRim);
+});
+test('top danger pass draws edges and cues without area fills',options,()=>{
+ for(const reducedEffects of [false,true]){
+  const ctx=native.createCanvas(420,420).getContext('2d'),fills=[],strokes=[],fill=ctx.fill,stroke=ctx.stroke;
+  ctx.fill=function(){fills.push(this.fillStyle);return fill.call(this);};ctx.stroke=function(){strokes.push(this.strokeStyle);return stroke.call(this);};
+  const enemies=[{type:'rival_goat',charge:.4,r:23},{type:'rival_rooster',windup:.4},{type:'orangutan',windup:.3},{type:'explosive',windup:.4},{type:'travestia',phase:'tail_windup',tailTime:.7},{type:'travestia',phase:'tail_dash_windup',tailTime:.8,tailDashDir:0,tailDashX:50,tailDashY:200}].map(e=>({x:100,y:150,...e}));
+  const renderer=Object.assign(Object.create(Renderer.prototype),{ctx,time:1,reducedEffects});renderer._dangerWarnings(enemies,[{x:100,y:150,r:70,width:12,life:.5}]);
+  assert.ok(!fills.includes(TELEGRAPH_STYLES.crow.fill),'no danger area paints above actors');assert.ok(strokes.includes(TELEGRAPH_STYLES.tail.edge));
+  fills.length=0;strokes.length=0;renderer._dangerWarnings(enemies,[{x:100,y:150,r:70,width:12,life:.5}],'ground');
+  assert.ok(fills.length>=7);assert.ok(fills.every(color=>color===TELEGRAPH_STYLES.crow.fill));assert.equal(strokes.length,0,'ground pass contains only the area fill');
+ }
+});
+test('XP and gem halos add light in their own color and disappear with reduced effects',options,()=>{
+ for(const kind of ['xp','gem'])for(const reducedEffects of [false,true]){
+  const canvas=native.createCanvas(100,100),ctx=canvas.getContext('2d');ctx.fillStyle='#252238';ctx.fillRect(0,0,100,100);
+  Renderer.prototype._drop.call({ctx,time:0,reducedEffects,_shadow(){}},{kind,x:50,y:50});
+  const [r,g,b]=ctx.getImageData(59,50,1,1).data;
+  if(reducedEffects)assert.deepEqual([r,g,b],[37,34,56]);
+  else{assert.ok(r>=37&&g>=34&&b>=56,'a glow cannot darken the pavement');if(kind==='xp')assert.ok(g-34>r-37&&b-56>r-37);else assert.ok(r-37>g-34&&b-56>g-34);}
+ }
 });

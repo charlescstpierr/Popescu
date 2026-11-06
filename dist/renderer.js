@@ -34,6 +34,7 @@ const C = {
 const WALK = [0, 2, 3, 1, 0, -2, -3, -1];
 const BOB = [0, -1, -2, -1, 1, -1, -2, -1];
 const TAU = Math.PI * 2;
+const PICKUP_GLOWS = new Map();
 const hash = (x, y, seed = 0) => {
   let n = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263) ^ Math.imul(seed | 0, 1274126177);
   n = Math.imul(n ^ (n >>> 13), 1274126177);
@@ -462,18 +463,28 @@ this._shadow(x,y+7,40,8);
     ctx.save();
     ctx.globalAlpha=alpha*.22;ctx.fillStyle='#89e51c';ctx.beginPath();ctx.arc(cloud.x,cloud.y,r,0,TAU);ctx.fill();
     ctx.globalAlpha=alpha*.9;ctx.strokeStyle='#baff3c';ctx.lineWidth=2;ctx.stroke();
-    const puffs=[[-.4,-.24,.8],[.13,-.4,.86],[.4,-.02,.8],[.24,.36,.88],[-.3,.32,.82],[0,0,.96]];
+    const puffs=[[-.38,.02,.88],[.1,-.38,.96],[.4,.09,.86],[.04,.35,1.02]];
     for(let i=0;i<(this.reducedEffects?3:puffs.length);i++){
-      const [a,b,c]=puffs[i],x=cloud.x+a*r+Math.sin(t*.65+i)*r*.055,y=cloud.y+b*r+Math.cos(t*.55+i)*r*.045,w=r*c,h=w*.82;
-      ctx.globalAlpha=alpha*.32;oval(ctx,i%2?'#85d919':'#b2ef29',x-w/2,y-h/2,w,h,2);
-      ctx.globalAlpha=alpha*.3;ctx.strokeStyle='#c8ff54';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y,w/2,h/2,0,Math.PI*1.07,Math.PI*1.82);ctx.stroke();
-      ctx.globalAlpha=alpha*.13;oval(ctx,'#d1ff65',x-w*.29,y-h*.32,w*.5,h*.36,2);
+      const [a,b,c]=puffs[i],x=cloud.x+a*r+Math.sin(t*.65+i)*r*.045,y=cloud.y+b*r+Math.cos(t*.55+i)*r*.035,w=r*c,h=w*.82;
+      ctx.globalAlpha=alpha*.45;ctx.fillStyle=i%2?'#8fdc1b':'#a5ed24';ctx.beginPath();ctx.ellipse(x,y,w/2,h/2,0,0,TAU);ctx.fill();
+      ctx.globalAlpha=alpha*.5;ctx.strokeStyle='#79b612';ctx.lineWidth=1;ctx.stroke();
+      ctx.globalAlpha=alpha*.35;ctx.fillStyle='#c0fa3c';ctx.beginPath();ctx.ellipse(x-w*.08,y-h*.2,w*.3,h*.19,0,0,TAU);ctx.fill();
     }
     ctx.restore();
   }
   _drop(p,state,trail=true) {
     const ctx=this.ctx,x=Math.round(p.x),y=Math.round(p.y+(this.reducedEffects?0:Math.sin(this.time*3+p.x)*2));
-    if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.12;oval(ctx,p.kind==='coin'?'#f5cd76':p.kind==='xp'?'#8be5ef':'#eca2ef',x-10,y-10,20,20,2);ctx.restore();}
+    if(!this.reducedEffects){
+      ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.38;
+      const color=p.kind==='coin'?'#f5cd76':p.kind==='xp'?'#75e7f2':'#e68ff2';let stamp=PICKUP_GLOWS.get(color);
+      if(!stamp){
+        stamp=makeCanvas(24,24);
+        if(stamp){const c=stamp.getContext('2d'),glow=c.createRadialGradient(12,12,2,12,12,12);glow.addColorStop(0,color);glow.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=glow;c.fillRect(0,0,24,24);PICKUP_GLOWS.set(color,stamp);}
+      }
+      if(stamp)ctx.drawImage(stamp,x-12,y-12);
+      else{const glow=ctx.createRadialGradient(x,y,2,x,y,12);glow.addColorStop(0,color);glow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=glow;ctx.fillRect(x-12,y-12,24,24);}
+      ctx.restore();
+    }
     if(p.kind==='xp'){
       let drewTrail=false;
       if(trail&&!this.reducedEffects&&state){
@@ -605,41 +616,45 @@ this._shadow(x,y+7,40,8);
     if((actor.charmed||0)>0){heart(ctx,x-4,y-(ego?head+9:45*scale)+(ego&&this.reducedEffects?0:Math.sin(this.time*5)*2),C.pink,.7);ring(ctx,'#ed70ca',x,Math.round(actor.y)+(ego?20:9),24*scale,.45,1,ego&&this.reducedEffects?0:this.time*.5);}
     if(!['travestia','pelican'].includes(type)&&actor.hp<actor.maxhp){const w=type==='matriarch'?39:24;rect(ctx,C.ink,x-w/2,y-head,w,4);rect(ctx,type==='matriarch'?'#ff579f':'#d14b83',x-w/2+1,y-head+1,Math.max(0,(w-2)*actor.hp/actor.maxhp),2);}
   }
-  _travestiaDash(e){
+  _travestiaDash(e,pass='edge'){
     if(e.phase==='tail_dash_recover')return;
     const ctx=this.ctx,d=DASH_DIRECTIONS[e.tailDashDir],r=TAIL_DASH.halfWidth,end=TAIL_DASH.speed*TAIL_DASH.duration+TAIL_DASH.reach,warning=e.phase==='tail_dash_windup';
     ctx.save();ctx.translate(e.tailDashX,e.tailDashY);ctx.rotate(Math.atan2(d.y,d.x));
     ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(end,-r);ctx.arc(end,0,r,-Math.PI/2,Math.PI/2);ctx.lineTo(0,r);ctx.arc(0,0,r,Math.PI/2,Math.PI*1.5);ctx.closePath();
-    ctx.fillStyle=warning?'#ffb95e':'#ff477b';ctx.globalAlpha=warning?.16:.24;ctx.fill();ctx.globalAlpha=.9;ctx.strokeStyle=warning?'#ffcd78':'#ff6d96';ctx.lineWidth=2;ctx.stroke();
+    drawTelegraph(ctx,'tailDash',e.tailTime,this.time,this.reducedEffects,!warning,pass);
+    if(pass==='ground'){ctx.restore();return;}
+    ctx.strokeStyle=TELEGRAPH_STYLES.tailDash.edge;
     ctx.fillStyle=ctx.strokeStyle;for(let x=35;x<end;x+=45){ctx.beginPath();ctx.moveTo(x-6,-6);ctx.lineTo(x+4,0);ctx.lineTo(x-6,6);ctx.lineTo(x-1,0);ctx.closePath();ctx.fill();}
     ctx.restore();ctx.save();ctx.fillStyle='#fff0cb';ctx.textAlign='center';ctx.font='bold 11px sans-serif';ctx.fillText(warning?'CHARGE ARRIÈRE !':'QUEUE RAIDIE !',e.x,e.y-145);ctx.restore();
   }
-  _travestiaAttack(e){
-    if(e.type==='travestia'&&e.phase.startsWith('tail_dash')){this._travestiaDash(e);return;}
+  _travestiaAttack(e,pass='edge'){
+    if(e.type==='travestia'&&e.phase.startsWith('tail_dash')){this._travestiaDash(e,pass);return;}
     if(e.type!=='travestia'||!['tail_windup','tail_spin'].includes(e.phase))return;
     const ctx=this.ctx,warning=e.phase==='tail_windup',r=TRAVESTIA.radius;
-    ctx.save();ctx.fillStyle=warning?'#ffc76b':'#ff518c';ctx.strokeStyle=warning?'#ffda8b':'#ff77a7';
-    ctx.globalAlpha=warning?.11:.18;ctx.beginPath();ctx.arc(e.x,e.y,r,0,TAU);ctx.fill();
-    ctx.globalAlpha=.9;ctx.lineWidth=warning?2:3;ctx.setLineDash(warning?[7,5]:[]);ctx.stroke();ctx.setLineDash([]);
+    ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,r,0,TAU);
+    drawTelegraph(ctx,'tail',e.tailTime,this.time,this.reducedEffects,!warning,pass);
+    if(pass==='ground'){ctx.restore();return;}
+    ctx.strokeStyle=TELEGRAPH_STYLES.tail.edge;
     if(warning){ctx.lineWidth=4;ctx.beginPath();ctx.arc(e.x,e.y,r,-Math.PI/2,-Math.PI/2+TAU*(1-e.tailTime/(e.tailWarning||TRAVESTIA.warning)));ctx.stroke();}
     ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillStyle='#fff0cb';ctx.fillText(warning?'QUEUE HÉLICOPTÈRE !':'GARE À LA QUEUE !',e.x,e.y+r+17);
     ctx.restore();
   }
-  _orangutanAttack(e) {
+  _orangutanAttack(e,pass='edge') {
     if(e.type!=='orangutan'||(!(e.windup>0)&&!(e.swipe>0)))return;
     const ctx=this.ctx,dx=e.swipeDirX??e.faceX??1,dy=e.swipeDirY??e.faceY??0,aim=Math.atan2(dy,dx),half=Math.acos(.55),reach=73;
     ctx.save();
     if(e.windup>0){
       ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.arc(e.x,e.y,reach,aim-half,aim+half);ctx.closePath();
-      drawTelegraph(ctx,'swipe',e.windup,this.time,this.reducedEffects);
+      drawTelegraph(ctx,'swipe',e.windup,this.time,this.reducedEffects,false,pass);
+      if(pass==='ground'){ctx.restore();return;}
       rect(ctx,C.ink,e.x-5,e.y-82,11,17);rect(ctx,'#ffce90',e.x-1,e.y-79,3,8);rect(ctx,'#ff8d55',e.x-1,e.y-68,3,3);
-    }else{
+    }else if(pass==='edge'){
       const progress=1-Math.max(0,Math.min(1,e.swipe/.28)),angle=aim-half+progress*half*2;
       if(!this.reducedEffects){ctx.globalAlpha=.65;for(let a=angle-.35;a<angle;a+=.05)rect(ctx,'#ffe1a2',e.x+Math.cos(a)*67,e.y+Math.sin(a)*67,3,2);}
     }ctx.restore();
   }
 
-  _rivalAttack(e,foreground=false) {
+  _rivalAttack(e,foreground=false,pass='edge') {
     const goat=e.type==='rival_goat',rooster=e.type==='rival_rooster';
     if(!goat&&!rooster)return;
     const ctx=this.ctx,dx=e.chargeDirX??e.faceX??1,dy=e.chargeDirY??e.faceY??0;
@@ -649,23 +664,23 @@ this._shadow(x,y+7,40,8);
       const active=e.charge>0,reach=285*(active?Math.min(.55,e.charge):.55),half=(e.r||23)*.64+11,px=-dy*half,py=dx*half;
       ctx.beginPath();
       [[e.x+px,e.y+py],[e.x+dx*reach+px,e.y+dy*reach+py],[e.x+dx*reach-px,e.y+dy*reach-py],[e.x-px,e.y-py]].forEach(([x,y],i)=>i?ctx.lineTo(Math.round(x),Math.round(y)):ctx.moveTo(Math.round(x),Math.round(y)));ctx.closePath();
-      drawTelegraph(ctx,'charge',e.windup||0,this.time,this.reducedEffects,active);
+      drawTelegraph(ctx,'charge',e.windup||0,this.time,this.reducedEffects,active,pass);
+      if(pass==='ground'){ctx.restore();return;}
       ctx.globalAlpha=active?1:.75;for(let d=44;d<reach;d+=38){const x=e.x+dx*d,y=e.y+dy*d;line(ctx,'#ffb45b',x-dx*9-dy*7,y-dy*9+dx*7,x,y,2);line(ctx,'#ffb45b',x-dx*9+dy*7,y-dy*9-dx*7,x,y,2);}
     }
     if(rooster&&!foreground&&e.windup>0){
-      ctx.beginPath();ctx.arc(e.x,e.y,180,0,TAU);drawTelegraph(ctx,'crow',e.windup,this.time,this.reducedEffects);
+      ctx.beginPath();ctx.arc(e.x,e.y,180,0,TAU);drawTelegraph(ctx,'crow',e.windup,this.time,this.reducedEffects,false,pass);
+      if(pass==='ground'){ctx.restore();return;}
       const progress=Math.max(0,Math.min(1,1-e.windup/.85));
       ctx.globalAlpha=.35+progress*.3;ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,24+progress*14,0,TAU);ctx.stroke();
     }
     if(foreground&&(e.windup>0||e.crow>0||e.charge>0)){
       const crow=rooster&&e.crow>0;
       if(crow){
+        ctx.textAlign='center';ctx.font='bold 12px sans-serif';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle=C.ink;ctx.strokeText('COCORICO!',e.x,e.y-94);ctx.fillStyle='#ffe1a2';ctx.fillText('COCORICO!',e.x,e.y-94);
         ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.lineWidth=2;for(const side of [-1,1])for(let n=0;n<(this.reducedEffects?1:2);n++){ctx.beginPath();const a=side<0?Math.PI:0;ctx.arc(e.x,e.y-59,29+n*7,a-.45,a+.45);ctx.stroke();}
       }else if(rooster&&e.windup>0){
-        const progress=Math.max(0,Math.min(1,1-e.windup/.85)),x=e.x,y=e.y-78;
-        ctx.lineCap='round';ctx.lineWidth=4;ctx.strokeStyle='#292335';ctx.beginPath();ctx.arc(x,y,13,Math.PI*1.12,Math.PI*1.88);ctx.stroke();
-        ctx.lineWidth=2;ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.beginPath();ctx.arc(x,y,13,Math.PI*1.12,Math.PI*(1.12+.76*progress));ctx.stroke();
-        if(!this.reducedEffects){ctx.globalAlpha=.25+progress*.45;ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,18,Math.PI*1.24,Math.PI*1.76);ctx.stroke();}
+        rect(ctx,C.ink,e.x-5,e.y-97,11,19);rect(ctx,'#ffd470',e.x-1,e.y-94,3,9);rect(ctx,'#ff9855',e.x-1,e.y-82,3,3);
       }else if(e.windup>0){
         rect(ctx,C.ink,e.x-5,e.y-91,11,19);rect(ctx,goat?'#ffd470':'#ffb4cc',e.x-1,e.y-88,3,9);rect(ctx,'#ff9855',e.x-1,e.y-76,3,3);
       }
@@ -677,13 +692,13 @@ this._shadow(x,y+7,40,8);
     ctx.restore();
   }
 
-  _shockwave(p) {
+  _shockwave(p,pass='edge') {
     const ctx=this.ctx,r=p.r||0,half=(p.width||12)/2;
     ctx.save();ctx.globalAlpha=.65+.35*Math.min(1,(p.life||0)/.25);
     // Only this expanding annulus deals damage; its hollow centre stays clear.
     ctx.beginPath();ctx.arc(p.x,p.y,r+half,0,TAU);ctx.closePath();ctx.moveTo(p.x+Math.max(0,r-half),p.y);ctx.arc(p.x,p.y,Math.max(0,r-half),TAU,0,true);ctx.closePath();
-    const alpha=ctx.globalAlpha;ctx.fillStyle=TELEGRAPH_STYLES.crow.fill;ctx.globalAlpha=alpha*(this.reducedEffects?.45:.55);ctx.fill();ctx.globalAlpha=alpha;
-    ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.lineWidth=2;ctx.stroke();
+    if(pass==='ground'){ctx.fillStyle=TELEGRAPH_STYLES.crow.fill;ctx.globalAlpha*=this.reducedEffects?.45:.55;ctx.fill();}
+    else{ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.lineWidth=2;ctx.stroke();}
     ctx.restore();
   }
 
@@ -697,7 +712,7 @@ this._shadow(x,y+7,40,8);
     line(ctx,'#ffe4a0',p.x-dx*10,p.y-dy*10,p.x,p.y,2);line(ctx,'#fffdeb',p.x-dx*5,p.y-dy*5,p.x,p.y,1);rect(ctx,'#ffffff',p.x-1,p.y-1,2,2);
   }
 
-  _dangerWarnings(enemies,shockwaves){
+  _dangerWarnings(enemies,shockwaves,pass='edge'){
     const ctx=this.ctx;
     for(const e of enemies)if((e.windup||0)>0&&!e.dead&&!['orangutan','rival_rooster','rival_goat'].includes(e.type)){
       if(e.type==='explosive'){
@@ -705,16 +720,17 @@ this._shadow(x,y+7,40,8);
         // contact margin as Game.explode. Never pulse it into damaging space.
         const radius=EXPLOSIVE_BLAST.radius+EXPLOSIVE_BLAST.playerPadding;
         ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,radius,0,TAU);
-        drawTelegraph(ctx,'blast',e.windup,this.time,this.reducedEffects);ctx.restore();
+        drawTelegraph(ctx,'blast',e.windup,this.time,this.reducedEffects,false,pass);ctx.restore();
       }else{
         const radius=(e.r||19)+17+Math.sin(this.time*12)*2;
         ctx.save();ctx.beginPath();ctx.arc(e.x,e.y,radius,0,TAU);
-        drawTelegraph(ctx,e.type==='gas'?'gas':'blast',e.windup,this.time,this.reducedEffects);ctx.restore();
+        drawTelegraph(ctx,e.type==='gas'?'gas':'blast',e.windup,this.time,this.reducedEffects,false,pass);ctx.restore();
       }
+      if(pass==='ground')continue;
       rect(ctx,C.ink,e.x-4,e.y-55,9,15);rect(ctx,'#ffe1a2',e.x-1,e.y-53,3,8);rect(ctx,C.orange,e.x-1,e.y-43,3,3);
     }
-    for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e);drawEgoGround(ctx,e,this.reducedEffects);drawPelicanGround(ctx,e,this.reducedEffects);this._travestiaAttack(e);this._orangutanAttack(e);this._rivalAttack(e);}
-    for(const p of shockwaves||[])this._shockwave(p);
+    for(const e of enemies)if(!e.dead){if(pass==='edge'){drawAnimalWarning(ctx,e);drawEgoGround(ctx,e,this.reducedEffects);drawPelicanGround(ctx,e,this.reducedEffects);}this._travestiaAttack(e,pass);this._orangutanAttack(e,pass);this._rivalAttack(e,false,pass);}
+    for(const p of shockwaves||[])this._shockwave(p,pass);
   }
   render(game,time=0) {
     const state=game.state||game.s;if(!state)return;const arrival=charlesArrival(state.charles);const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
@@ -753,6 +769,7 @@ this._shadow(x,y+7,40,8);
       ctx.save();ctx.globalAlpha=.35;ring(ctx,'#75dff6',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#a5f6ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
+    if(!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves,'ground');
     const items=[];if(s.charles&&s.charles.phase!=='complete'&&!arrival)items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
@@ -792,8 +809,7 @@ this._shadow(x,y+7,40,8);
     if(arrival)this.charles.draw(ctx,s.charles,s.charles.elapsed,this.reducedEffects);
     drawCharlesForeground(ctx,s.charles,this.reducedEffects,charlesBodyPose);
     this._shield(s);
-    // One danger pass above actors and allied effects, using the unchanged
-    // attack geometry. Never duplicate warnings or cover the locked arrival.
+    // Damage edges stay above allied effects; the matching fills lie under actors.
     if(!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves);
     ctx.restore();
     // Subtle film grain is deterministic and far lighter than the playfield art.
