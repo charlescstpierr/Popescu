@@ -39,13 +39,11 @@ export class ActorArt {
     m.save();if(mirror){m.translate(w+2,0);m.scale(-1,1);}m.drawImage(image,sx,sy,sw,sh,1,1,w,h);m.restore();
     for(const [dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]])c.drawImage(mask,dx,dy);
     c.globalCompositeOperation='source-in';c.fillStyle=color;c.fillRect(0,0,w+2,h+2);
-    c.globalCompositeOperation='destination-out';c.drawImage(mask,0,0);
     if(outsideOnly){
-      const source=m.getImageData(0,0,w+2,h+2).data,edge=c.getImageData(0,0,w+2,h+2);
-      // Translucent paint still belongs to the painting, never to its outline.
-      for(let i=3;i<source.length;i+=4)if(source[i])edge.data[i]=0;
-      c.putImageData(edge,0,0);
+      // Saturate even alpha=1 paint before subtraction, without reading file:// images.
+      for(let i=0;i<11;i++)m.drawImage(mask,0,0);
     }
+    c.globalCompositeOperation='destination-out';c.drawImage(mask,0,0);
     return rim;
   }
   constructor({loadImage=load,animalsTimeoutMs=10000,timers=globalThis}={}){
@@ -156,11 +154,23 @@ export class ActorArt {
       const surface=canvas(256,256);if(!surface)return true;
       const c=surface.getContext('2d');c.translate(128,224);
       if(!this.draw(c,{...actor,x:0,y:0,hitFlash:actor.type==='pelican'?actor.hitFlash:0},'enemy',phase,state,time,true))return true;
-      const pixels=c.getImageData(0,0,256,256).data;mask=new Uint8Array(256*256);
-      for(let i=0;i<mask.length;i++)mask[i]=pixels[i*4+3]>32?1:0;
+      if(this.occlusionReadable!==false){
+        try{
+          const pixels=c.getImageData(0,0,256,256).data;mask=new Uint8Array(256*256);
+          for(let i=0;i<mask.length;i++)mask[i]=pixels[i*4+3]>32?1:0;
+        }catch(error){if(error.name!=='SecurityError')throw error;this.occlusionReadable=false;}
+      }
+      if(!mask)mask='geometry';
       this.occlusionMasks.set(key,mask);if(this.occlusionMasks.size>96)this.occlusionMasks.delete(this.occlusionMasks.keys().next().value);
     }
     this.occlusionMasks.delete(key);this.occlusionMasks.set(key,mask);
+    if(mask==='geometry'){
+      const animal=ANIMAL_FRAMES[actor.type],boss=actor.type==='pelican'||actor.type==='travestia'||EGO_BEASTS[actor.type];
+      const scale=(ENEMY_SIZE[actor.type]||76)/76,half=boss?28:animal?20:18*scale;
+      const top=actor.y-(boss?92:animal?65:61*scale),foot=actor.y-(animal?35:8);
+      const width=Math.max(0,Math.min(body.right,actor.x+half)-Math.max(body.left,actor.x-half)),height=Math.max(0,Math.min(body.foot,foot)-Math.max(body.top,top));
+      return width*height>=(body.right-body.left)*(body.foot-body.top)*.3;
+    }
     const left=Math.max(0,Math.ceil(body.left-actor.x+128)),right=Math.min(256,Math.floor(body.right-actor.x+128));
     const top=Math.max(0,Math.ceil(body.top-actor.y+224)),bottom=Math.min(256,Math.floor(body.foot-actor.y+224));
     const required=(body.right-body.left)*(body.foot-body.top)*.3;let covered=0;

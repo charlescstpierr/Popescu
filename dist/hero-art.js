@@ -49,8 +49,14 @@ export class HeroArt {
     const mask=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(f.w,f.h):typeof document!=='undefined'?document.createElement('canvas'):null;
     if(!mask)return null;mask.width=f.w;mask.height=f.h;
     const c=mask.getContext('2d');c.save();if(art.mirror){c.translate(f.w,0);c.scale(-1,1);}c.drawImage(this.image,f.x,f.y,f.w,f.h,0,0,f.w,f.h);c.restore();
-    const pixels=c.getImageData(0,0,f.w,f.h).data;let left=f.w,right=0,top=f.h,bottom=0;
-    for(let y=0;y<f.h;y++)for(let x=0;x<f.w;x++)if(pixels[(y*f.w+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);}
+    const anchor=art.anchor||HERO_FRAMES.anchor,cx=art.mirror?f.w-anchor[0]:anchor[0];
+    let left=cx-28,right=cx+28,top=(f.hip?.[1]||80)-56,bottom=anchor[1];
+    if(this.visibilityReadable!==false){
+      try{
+        const pixels=c.getImageData(0,0,f.w,f.h).data;left=f.w;right=0;top=f.h;bottom=0;
+        for(let y=0;y<f.h;y++)for(let x=0;x<f.w;x++)if(pixels[(y*f.w+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);}
+      }catch(error){if(error.name!=='SecurityError')throw error;this.visibilityReadable=false;}
+    }
     const outline=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#ffe6b0',art.mirror,true);
     // Match the atlas cell and source origin: fractional DPR must sample the same pixel grid.
     c.clearRect(0,0,f.w,f.h);if(outline)c.drawImage(outline,-1,-1);

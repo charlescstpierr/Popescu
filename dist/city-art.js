@@ -758,6 +758,34 @@ export class CityArt {
     }
     const result={image,x:-ax,y:-ay,bytes:cw*ch*4};this.props.set(key,result);this.propBytes+=result.bytes;this._trimProps();return result;
   }
+  occludes(p,body,seed=42,reduced=false){
+    // Architecture opens a window around Toma rather than hiding his body.
+    if(p.type==='building')return false;
+    const item=this._propImage(p,seed,reduced);if(!item)return false;
+    if(item.coverage===undefined){
+      try{
+        // These sprites are painted locally, so file:// image taint never enters them.
+        const pixels=item.image.getContext('2d').getImageData(0,0,item.image.width,item.image.height).data;
+        item.coverage=new Uint8Array(pixels.length/4);
+        for(let i=0;i<item.coverage.length;i++)item.coverage[i]=pixels[i*4+3]>192?1:0;
+        item.bytes+=item.coverage.length;this.propBytes+=item.coverage.length;this._trimProps();
+      }catch(error){if(error.name!=='SecurityError')throw error;item.coverage=null;}
+    }
+    const scale=p.artScale||1,required=(body.right-body.left)*(body.foot-body.top)*.3;
+    if(item.coverage===null){
+      // An inscribed core avoids treating transparent canopy margins as cover.
+      const tree=p.type==='tree'||p.type==='pine',half=tree?15:Math.min(15,(p.w||30)/3),top=tree?-60:-Math.min(60,p.h||30),foot=tree?-30:-10;
+      const width=Math.max(0,Math.min(body.right,p.x+half*scale)-Math.max(body.left,p.x-half*scale)),height=Math.max(0,Math.min(body.foot,p.y+foot*scale)-Math.max(body.top,p.y+top*scale));
+      return width*height>=required;
+    }
+    const x0=Math.round(p.x),y0=Math.round(p.y),w=item.image.width,h=item.image.height;
+    let covered=0;
+    for(let y=Math.ceil(body.top);y<body.foot;y++)for(let x=Math.ceil(body.left);x<body.right;x++){
+      const sx=Math.floor((x-x0)/scale-item.x),sy=Math.floor((y-y0)/scale-item.y);
+      if(sx>=0&&sx<w&&sy>=0&&sy<h&&item.coverage[sy*w+sx]&&++covered>=required)return true;
+    }
+    return false;
+  }
   drawProp(ctx,p,seed=42,time=0,reduced=false,focus=null){
     if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed,reduced);if(!item)return;
     const cover=propForegroundBounds(p);

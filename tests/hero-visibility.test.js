@@ -118,3 +118,43 @@ test('both hero outlines preserve every painted byte under fractional cameras an
   }
  }finally{globalThis.OffscreenCanvas=old;}
 });
+
+for(const tainted of [false,true])test(`scenery markers require painted torso coverage (${tainted?'tainted Canvas fallback':'readable Canvas'})`,options,async()=>{
+ const old=globalThis.OffscreenCanvas;let reads=0;
+ globalThis.OffscreenCanvas=class{constructor(w,h){const canvas=native.createCanvas(w,h);if(tainted)canvas.getContext('2d').getImageData=()=>{reads++;throw new DOMException('Canvas is tainted','SecurityError');};return canvas;}};
+ try{
+  const hero=new HeroArt({loadImage:src=>native.loadImage(fileURLToPath(src))}),actors=new ActorArt({loadImage:src=>native.loadImage(fileURLToPath(new URL('../dist/'+src,import.meta.url)))});await Promise.all([hero.ready,actors.ready]);
+  const renderer=new Renderer(native.createCanvas(390,844));renderer.hero=hero;renderer.actors=actors;
+  const g=new Game({seed:42});Object.assign(g.s,{x:55,y:2404,elapsed:40,shotClock:0,invulnerable:0,walkMoving:false});g.s.enemies=[];
+  assert.equal(g.world.collides(55,2404,13),false,'the reported position is walkable');
+  const check=(expected,message)=>{
+   renderer.heroVisibility=null;
+   for(let i=0;i<=12;i++){g.s.elapsed+=1/60;const before=JSON.stringify(g.s);assert.doesNotThrow(()=>renderer.render(g,g.s.elapsed));assert.equal(JSON.stringify(g.s),before);}
+   assert.equal(renderer.heroVisibility.opacity>0,expected,message);
+  };
+  check(false,'seed 42, (55,2404): scenery beside Toma does not hide his body');
+  const tree={id:'covering-tree',type:'tree',x:g.s.x,y:g.s.y+12,w:40,h:30,variant:0};
+  g.world.getVisible=()=>[tree];check(true,'a canopy painted over the torso activates the marker');
+  const warmed=reads;check(true,'cached cover stays stable');assert.equal(reads,warmed,'the same cache entries never retry forbidden reads');
+  g.world.getVisible=()=>[{id:'cutaway',type:'building',x:g.s.x,y:g.s.y+15,w:160,h:140}];check(false,'a building cutaway reveals the hero');
+  g.world.getVisible=()=>[];
+  const enemy=g.spawnEnemy('normal',g.s.x,g.s.y+8);Object.assign(enemy,{x:g.s.x,y:g.s.y+8});check(true,'an enemy covering the torso still activates the marker');
+  enemy.x+=100;check(false,'an enemy beside Toma does not hide him');
+  Object.assign(enemy,{type:'moose',x:g.s.x,y:g.s.y+90});check(false,'feet-only animal overlap is not torso coverage');
+  if(tainted){assert.equal(hero.visibilityReadable,false);assert.equal(actors.occlusionReadable,false);assert.ok(reads>0);}
+ }finally{globalThis.OffscreenCanvas=old;}
+});
+
+test('composited outside outlines exclude even the faintest painted alpha without reading pixels',options,()=>{
+ const old=globalThis.OffscreenCanvas;
+ globalThis.OffscreenCanvas=class{constructor(w,h){const canvas=native.createCanvas(w,h);canvas.getContext('2d').getImageData=()=>{throw new DOMException('Canvas is tainted','SecurityError');};return canvas;}};
+ try{
+  const source=native.createCanvas(20,20),c=source.getContext('2d');
+  for(const [i,alpha]of [1,2,16,128,255].entries()){c.fillStyle=`rgba(120,80,40,${alpha/255})`;c.fillRect(3+i*3,8,1,3);}
+  const rim=ActorArt.outline(source,0,0,20,20,20,20,'#ffe6b0',false,true);
+  const result=native.createCanvas(22,22);result.getContext('2d').drawImage(rim,0,0);
+  const pixels=result.getContext('2d').getImageData(0,0,22,22).data;
+  for(let i=0;i<5;i++)for(let y=9;y<12;y++)assert.equal(pixels[(y*22+4+i*3)*4+3],0);
+  assert.ok(pixels.some((v,i)=>i%4===3&&v>0),'the surrounding rim is present');
+ }finally{globalThis.OffscreenCanvas=old;}
+});

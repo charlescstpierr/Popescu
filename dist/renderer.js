@@ -823,7 +823,7 @@ this._shadow(x,y+7,40,8);
       if(item.y<s.y+10)return false;
       const a=item.data;
       if(item.kind==='enemy'){const actor=a;return coversBody(actorBounds(actor))&&this.actors.occludes(actor,body,(actorFrame(actor,'enemy')+8)%8,s,this.time);}
-      if(item.kind==='prop')return coversBody(propForegroundBounds(a)||{left:a.x-(a.w||30)/2,right:a.x+(a.w||30)/2,top:a.y-(a.h||30),foot:a.y+10});
+      if(item.kind==='prop')return coversBody(propForegroundBounds(a)||{left:a.x-(a.w||30)/2,right:a.x+(a.w||30)/2,top:a.y-(a.h||30),foot:a.y+10})&&this.city.occludes(a,body,this.seed,this.reducedEffects);
       if(item.kind==='charles')return coversBody({left:a.x-70,right:a.x+70,top:a.y-170,foot:a.y+10});
       if(item.kind==='vehicle')return !(a.carDelay>0||a.life===0)&&coversBody({left:a.x-43,right:a.x+43,top:a.y-(a.kind==='bike'?26:31),foot:a.y+14});
       if(item.kind==='chest')return coversBody({left:a.x-24,right:a.x+24,top:a.y-32,foot:a.y+14});
