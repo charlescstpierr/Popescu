@@ -2,7 +2,7 @@ import {buildingGeometry,propForegroundBounds} from './prop-geometry.js';
 import {biomeForChunk,riverSection} from './biomes.js';
 import {drawRiverTile} from './river-art.js';
 /* Original, deterministic pixel city. All positions are world coordinates. */
-const INK='#100e20', TAU=Math.PI*2;
+const INK='#100e20', TAU=Math.PI*2, PROP_CACHE_BYTES=8*1024*1024;
 const LIGHT_COLORS={pink:'255,85,182',cyan:'109,229,238',gold:'255,190,100'};
 const PALETTES=[
   {wall:'#47384f',lit:'#665066',shade:'#2d273e',brick:'#755365',neon:'#ff55b6',light:'#ffc0e5',sign:'EGO CLUB'},
@@ -27,7 +27,7 @@ function neon(c,str,x,y,color,scale=1,align='center'){c.save();c.shadowColor=col
 function blot(c,x,y,w,h,color,random){const pts=[];for(let i=0;i<12;i++){const a=i/12*TAU,r=.72+random()*.28;pts.push([x+Math.cos(a)*w*.5*r,y+Math.sin(a)*h*.5*r]);}P(c,color,pts);return pts;}
 
 export class CityArt {
-  constructor(){this.tiles=new Map();this.props=new Map();this.glows=new Map();this.lighting=new WeakMap();this.puddles=new WeakMap();this.seed=null;}
+  constructor(){this.tiles=new Map();this.props=new Map();this.propBytes=0;this.propMode=false;this.glows=new Map();this.lighting=new WeakMap();this.puddles=new WeakMap();this.seed=null;}
   _glow(c,color,x,y,w,h,alpha=1){
     if(!c)return;
     if(!this.glows.has(color)){
@@ -62,16 +62,21 @@ export class CityArt {
     for(let i=-8;i<=8;i+=4)L(c,'#51485c',x+i,y-4,x+i+3,y+3);
     R(c,'#726073',x-8,y-8,12,1);R(c,'#151b2c',x-9,y-1,3,2);R(c,'#151b2c',x+7,y,3,2);
   }
-  _cutaway(item,p,reduced=false){
-    const key=reduced?'reducedCutaway':'cutaway';if(item[key])return item[key];
-    const source=reduced&&item.reducedImage||item.image,image=canvas(source.width,source.height);if(!image)return source;
+  _trimProps(){
+    while(this.props.size>96||this.propBytes>PROP_CACHE_BYTES){
+      const key=this.props.keys().next().value;this.propBytes-=this.props.get(key).bytes;this.props.delete(key);
+    }
+  }
+  _cutaway(item,p){
+    if(item.cutaway)return item.cutaway;
+    const source=item.image,image=canvas(source.width,source.height);if(!image)return source;
     const c=image.getContext('2d'),roof=-item.y+buildingGeometry(p).top,foot=-item.y+p.h/2;
-    // Preserve the roof silhouette and doorstep; let the facade dissolve below the cornice.
+    // Even the roof must be no more opaque than the original 34% fade: actors extend above their feet.
     for(let y=0;y<image.height;y+=3){
-      c.globalAlpha=y<roof?1:y<roof+48?1-.86*(y-roof)/48:y<foot-16?.14:Math.min(.62,.14+(y-foot+16)*.016);
+      c.globalAlpha=y<roof?.34:y<roof+48?.34-.20*(y-roof)/48:y<foot-16?.14:Math.min(.34,.14+(y-foot+16)*.016);
       const h=Math.min(3,image.height-y);c.drawImage(source,0,y,image.width,h,0,y,image.width,h);
     }
-    item[key]=image;return image;
+    item.cutaway=image;item.bytes+=image.width*image.height*4;this.propBytes+=image.width*image.height*4;this._trimProps();return image;
   }
   _forestEdge(c,tx,ty,seed){
     const cx=Math.floor(tx/2),cy=Math.floor(ty/2),localX=((tx%2)+2)%2,localY=((ty%2)+2)%2;
@@ -387,7 +392,7 @@ export class CityArt {
   }
   _drain(c,x,y){R(c,'#171a2c',x-10,y-6,22,13);R(c,'#63546b',x-9,y-5,20,10);R(c,'#25283d',x-8,y-4,18,8);for(let i=0;i<6;i++)R(c,'#777084',x-7+i*3,y-4,1,8);R(c,'#afa0a9',x-8,y-5,17,1);R(c,'#191a2d',x-9,y+5,20,2);}
   drawGround(ctx,camera,width,height,seed=42,time=0,reduced=false){
-    if(this.seed!==seed){this.seed=seed;this.tiles.clear();this.props.clear();}
+    if(this.seed!==seed){this.seed=seed;this.tiles.clear();this.props.clear();this.propBytes=0;}
     const left=camera.x-width/2,top=camera.y-height*.48,minX=Math.floor(left/256),minY=Math.floor(top/256),maxX=Math.floor((left+width)/256),maxY=Math.floor((top+height)/256);
     for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
       const tile=this._tile(x,y,seed);if(!tile){R(ctx,'#30283f',x*256,y*256,256,256);continue;}
@@ -674,30 +679,29 @@ export class CityArt {
     const x=p.x-Math.floor(cw/2),y=p.y-ay;
     return x+cw>=camera.x-width/2&&x<=camera.x+width/2&&y+ch>=camera.y-height*.48&&y<=camera.y+height*.52;
   }
-  _propImage(p,seed){
+  _propImage(p,seed,reduced=false){
+    if(this.propMode!==reduced){this.props.clear();this.propBytes=0;this.propMode=reduced;}
     const w=Math.round(p.w||40),h=Math.round(p.h||40),baseVariant=p.variant??Math.floor(hash(p.x,p.y,seed)*5),v=p.artVariant??(p.type==='billboard'?((baseVariant+Math.floor(p.x/512)+2*Math.floor(p.y/512))%5+5)%5:baseVariant),detail=p.type==='building'?Math.floor(hash(p.x,p.y,seed+3)*10000):seed,key=`${p.type}:${p.buildingKind||'apartment'}:${p.damage||0}:${w}:${h}:${v}:${detail}`;
-    if(this.props.has(key))return this.props.get(key);
+    if(this.props.has(key)){const item=this.props.get(key);this.props.delete(key);this.props.set(key,item);return item;}
     const building=p.type==='building',cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100,ch=building?h+190:180,ax=Math.floor(cw/2),ay=building?Math.ceil(h/2)+110:110;
     const image=canvas(cw,ch);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;c.translate(ax,ay);
     const lit=(building&&p.buildingKind!=='ruin')||['foodcart','vending','phone'].includes(p.type),light=lit?canvas(cw,ch):null;
     if(light){const lc=light.getContext('2d');lc.translate(ax,ay);this.lighting.set(c,lc);}
     if(building)this._buildingVariant(c,p,seed);else if(['pine','rock','stump','log','forestRuin'].includes(p.type))this._nature(c,p,seed);else if(p.type==='car')this._car(c,p,seed);else if(p.type==='bike')this._bike(c,p);else if(p.type==='bin')this._bin(c);else if(p.type==='bench')this._bench(c);else if(p.type==='lamp')this._lamp(c);else if(p.type==='mirror')this._mirror(c);else if(p.type==='phone')this._phone(c);else if(p.type==='billboard')this._billboard(c,{...p,variant:v});else if(p.type==='foodcart')this._foodcart(c,p);else if(p.type==='vending')this._vending(c,p);else if(p.type==='planter')this._planter(c,p);else if(p.type==='tree')this._tree(c,p);else if(p.type==='table')this._table(c,p);else if(p.type==='cone')this._cone(c,p);else if(p.type==='barricade')this._barricade(c,p);else if(p.type==='crate')this._crate(c,p);else if(p.type==='pallet')this._pallet(c,p);else if(p.type==='bags')this._bags(c,p);else if(p.type==='trophy')this._trophy(c,p);else if(p.type==='hydrant')this._hydrant(c,p);
     this.lighting.delete(c);
-    let reducedImage=null;
     if(light){
-      reducedImage=canvas(cw,ch);const rc=reducedImage.getContext('2d');rc.drawImage(image,0,0);rc.globalAlpha=.22;rc.drawImage(light,0,0);
-      c.translate(-ax,-ay);c.drawImage(light,0,0);
+      c.translate(-ax,-ay);c.globalCompositeOperation='destination-over';c.globalAlpha=reduced?.22:1;c.drawImage(light,0,0);
     }
-    const result={image,reducedImage,x:-ax,y:-ay};this.props.set(key,result);if(this.props.size>96)this.props.delete(this.props.keys().next().value);return result;
+    const result={image,x:-ax,y:-ay,bytes:cw*ch*4};this.props.set(key,result);this.propBytes+=result.bytes;this._trimProps();return result;
   }
   drawProp(ctx,p,seed=42,time=0,reduced=false,focus=null){
-    if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed);if(!item)return;
+    if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed,reduced);if(!item)return;
     // Fade only foreground architecture/canopies that cover the player. The
     // underlying collider and depth stay unchanged; there is no hidden corridor.
     const cover=propForegroundBounds(p);
     const coversActor=(actor,padding=16)=>actor&&actor.y+10<cover.foot&&actor.y>cover.top&&actor.y-64<cover.foot&&Math.abs(actor.x-p.x)<cover.halfWidth+padding;
     const obscures=cover&&focus&&(coversActor(focus)||(focus.companion&&coversActor(focus.girl))||(focus.enemies||[]).some(e=>!e.dead&&e.hp>0&&coversActor(e,38)));
-    const architecture=obscures&&p.type==='building',image=architecture?this._cutaway(item,p,reduced):(reduced&&item.reducedImage||item.image);
+    const architecture=obscures&&p.type==='building',image=architecture?this._cutaway(item,p):item.image;
     if(obscures&&!architecture){ctx.save();ctx.globalAlpha=.34;}
     if(p.artScale&&p.artScale!==1){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.scale(p.artScale,p.artScale);ctx.drawImage(image,item.x,item.y);ctx.restore();}
     else ctx.drawImage(image,Math.round(p.x+item.x),Math.round(p.y+item.y));
