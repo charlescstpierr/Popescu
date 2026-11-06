@@ -9,8 +9,8 @@
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 761578,
-      "sha256": "3b4af35cc32d17632407885584a11599cdf85b97eb560ca906c3d531495593f7"
+      "bytes": 765282,
+      "sha256": "b5206489e8f5f2aa5005f864776ece199d6cb3b6fcc5056bbb0c60e6f44c82ad"
     },
     {
       "path": "assets/actors-v2.json",
@@ -211,6 +211,11 @@
       "path": "assets/toma-whole-v7.png",
       "bytes": 641449,
       "sha256": "5005a6f274c1f6a8b8300399edebbd0a5541fdc87c8c450b6a87d8207c34d6a9"
+    },
+    {
+      "path": "assets/toma-whole-v8.png",
+      "bytes": 676289,
+      "sha256": "79ed9609511e2bda48962d569fb1ebfd6f440d1cfcfd3dfb8d883115658f4fea"
     },
     {
       "path": "assets/travestia-dash.png",
