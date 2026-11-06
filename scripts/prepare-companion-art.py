@@ -34,6 +34,10 @@ for rank in range(5):
     top=rows[rank]
     portrait=source.crop((72,top+2,223,top+153)).resize((80,80),Image.Resampling.LANCZOS)
     portrait.save(ROOT / f'dist/assets/companion-portrait-{rank+1}.png',optimize=True)
+# Keep user-requested distinct women when rebuilding the legacy source atlas.
+import runpy
+runpy.run_path(str(ROOT/'scripts/prepare-companion-references.py'), run_name='__main__')
+atlas = Image.open(ROOT/'dist/assets/companion-levels-whole.png').convert('RGBA')
 # Contact sheet at actual game size plus 2x enlargement, on the game's dark palette.
 preview = Image.new('RGB', (1090, 520), '#17152c')
 draw = ImageDraw.Draw(preview)

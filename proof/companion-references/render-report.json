@@ -1,0 +1,41 @@
+{
+  "size": [
+    390,
+    844
+  ],
+  "ranks": [
+    {
+      "rank": 1,
+      "file": "in-game-rank-1.png",
+      "sha256": "b0e0d96c770108a1ff9b7c20b530e8cbf0140a0cbd4a0c1909cedc37182a5492",
+      "nativeCanvasMs": 5.08
+    },
+    {
+      "rank": 2,
+      "file": "in-game-rank-2.png",
+      "sha256": "f8315fb67238547f8d35e44fad88a39e4ca45b8d03c4a239c59d1246131b02c3",
+      "nativeCanvasMs": 2.36
+    },
+    {
+      "rank": 3,
+      "file": "in-game-rank-3.png",
+      "sha256": "c3e9b74206b5b8e896bad035ad13805178c5a6ae01590bc2c88ad0a723104b2a",
+      "nativeCanvasMs": 2.06
+    },
+    {
+      "rank": 4,
+      "file": "in-game-rank-4.png",
+      "sha256": "6e6ea8e393e7aa370f591ec3f01a65363e51791f5dca3813e8e07bb8f5c1e66c",
+      "nativeCanvasMs": 2.81
+    },
+    {
+      "rank": 5,
+      "file": "in-game-rank-5.png",
+      "sha256": "07e131706456338f93e4b4039c4834b3294387ba8fd8a7db07a6c6a17908e83d",
+      "nativeCanvasMs": 2.22
+    }
+  ],
+  "renderReadOnly": true,
+  "physicalMobile": false,
+  "browser": false
+}

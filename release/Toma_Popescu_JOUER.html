@@ -202,7 +202,7 @@ const DIFFICULTIES = {
   nightmare: { label: 'Légende dans sa tête', hp: 0.7, damage: 1.5, spawn: 1.45, speed: 1.18 },
 };
 
-// The same companion gains a new look and one readable support skill per rank.
+// Each rank represents a different woman and adds one readable support skill.
 const COMPANION_LEVELS = [
   {name:'Version gratuite',short:'CŒURS',description:'Elle te suit, tire des cœurs et ramasse les objets. 95 PV, +20 bouclier au déblocage.',color:'#ed6578'},
   {name:'Mise à jour',short:'ESQUIVE',description:'Elle réagit plus vite et évite les ennemis proches. 120 PV, cœurs plus forts et plus rapides.',color:'#59d6ec'},
@@ -219,7 +219,7 @@ const UPGRADES = [
   { id: 'ego', name: 'Ego surdimensionné', desc: '+20 PV maximum et 25 PV récupérés par rang. Ça déborde du cadre.', icon: 'ego', max: 5, color: '#cf83ff' },
   { id: 'money', name: 'Selfie de milliardaire', desc: 'Lance un éventail de billets. Les pièces soignent davantage à chaque rang.', icon: 'money', max: 5, color: '#8ee68e' },
   { id: 'airplane', name: 'Mode avion', desc: 'Dissipe le gaz, suspend les attaques spéciales proches et ralentit les ennemis. Immunité temporaire au gaz.', icon: 'airplane', max: 5, color: '#a5d8ff' },
-  { id: 'girlfriend', name: 'Blonde IA', desc: 'Copie locale hors ligne. Cinq looks : cœurs, esquive, collecte, protection et drones.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
+  { id: 'girlfriend', name: 'Blonde IA', desc: 'Copie locale hors ligne. Cinq femmes différentes : cœurs, esquive, collecte, protection et drones.', icon: 'girlfriend', max: 5, color: '#ff8cba' },
   { id: 'charisma', name: 'Charisme imaginaire', desc: 'Les cœurs charment mieux et plus longtemps. Les boss résistent aux charmes répétés. Vitesse ennemie réduite de 7 % par rang.', icon: 'charisma', max: 5, color: '#fca8d4' },
   { id: 'chopper', name: 'Chopper inexistant', desc: 'Une moto holographique traverse la horde, frappe et repousse. Chaque rang augmente les dégâts et la fréquence.', icon: 'chopper', max: 5, color: '#6ce2cc' },
   { id: 'truth', name: 'Vérité brute', desc: 'Une onde de vérité blesse et repousse les ennemis proches. Les faits cognent fort.', icon: 'truth', max: 5, color: '#ffe193' },
@@ -7778,7 +7778,7 @@ function renderUpgrades(options){
   const button=document.createElement('button');button.className=`upgrade-card${evolution?' evolution-card':''}`;
   if(evolution)button.style.setProperty('--evolution-color',evolution.color);
   button.setAttribute('aria-label',`${u.name}. ${evolution?`Évolution disponible. ${evolution.requirement}. `:''}${description}. ${permanent?`Niveau ${rank+1}`:evolution?'Évolution permanente':'Récompense immédiate'}`);
-  const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`La même Blonde IA, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
+  const icon=document.createElement(companion?'img':'canvas');icon.width=48;icon.height=48;if(companion){icon.src=COMPANION_PORTRAITS[companion.rank-1];icon.alt=`Blonde IA, niveau ${companion.rank}, ${companion.name}`;}else drawIcon(icon.getContext('2d'),u.icon||u.id,0,0,48);
   const copy=document.createElement('div');copy.className='upgrade-copy';const name=document.createElement('h3');name.textContent=companion?`${u.name} · ${companion.name}`:car?`${u.name} · ${car.name}`:u.name;
   const desc=document.createElement('p');desc.textContent=description;const level=document.createElement('span');level.className='upgrade-rank';
   if(evolution){level.textContent='ÉVOLUTION DISPONIBLE';const requirement=document.createElement('p');requirement.className='evolution-requirement';requirement.textContent=evolution.requirement;copy.append(name,level,requirement,desc);}
