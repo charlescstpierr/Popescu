@@ -1,18 +1,18 @@
 // Short-lived visual reactions are derived from simulation changes, never written back.
 const COLORS={hit:'#ffe293',heart:'#ff8ebc',dust:'#a494a4'};
 export const TELEGRAPH_STYLES=Object.freeze({
-  charge:{fill:'#dda654',edge:'#f4ce8e',windup:.8},
-  crow:{fill:'#b973a6',edge:'#e6a7d0',windup:.85},
-  blast:{fill:'#e07856',edge:'#ffc094',windup:.72},
-  gas:{fill:'#91b65c',edge:'#c4df95',windup:1.05},
-  swipe:{fill:'#d69878',edge:'#f2c7a0',windup:.6}
+  charge:{fill:'#ff472b',edge:'#ff8951',windup:.8},
+  crow:{fill:'#ff472b',edge:'#ff6984',windup:.85},
+  blast:{fill:'#ff472b',edge:'#ff8951',windup:.72},
+  gas:{fill:'#ff472b',edge:'#ff8951',windup:1.05},
+  swipe:{fill:'#ff472b',edge:'#ff8951',windup:.6}
 });
-export function drawTelegraph(ctx,family,remaining,time,reduced){
+export function drawTelegraph(ctx,family,remaining,time,reduced,active=false){
   const style=TELEGRAPH_STYLES[family],progress=Math.max(0,Math.min(1,1-remaining/style.windup));
   const pulse=reduced?0:(.5+.5*Math.sin(time*8))*progress;
   ctx.save();const alpha=ctx.globalAlpha;ctx.setLineDash([]);ctx.lineWidth=2;
-  ctx.fillStyle=style.fill;ctx.globalAlpha=alpha*(reduced?.07:.045+progress*.07+pulse*.025);ctx.fill();
-  ctx.strokeStyle=style.edge;ctx.globalAlpha=alpha*(.5+progress*.32);ctx.stroke();ctx.restore();
+  ctx.fillStyle=style.fill;ctx.globalAlpha=alpha*(active?(reduced?.32:.38):reduced?.14+progress*.08:.12+progress*.1+pulse*.08);ctx.fill();
+  ctx.strokeStyle=style.edge;ctx.globalAlpha=alpha*(active?1:.85+progress*.15);ctx.stroke();ctx.restore();
 }
 export class CombatArt {
   constructor(){this.previous=new Map();this.effects=[];this.appeared=new Map();this.seed=null;this.lastKills=0;this.lastLevel=1;this.lastHP=0;this.started=false;this.defeats=[];this.owner=new WeakSet();this.lastElapsed=0;}

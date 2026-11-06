@@ -460,14 +460,14 @@ this._shadow(x,y+7,40,8);
     const ctx=this.ctx,r=cloud.r||35,t=this.reducedEffects?0:this.time,life=Math.max(0,Math.min(1,(cloud.life||0)/(cloud.maxlife||4)));
     const alpha=(.45+Math.min(.55,life*1.7))*(foreground?.23:1);
     ctx.save();
-    ctx.globalAlpha=alpha*.12;ctx.fillStyle='#9cbe68';ctx.beginPath();ctx.arc(cloud.x,cloud.y,r,0,TAU);ctx.fill();
-    ctx.globalAlpha=alpha*.52;ctx.strokeStyle='#bedc8b';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.globalAlpha=alpha*.22;ctx.fillStyle='#89e51c';ctx.beginPath();ctx.arc(cloud.x,cloud.y,r,0,TAU);ctx.fill();
+    ctx.globalAlpha=alpha*.9;ctx.strokeStyle='#baff3c';ctx.lineWidth=2;ctx.stroke();
     const puffs=[[-.4,-.24,.8],[.13,-.4,.86],[.4,-.02,.8],[.24,.36,.88],[-.3,.32,.82],[0,0,.96]];
     for(let i=0;i<(this.reducedEffects?3:puffs.length);i++){
       const [a,b,c]=puffs[i],x=cloud.x+a*r+Math.sin(t*.65+i)*r*.055,y=cloud.y+b*r+Math.cos(t*.55+i)*r*.045,w=r*c,h=w*.82;
-      ctx.globalAlpha=alpha*.25;oval(ctx,i%2?'#91bc65':'#b9d77f',x-w/2,y-h/2,w,h,2);
-      ctx.globalAlpha=alpha*.22;ctx.strokeStyle='#d5e6a7';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y,w/2,h/2,0,Math.PI*1.07,Math.PI*1.82);ctx.stroke();
-      ctx.globalAlpha=alpha*.1;oval(ctx,'#e1ebb2',x-w*.29,y-h*.32,w*.5,h*.36,2);
+      ctx.globalAlpha=alpha*.32;oval(ctx,i%2?'#85d919':'#b2ef29',x-w/2,y-h/2,w,h,2);
+      ctx.globalAlpha=alpha*.3;ctx.strokeStyle='#c8ff54';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y,w/2,h/2,0,Math.PI*1.07,Math.PI*1.82);ctx.stroke();
+      ctx.globalAlpha=alpha*.13;oval(ctx,'#d1ff65',x-w*.29,y-h*.32,w*.5,h*.36,2);
     }
     ctx.restore();
   }
@@ -644,13 +644,13 @@ this._shadow(x,y+7,40,8);
     if(!goat&&!rooster)return;
     const ctx=this.ctx,dx=e.chargeDirX??e.faceX??1,dy=e.chargeDirY??e.faceY??0;
     ctx.save();
-    if(goat&&!foreground&&e.windup>0){
+    if(goat&&!foreground&&(e.windup>0||e.charge>0)){
       // The goat locks his direction before charging: the whole warning is avoidable.
-      const reach=285*.55,half=(e.r||23)*.64+11,px=-dy*half,py=dx*half;
+      const active=e.charge>0,reach=285*(active?Math.min(.55,e.charge):.55),half=(e.r||23)*.64+11,px=-dy*half,py=dx*half;
       ctx.beginPath();
       [[e.x+px,e.y+py],[e.x+dx*reach+px,e.y+dy*reach+py],[e.x+dx*reach-px,e.y+dy*reach-py],[e.x-px,e.y-py]].forEach(([x,y],i)=>i?ctx.lineTo(Math.round(x),Math.round(y)):ctx.moveTo(Math.round(x),Math.round(y)));ctx.closePath();
-      drawTelegraph(ctx,'charge',e.windup,this.time,this.reducedEffects);
-      ctx.globalAlpha=.48;for(let d=44;d<reach;d+=38){const x=e.x+dx*d,y=e.y+dy*d;line(ctx,TELEGRAPH_STYLES.charge.edge,x-dx*9-dy*7,y-dy*9+dx*7,x,y,2);line(ctx,TELEGRAPH_STYLES.charge.edge,x-dx*9+dy*7,y-dy*9-dx*7,x,y,2);}
+      drawTelegraph(ctx,'charge',e.windup||0,this.time,this.reducedEffects,active);
+      ctx.globalAlpha=active?1:.75;for(let d=44;d<reach;d+=38){const x=e.x+dx*d,y=e.y+dy*d;line(ctx,'#ffb45b',x-dx*9-dy*7,y-dy*9+dx*7,x,y,2);line(ctx,'#ffb45b',x-dx*9+dy*7,y-dy*9-dx*7,x,y,2);}
     }
     if(rooster&&!foreground&&e.windup>0){
       ctx.beginPath();ctx.arc(e.x,e.y,180,0,TAU);drawTelegraph(ctx,'crow',e.windup,this.time,this.reducedEffects);
@@ -670,7 +670,7 @@ this._shadow(x,y+7,40,8);
         rect(ctx,C.ink,e.x-5,e.y-91,11,19);rect(ctx,goat?'#ffd470':'#ffb4cc',e.x-1,e.y-88,3,9);rect(ctx,'#ff9855',e.x-1,e.y-76,3,3);
       }
       if(goat&&e.charge>0&&!this.reducedEffects){
-        for(let n=0;n<4;n++){const x=e.x-dx*(22+n*8),y=e.y-dy*(22+n*8)-10;line(ctx,'#d9b46a',x,y,x-dx*12,y-dy*12,2);}
+        for(let n=0;n<4;n++){const x=e.x-dx*(22+n*8),y=e.y-dy*(22+n*8)-10;line(ctx,'#ff8951',x,y,x-dx*12,y-dy*12,2);}
         sparkle(ctx,e.x+dx*26,e.y+dy*26-25,'#fff0b0',4);
       }
     }
@@ -679,10 +679,10 @@ this._shadow(x,y+7,40,8);
 
   _shockwave(p) {
     const ctx=this.ctx,r=p.r||0,half=(p.width||12)/2;
-    ctx.save();ctx.globalAlpha=.48+.4*Math.min(1,(p.life||0)/.25);
+    ctx.save();ctx.globalAlpha=.65+.35*Math.min(1,(p.life||0)/.25);
     // Only this expanding annulus deals damage; its hollow centre stays clear.
     ctx.beginPath();ctx.arc(p.x,p.y,r+half,0,TAU);ctx.closePath();ctx.moveTo(p.x+Math.max(0,r-half),p.y);ctx.arc(p.x,p.y,Math.max(0,r-half),TAU,0,true);ctx.closePath();
-    const alpha=ctx.globalAlpha;ctx.fillStyle=TELEGRAPH_STYLES.crow.fill;ctx.globalAlpha=alpha*.25;ctx.fill();ctx.globalAlpha=alpha;
+    const alpha=ctx.globalAlpha;ctx.fillStyle=TELEGRAPH_STYLES.crow.fill;ctx.globalAlpha=alpha*(this.reducedEffects?.45:.55);ctx.fill();ctx.globalAlpha=alpha;
     ctx.strokeStyle=TELEGRAPH_STYLES.crow.edge;ctx.lineWidth=2;ctx.stroke();
     ctx.restore();
   }
