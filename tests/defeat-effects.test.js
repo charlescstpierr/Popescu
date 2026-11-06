@@ -50,7 +50,7 @@ test('the short breakup is localized, bounded and disabled with reduced effects'
  const g=new Game({seed:42}),art=new CombatArt();g.hurt(g.spawnEnemy('normal',100,-30),1000);art.prepare(g.s,g.seed,g.defeatEffects);
  assert.equal(typeof art.drawDefeats,'function');
  g.s.elapsed=.12;const full=drawingContext();art.drawDefeats(full,g.s,false);
- assert.ok(full.calls.some(c=>c.color==='#c387d4'),'purple fragments follow the ivory impact');
+ assert.ok(full.calls.some(c=>c.color==='#ce8eae'),'enemy rim-colored shards follow the ivory impact');
  assert.ok(full.calls.length<=60,'one defeat does not issue a particle storm');
  for(const p of full.calls.filter(c=>c.op==='pixel'))assert.ok(Math.abs(p.x)<48&&Math.abs(p.y)<48,'fragments stay near the defeated sprite');
  const reduced=drawingContext();art.drawDefeats(reduced,g.s,true);assert.equal(reduced.calls.length,0,'reduced effects have no breakup particles or flashes');
@@ -82,4 +82,18 @@ test('visible attraction trails remain capped and vanish in reduced effects',()=
  const {ctx,renderer,game}=trailFixture();game.s.drops=Array.from({length:260},()=>({x:40,y:0,kind:'xp',value:2,life:30}));
  renderer.render(game,0);assert.equal(ctx.calls.filter(c=>c.op==='pixel'&&c.color==='#75e7f2').length,64);
  ctx.calls.length=0;renderer.reducedEffects=true;renderer.render(game,0);assert.equal(ctx.calls.filter(c=>c.op==='pixel'&&c.color==='#75e7f2').length,0);
+});
+
+test('standard defeat painting holds for 140 ms and expires without touching its snapshot',()=>{
+ const effect={actor:{x:0,y:0},start:10},ctx=new Proxy({calls:0,globalAlpha:1,drawImage(){this.calls++;}},{get:(o,k)=>k in o?o[k]:()=>{}});
+ const renderer={ctx,reducedEffects:false,defeatStamps:new Map([[effect,{original:{},ivory:{}}]])},before=JSON.stringify(effect);
+ Renderer.prototype._defeatImpact.call(renderer,effect,{elapsed:10.139});assert.ok(ctx.calls>0);
+ ctx.calls=0;Renderer.prototype._defeatImpact.call(renderer,effect,{elapsed:10.141});assert.equal(ctx.calls,0);assert.equal(JSON.stringify(effect),before);
+});
+test('large-enemy ground scorches are deduplicated, bounded, short and absent in reduced effects',()=>{
+ const ctx=new Proxy({globalAlpha:1},{get:(o,k)=>k in o?o[k]:()=>{},set:(o,k,v)=>(o[k]=v,true)}),renderer={ctx,reducedEffects:false,scorches:[],seenDefeats:new WeakSet()},effects=Array.from({length:30},(_,i)=>({actor:{type:'tank',x:i,y:0,r:25},start:10}));
+ Renderer.prototype._defeatGround.call(renderer,{elapsed:10},effects);assert.equal(renderer.scorches.length,24);
+ Renderer.prototype._defeatGround.call(renderer,{elapsed:10.5},effects);assert.equal(renderer.scorches.length,24);
+ Renderer.prototype._defeatGround.call(renderer,{elapsed:11.5},effects);assert.equal(renderer.scorches.length,0);
+ renderer.reducedEffects=true;Renderer.prototype._defeatGround.call(renderer,{elapsed:10},effects);assert.equal(renderer.scorches.length,0);
 });

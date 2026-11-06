@@ -2,7 +2,7 @@
 const rect=(ctx,color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h);};
 const polygon=(ctx,color,points)=>{ctx.fillStyle=color;ctx.beginPath();points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
 export function drawDiscovery(ctx,p,time=0,reduced=false){
-  const color=p.color||'#c6bbff';
+  const color=p.discoveryType==='anomaly'?'#c6a1e8':p.color||'#c6bbff';
   ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));
   rect(ctx,'#17172a',-36,-13,72,30);
   rect(ctx,'#4b4056',-34,-11,68,26);
@@ -52,11 +52,16 @@ export function drawDiscovery(ctx,p,time=0,reduced=false){
   }else{
     rect(ctx,'#332a50',-23,-20,46,24);rect(ctx,'#7f6b96',-19,-23,38,6);
     const pulse=reduced?0:Math.floor(Math.sin(time*2)*2);
-    polygon(ctx,'#3c325a',[[0,-65+pulse],[21,-43+pulse],[0,-21+pulse],[-21,-43+pulse]]);
-    polygon(ctx,color,[[0,-61+pulse],[17,-43+pulse],[0,-25+pulse],[-17,-43+pulse]]);
-    polygon(ctx,'#191c36',[[0,-54+pulse],[10,-43+pulse],[0,-32+pulse],[-10,-43+pulse]]);
-    rect(ctx,'#f6efff',-2,-46+pulse,4,6);
-    for(const [x,y]of [[-28,-47],[28,-35],[-16,-67],[19,-62]]){rect(ctx,color,x,y,3,3);}
+    // An open, fractured seal cannot be mistaken for the collectible XP diamond.
+    ctx.lineCap='square';ctx.lineWidth=5;ctx.strokeStyle='#3c325a';
+    for(const [start,end,r]of [[.15,1.4,19],[1.75,3.05,21],[3.45,4.8,18],[5.15,5.9,22]]){
+      ctx.beginPath();ctx.arc(0,-43+pulse,r,start,end);ctx.stroke();
+      ctx.lineWidth=2;ctx.strokeStyle=color;ctx.stroke();ctx.lineWidth=5;ctx.strokeStyle='#3c325a';
+    }
+    const crack=[[3,-66],[-4,-51],[3,-46],[-6,-31],[-2,-23]];
+    ctx.lineWidth=3;ctx.strokeStyle='#211d35';ctx.beginPath();crack.forEach(([x,y],i)=>i?ctx.lineTo(x,y+pulse):ctx.moveTo(x,y+pulse));ctx.stroke();
+    ctx.lineWidth=1;ctx.strokeStyle='#eed9ff';ctx.stroke();
+    for(const [x,y]of [[-28,-47],[28,-35],[-16,-67],[19,-62]])rect(ctx,color,x,y,3,2);
   }
   ctx.restore();
 }

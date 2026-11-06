@@ -5,6 +5,7 @@ import {ActorArt} from './actor-art.js';
 const ASSET=new URL('./assets/toma-whole-v9.png',import.meta.url).href;
 function load(src){return new Promise(resolve=>{if(typeof Image==='undefined'){resolve(null);return;}const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>resolve(null);image.src=src.startsWith('file:')?decodeURIComponent(new URL(src).pathname):src;});}
 const pt=(x,y)=>({x,y});
+const BROWSER_CANVAS=typeof CanvasRenderingContext2D!=='undefined'||typeof OffscreenCanvasRenderingContext2D!=='undefined';
 function line(c,color,a,b,width=1){
   let x=Math.round(a.x),y=Math.round(a.y),tx=Math.round(b.x),ty=Math.round(b.y),dx=Math.abs(tx-x),dy=Math.abs(ty-y),sx=x<tx?1:-1,sy=y<ty?1:-1,e=dx-dy;c.fillStyle=color;
   for(let i=0;i<100;i++){c.fillRect(x-Math.floor(width/2),y-Math.floor(width/2),width,width);if(x===tx&&y===ty)break;const t=e*2;if(t>-dy){e-=dy;x+=sx;}if(t<dx){e+=dx;y+=sy;}}
@@ -16,20 +17,64 @@ function polygon(c,color,points){
 /** Each animation frame is one complete painting: head to boots and both hands. */
 export class HeroArt {
   constructor({loadImage=load}={}){
-    this.image=null;this.error=null;this.outlines=new Map();
+    this.image=null;this.error=null;this.outlines=new Map();this.visibility=new Map();this.outlineAtlases=new Map();
     this.ready=Promise.resolve().then(()=>loadImage(ASSET)).then(image=>{this.image=image||null;return Boolean(image);}).catch(error=>{this.error=error;return false;});
+  }
+  _outlineAtlas(color){
+    if(this.outlineAtlases.has(color))return this.outlineAtlases.get(color);
+    // Chromium samples fractional scales differently when the source texture size changes.
+    const w=this.image.width,h=this.image.height,atlas=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(w,h):typeof document!=='undefined'?document.createElement('canvas'):null;
+    if(!atlas)return null;atlas.width=w;atlas.height=h;
+    const rim=ActorArt.outline(this.image,0,0,w,h,w,h,color,false,true);if(!rim)return null;
+    atlas.getContext('2d').drawImage(rim,-1,-1);this.outlineAtlases.set(color,atlas);if(this.outlineAtlases.size>2)this.outlineAtlases.delete(this.outlineAtlases.keys().next().value);return atlas;
   }
   _wholeFrame(c,pose,reduced){
     const art=pose.art,f=art.frame,t=art.transform,anchor=art.anchor||HERO_FRAMES.anchor;
     const left=art.mirror?anchor[0]-f.w:-anchor[0],dest=ActorArt.snap(c,art.ground.x+left,art.ground.y-anchor[1]);
     c.save();c.translate(dest.x-left,dest.y+anchor[1]);
-    if(!reduced){
+    const fractional=BROWSER_CANVAS&&!Number.isInteger(Math.abs(c.getTransform?.().a||1));
+    if(!reduced&&!fractional){
       const key=`${f.x}:${f.y}:${Boolean(art.mirror)}`;let rim=this.outlines.get(key);
-      if(!rim){rim=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#deb981',art.mirror);if(rim){this.outlines.set(key,rim);if(this.outlines.size>48)this.outlines.delete(this.outlines.keys().next().value);}}
-      if(rim){this.outlines.delete(key);this.outlines.set(key,rim);const edge=ActorArt.snap(c,left-1,-anchor[1]-1);c.save();c.globalAlpha*=.4;c.drawImage(rim,edge.x,edge.y);c.restore();}
+      if(!rim){rim=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#deb981',art.mirror,true);if(rim){this.outlines.set(key,rim);if(this.outlines.size>48)this.outlines.delete(this.outlines.keys().next().value);}}
+      if(rim){this.outlines.delete(key);this.outlines.set(key,rim);c.save();c.globalAlpha*=.4;c.drawImage(rim,1,1,f.w,f.h,left,-anchor[1],f.w,f.h);c.restore();}
     }
     c.transform(t.a,t.b,t.c,t.d,0,0);if(art.mirror)c.scale(-1,1);
+    if(!reduced&&fractional){const rim=this._outlineAtlas('#deb981');if(rim){c.save();c.globalAlpha*=.4;c.drawImage(rim,f.x,f.y,f.w,f.h,-anchor[0],-anchor[1],f.w,f.h);c.restore();}}
     c.drawImage(this.image,f.x,f.y,f.w,f.h,-anchor[0],-anchor[1],f.w,f.h);c.restore();
+  }
+  visibilityFrame(pose){
+    if(!this.image)return null;
+    const art=pose.art,f=art.frame,key=`${f.x}:${f.y}:${Boolean(art.mirror)}`;
+    if(this.visibility.has(key)){const frame=this.visibility.get(key);this.visibility.delete(key);this.visibility.set(key,frame);return frame;}
+    const mask=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(f.w,f.h):typeof document!=='undefined'?document.createElement('canvas'):null;
+    if(!mask)return null;mask.width=f.w;mask.height=f.h;
+    const c=mask.getContext('2d');c.save();if(art.mirror){c.translate(f.w,0);c.scale(-1,1);}c.drawImage(this.image,f.x,f.y,f.w,f.h,0,0,f.w,f.h);c.restore();
+    const anchor=art.anchor||HERO_FRAMES.anchor,cx=art.mirror?f.w-anchor[0]:anchor[0];
+    let left=cx-28,right=cx+28,top=(f.hip?.[1]||80)-56,bottom=anchor[1];
+    if(this.visibilityReadable!==false){
+      try{
+        const pixels=c.getImageData(0,0,f.w,f.h).data;left=f.w;right=0;top=f.h;bottom=0;
+        for(let y=0;y<f.h;y++)for(let x=0;x<f.w;x++)if(pixels[(y*f.w+x)*4+3]>32){left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);}
+      }catch(error){if(error.name!=='SecurityError')throw error;this.visibilityReadable=false;}
+    }
+    const outline=ActorArt.outline(this.image,f.x,f.y,f.w,f.h,f.w,f.h,'#ffe6b0',art.mirror,true);
+    // Match the atlas cell and source origin: fractional DPR must sample the same pixel grid.
+    c.clearRect(0,0,f.w,f.h);if(outline)c.drawImage(outline,-1,-1);
+    const frame={rim:mask,left,right,top,bottom};
+    this.visibility.set(key,frame);if(this.visibility.size>192)this.visibility.delete(this.visibility.keys().next().value);return frame;
+  }
+  visibilityBounds(s){
+    const pose=computeHeroPose(s),f=this.visibilityFrame(pose);if(!f)return null;
+    const art=pose.art,anchor=art.anchor||HERO_FRAMES.anchor,left=art.ground.x+(art.mirror?anchor[0]-art.frame.w:-anchor[0]),top=art.ground.y-anchor[1];
+    return {left:left+f.left,right:left+f.right,top:top+f.top,foot:top+f.bottom,body:{left:Math.max(left+f.left,s.x-14),right:Math.min(left+f.right,s.x+14),top:top+f.top+12,foot:Math.min(top+f.bottom,s.y-30)}};
+  }
+  drawVisibility(ctx,s,time=0,opacity=1){
+    if(s.mode==='gameover')return;
+    const pose=computeHeroPose(s),f=this.visibilityFrame(pose);if(!f)return;
+    const art=pose.art,anchor=art.anchor||HERO_FRAMES.anchor,left=art.mirror?anchor[0]-art.frame.w:-anchor[0],dest=ActorArt.snap(ctx,art.ground.x+left,art.ground.y-anchor[1]);
+    const fractional=BROWSER_CANVAS&&!Number.isInteger(Math.abs(ctx.getTransform?.().a||1)),atlas=fractional?this._outlineAtlas('#ffe6b0'):null;
+    const rim=art.mirror?this.visibilityFrame({...pose,art:{...art,mirror:false}})?.rim:f.rim;
+    ctx.save();ctx.globalAlpha*=opacity*(s.invulnerable>0&&Math.floor(time*16)%2?.58:1);ctx.imageSmoothingEnabled=false;ctx.translate(dest.x-left,dest.y+anchor[1]);ctx.transform(art.transform.a,art.transform.b,art.transform.c,art.transform.d,0,0);if(art.mirror)ctx.scale(-1,1);if(atlas)ctx.drawImage(atlas,art.frame.x,art.frame.y,art.frame.w,art.frame.h,-anchor[0],-anchor[1],art.frame.w,art.frame.h);else if(rim)ctx.drawImage(rim,0,0,art.frame.w,art.frame.h,-anchor[0],-anchor[1],art.frame.w,art.frame.h);ctx.restore();
   }
   _fallback(c,pose){
     // The load-failure path also uses a complete approved painting, never limbs.

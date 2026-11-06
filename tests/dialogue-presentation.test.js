@@ -90,7 +90,9 @@ test('CSS isolates the new view, keeps actual Canvas background and guards short
  const variant=css.slice(css.indexOf('/* Approved paused encounter presentation.'));
  assert.ok(variant.length>1000);assert.match(variant,/\.encounter-dialogue\{[^}]*background:transparent/s);
  for(const marker of ['env(safe-area-inset-left','env(safe-area-inset-right','var(--safe-top)','var(--safe-bottom)','max-height:620px','max-height:440px','min-height:44px','overflow-y:auto','touch-action:pan-y','prefers-reduced-motion'])assert.ok(variant.includes(marker),marker);
- assert.doesNotMatch(variant,/url\(|backdrop-filter:blur|\.banter\s*\{/);
+ assert.doesNotMatch(variant,/url\(|\.banter\s*\{/);
+ assert.match(variant,/\.encounter-dialogue::before\{[^}]*backdrop-filter:blur\(3px\)/);
+ assert.match(variant,/\.reduced-fx \.encounter-dialogue::before\{[^}]*backdrop-filter:none/);
  assert.match(variant,/\.encounter-dialogue \.dialogue-art[^}]*display:none/s);
  assert.match(variant,/\.encounter-dialogue #dialogue-text[^}]*min-height:0/s);
 });
@@ -122,4 +124,31 @@ test('speaker change hides the previous face while loading and rejects late call
  bossLoad();bossError();assert.equal(framed.hidden,true);assert.equal(portrait.src,'assets/dialogue-toma.png');
  portrait.onerror();assert.equal(document.nodes.get('encounter-art-status').textContent,'Portrait indisponible');assert.equal(framed.hidden,true);
  renderEncounterPresentation({line:{who:'SYSTÈME',text:'Message'},context:context('pelican'),document});assert.equal(framed.hidden,true);assert.equal(document.nodes.get('encounter-framed-image').getAttribute('href'),null);assert.equal(document.nodes.get('encounter-name').textContent,'SYSTÈME');
+});
+
+test('system and unknown voices never inherit a character portrait and reset cleanly',()=>{
+ const document=dom(),root=document.nodes.get('dialogue');
+ for(const who of ['SYSTÈME','RÉSEAU LOCAL','__proto__','']){
+  renderEncounterPresentation({context:context('charles'),line:{who,text:'Hors ligne.'},document});
+  assert.equal(root.classList.contains('encounter-system'),true);
+  assert.equal(document.nodes.get('encounter-framed-portrait').getAttribute('hidden'),'');
+  assert.equal(document.nodes.get('encounter-portrait').getAttribute('src'),null);
+  assert.equal(document.nodes.get('encounter-name').textContent,who);
+ }
+ renderEncounterPresentation({context:null,line:{who:'TOMA',text:'Moi.'},document});
+ assert.equal(root.classList.contains('encounter-system'),false);
+ assert.equal(document.nodes.get('encounter-portrait').src,'assets/dialogue-toma.png');
+ renderEncounterPresentation({context:null,line:null,document});
+ assert.equal(root.classList.contains('encounter-system'),false);
+});
+
+test('rival dialogue selects the named rival cell even in another actor scene',()=>{
+ for(const [who,type] of [['BOUC RIVAL','rival_goat'],['COQ RIVAL','rival_rooster']]){
+  const model=encounterPresentation({context:context('pelican'),line:{who,text:'Salut.'}});
+  assert.equal(model.speakerType,type);
+  const document=dom();renderEncounterPresentation({context:context('pelican'),line:{who,text:'Salut.'},document});
+  assert.equal(document.nodes.get('dialogue').classList.contains('encounter-existing-portrait'),true);
+  assert.deepEqual(model.portraits,[`assets/${type}-walk-v3.png`]);
+  assert.deepEqual(encounterPortraitFrame(model.portraits[0]),{width:512,height:256,viewBox:[0,0,128,128]});
+ }
 });

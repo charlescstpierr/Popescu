@@ -1,3 +1,4 @@
+import {drawTelegraph} from './combat-art.js';
 import {PELICAN,pelicanCards,pelicanRingRadius} from './pelican.js';
 
 // Every atlas cell is an intact painting. Only translation and horizontal mirror
@@ -41,50 +42,52 @@ function arrow(ctx,x,y,color=GOLD){
   ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-5,y-5);ctx.lineTo(x+2,y);ctx.lineTo(x-5,y+5);ctx.stroke();
 }
 
-export function drawPelicanGround(ctx,e,reduced=false){
+export function drawPelicanGround(ctx,e,reduced=false,pass='both',time=0){
   const h=pelicanHazards(e);if(!h)return;
   ctx.save();ctx.translate(h.x,h.y);ctx.rotate(h.aim);
-  ctx.strokeStyle=h.warning?GOLD:PINK;ctx.lineWidth=2;ctx.fillStyle=h.warning?'#ffcf6924':'#f852bd4a';
+  const edge=pass!=='ground',paint=()=>drawTelegraph(ctx,h.kind,e.peliTime,time,reduced,!h.warning,pass,PELICAN[h.kind].warning);
+  ctx.strokeStyle='#ff8951';ctx.lineWidth=2;
   if(h.kind==='hug'){
     // The corridor previews the maximum travel. Only the moving contact disc is
     // live during the dash, so the already-crossed corridor has no damage fill.
-    capsule(ctx,h.length,h.width);ctx.setLineDash(h.warning?[6,5]:[3,8]);if(h.warning)ctx.fill();ctx.stroke();ctx.setLineDash([]);
-    for(let x=36;x<h.length;x+=44)arrow(ctx,x,0,h.warning?GOLD:'#c58ec7');
+    capsule(ctx,h.length,h.width);if(h.warning)paint();else if(edge){ctx.globalAlpha*=.45;ctx.stroke();ctx.globalAlpha/=.45;}
+    if(edge)for(let x=36;x<h.length;x+=44)arrow(ctx,x,0,'#ff8951');
     if(!h.warning){
       const dx=h.liveX-h.x,dy=h.liveY-h.y,x=dx*Math.cos(h.aim)+dy*Math.sin(h.aim),y=-dx*Math.sin(h.aim)+dy*Math.cos(h.aim);
-      ctx.beginPath();ctx.arc(x,y,h.width,0,TAU);ctx.fillStyle='#f852bd42';ctx.fill();ctx.strokeStyle=PINK;ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,h.width,0,TAU);paint();
     }
   }else if(h.kind==='zodiac'){
-    if(sector(ctx,h)){ctx.fill();ctx.setLineDash(h.warning?[7,5]:[]);ctx.stroke();ctx.setLineDash([]);}
-    if(!reduced&&h.outer>h.inner){
+    if(sector(ctx,h))paint();
+    if(edge&&!reduced&&h.outer>h.inner){
       // Stars sit only on the dangerous arc, never across the safe opening.
       const radius=h.warning?h.radius:(h.inner+h.outer)/2,size=Math.min(h.warning?3:4,(h.outer-h.inner)/2);
-      for(let i=0;i<10;i++){const a=h.gap+.13+(TAU-2*h.gap-.26)*i/9;star(ctx,Math.cos(a)*radius,Math.sin(a)*radius,size,h.warning?GOLD:PINK);}
+      for(let i=0;i<10;i++){const a=h.gap+.13+(TAU-2*h.gap-.26)*i/9;star(ctx,Math.cos(a)*radius,Math.sin(a)*radius,size,GOLD);}
     }
-    if(h.warning){
-      ctx.strokeStyle='#7ee5ce';ctx.globalAlpha=.85;
+    if(edge&&h.warning){
+      ctx.strokeStyle='#b9e7b1';ctx.globalAlpha=.85;
       for(const a of [-h.gap,h.gap]){ctx.beginPath();ctx.moveTo(Math.cos(a)*22,Math.sin(a)*22);ctx.lineTo(Math.cos(a)*(h.outer+5),Math.sin(a)*(h.outer+5));ctx.stroke();}
-      arrow(ctx,60,0,'#a6ffe7');arrow(ctx,88,0,'#a6ffe7');
+      arrow(ctx,60,0,'#d8f2cd');arrow(ctx,88,0,'#d8f2cd');
     }
   }else if(h.warning){
     for(const spread of [-1,0,1]){
-      ctx.save();ctx.rotate(spread*h.spread);capsule(ctx,h.length,h.width);ctx.fill();ctx.setLineDash([5,6]);ctx.stroke();ctx.setLineDash([]);
-      for(let x=42;x<h.length;x+=55)arrow(ctx,x,0);ctx.restore();
+      ctx.save();ctx.rotate(spread*h.spread);capsule(ctx,h.length,h.width);paint();
+      if(edge)for(let x=42;x<h.length;x+=55)arrow(ctx,x,0);ctx.restore();
     }
   }
   ctx.restore();
-  if(h.warning){
+  if(edge&&h.warning){
     const label=h.kind==='hug'?'CÂLIN COSMIQUE !':h.kind==='zodiac'?'ZODIAQUE : PASSE DANS L’OUVERTURE':'TAROT : ATTENTION AU RETOUR !';
     ctx.save();ctx.textAlign='center';ctx.font='bold 10px sans-serif';ctx.lineJoin='round';ctx.lineWidth=3;ctx.strokeStyle=INK;ctx.strokeText(label,e.x,e.y+32);ctx.fillStyle=GOLD;ctx.fillText(label,e.x,e.y+32);ctx.restore();
   }
 }
 
-export function drawPelicanCards(ctx,e,reduced=false){
+export function drawPelicanCards(ctx,e,reduced=false,pass='both'){
   const cards=pelicanCards(e);if(!cards.length)return;
   for(const card of cards){
     ctx.save();ctx.translate(card.x,card.y);
     // The entire 14 x 16 card lies inside the exact 11 px collision radius.
-    ctx.beginPath();ctx.arc(0,0,PELICAN.tarot.width,0,TAU);ctx.fillStyle='#ff72c826';ctx.fill();ctx.strokeStyle='#f6a2df';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(0,0,PELICAN.tarot.width,0,TAU);drawTelegraph(ctx,'tarot',0,0,reduced,true,pass);
+    if(pass==='ground'){ctx.restore();continue;}
     ctx.rotate(card.angle);
     if(!reduced){ctx.strokeStyle='#ec8ef0';ctx.globalAlpha=.6;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-15,-4);ctx.lineTo(-25,-4);ctx.moveTo(-15,4);ctx.lineTo(-21,4);ctx.stroke();ctx.globalAlpha=1;}
     ctx.fillStyle=INK;ctx.fillRect(-7,-8,14,16);ctx.fillStyle=GOLD;ctx.fillRect(-6,-7,12,14);ctx.fillStyle='#57277b';ctx.fillRect(-4.5,-5.5,9,11);

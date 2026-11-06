@@ -12,7 +12,7 @@ test('five acquisitions have distinct visible geometry and palettes',()=>{const 
 test('elapsed advances effects and a frozen simulation draws identically',()=>{for(const p of powers){const fx=[effect(p)];const first=draw(state(.1),fx);assert.notDeepEqual(draw(state(.4),fx),first);assert.deepEqual(draw(state(.1),fx),first);assert.equal(vertices(draw(state(1),fx)).length,0);}});
 test('rendering does not modify frozen state or effects',()=>{const s=state(.2),fx=powers.map(p=>effect(p));Object.freeze(s.girl);Object.freeze(s.airplane);Object.freeze(s);fx.forEach(Object.freeze);Object.freeze(fx);const before=JSON.stringify([s,fx]);draw(s,fx);assert.equal(JSON.stringify([s,fx]),before);});
 test('reduced effects are static compact pictograms without floor marks',()=>{for(const p of powers){const fx=[effect(p)];assert.deepEqual(draw(state(.1),fx,true),draw(state(.6),fx,true));const c=canvas();new PowerArt().drawGround(c,state(.1),fx,true);assert.equal(vertices(c.calls).length,0);const points=vertices(draw(state(.1),fx,true));assert.ok(points.length<40);for(const v of points){assert.ok(Math.abs(v[1]-100)<=20);assert.ok(Math.abs(v[2]-(150-94))<=20);}}});
-test('truth rays reach their full fixed radius immediately and only fade',()=>{const fx=[effect('truth','activate',{r:180})];for(const elapsed of [0,.1,.3]){const calls=draw(state(elapsed),fx);const endpoints=calls.filter(c=>c[0]==='lineTo');assert.ok(endpoints.some(p=>Math.abs(Math.hypot(p[1]-100,p[2]-150)-180)<2));assert.ok(endpoints.length<=32);assert.ok(!calls.some(c=>c[0]==='arc'));}});
+test('truth ring and rays show the full fixed radius immediately and only fade',()=>{const fx=[effect('truth','activate',{r:180})];for(const elapsed of [0,.1,.3]){const calls=draw(state(elapsed),fx);const endpoints=calls.filter(c=>c[0]==='lineTo');assert.ok(endpoints.some(p=>Math.abs(Math.hypot(p[1]-100,p[2]-150)-180)<2));assert.ok(endpoints.length<=32);const arcs=calls.filter(c=>c[0]==='arc');assert.equal(arcs.length,2);assert.ok(arcs.every(p=>p[1]===100&&p[2]===150));assert.deepEqual(arcs.map(p=>p[3]),[177.5,178.5]);assert.ok(!calls.some(c=>c[0]==='fill'),'the range ring never fills the damage disc');}});
 test('work is bounded to sixteen effects and no expensive canvas filters',()=>{const fx=Array.from({length:100},()=>effect('truth','activate',{r:200}));const calls=draw(state(.1),fx);assert.deepEqual(calls,draw(state(.1),fx.slice(-16)));assert.ok(calls.length<2400);assert.ok(!calls.some(c=>c[0]==='set'&&['shadowBlur','filter','shadowColor'].includes(c[1])));});
 test('car signature follows the actual y + 40 vehicle lane',()=>{const points=vertices(draw(state(.1),[effect('car','activate',{life:.55})]));assert.ok(points.length>4);assert.ok(points.every(p=>Math.abs(p[2]-190)<=6));});
 test('active airplane draws local defense brackets without inventing a boundary',()=>{const s=state();s.airplane.active=true;s.airplane.r=440;const calls=draw(s,[]);assert.ok(vertices(calls).length>5);assert.ok(!calls.some(c=>c[0]==='arc'));const reduced=vertices(draw(s,[],true));assert.ok(reduced.length<20);});
@@ -40,3 +40,20 @@ test('bike launch wake respects actual direction rather than always pointing rig
 test('rapid acquisitions show only newest badge, with reduced use badges kept away from hero',()=>{const s=state(.2),latest=effect('speed'),fx=[effect('money'),effect('filter'),latest];assert.deepEqual(draw(s,fx,true),draw(s,[latest],true));const near=effect('money','heal',{x:s.x,y:s.y}),far=effect('girlfriend','collect',{x:300,y:150});assert.deepEqual(draw(s,[latest,near,far],true),draw(s,[latest,far],true));});
 test('reduced local passive feedback stays above hero rather than hiding face or torso',()=>{const calls=vertices(draw(state(),[effect('detox','heal')],true));assert(calls.length>0);assert(calls.every(c=>c[2]<150-74));});
 test('motorcycle impact rays follow real knockback direction',()=>{const s=state(.1),fx=effect('chopper','impact',{tx:40,ty:150});const calls=draw(s,[fx]);const rays=calls.filter(c=>c[0]==='lineTo');assert(rays.length>=3);assert(rays.every(c=>c[1]<100));});
+test('normal acquisitions have character-scale signatures and reserve cyan for pickups',()=>{
+ for(const power of [...powers,...remaining]){
+  const calls=draw(state(.1),[effect(power)]),points=vertices(calls);
+  const left=Math.min(...points.map(p=>p[1])),right=Math.max(...points.map(p=>p[1]+(p[0]==='fillRect'?p[3]:0)));
+  assert.ok(right-left>=40,`${power} must read beyond a compact status icon`);
+  assert.ok(!calls.some(c=>c[0]==='set'&&['fillStyle','strokeStyle'].includes(c[1])&&['#71eeff','#bfffe0','#e1fcff'].includes(c[2])));
+ }
+ const wake=draw(state(.1),[effect('chopper','activate',{tx:130,ty:150})]);
+ for(const color of ['#ff43aa','#ffd634'])assert.ok(wake.some(c=>c[0]==='set'&&c[1]==='strokeStyle'&&c[2]===color));
+});
+test('reduced truth retains a static unfilled range ring at the real radius',()=>{
+ const fx=[effect('truth','activate',{r:180})];
+ assert.deepEqual(draw(state(.1),fx,true),draw(state(.3),fx,true));
+ const c=canvas();new PowerArt().drawGround(c,state(.1),fx,true);
+ assert.deepEqual(c.calls.filter(c=>c[0]==='arc'),[['arc',100,150,179,0,Math.PI*2]]);
+ assert.ok(!c.calls.some(c=>c[0]==='fill'||c[0]==='fillRect'));
+});

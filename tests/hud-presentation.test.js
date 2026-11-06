@@ -2,10 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {app} from './helpers/focus-controller.js';
 
-test('movement hint disappears after the tutorial first moves and stays hidden after finishing or restoring',async()=>{
+test('tutorial owns movement instructions and the generic hint stays hidden after moving or restoring',async()=>{
  const a=app(new Map());await a.click('play');a.click('skip-dialogue');
  a.game.s.opening={phase:'move',startedAt:0};a.controller.updateHud();
- assert.equal(a.get('control-hint').classList.contains('hidden'),false);
+ assert.equal(a.get('opening-help').classList.contains('hidden'),false);
+ assert.match(a.get('opening-help-text').textContent,/boug|déplac|gliss/i);
+ assert.equal(a.get('control-hint').classList.contains('hidden'),true);
  a.events.keydown({key:'ArrowRight',target:{},preventDefault(){}});a.controller.frame(performance.now()+50);a.controller.updateHud();
  assert.equal(a.game.s.opening.phase,'shoot');assert.equal(a.get('control-hint').classList.contains('hidden'),true);
  a.game.s.opening.phase='done';a.controller.updateHud();assert.equal(a.get('control-hint').classList.contains('hidden'),true);

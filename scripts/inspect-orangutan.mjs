@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {createCanvas,Image}=require('@napi-rs/canvas');

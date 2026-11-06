@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire} from 'node:module';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';

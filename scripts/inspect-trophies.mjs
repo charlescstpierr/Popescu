@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Real Chromium DOM/canvas QA. No production debug hooks or browser dependency.
 import {spawn} from 'node:child_process';
 import {createServer} from 'node:http';

@@ -92,7 +92,7 @@ function follow(g,c,dt){const dx=g.s.x-c.x,dy=g.s.y-c.y,d=Math.hypot(dx,dy)||1;c
 function nextAttack(g,c){
  c.waveMax=c.powered?380:300;c.capeRadius=c.powered?145:112;
  if(c.attackCount%2===0){c.safeAngle=Math.atan2(g.s.y-c.y,g.s.x-c.x);phase(c,'shock_warning');line(g,'LA VÉRITÉ ARRIVE. Reste dans l’ouverture verte !');}
- else{phase(c,'cape_warning');line(g,'CAPE-LAME. Sors du cercle doré !');}
+ else{phase(c,'cape_warning');line(g,'CAPE-LAME. Sors du cercle rouge !');}
 }
 export function updateCharles(g,dt,previousPlayer){
  const s=g.s,c=s.charles;if(!charlesActive(s))return;

@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Independent offline QA: real threshold crossing and Game/Renderer; no user storage.
 import {createRequire} from 'node:module';
 import {mkdirSync,writeFileSync} from 'node:fs';

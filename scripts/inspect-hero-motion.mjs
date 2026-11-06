@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 import {createRequire}from'node:module';import{mkdirSync,writeFileSync}from'node:fs';import{resolve,dirname}from'node:path';import{fileURLToPath,pathToFileURL}from'node:url';import{spawn}from'node:child_process';import{once}from'node:events';import assert from'node:assert/strict';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),out=resolve(process.argv[2]||root+'/proof/motion'),base=process.argv[3]?resolve(process.argv[3]):null;if(!base)throw Error('Usage: node scripts/inspect-hero-motion.mjs OUTPUT BASELINE_CHECKOUT');mkdirSync(out,{recursive:true});
 const{createCanvas,Image}=createRequire(import.meta.url)('@napi-rs/canvas');globalThis.Image=Image;globalThis.OffscreenCanvas=class{constructor(w,h){return createCanvas(w,h)}};

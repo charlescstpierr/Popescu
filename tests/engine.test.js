@@ -71,8 +71,10 @@ test('city events require proximity and never immediately interrupt the opening'
   const events=[];const g=game({onEvent:(t,p)=>events.push({t,p})});tick(g,5);
   assert.ok(!events.some(e=>e.t==='dialogue'));
   g.s.elapsed=35;const prop=g.world.getVisible(0,0,1500,1500).find(p=>['mirror','phone','bench','bike','bin'].includes(p.type));
-  assert.ok(prop);g.s.x=prop.x;g.s.y=prop.y;g.update(.05);
-  assert.equal(g.s.mode,'playing');assert.ok(events.some(e=>e.t==='bark'));assert.ok(g.eventSeen.has(prop.type));assert.ok(!events.some(e=>e.t==='dialogue'));
+  assert.ok(prop);g.s.x=prop.x;g.s.y=prop.y;
+  const nearby=g.world.getVisible(prop.x,prop.y,360,360).find(p=>awaitedContent.WORLD_REMARKS[p.type]&&Math.hypot(p.x-prop.x,p.y-prop.y)<Math.max(55,p.w*.6));
+  assert.ok(nearby);g.update(.05);
+  assert.equal(g.s.mode,'playing');assert.ok(events.some(e=>e.t==='bark'));assert.ok(g.eventSeen.has(nearby.type));assert.ok(!events.some(e=>e.t==='dialogue'));
 });
 
 test('long travel bounds simulation entities and regenerates the city deterministically', () => {

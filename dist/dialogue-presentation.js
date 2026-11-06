@@ -5,13 +5,17 @@ const ENCOUNTER_ART={
  charles:{name:'CHARLES',spokenName:'Charles l’Illuminé',subtitle:'L’ILLUMINÉ',portrait:'assets/dialogue-charles.png'},
  pelican:{name:'PÉLI ZODIAQUE',spokenName:'Péli Zodiaque',subtitle:'',portrait:'assets/dialogue-pelican.png'},
  travestia:{name:'TRAVESTIA',spokenName:'Travestia',subtitle:'',portrait:'assets/dialogue-travestia.png'},
+ rival_goat:{name:'BOUC RIVAL',spokenName:'Bouc rival',subtitle:'',portrait:'assets/rival_goat-walk-v3.png'},
+ rival_rooster:{name:'COQ RIVAL',spokenName:'Coq rival',subtitle:'',portrait:'assets/rival_rooster-walk-v3.png'},
  companion:{name:'BLONDE IA',spokenName:'Blonde IA',subtitle:'',portrait:'assets/dialogue-companion-1.png'}
 };
-const SPEAKERS={'TOMA':'toma','TOMA POPESCU':'toma','BLONDE IA':'companion','CHARLES':'charles','PÉLI ZODIAQUE':'pelican','TRAVESTIA':'travestia'};
+const SPEAKERS={'BOUC RIVAL':'rival_goat','COQ RIVAL':'rival_rooster','TOMA':'toma','TOMA POPESCU':'toma','BLONDE IA':'companion','CHARLES':'charles','PÉLI ZODIAQUE':'pelican','TRAVESTIA':'travestia'};
 const COMPANION_PORTRAITS=['assets/companion-portrait-1.png','assets/companion-portrait-2.png','assets/companion-portrait-3.png','assets/companion-portrait-4.png','assets/companion-portrait-5.png'];
 // Crop only transparent margins through an SVG viewBox. Source PNGs stay unchanged.
 // The lower silhouette edge sits behind the actual dialogue panel.
 const PORTRAIT_FRAMES={
+ rival_goat:{width:512,height:256,viewBox:[0,0,128,128]},
+ rival_rooster:{width:512,height:256,viewBox:[0,0,128,128]},
  toma:{width:1024,height:1536,viewBox:[0,25,1024,1511]},
  charles:{width:1104,height:1425,viewBox:[0,10,1104,1274]},
  pelican:{width:1024,height:1536,viewBox:[76,219,884,1020]},
@@ -33,7 +37,7 @@ export function encounterPresentation({line,context}={}){
  // The encounter owns the save cursor and actor identity. Only the current
  // line owns the visible portrait, even when Toma answers a boss.
  const encounter=approvedScene(context)?ENCOUNTER_ART[context.actorType]:null;
- const who=line.who||'',speakerType=SPEAKERS[who]||null;
+ const who=line.who||'',speakerType=Object.hasOwn(SPEAKERS,who)?SPEAKERS[who]:null;
  const art=ENCOUNTER_ART[speakerType]||{name:who,spokenName:who,subtitle:'',portrait:null};
  const rank=speakerType==='companion'?Math.max(1,Math.min(5,Math.trunc(Number(context?.companionRank)||1))):null;
  const portraits=rank?(rank===1?[art.portrait,COMPANION_PORTRAITS[0]]:[COMPANION_PORTRAITS[rank-1]]):art.portrait?[art.portrait]:[];
@@ -49,7 +53,7 @@ function set(node,text){if(node)node.textContent=text;}
 function reset(root,doc){
  const state=PRESENTATIONS.get(root);if(!state)return false;
  state.active=false;state.generation++;
- root.classList.remove('encounter-dialogue','encounter-reply','encounter-no-art','encounter-existing-portrait');
+ root.classList.remove('encounter-dialogue','encounter-reply','encounter-no-art','encounter-existing-portrait','encounter-system');
  restoreAttributes(root,state.attributes);restoreAttributes(doc.getElementById('dialogue-text'),state.textAttributes);
  for(const id of ['encounter-header','encounter-visual','encounter-nameplate','encounter-description'])hidden(doc.getElementById(id),true);
  hidden(doc.getElementById('encounter-framed-portrait'),true);
@@ -62,12 +66,12 @@ function loadPortrait(root,portrait,status,state,model,doc){
  const key=`${model.speakerType||model.name}|${model.portraits.join('|')}`;if(state.assetKey===key)return;
  state.assetKey=key;state.generation++;const generation=state.generation;
  portrait.setAttribute('alt','');portrait.setAttribute('aria-hidden','true');
- if(!model.portraits.length){portrait.onload=null;portrait.onerror=null;portrait.removeAttribute?.('src');artImage?.removeAttribute?.('href');hidden(portrait,true);hidden(framed,true);root.classList.add('encounter-no-art');root.classList.remove('encounter-existing-portrait');set(status,model.name==='SYSTÈME'?'MESSAGE SYSTÈME':'Portrait indisponible');return;}
+ if(!model.portraits.length){portrait.onload=null;portrait.onerror=null;portrait.removeAttribute?.('src');artImage?.removeAttribute?.('href');hidden(portrait,true);hidden(framed,true);root.classList.add('encounter-no-art');root.classList.remove('encounter-existing-portrait');set(status,'MESSAGE SYSTÈME');return;}
  const tryImage=index=>{
   if(!state.active||generation!==state.generation)return;
   const source=model.portraits[index];
   hidden(portrait,true);hidden(framed,true);root.classList.add('encounter-no-art');set(status,'');
-  root.classList.toggle('encounter-existing-portrait',source!==ENCOUNTER_ART[model.speakerType]?.portrait);
+  root.classList.toggle('encounter-existing-portrait',source!==ENCOUNTER_ART[model.speakerType]?.portrait||model.speakerType==='rival_goat'||model.speakerType==='rival_rooster');
   const current=()=>state.active&&generation===state.generation&&state.imageAttempt===index;
   state.imageAttempt=index;
   portrait.onload=()=>{if(!current())return;
@@ -90,7 +94,7 @@ export function renderEncounterPresentation({game,line,context,index=0,total=1,d
  const model=encounterPresentation({line,context:resolved});if(!model)return reset(root,doc);
  let state=PRESENTATIONS.get(root);
  if(!state){state={active:true,generation:0,attributes:saveAttributes(root,ROOT_ATTRIBUTES),textAttributes:saveAttributes(doc.getElementById('dialogue-text'),TEXT_ATTRIBUTES)};PRESENTATIONS.set(root,state);}
- root.classList.add('encounter-dialogue');root.classList.toggle('encounter-reply',model.reply);
+ root.classList.add('encounter-dialogue');root.classList.toggle('encounter-reply',model.reply);root.classList.toggle('encounter-system',!model.speakerType);
  root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','speaker');
  root.setAttribute('aria-describedby','encounter-description dialogue-text');
  if(root.removeAttribute)root.removeAttribute('aria-label');

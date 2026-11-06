@@ -1,0 +1,29 @@
+{
+  "source": "cb5ff6b; all original fields except the seven decorative prop positions",
+  "bounds": [
+    -4,
+    4
+  ],
+  "hashes": [
+    {
+      "seed": -1,
+      "sha256": "95363af979de4a6ef684276a3c1791d61da08eac3c779e51e13b328baef12490"
+    },
+    {
+      "seed": 0,
+      "sha256": "1d2422f3529a36d42060b5543d24d61889412105e233786679d7e68156273d3c"
+    },
+    {
+      "seed": 1,
+      "sha256": "2280f3c7889dac1b0fc1d69def9cb0f28c929d2a45a9b439ecc2e239312b7033"
+    },
+    {
+      "seed": 42,
+      "sha256": "da3f8d5ab54f99b596dc9c05e12f8a4ff745338bf52446e39e8a3cb172a35e70"
+    },
+    {
+      "seed": 831,
+      "sha256": "1bfff816c45661be4cf2504a26a536d3fc780a3d4c9d8a1589ef4e1b3facc0de"
+    }
+  ]
+}

@@ -30,31 +30,35 @@ function reeds(c,x,y,r){
 function bridge(c,x,y){
  // Road surface stays level and unobstructed; the exposed masonry below its
  // near edge supplies depth without painting a raised wall across the route.
- rect(c,'#24343d',x-78,y-59,156,137);
- rect(c,'#514759',x-78,y-58,156,116);
- rect(c,'#655969',x-77,y-56,154,6);
- rect(c,'#756671',x-77,y+48,154,10);
+ rect(c,'#172c36',x-78,y-59,156,137);
+ rect(c,'#514c54',x-78,y-58,156,116);
+ rect(c,'#8d7d7b',x-77,y-56,154,6);
+ rect(c,'#302f40',x-77,y-50,154,5);
+ rect(c,'#8e7b78',x-77,y+48,154,10);
  for(let row=-42;row<49;row+=16){
-  rect(c,'#615466',x-75,y+row,150,1);
-  for(let col=-68;col<76;col+=28)rect(c,'#756473',x+col+(row%32===-10?8:0),y+row-10,2,2);
+  rect(c,'#3c3a46',x-75,y+row,150,1);
+  rect(c,'#70656a',x-74,y+row+1,148,1);
+  for(let col=-68;col<65;col+=28){const offset=row%32===-10?8:0;rect(c,'#3f3b46',x+col+offset,y+row-14,1,14);rect(c,'#7e716f',x+col+offset+2,y+row-12,12,1);}
  }
  // Arch cutout is filled with the shaded stream, not erased (tiles are opaque).
- rect(c,'#71616e',x-77,y+58,154,19);
- for(let xx=-76;xx<76;xx+=19){rect(c,'#a28b91',x+xx,y+59,17,2);rect(c,'#4c4459',x+xx,y+62,1,13);}
- rect(c,'#baa29e',x-78,y+55,156,3);
- rect(c,'#403b50',x-78,y+76,156,3);
- c.fillStyle='#203f4a';c.beginPath();c.moveTo(x-57,y+79);c.quadraticCurveTo(x-52,y+57,x,y+61);c.quadraticCurveTo(x+52,y+57,x+57,y+79);c.closePath();c.fill();
- c.strokeStyle='#a38b8c';c.lineWidth=4;c.beginPath();c.moveTo(x-61,y+79);c.quadraticCurveTo(x-56,y+53,x,y+57);c.quadraticCurveTo(x+56,y+53,x+61,y+79);c.stroke();
+ rect(c,'#807076',x-77,y+58,154,19);
+ for(let xx=-76;xx<76;xx+=19){rect(c,'#c3a695',x+xx,y+59,17,2);rect(c,'#493e50',x+xx,y+62,2,13);}
+ rect(c,'#d5baa1',x-78,y+54,156,4);
+ rect(c,'#322e40',x-78,y+58,156,3);
+ rect(c,'#272d3e',x-78,y+76,156,3);
+ c.fillStyle='#132e3b';c.beginPath();c.moveTo(x-57,y+79);c.quadraticCurveTo(x-52,y+57,x,y+61);c.quadraticCurveTo(x+52,y+57,x+57,y+79);c.closePath();c.fill();
+ c.strokeStyle='#cfb49e';c.lineWidth=5;c.beginPath();c.moveTo(x-61,y+79);c.quadraticCurveTo(x-56,y+53,x,y+57);c.quadraticCurveTo(x+56,y+53,x+61,y+79);c.stroke();
+ for(const side of [-1,1])poly(c,'#907e7d',[[x+side*13,y+58],[x+side*21,y+58],[x+side*24,y+65],[x+side*17,y+64]]);
  for(const side of [-1,1]){
   const rail=y+side*58;
   // Open iron balustrade, low enough that actors always remain legible.
-  rect(c,'#252b3d',x-65,rail-13,130,3);
-  for(let xx=-58;xx<=58;xx+=14){rect(c,'#252b3d',x+xx,rail-11,3,11);rect(c,'#8c7d8b',x+xx,rail-10,1,8);}
-  rect(c,'#a59699',x-65,rail-14,130,2);rect(c,'#b4a09c',x-65,rail-1,130,2);
+  rect(c,'#1b2736',x-65,rail-13,130,4);
+  for(let xx=-58;xx<=58;xx+=14){rect(c,'#1c2534',x+xx,rail-11,4,11);rect(c,'#a59288',x+xx,rail-10,1,8);}
+  rect(c,'#dac1a8',x-65,rail-15,130,2);rect(c,'#c4aa98',x-65,rail-1,130,2);
   for(const end of [-1,1]){
    const px=x+end*72;
-   rect(c,'#302d40',px-7,rail-19,14,23);rect(c,'#82717c',px-6,rail-18,12,21);
-   rect(c,'#b4a09a',px-6,rail-19,12,3);rect(c,'#c6afa3',px-6,rail-16,2,17);rect(c,'#574c60',px+3,rail-16,3,19);
+   rect(c,'#292c3c',px-7,rail-19,14,23);rect(c,'#8f7b7c',px-6,rail-18,12,21);
+   rect(c,'#d9bfa4',px-6,rail-19,12,3);rect(c,'#d3b8a0',px-6,rail-16,2,17);rect(c,'#4b4256',px+3,rail-16,3,19);
   }
  }
 }

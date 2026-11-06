@@ -9,6 +9,7 @@ function detailHash(p){
 }
 export function presentSceneryProp(p){
  if(!p||p.presentationApplied)return p;
+ if(p.type==='pine')return {...p,artVariant:detailHash(p)%20,presentationApplied:true};
  if(!p.solid&&looseClutter.has(p.type)&&detailHash(p)%4!==0)return null;
  if(p.type==='building'&&p.w>=100){
   const district=mod(Math.floor(p.x/512)+2*Math.floor(p.y/512),4);

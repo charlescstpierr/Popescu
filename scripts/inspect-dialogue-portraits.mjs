@@ -1,3 +1,5 @@
+import {registerInspectionFonts} from './canvas-fonts.mjs';
+registerInspectionFonts();
 // Native decoding + production SVG framing. This is not a browser/CSS screenshot.
 import {createRequire} from 'node:module';
 import {writeFileSync,mkdirSync} from 'node:fs';
