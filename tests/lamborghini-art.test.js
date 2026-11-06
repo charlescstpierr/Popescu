@@ -1,7 +1,7 @@
 import {TELEGRAPH_STYLES} from '../dist/combat-art.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Renderer} from '../dist/renderer.js';
+import {drawIcon,Renderer} from '../dist/renderer.js';
 import {Game} from '../dist/engine.js';
 import {drawLamborghini} from '../dist/lamborghini-art.js';
 function fixture(){const calls=[],target={fillStyle:'',strokeStyle:'',globalAlpha:1,fillRect(...p){calls.push(['rect',this.fillStyle,...p]);},fill(){calls.push(['fill',this.fillStyle]);},stroke(){calls.push(['stroke',this.strokeStyle]);},createRadialGradient(){return{addColorStop(){}};}};const ctx=new Proxy(target,{get:(t,k)=>k in t?t[k]:(...p)=>calls.push([k,...p])}),renderer=new Renderer({getContext:()=>ctx});return{ctx,calls,renderer};}
@@ -18,3 +18,10 @@ test('copper body, white headlights and motion cues stay readable throughout bot
  }
 });
 test('real render raises hostile warning outlines above a new car without mutating state',()=>{const {renderer,calls}=fixture(),g=new Game({seed:42});g.s.upg.car=3;g.timers.car=0;g.weapons(0);g.s.vehicles[0].x=0;const e=g.spawnEnemy('explosive',0,40);e.windup=.5;renderer._drawGround=()=>{};renderer._actor=()=>{};g.world.getVisible=()=>[];const before=JSON.stringify(g.s);renderer.render(g,1);assert.equal(JSON.stringify(g.s),before);const car=calls.findLastIndex(c=>c[0]==='fill'&&c[1]==='#bc572c');const danger=calls.findLastIndex(c=>c[0]==='stroke'&&c[1]===TELEGRAPH_STYLES.blast.edge);assert.ok(car>=0&&danger>car,'warning contour is painted after the opaque car');});
+
+test('Lamborghini upgrade icon shares the copper body palette of the world coupe',()=>{
+ const {ctx,calls}=fixture();drawIcon(ctx,'car',0,0);
+ assert.ok(calls.some(c=>c[0]==='fill'&&c[1]==='#bc572c'));
+ assert.ok(!calls.some(c=>c[0]==='fill'&&c[1]==='#ffd634'));
+ assert.ok(calls.some(c=>c[0]==='rect'&&c[1]==='#ffc279'));
+});

@@ -43,3 +43,15 @@ test('mirror and reduced-effects draws preserve actor state and approved body si
   ctx.clearRect(0,0,180,180);assert.equal(art.draw(ctx,e,'enemy',2,s,999,true),true);assert.equal(hash(c),first,'wall time does not move a cached step');
  }
 });
+test('distant accessories use one cached body blit and reduced mode keeps the approved frame',options,()=>{
+ const canvas=native.createCanvas(220,200),ctx=canvas.getContext('2d'),draw=ctx.drawImage,calls=[];
+ ctx.drawImage=function(...args){calls.push(args);return draw.apply(this,args);};
+ const e={type:'gas',x:110,y:170,faceX:1,faceY:0},near={x:110,y:170},far={x:-500,y:170};
+ art.draw(ctx,e,'enemy',2,near,0,false);const nearFrame=calls.at(-1)[0];
+ calls.length=0;art.draw(ctx,e,'enemy',2,far,0,false);assert.equal(calls.length,2,'one rim and one precomposed whole frame');const dim=calls.at(-1)[0];
+ assert.notEqual(hash(dim),hash(nearFrame),'distant accessories are quieter');
+ calls.length=0;art.draw(ctx,e,'enemy',2,far,0,false);assert.equal(calls.at(-1)[0],dim,'precomposed pixels are reused');
+ calls.length=0;art.draw(ctx,e,'enemy',2,far,0,true);assert.equal(calls.length,1);assert.equal(calls[0][0],nearFrame,'reduced mode skips dimming');
+ for(let i=0;i<400;i++)art.frame('enemy',i%4,Boolean(i%2),`bounded-${i}`,false,i%4);
+ assert.ok(art.cache.size<=288);
+});
