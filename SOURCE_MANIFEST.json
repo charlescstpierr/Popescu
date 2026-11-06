@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -509,8 +509,8 @@
     },
     {
       "path": "dist/app.js",
-      "bytes": 50178,
-      "sha256": "218b14107339d2f70dfa3243b41d64be2806414be3748995862d437781338881"
+      "bytes": 50175,
+      "sha256": "eafbe1fcc00d8b5df24b186862a7fb51f21a5fa2bf077c3003ea4fcb09352c69"
     },
     {
       "path": "dist/assets/actors-v2.json",
@@ -874,8 +874,8 @@
     },
     {
       "path": "dist/opening.js",
-      "bytes": 2610,
-      "sha256": "df42de2246ab85b98f2f04c1dd4b4cc3f9101f5ec3d1c82c17cacb744f1eb52b"
+      "bytes": 3042,
+      "sha256": "2d0860bcd82db14f703509a81e5f7b568c9441b10d4990476776f70513549c1f"
     },
     {
       "path": "dist/pelican-art.js",
@@ -1236,6 +1236,11 @@
       "path": "docs/QA-INTEGRATION.md",
       "bytes": 2125,
       "sha256": "3ff33cec0c27dda263bc898881d9f8ab4ca7e7d51c26b8de1d26fdc759e7aa98"
+    },
+    {
+      "path": "docs/QA-INTRO-APPROVED.md",
+      "bytes": 2982,
+      "sha256": "1755580ce3870da8048785190e46d4247926cc9aa3556a481d729af03a7442da"
     },
     {
       "path": "docs/QA-INTRO-THEATRE.md",
@@ -1840,12 +1845,12 @@
     {
       "path": "release/OFFLINE_MANIFEST.json",
       "bytes": 7312,
-      "sha256": "85501c17e715daf3eee2f464b2325641b78faa765aaaf4954f74d5c4c6022c87"
+      "sha256": "d7eb6ccda9de69fedfbdee3da7f9ae278f69b4f6dd6288136b8739326f328fc2"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 761116,
-      "sha256": "4f5834141f4e8209aaee763571b0c8a2e6d9f4065209d6ce389484faf0deea3b"
+      "bytes": 761548,
+      "sha256": "3071507dcaaa5e56350a17da92f6deb343e0b671ebf0fafa919c2b6e3dc84107"
     },
     {
       "path": "release/archives/README.md",
@@ -2484,8 +2489,8 @@
     },
     {
       "path": "tests/app-records.test.js",
-      "bytes": 27234,
-      "sha256": "c56c3a40262a758c78575013d3eaa13bf66ec7655789e7b07f55d694438115b1"
+      "bytes": 27284,
+      "sha256": "832adcf50b109eba50b8195d2b86ae76f64b4477deded287299a57029294246c"
     },
     {
       "path": "tests/asset-loading-ui.test.js",
@@ -2665,7 +2670,7 @@
     {
       "path": "tests/dialogue-focus.test.js",
       "bytes": 5660,
-      "sha256": "83131bfcc4d5187ad0d7696539d830e146b577badb8e0a8cd3cc7fb23110beb7"
+      "sha256": "8c5b19a2dac1f1c123648d0809d43736cd3cf8ffe3c5bc21bd03cd7f6c63070a"
     },
     {
       "path": "tests/dialogue-presentation.test.js",
@@ -2963,6 +2968,11 @@
       "sha256": "6e70b55e0b9ed69bd311984fda0709734962377f27f2f95b947a43f8d5e4ebb6"
     },
     {
+      "path": "tests/opening-approved.test.js",
+      "bytes": 3503,
+      "sha256": "394367f2942ffb45f9ddff0a2b083b6d8de64b5e496f9890aaf2b922e2a6c3a2"
+    },
+    {
       "path": "tests/opening-layout.test.js",
       "bytes": 807,
       "sha256": "7947cba800a5f8dd43e787059e6b1645cfc0f04827247d0223587933c99cd0d6"
@@ -2974,8 +2984,8 @@
     },
     {
       "path": "tests/opening.test.js",
-      "bytes": 4464,
-      "sha256": "288727b0dc232b3eced5be3d988ef03adc185f146b67564c5be312f935593d6d"
+      "bytes": 4414,
+      "sha256": "55c5c74435625c3a29e2204f5106b0a6002e2e102be53991cb892c66e5c64f14"
     },
     {
       "path": "tests/orangutan-art.test.js",
@@ -3139,8 +3149,8 @@
     },
     {
       "path": "tests/speaker-portraits.test.js",
-      "bytes": 6080,
-      "sha256": "773061ad844d7685ecaa0e30b8313be59323029d56bc2985b1697b8ef6b07fdb"
+      "bytes": 6100,
+      "sha256": "0ac81c0a942e5f351a4e0f2772d75d6b612e115518e2ccf7477f6fb05c4c1202"
     },
     {
       "path": "tests/stability-integration.test.js",
@@ -3164,8 +3174,8 @@
     },
     {
       "path": "tests/start-visuals.test.js",
-      "bytes": 5026,
-      "sha256": "ed900bdf6981c4991e9c2307b4902aa712b1e298975dd82bde774468708eaace"
+      "bytes": 4812,
+      "sha256": "2d86241e926e0cd9c21e3cb2f9e61031bbaf461907a47b5077594a97195ff5d8"
     },
     {
       "path": "tests/story-conversations.test.js",
@@ -3278,7 +3288,7 @@
       "sha256": "e7b35347b505e56837aa5e15e644ba2fb0b95abd9293f21e2ffe180d040e096c"
     }
   ],
-  "base_github_commit": "206de57093dd09b8cfcd03a5035abee7d6f17a8f",
+  "base_github_commit": "32590d1e4bfc1d3770a7ffa758a4717ddb9d9dcf",
   "integration_date": "2026-11-06",
   "offline_release": {
     "format": "offline-folder-v1",
@@ -3286,5 +3296,5 @@
     "manifest": "release/OFFLINE_MANIFEST.json",
     "standalone_output": "generated/standalone/Toma_Popescu_JOUER.html"
   },
-  "base_github_tree": "3e55aaadffea16c17d2073ba9bd9ddb15b9bc30c"
+  "base_github_tree": "0c016d3d6832923588378dfe48feac60f6c9b4dd"
 }

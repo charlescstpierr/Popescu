@@ -55,8 +55,8 @@ test('AUTO, blur and visibility cannot advance or restore an obsolete speaker',a
 test('opening preserves every action, explanatory reply and manual progression',async t=>{
  t.mock.timers.enable({apis:['setTimeout']});const a=app(new Map());await a.click('play');
  for(let i=0;i<OPENING.length;i++){
-  assert.equal(a.get('encounter-name').textContent,OPENING[i].who==='TOMA'?'TOMA POPESCU':'SYSTÈME');assert.equal(a.get('next-dialogue').textContent,OPENING[i].action);assert.equal(a.get('opening-reply-text').textContent,OPENING[i].reply);
-  t.mock.timers.tick(60000);assert.equal(a.get('dialogue-progress').textContent,`${i+1} / 3`);a.click('next-dialogue');
+  assert.equal(a.get('encounter-name').textContent,OPENING[i].who==='TOMA'?'TOMA POPESCU':OPENING[i].who);assert.equal(a.get('next-dialogue').textContent,OPENING[i].action);assert.equal(a.get('opening-reply-text').textContent,OPENING[i].reply);
+  t.mock.timers.tick(60000);assert.equal(a.get('dialogue-progress').textContent,`${i+1} / ${OPENING.length}`);a.click('next-dialogue');
  }
  assert.equal(a.controller.screen,'hud');
 });

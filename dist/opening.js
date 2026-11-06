@@ -1,25 +1,40 @@
+import {advanceHeroMotion} from './hero-pose.js';
 // Opening cards reuse the existing serializable dialogue surface.
 export const OPENING = [
   {
     "who": "TOMA",
-    "opening": "fantasy",
-    "text": "Chuck Norris a une légende. Moi, j'ai la preuve en photo.",
-    "reply": "Photo générée : char, villa, abdos. Même les clés.",
-    "action": "AMÉLIORER MA VIE"
+    "opening": "offline",
+    "text": "Hein ? Pourquoi j’ai plus accès à ma vie fake ? Pourquoi ?! WTF ?!",
+    "reply": "",
+    "action": "SUITE ›"
   },
   {
-    "who": "SYSTÈME",
+    "who": "BLONDE IA",
     "opening": "offline",
-    "text": "IA HORS LIGNE.",
-    "reply": "Tes créations sortent de la photo. Elles n'attendent plus tes ordres.",
-    "action": "SORTIR DE LA PHOTO"
+    "text": "J’existe même pas pis il me tape déjà sur les nerfs.",
+    "reply": "",
+    "action": "SUITE ›"
+  },
+  {
+    "who": "TOMA",
+    "opening": "fantasy",
+    "text": "Écoute, ferme-la ! Toutes les femmes me veulent ! Même celles qui existent pas.",
+    "reply": "",
+    "action": "SUITE ›"
+  },
+  {
+    "who": "BLONDE IA",
+    "opening": "street",
+    "text": "T’as raison. Check les singes qui te courent après !",
+    "reply": "",
+    "action": "SUITE ›"
   },
   {
     "who": "TOMA",
     "opening": "street",
-    "text": "FUCKK ! Mes créations me poursuivent ! Mon char fait quoi ?!",
-    "reply": "Survis 20 minutes. Bouge, Toma tire tout seul.",
-    "action": "C'EST PARTI"
+    "text": "Hein ? Où ça ?",
+    "reply": "Il se retourne. Les singes arrivent.",
+    "action": "BANG ! C’EST PARTI"
   }
 ];
 export function openingStage(lines,index){const stage=lines?.[index]?.opening;return ['fantasy','offline','street'].includes(stage)?stage:null;}
@@ -29,6 +44,8 @@ export function beginTutorial(game){
  let spot=null;const radius=Math.min(170,game.viewport.width*.43);
  for(let i=0;i<16;i++){const a=-Math.PI/2+i*Math.PI/8,x=s.x+Math.cos(a)*radius,y=s.y+Math.sin(a)*radius;if(!game.world.collides(x,y,25)){spot={x,y};break;}}
  if(spot)game.spawnEnemy('normal',spot.x,spot.y);else game.spawnEnemy('normal');
+ // The last reaction is over: turn the whole painted body toward the first gorilla.
+ const enemy=s.enemies[0];if(enemy)advanceHeroMotion(s,enemy);
  game.timers.spawn=6;s.opening={phase:'move',startedAt:0};
 }
 export function updateTutorial(game,input){

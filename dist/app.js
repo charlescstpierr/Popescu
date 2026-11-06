@@ -171,7 +171,7 @@ function renderDialogue(){
  const stage=openingStage(dialogueLines,dialogueIndex),girl=l.who==='BLONDE IA';
  for(const name of ['fantasy','offline','street'])$('dialogue').classList.toggle(`opening-${name}`,stage===name);
  $('dialogue').classList.toggle('opening',Boolean(stage));$('auto-dialogue').classList.toggle('hidden',Boolean(stage));
- $('opening-reply').classList.toggle('hidden',!stage);$('opening-avatar').classList.toggle('hidden',stage!=='fantasy');setText('opening-reply-text',l.reply||'');
+ $('opening-reply').classList.toggle('hidden',!stage||!l.reply);$('opening-avatar').classList.toggle('hidden',true);setText('opening-reply-text',l.reply||'');
  setText('speaker',l.who==='TOMA'?'TOMA POPESCU':l.who);setText('dialogue-text',l.text);setText('dialogue-progress',`${dialogueIndex+1} / ${dialogueLines.length}`);
  $('portrait').src=girl?'assets/portrait-blonde-ia.webp':'assets/portrait-toma-current.webp';$('scene-art').src=girl?'assets/portrait-blonde-ia.webp':l.who==='SYSTÈME'?'assets/scene-gorilles.webp':'assets/couverture-personnages.webp';
  setText('next-dialogue',l.action||(dialogueIndex===dialogueLines.length-1?'C’EST PARTI ›':'SUITE ›'));

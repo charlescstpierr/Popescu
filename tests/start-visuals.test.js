@@ -29,26 +29,25 @@ test('a returning player starts directly with the current Toma face in the compa
  a.controller.showBanter({who:'TOMA',text:'Réponse.'});assert.equal(a.get('banter-portrait').src,portrait);
  assert.equal(JSON.parse(a.values.get('toma-popescu-v1')).introSeen,true);
 });
-test('opening keeps large Toma portraits and never borrows a face for the system card',async t=>{
+test('opening keeps the large portrait of each speaking character',async t=>{
  t.mock.timers.enable({apis:['setTimeout']});const a=app(new Map());await a.click('play');
  for(let index=0;index<OPENING.length;index++){
-  const root=a.get('dialogue'),system=index===1;
+  const root=a.get('dialogue');
   assert.equal(root.classList.contains('encounter-dialogue'),true);
-  if(!system)assert.equal(a.get('encounter-portrait').src,'assets/dialogue-toma.png');
-  else {assert.equal(a.get('encounter-framed-image').getAttribute('href'),null);assert.equal(a.get('encounter-framed-portrait').getAttribute('hidden'),'');assert.equal(a.get('encounter-art-status').textContent,'MESSAGE SYSTÈME');}
+  assert.equal(a.get('encounter-portrait').src,OPENING[index].who==='TOMA'?'assets/dialogue-toma.png':'assets/dialogue-companion-1.png');
   assert.equal(a.get('next-dialogue').textContent,OPENING[index].action);
   assert.equal(a.get('opening-reply-text').textContent,OPENING[index].reply);
   assert.equal(a.get('auto-dialogue').classList.contains('hidden'),true);
-  t.mock.timers.tick(60000);assert.equal(a.get('dialogue-progress').textContent,`${index+1} / 3`);
+  t.mock.timers.tick(60000);assert.equal(a.get('dialogue-progress').textContent,`${index+1} / ${OPENING.length}`);
   a.click('next-dialogue');
  }
  assert.equal(a.controller.screen,'hud');assert.equal(a.get('dialogue').classList.contains('encounter-dialogue'),false);
 });
-test('resuming the system opening card preserves its exact progress without a borrowed face',async()=>{
+test('resuming the companion opening card preserves its exact progress and portrait',async()=>{
  const a=app(new Map());await a.click('play');a.click('next-dialogue');assert.equal((await a.controller.persistRun()).ok,true);
  const saved=a.values.get('toma-popescu-run-v1'),b=app(a.values);await b.click('resume-saved');assert.equal(b.controller.screen,'pause-screen');b.click('resume');
- assert.equal(b.get('dialogue-progress').textContent,'2 / 3');assert.equal(b.get('encounter-art-status').textContent,'MESSAGE SYSTÈME');
- assert.equal(b.get('encounter-framed-portrait').getAttribute('hidden'),'');assert.equal(b.values.get('toma-popescu-run-v1'),saved);
+ assert.equal(b.get('dialogue-progress').textContent,'2 / 5');assert.equal(b.get('encounter-portrait').src,'assets/dialogue-companion-1.png');
+ assert.equal(b.get('encounter-name').textContent,'BLONDE IA');assert.equal(b.values.get('toma-popescu-run-v1'),saved);
  b.click('next-dialogue');assert.equal(b.get('encounter-portrait').src,'assets/dialogue-toma.png');assert.equal(b.get('encounter-visual').getAttribute('hidden'),null);
  b.click('skip-dialogue');assert.equal(b.controller.screen,'hud');assert.equal(b.game.s.opening.phase,'shoot');
 });
@@ -58,12 +57,12 @@ test('ordinary system messages also keep their own name without a portrait',asyn
  assert.equal(a.get('encounter-art-status').textContent,'MESSAGE SYSTÈME');
 });
 
-test('a late Toma image load cannot put a human face on the system opening card',async()=>{
+test('a late Toma image load cannot replace the companion opening portrait',async()=>{
  const a=app(new Map());await a.click('play');const portrait=a.get('encounter-portrait'),oldLoad=portrait.onload;
  a.click('next-dialogue');oldLoad();
- assert.equal(a.get('encounter-name').textContent,'SYSTÈME');
+ assert.equal(a.get('encounter-name').textContent,'BLONDE IA');
  assert.equal(a.get('encounter-framed-portrait').getAttribute('hidden'),'');
- assert.equal(a.get('encounter-framed-image').getAttribute('href'),null);
+ assert.equal(a.get('encounter-portrait').src,'assets/dialogue-companion-1.png');
  a.click('next-dialogue');portrait.onload();
  assert.equal(a.get('encounter-name').textContent,'TOMA POPESCU');
  assert.equal(a.get('encounter-framed-image').getAttribute('href'),'assets/dialogue-toma.png');

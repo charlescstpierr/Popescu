@@ -52,7 +52,7 @@ test('saved companion dialogue keeps its current line through blur and reload',a
  b.click('auto-dialogue');b.events.blur();tickAll(t);assert.equal(progress(b),'2 / 5');b.events.focus?.();t.mock.timers.tick(delay(b));assert.equal(progress(b),'3 / 5');
 });
 test('opening remains manual across focus and visibility changes even with AUTO set',async t=>{
- t.mock.timers.enable({apis:['setTimeout']});const a=app(new Map());await a.click('play');a.click('auto-dialogue');a.events.blur();hidden(a,true);a.events.focus?.();hidden(a,false);tickAll(t);assert.equal(progress(a),'1 / 3');assert.equal(a.game.s.mode,'dialogue');
+ t.mock.timers.enable({apis:['setTimeout']});const a=app(new Map());await a.click('play');a.click('auto-dialogue');a.events.blur();hidden(a,true);a.events.focus?.();hidden(a,false);tickAll(t);assert.equal(progress(a),'1 / 5');assert.equal(a.game.s.mode,'dialogue');
 });
 
 test('an already queued AUTO callback rechecks visibility before advancing',async t=>{
