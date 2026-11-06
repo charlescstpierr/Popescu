@@ -1,5 +1,5 @@
 {
-  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection-native-start-confirmation-focus-approved-gorilla-accessories",
+  "version": "1.5-plus-four-ego-beasts-decor-save-v15-offline-folder-varied-upgrades-contextual-companion-cues-cancelled-start-playtest-fixes-hud-space-activation-protected-damage-audio-story-onboarding-boss-dismissal-toma-fourteen-directions-charles-flight-snap-ego-animation-v2-ordinary-attacks-distance-gait-complete-explosive-warning-radius-photo-corrected-toma-speaker-portraits-cabane-safe-controls-current-compact-toma-portraits-automatic-charles-at-twenty-minutes-charles-twelve-whole-motion-poses-tarot-airborne-body-swept-lamborghini-bumper-readable-opening-theatrical-opening-approved-five-line-opening-distinct-companion-reference-designs-consistent-toma-fourteen-directions-foreground-combat-warnings-numeric-crowd-neighborhoods-pause-save-exit-protection-native-start-confirmation-focus-approved-gorilla-accessories-approved-smaller-head-toma",
   "source_site_commit": "a19686f970dd7b7a9e2c0b889ae3cc2c027db86b",
   "files": [
     {
@@ -9,8 +9,8 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 6443,
-      "sha256": "f9b494636eb5a5760b9e664b539385c19213760acd0b99d44d0b4d2b993268fa"
+      "bytes": 6745,
+      "sha256": "c16c3a09df6ff49c5768f25b864af862b08396ca7ec1962111bf816dcd80dcb6"
     },
     {
       "path": "README.md",
@@ -453,6 +453,61 @@
       "sha256": "438646594b99021c66d9b439e15213ab2149538e97a99ae7d02a0246d5d493d4"
     },
     {
+      "path": "art/source/toma-smaller-head/E.png",
+      "bytes": 805780,
+      "sha256": "518f73720b1ac871135a81453896f4d3c661a3f48d2831123ddb228002f98e2a"
+    },
+    {
+      "path": "art/source/toma-smaller-head/MSE.png",
+      "bytes": 1069876,
+      "sha256": "ff9e315c3f67e04388f9b6728415805303a131dabab46d8c133ccb78e751240b"
+    },
+    {
+      "path": "art/source/toma-smaller-head/N.png",
+      "bytes": 1167006,
+      "sha256": "4c43e2490fc218d4ea5e7455a245c559e8712cc646727cfac54cc58a005ad244"
+    },
+    {
+      "path": "art/source/toma-smaller-head/NE.png",
+      "bytes": 999257,
+      "sha256": "26efa885e9a393984609a2a5d44294b72d9d05abc160fcd926542d8c4b39eb2d"
+    },
+    {
+      "path": "art/source/toma-smaller-head/NNE.png",
+      "bytes": 1184187,
+      "sha256": "dbe1c734ee93ee707d8a90cbec268a36d88bfad5c56a29d0720116d2a41e9c06"
+    },
+    {
+      "path": "art/source/toma-smaller-head/S.png",
+      "bytes": 1127447,
+      "sha256": "7c5e7e63c2c100b589d3ebeca18e5b457be90422b1524a98ce569580f1b8fe9f"
+    },
+    {
+      "path": "art/source/toma-smaller-head/SE.png",
+      "bytes": 914653,
+      "sha256": "696cb8df0ea5f836c4ecdb574bf752557dc1c077878a99d03df128882f4191fa"
+    },
+    {
+      "path": "art/source/toma-smaller-head/SSE.png",
+      "bytes": 1198120,
+      "sha256": "0728c249d87b85fde0e27a16555753f35516cca68aa7a7abe1b86cb2663b3c29"
+    },
+    {
+      "path": "art/source/toma-smaller-head/baseline-frames-v8.json",
+      "bytes": 49214,
+      "sha256": "0a874e90ef4be3fb7cd233b24ad82d027b386052d1cd9605ba88e78cff3b6a73"
+    },
+    {
+      "path": "art/source/toma-smaller-head/prompts.json",
+      "bytes": 9076,
+      "sha256": "4f8d4566532c696dd58a593b5c41b5c97af8df5fb06fa57f407f472d83f11503"
+    },
+    {
+      "path": "art/source/toma-smaller-head/registration.json",
+      "bytes": 54322,
+      "sha256": "28f0e00bbca330a52f6aa3b03e9ecfcd458875da3deabf3a8284be5a9c63a338"
+    },
+    {
       "path": "art/source/toma-turns/README.md",
       "bytes": 1680,
       "sha256": "4b5477f3f6e7badf5b0cf14ab5cd9e6a0d29010a6adbc6a1f44e73f8e096ccc0"
@@ -793,6 +848,11 @@
       "sha256": "79ed9609511e2bda48962d569fb1ebfd6f440d1cfcfd3dfb8d883115658f4fea"
     },
     {
+      "path": "dist/assets/toma-whole-v9.png",
+      "bytes": 666258,
+      "sha256": "0996d1d09c1ccf93e57b8c59c68d8ab80e7466eb1767d837da3dfbab050bcde4"
+    },
+    {
       "path": "dist/assets/travestia-dash.png",
       "bytes": 184441,
       "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
@@ -930,12 +990,12 @@
     {
       "path": "dist/hero-art.js",
       "bytes": 3454,
-      "sha256": "eef6f32d2ae2cc60f762cccf68452e83b854459b93bd5908e957b43e24fa262a"
+      "sha256": "bb5751c051a57f4f26b79cf93e6b85d24a8c1134e10148e6fadce2b7bd6466f2"
     },
     {
       "path": "dist/hero-frames.js",
-      "bytes": 148331,
-      "sha256": "2baad0404b2b332d7eac9a72f64dcf2ed34a160ca59de2b7282c1ff36ba3c252"
+      "bytes": 154446,
+      "sha256": "9caf042109b3e0d967b070e5b685662e8bca463065907e8f657cfdfde6279e37"
     },
     {
       "path": "dist/hero-pose.js",
@@ -1493,6 +1553,11 @@
       "sha256": "b5aa12f94781644c7f60796a503982c8c9767fde33a5f8c12d998e0bc0a261ca"
     },
     {
+      "path": "docs/QA-TOMA-SMALLER-HEAD.md",
+      "bytes": 3906,
+      "sha256": "e8d8e9b63f85754fa62f2227d4ad1b10dcd9c8bea26c77c76600b9e8c7b03e66"
+    },
+    {
       "path": "docs/QA-TRAVESTIA.md",
       "bytes": 2913,
       "sha256": "d57c5323cb2ece2a02eadccee52c5176ccc3e21990521ebbd960fb2c3b5c7af8"
@@ -1611,6 +1676,11 @@
       "path": "docs/superpowers/plans/2026-11-06-intro-theatre.md",
       "bytes": 1127,
       "sha256": "3a37df969731207e12629940954093065cfe0cc1fe5f12b2463245f0fb68a0b5"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-11-06-toma-smaller-head.md",
+      "bytes": 1485,
+      "sha256": "091f62d4e201daf9213ce15b77fdf811b55cc1ac838d195ffb2eba146e8e0e8b"
     },
     {
       "path": "package.json",
@@ -1963,6 +2033,16 @@
       "sha256": "a4619f744bc74dd275db42cb4dcfd46fb303220e5f9b3fc027adcf2d29f2bc3c"
     },
     {
+      "path": "proof/toma-smaller-head/browser-report.json",
+      "bytes": 432,
+      "sha256": "7acdec43da29da8a15cebcaf761838431e5d57de91756c58ddaa6a90fa3482e7"
+    },
+    {
+      "path": "proof/toma-smaller-head/motion-summary.json",
+      "bytes": 1555,
+      "sha256": "d5bf169475ca48a813d317b0f36d509e0082d05894989deff1f3f963750eff6a"
+    },
+    {
       "path": "proof/trophies/effects-320-reduced.png",
       "bytes": 95320,
       "sha256": "ba96ad559acdb043a78c3716e5a27989d3f994e01c5ca24bf2c66d24a344d7b0"
@@ -2009,13 +2089,13 @@
     },
     {
       "path": "release/OFFLINE_MANIFEST.json",
-      "bytes": 7473,
-      "sha256": "b0326a2c4ad034347cbbe996d9b16b9e5cb8cefee30dbc3bf44735b0a98fddf1"
+      "bytes": 7634,
+      "sha256": "0cfe509951b618d40854b54308a5ba9d42f61e3eef5abc0b14d019a1633b233e"
     },
     {
       "path": "release/Toma_Popescu_JOUER.html",
-      "bytes": 773798,
-      "sha256": "27e3b3ee0a6837880d9f346ac9c712439686d126aef9e48d03b7c3160dfdcb1c"
+      "bytes": 779913,
+      "sha256": "4f9364806283a0214353a309fbcf761769387531ca5adbb68f2d1b73b48055c6"
     },
     {
       "path": "release/archives/README.md",
@@ -2233,6 +2313,11 @@
       "sha256": "79ed9609511e2bda48962d569fb1ebfd6f440d1cfcfd3dfb8d883115658f4fea"
     },
     {
+      "path": "release/assets/toma-whole-v9.png",
+      "bytes": 666258,
+      "sha256": "0996d1d09c1ccf93e57b8c59c68d8ab80e7466eb1767d837da3dfbab050bcde4"
+    },
+    {
       "path": "release/assets/travestia-dash.png",
       "bytes": 184441,
       "sha256": "cce88e50338b99d36d73c266e8d0ff82de2c27e0293d107adeabed9cae192dc6"
@@ -2413,14 +2498,19 @@
       "sha256": "c1dd31430bd44e6ad29428393cd4a9bb2f455579cf86b7c5e4969ffcdb259682"
     },
     {
+      "path": "scripts/inspect-hero-head-transitions.mjs",
+      "bytes": 8289,
+      "sha256": "0f779cff9bfad7085192a7ed92b3d91ec3ed4e01c216c963d8bafacc7570133f"
+    },
+    {
       "path": "scripts/inspect-hero-motion.mjs",
       "bytes": 3730,
       "sha256": "164c5bff5517be3fcf9299a7a9672dcf677781cc6a4175a9174364730d7efd2b"
     },
     {
       "path": "scripts/inspect-hero.mjs",
-      "bytes": 9437,
-      "sha256": "efe1e7d8d96808e2e417076df6351e67adf98bf43237c18a48743ce42642f8c1"
+      "bytes": 11275,
+      "sha256": "23f3a1c39aac34b2a5636628ac804b01203077a60979a3f15e287b294d90eefe"
     },
     {
       "path": "scripts/inspect-lamborghini-standalone.cjs",
@@ -2566,6 +2656,11 @@
       "path": "scripts/prepare-hero-likeness.py",
       "bytes": 7378,
       "sha256": "da8e675850baebd71adcaf48de088eb2274d3066e264c07dfeca7ee3f032aa19"
+    },
+    {
+      "path": "scripts/prepare-hero-smaller-head.py",
+      "bytes": 5089,
+      "sha256": "8ec2c8b760ec0cc977aad165f8c57157816f5b3e22d6d6c6f01ce1b7cf3eee24"
     },
     {
       "path": "scripts/prepare-hero-turns.py",
@@ -3128,9 +3223,14 @@
       "sha256": "7a5f28514a4d8139217547b58f0bac88940cb1acd2291accf85c995424ae0363"
     },
     {
+      "path": "tests/hero-head-proportions.test.js",
+      "bytes": 6427,
+      "sha256": "4fd09a6c3663273b5ec456a796bbd0f1e8b4b465b31a278e165db7136ad0a2d1"
+    },
+    {
       "path": "tests/hero-likeness.test.js",
-      "bytes": 1769,
-      "sha256": "ce2a919e7f37db2239ca1b8a9d76412d9ddab59cd3d58848fe7d60bc9f6eb81f"
+      "bytes": 1771,
+      "sha256": "c4cca48daa1ebac97e985ce8c20b2e2064c5c7df14ef323812f76e16af368cb7"
     },
     {
       "path": "tests/hero-motion.test.js",
@@ -3141,6 +3241,11 @@
       "path": "tests/hero-pose.test.js",
       "bytes": 6121,
       "sha256": "c2affa212524fe76d39bd4c0fde3d045862f099189a7aec2b9d8197462073c65"
+    },
+    {
+      "path": "tests/hero-split-diagnostic.test.js",
+      "bytes": 1635,
+      "sha256": "d74788cfb710f9d21b4e5a565911d6b62041c104a0cb0ea4adce54f892c3e610"
     },
     {
       "path": "tests/hero-turn-art.test.js",

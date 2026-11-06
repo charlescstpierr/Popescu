@@ -9,8 +9,8 @@ let nativeCanvas=null;
 try{nativeCanvas=createRequire(import.meta.url)('@napi-rs/canvas');}catch{}
 
 test('the photo-corrected whole-body atlas is the image actually loaded in play',async()=>{
-  assert.equal(HERO_FRAMES.image,'toma-whole-v8.png');
-  assert.equal(HERO_FRAMES.identityRevision,'consistent-2026-11-06');
+  assert.equal(HERO_FRAMES.image,'toma-whole-v9.png');
+  assert.equal(HERO_FRAMES.identityRevision,'smaller-head-2026-11-06');
   let loaded='';
   const art=new HeroArt({loadImage:async src=>{loaded=src;return {};}});
   assert.equal(await art.ready,true);
