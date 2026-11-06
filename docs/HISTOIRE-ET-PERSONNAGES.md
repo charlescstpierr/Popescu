@@ -22,15 +22,18 @@ Sources : `dist/opening.js`, `dist/index.html`, `dist/content.js`, `dist/engine.
 ## Ordre réel des scènes
 
 - **Ouverture :** les trois cartes `fantasy → offline → street`. `INTRO`, encore exporté par `content.js`, contient un ancien dialogue de sept lignes; il n'est pas le parcours actuel du bouton JOUER ou REVOIR L'INTRO. Ne pas le confondre avec le texte réellement lu.
-- **Pendant l'action :** la première horde fournit un démenti au fantasme des admiratrices. Cette scène attend au moins vingt secondes et douze ennemis vivants; ce n'est pas une cinématique garantie à une seconde exacte.
+- **Pendant l'action :** la première horde fournit un démenti au fantasme des admiratrices. Le pic de douze ennemis vivants est noté (`horde-peak`), puis la scène se joue au premier calme; ce n'est pas une cinématique garantie à une seconde exacte.
+- **Scènes de rue :** téléphone, distributrice, trophée, vélo, miroir, char et banc jouent leur scène complète de `EVENTS`, une fois par partie, seulement au calme. Les autres objets gardent leur remarque d'une ligne. Une scène lue ou annulée ne revient pas.
 - **Compagne :** l'invocation est liée à l'acquisition de Blonde IA. La scène compacte `companion-local` précise ensuite sa copie locale si le bavardage est actif et qu'elle est disponible. Ne pas écrire de réponse de sa part dans une partie solo.
 - **Construction du personnage :** la première amélioration choisie parmi voiture, vérité, billets et abonnés sélectionne un seul petit fil narratif. Les anciennes sauvegardes sans choix mémorisé utilisent un pouvoir acquis comme repli. Il ne faut pas annoncer au joueur qu'il verra les quatre scènes dans une seule partie.
-- **Jalons :** cinq, dix, quinze et dix-neuf minutes. À dix minutes, le rappel dépend d'une scène entièrement lue, pas de son premier mot ou du seul pouvoir acquis. Une reprise tardive ne déverse pas tous les anciens jalons.
+- **Jalons :** cinq, dix, quinze et dix-neuf minutes. À dix minutes, le rappel dépend d'un fil d'amélioration entièrement lu; à quinze minutes, de la dernière scène de rue entièrement lue. Une reprise tardive ne déverse pas tous les anciens jalons.
 - **Boss :** Matriarche, Travestia et Péli arrivent dans un ordre variable. Leur première conversation admissible peut arrêter le temps; les provocations suivantes restent compactes. Le récit ne doit pas supposer que Péli a précédé Travestia.
 - **Dernière minute :** les nouvelles scènes facultatives s'arrêtent avant les annonces finales. Survivre jusqu'à 20:00 suffit même si les ennemis sont encore présents.
 - **Victoire :** une réplique tient compte du fil effectivement terminé ou des pouvoirs de la partie. Charles conserve son dialogue et sa séquence distincts.
+- **Défaite :** `defeatQuote` choisit selon `deathCause`, la source d'abord (nuage de gaz, explosion, cri du coq, queue de Travestia, Péli), puis l'acteur d'un contact (orang-outan, bouc, Matriarche, gorilles ordinaires). Animaux, bêtes de l'ego et causes inconnues gardent « FUCKK ! Efface la vidéo. On recommence. »
+- **Calme :** `Game.isCalm` exige l'absence d'attaque annoncée ou en cours, de nuage et de boss à l'écran (`CALM_DANGER_R`), de boss en attaque n'importe où, de contact, de coup reçu depuis une seconde et de foule (`CALM_N`, `CALM_R`). Une scène au calme attend jusqu'à huit secondes entre deux répliques, puis s'annule; la simulation ne se fige jamais. Recalibrer avec `node scripts/simulate-story-lulls.mjs`.
 
-Sources : `Game.story`, `Game.chooseUpgrade`, `STORY_SCENES`, `storyMilestoneLine`, `victoryQuote`, `dist/boss-director.js`, `dist/encounter-dialogue.js`. L'ordre d'arrivée détaillé peut différer si une zone d'apparition est bloquée.
+Sources : `Game.story`, `Game.isCalm`, `Game.chooseUpgrade`, `STORY_SCENES`, `STREET_SCENE_TYPES`, `storyMilestoneLine`, `victoryQuote`, `defeatQuote`, `dist/boss-director.js`, `dist/encounter-dialogue.js`. L'ordre d'arrivée détaillé peut différer si une zone d'apparition est bloquée.
 
 ## Toma Popescu
 
@@ -46,12 +49,12 @@ Sources : `OPENING`, `STUNT_BARKS`, `RIVAL_BARKS`, `ROOSTER_REACTION`, `Game.upd
 ## Blonde IA
 
 - **Rôle :** alliée concrète et contrepoint pratique. Elle aide Toma, mais n'est pas son public docile.
-- **Faits montrés :** une même compagne, cinq rangs et cinq looks. Cœurs et collecte au premier rang; esquive, collecte accrue, protection puis deux drones aux rangs suivants. Elle redémarre après sa mise à terre.
+- **Faits montrés :** cinq femmes différentes, une par rang (décision du 6 novembre 2026). Toma prend chaque changement pour un hommage; la nouvelle venue rétablit les faits (`COMPANION_ARRIVALS`, rangs 2 à 5, au calme, seulement le rang en attente le plus haut). Cœurs et collecte au premier rang; esquive, collecte accrue, protection puis deux drones aux rangs suivants. Elle redémarre après sa mise à terre.
 - **Voix :** courte, sèche, attentive à ce qui se passe. Une pointe finale répond à la vantardise qui vient réellement d'être prononcée.
 - **Continuité :** copie locale compatible avec la panne du service en ligne. Ses interventions en action exigent son déblocage et sa disponibilité. Sa présence illustrée sur la couverture n'est pas un déblocage de jeu.
-- **Garde-fous :** pas de nouvelle femme à chaque niveau; pas de réplique après sa mise hors service, hormis l'annonce de transition déjà prévue. Une alerte de claque exige une véritable préparation hostile; une baisse de PV exige un dégât de santé récent, pas seulement un bouclier touché.
+- **Garde-fous :** pas de mémoire d'une partie à l'autre; pas de réplique après sa mise hors service, hormis l'annonce de transition déjà prévue. Une alerte de claque exige une véritable préparation hostile; une baisse de PV exige un dégât de santé récent, pas seulement un bouclier touché.
 
-Sources : `COMPANION_LEVELS`, `EVENTS.companion`, `STORY_SCENES['companion-local']`, `currentBarkContext`, `Game.updateCompanion`.
+Sources : `COMPANION_LEVELS`, `COMPANION_ARRIVALS`, `EVENTS.companion`, `STORY_SCENES['companion-local']`, `currentBarkContext`, `Game.updateCompanion`.
 
 ## Système
 

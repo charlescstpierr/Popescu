@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {OPENING} from '../dist/opening.js';
 import {encounterPresentation} from '../dist/dialogue-presentation.js';
-const text=["Hein ? Pourquoi j’ai plus accès à ma vie fake ? Pourquoi ?! WTF ?!","J’existe même pas pis il me tape déjà sur les nerfs.","Écoute, ferme-la ! Toutes les femmes me veulent ! Même celles qui existent pas.","T’as raison. Check les singes qui te courent après !","Hein ? Où ça ?"];
+const text=["Hein ? Mon char, mes abonnés, ma blonde… Tout est où ?!","J’existe même pas pis il me tape déjà sur les nerfs.","Écoute, ferme-la ! Toutes les femmes me veulent ! Même celles qui existent pas.","T’as raison. Check les singes qui te courent après !","Hein ? Où ça ?"];
 test('approved opening keeps every exact line and speaker in order',()=>{
  assert.deepEqual(OPENING.map(l=>l.text),text);
  assert.deepEqual(OPENING.map(l=>l.who),['TOMA','BLONDE IA','TOMA','BLONDE IA','TOMA']);

@@ -119,6 +119,9 @@ function validateSpeech(s,nextActorId,now){
   check(['survival','charles'].includes(scene.scope)&&typeof scene.remember==='boolean'&&typeof scene.companion==='boolean');
   for(const line of scene.lines)check(object(line)&&typeof line.who==='string'&&line.who.length>0&&line.who.length<=80&&typeof line.text==='string'&&line.text.length>0&&line.text.length<=2000);
   check(scene.companion===scene.lines.some(line=>line.who==='BLONDE IA'));
+  // Optional since the lull-gated story scenes; older saves omit both fields.
+  check(scene.calm===undefined||scene.calm===true);
+  check(scene.waitSince===undefined||scene.calm===true&&finite(scene.waitSince)&&scene.waitSince>=0&&scene.waitSince<=now+1e-6);
  }
  const ids=new Set();check(s.queue.every(object));let sceneLines=0;
  for(const line of [s.active,...s.queue]){if(line===null){check(s.active===null);continue;}
