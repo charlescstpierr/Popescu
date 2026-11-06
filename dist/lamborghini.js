@@ -28,7 +28,7 @@ function contacts(game,v,fromX,toX,level){
   if(e.dead||v.hitIds.has(e.id)||e.x+e.r<=left||e.x-e.r>=right||Math.abs(e.y-v.y)>=e.r+level.halfHeight)continue;
   v.hitIds.add(e.id);game.hurt(e,level.damage);
   // Boss positions and locked attack lanes must not shift under their warnings.
-  if(level.knockback&&!e.dead&&!['charles','pelican','travestia','matriarch'].includes(e.type)&&!(e.windup>0||e.charge>0||e.swipe>0||e.crow>0||e.gasPose>0))game.move(e,Math.sign(v.vx)*level.knockback,0,e.r*.6);
+  if(level.knockback&&!e.dead&&!['charles','pelican','travestia','matriarch'].includes(e.type)&&!(e.windup>0||e.charge>0||e.swipe>0||e.crow>0||e.gasPose>0))game.knockback(e,Math.sign(v.vx)*level.knockback,0,e.r*.6);
   game.burst(e.x,e.y,'#f2bd53',Math.min(4,Math.max(0,200-game.s.particles.length)));
  }
 }
