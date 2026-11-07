@@ -92,9 +92,13 @@ export class HeroArt {
     if(!shooting||Math.floor(time*42)%3===1)return;
     const a=pose.barrelAim,m=pose.muzzle,n=pt(-a.y,a.x),v=(x,y)=>pt(m.x+a.x*x+n.x*y,m.y+a.y*x+n.y*y);
     if(reduced){line(c,'#ffe9a1',v(1,0),v(5,0),2);return;}
-    c.save();c.globalAlpha*=.18;polygon(c,'#ffbd65',[v(-3,-3),v(9,-9),v(23,0),v(9,9),v(-3,3)]);c.restore();
-    polygon(c,'#ed9b47',[v(0,-2),v(7,-6),v(6,-2),v(19,0),v(6,3),v(8,6),v(0,2)]);
-    polygon(c,'#ffe489',[v(0,-2),v(9,-3),v(15,0),v(8,3),v(0,2)]);polygon(c,'#fffdeb',[v(1,-1),v(11,0),v(1,2)]);
+    // A fuller flame that only extends beyond the painted muzzle; its bloom is
+    // painted under the whole body by the combat layer, never over the figure.
+    const k=Math.floor(time*42)%3?1:.82;
+    c.save();c.globalAlpha*=.2;polygon(c,'#ffbd65',[v(-3,-3),v(10,-11),v(28*k,0),v(10,11),v(-3,3)]);c.restore();
+    polygon(c,'#ed9b47',[v(0,-2),v(8,-8),v(7,-2),v(24*k,0),v(7,3),v(9,8),v(0,2)]);
+    line(c,'#ffcf6e',v(5,-4),v(10,-10),1);line(c,'#ffcf6e',v(5,4),v(10,10),1);
+    polygon(c,'#ffe489',[v(0,-2),v(10,-3),v(18*k,0),v(10,3),v(0,2)]);polygon(c,'#fffdeb',[v(1,-1),v(13*k,0),v(1,2)]);
   }
   draw(ctx,s,time=0,reduced=false){
     const pose=computeHeroPose(s);ctx.save();ctx.imageSmoothingEnabled=false;

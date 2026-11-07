@@ -1,4 +1,4 @@
-import {RIMS,enemyAccent} from './combat-art.js';
+import {RIMS,enemyAccent,FX,hitFlashAlpha} from './combat-art.js';
 import {drawGorillaAccessories} from './gorilla-accessories.js';
 import {enemyAttackPose} from './enemy-attack-pose.js';
 import {EGO_BEASTS,egoHeight} from './ego-beasts.js';
@@ -92,7 +92,7 @@ export class ActorArt {
     const frame=canvas(128,128);if(!frame)return null;const c=frame.getContext('2d');c.imageSmoothingEnabled=false;
     c.drawImage(image,(index%4)*128,back?128:0,128,128,0,0,128,128);
     if(kind==='enemy'){c.save();c.globalAlpha=1-dim*.26;this._decorate(c,type,index,back);c.restore();}
-    if(flash){c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,128,128);c.globalCompositeOperation='source-over';}
+    if(flash){c.globalCompositeOperation='source-in';c.fillStyle=FX.flash.color;c.fillRect(0,0,128,128);c.globalCompositeOperation='source-over';}
     this.cache.set(key,frame);if(this.cache.size>288)this.cache.delete(this.cache.keys().next().value);return frame;
   }
   _decorate(c,type,index,back){
@@ -109,6 +109,12 @@ export class ActorArt {
     this.outlines.delete(key);this.outlines.set(key,rim);
     const dest=ActorArt.snap(ctx,x-1,y-1);ctx.save();ctx.globalAlpha*=.56*accent;ctx.drawImage(rim,dest.x,dest.y);ctx.restore();
   }
+  _tinted(image,sx,sy,sw,sh,key){
+    // Compositing only: a cached near-white copy of one painted cell, no pixel reads.
+    let flash=this.cache.get(key);if(flash)return flash;flash=canvas(sw,sh);if(!flash)return null;
+    const c=flash.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(image,sx,sy,sw,sh,0,0,sw,sh);c.globalCompositeOperation='source-in';c.fillStyle=FX.flash.color;c.fillRect(0,0,sw,sh);
+    this.cache.set(key,flash);if(this.cache.size>288)this.cache.delete(this.cache.keys().next().value);return flash;
+  }
   drawEnemyAttack(ctx,actor,reduced=false,accent=1){
     const pose=enemyAttackPose(actor);if(!pose)return false;
     const image=this.images[pose.image];if(!image)return false;
@@ -119,8 +125,8 @@ export class ActorArt {
     ctx.drawImage(image,index*w,back?128:0,w,128,dest.x,dest.y,w*scale,size);
     if(actor.hitFlash>0){
       const key=['attack',pose.image,index,back].join(':');let flash=this.cache.get(key);
-      if(!flash){flash=canvas(w,128);if(flash){const c=flash.getContext('2d');c.drawImage(image,index*w,back?128:0,w,128,0,0,w,128);c.globalCompositeOperation='source-in';c.fillStyle='#fff4d7';c.fillRect(0,0,w,128);this.cache.set(key,flash);if(this.cache.size>288)this.cache.delete(this.cache.keys().next().value);}}
-      if(flash){ctx.globalAlpha*=Math.min(.85,actor.hitFlash*5);ctx.drawImage(flash,dest.x,dest.y,w*scale,size);}
+      if(!flash){flash=canvas(w,128);if(flash){const c=flash.getContext('2d');c.drawImage(image,index*w,back?128:0,w,128,0,0,w,128);c.globalCompositeOperation='source-in';c.fillStyle=FX.flash.color;c.fillRect(0,0,w,128);this.cache.set(key,flash);if(this.cache.size>288)this.cache.delete(this.cache.keys().next().value);}}
+      if(flash){ctx.globalAlpha*=hitFlashAlpha(actor.hitFlash,reduced);ctx.drawImage(flash,dest.x,dest.y,w*scale,size);}
     }
     ctx.restore();return true;
   }
@@ -133,13 +139,14 @@ export class ActorArt {
     ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,dest.x,dest.y,size,size);
     ctx.restore();return true;
   }
-  drawTravestia(ctx,e,time){
+  drawTravestia(ctx,e,time,reduced=false){
     const pose=travestiaPose(e,time);
-    if(pose.directional&&this.images.travestia_dash){const image=this.images.travestia_dash,w=image.width/4,h=image.height/2,index=pose.index,dest=ActorArt.snap(ctx,e.x-100,e.y+11-174);ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,dest.x,dest.y,200,200);ctx.restore();return true;}
+    if(pose.directional&&this.images.travestia_dash){const image=this.images.travestia_dash,w=image.width/4,h=image.height/2,index=pose.index,dest=ActorArt.snap(ctx,e.x-100,e.y+11-174);ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,dest.x,dest.y,200,200);if(e.hitFlash>0){const flash=this._tinted(image,index%4*w,Math.floor(index/4)*h,w,h,`travestia-dash-hit:${index}`);if(flash){ctx.globalAlpha*=hitFlashAlpha(e.hitFlash,reduced);ctx.drawImage(flash,dest.x,dest.y,200,200);}}ctx.restore();return true;}
     const image=this.images.travestia;if(!image)return false;
     const index=pose.directional?4:pose.index,w=image.width/4,h=image.height/3,size=144;
     ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(e.x,e.y+11);if(pose.flip)ctx.scale(-1,1);
     const dest=ActorArt.snap(ctx,-72,-132);ctx.drawImage(image,index%4*w,Math.floor(index/4)*h,w,h,dest.x,dest.y,size,size);
+    if(e.hitFlash>0){const flash=this._tinted(image,index%4*w,Math.floor(index/4)*h,w,h,`travestia-hit:${index}`);if(flash){ctx.globalAlpha*=hitFlashAlpha(e.hitFlash,reduced);ctx.drawImage(flash,dest.x,dest.y,size,size);}}
     ctx.restore();return true;
   }
   occludes(actor,body,phase,state,time){
@@ -179,9 +186,9 @@ export class ActorArt {
   }
   draw(ctx,actor,kind,phase,state,time,reduced=false){
     if(EGO_BEASTS[actor.type])return drawEgoBody(ctx,actor,this.images.ego,this.cache,phase,reduced);
-    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(actor.x,actor.y+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);const dest=ActorArt.snap(ctx,frame.left,frame.top);ctx.drawImage(im,index*cell,row*cell,cell,cell,dest.x,dest.y,size,size);ctx.restore();return true;}
+    if(ANIMALS[actor.type]){const im=this.images.animals;if(!this.available('animals'))return false;const row=Object.keys(ANIMALS).indexOf(actor.type),cell=im.width/4,frame=ANIMAL_FRAMES[actor.type],size=frame.size,index=actor.phase==='animal_warning'?2:actor.phase==='animal_active'?3:phase%2;ctx.save();ctx.imageSmoothingEnabled=false;ctx.translate(actor.x,actor.y+frame.anchorY);if(actor.faceX<0)ctx.scale(-1,1);const dest=ActorArt.snap(ctx,frame.left,frame.top);ctx.drawImage(im,index*cell,row*cell,cell,cell,dest.x,dest.y,size,size);if(actor.hitFlash>0){const flash=this._tinted(im,index*cell,row*cell,cell,cell,`animal-hit:${row}:${index}`);if(flash){ctx.globalAlpha*=hitFlashAlpha(actor.hitFlash,reduced);ctx.drawImage(flash,dest.x,dest.y,size,size);}}ctx.restore();return true;}
     if(actor.type==='pelican')return this.drawPelican(ctx,actor,time);
-    if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time);
+    if(actor.type==='travestia')return this.drawTravestia(ctx,actor,time,reduced);
     if(kind==='enemy'&&this.drawEnemyAttack(ctx,actor,reduced,enemyAccent(actor,state)))return true;
     if(!this.availableFor(actor,kind))return false;const enemy=kind==='enemy',girl=kind==='girl',type=actor.type||'normal';
     const gas=enemy&&actor.gasPose>0;const moving=Math.hypot(state.moveX||0,state.moveY||0)>.05;
@@ -199,7 +206,7 @@ export class ActorArt {
       const dest=ActorArt.snap(ctx,-size/2,-121*scale);
       if(enemy&&!reduced)this._rim(ctx,sprite,0,0,128,128,dest.x,dest.y,size,size,type,[kind,index,back,type,dim].join(':'),accent);
       ctx.drawImage(sprite,dest.x,dest.y,size,size);
-      if(enemy&&actor.hitFlash>0){ctx.globalAlpha*=Math.min(.85,actor.hitFlash*5);ctx.drawImage(this.frame(kind,index,back,type,true),dest.x,dest.y,size,size);}
+      if(enemy&&actor.hitFlash>0){ctx.globalAlpha*=hitFlashAlpha(actor.hitFlash,reduced);ctx.drawImage(this.frame(kind,index,back,type,true),dest.x,dest.y,size,size);}
     }
     ctx.restore();
     // Variant cues remain legible even in the middle of a dense horde.

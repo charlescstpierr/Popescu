@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {ActorArt} from '../dist/actor-art.js';
+import {FX} from '../dist/combat-art.js';
 const require=createRequire(import.meta.url);let native;
 try{native=require('@napi-rs/canvas');}catch{}
 const approved=JSON.parse(readFileSync(new URL('./fixtures/gorilla-approved-frames.json',import.meta.url)));
@@ -27,11 +28,13 @@ test('rear jealous heart remains distinct without a speed trail or extra render 
  for(let frame=0;frame<4;frame++)assert.notEqual(hash(art.frame('enemy',frame,true,'jealous')),hash(art.frame('enemy',frame,true,'normal')));
 });
 test('accessories share the whole damage flash and reuse the bounded actor cache',options,()=>{
+ // The registry owns the flash colour; every painted pixel takes it, alpha unchanged.
+ const flashRGB=[1,3,5].map(i=>parseInt(FX.flash.color.slice(i,i+2),16));
  for(const type of ['jealous','gas','sprinter','tank'])for(let frame=0;frame<4;frame++)for(const back of [false,true]){
   const sprite=art.frame('enemy',frame,back,type),flash=art.frame('enemy',frame,back,type,true);
   assert.equal(art.frame('enemy',frame,back,type),sprite);
   const base=bytes(sprite),f=bytes(flash);
-  for(let i=0;i<base.length;i+=4){assert.equal(f[i+3],base[i+3]);if(f[i+3]===255)assert.deepEqual(Array.from(f.slice(i,i+3)),[255,244,215]);}
+  for(let i=0;i<base.length;i+=4){assert.equal(f[i+3],base[i+3]);if(f[i+3]===255)assert.deepEqual(Array.from(f.slice(i,i+3)),flashRGB);}
  }
  assert.ok(art.cache.size<=144);
 });
