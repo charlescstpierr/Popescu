@@ -1,6 +1,6 @@
 import {buildingGeometry,propForegroundBounds} from './prop-geometry.js';
 import {biomeForChunk,riverSection} from './biomes.js';
-import {drawRiverTile} from './river-art.js';
+import {drawRiverTile,drawRiverCurrent} from './river-art.js';
 /* Original, deterministic pixel city. All positions are world coordinates. */
 const INK='#100e20', TAU=Math.PI*2, PROP_CACHE_BYTES=8*1024*1024;
 const LIGHT_COLORS={pink:'255,85,182',cyan:'109,229,238',gold:'255,190,100'};
@@ -32,7 +32,7 @@ function trailDistance(x,y){
 }
 
 export class CityArt {
-  constructor({now=()=>performance.now()}={}){this.now=now;this.cutaways=new Map();this.windowMask=null;this.tiles=new Map();this.props=new Map();this.propBytes=0;this.propMode=false;this.glows=new Map();this.lighting=new WeakMap();this.puddles=new WeakMap();this.seed=null;}
+  constructor({now=()=>performance.now()}={}){this.now=now;this.cutaways=new Map();this.windowMask=null;this.tiles=new Map();this.props=new Map();this.propBytes=0;this.propMode=false;this.glows=new Map();this.lighting=new WeakMap();this.puddles=new WeakMap();this.ambience=new WeakMap();this.facadeDetails=new WeakMap();this.steamStrip=null;this.seed=null;}
   _glow(c,color,x,y,w,h,alpha=1){
     if(!c)return;
     if(!this.glows.has(color)){
@@ -371,7 +371,8 @@ export class CityArt {
   _tile(tx,ty,seed){
     const key=`${tx}:${ty}`;if(this.tiles.has(key))return this.tiles.get(key);
     const image=canvas(256,256);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;
-    if(biomeForChunk(Math.floor(tx/2),Math.floor(ty/2),seed)==='forest'){this._forestTile(c,tx,ty,seed);this._riverTile(c,tx,ty,seed);this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;}
+    if(biomeForChunk(Math.floor(tx/2),Math.floor(ty/2),seed)==='forest'){this._forestTile(c,tx,ty,seed);this._riverTile(c,tx,ty,seed);this.ambience.set(image,{forest:true,phase:hash(tx,ty,seed+809)*TAU});this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;}
+    const ambient={vents:[],forest:false,phase:hash(tx,ty,seed+809)*TAU};this.ambience.set(image,ambient);
     const random=rng(Math.floor(hash(tx,ty,seed)*4294967295));
     R(c,'#30283f',0,0,256,256);
     // Broad, irregular repairs and worn asphalt have many scales of detail.
@@ -389,14 +390,14 @@ export class CityArt {
     for(let i=0;i<5;i++){let x=random()*256,y=random()*256;const length=15+random()*48,angle=random()*TAU;for(let j=0;j<4;j++){const nx=x+Math.cos(angle+(random()-.5)*.8)*length/4,ny=y+Math.sin(angle+(random()-.5)*.8)*length/4;L(c,'#171a2d',x,y,nx,ny,2);L(c,'#4f3e56',x+1,y+1,nx+1,ny+1,1);if(j===2)L(c,'#18192b',x,y,x+random()*14-7,y+random()*14-7,1);x=nx;y=ny;}}
     const patches=this._wetPatches(tx,ty,seed);this._wetAsphalt(c,patches,tx,ty,seed);this.puddles.set(image,patches);
     const roadX=tx%2===0?48:208,roadY=44+random()*168;
-    if(random()>.68)this._manhole(c,roadX,roadY);
+    if(random()>.68){this._manhole(c,roadX,roadY);ambient.vents.push({x:roadX,y:roadY});}
     if(random()>.32){const x=tx%2===0?65:191,y=35+random()*180;
       blot(c,x,y,24+random()*28,10+random()*13,'#292537',random);
       L(c,'#3e354c',x-9,y+3,x+7,y+5);L(c,'#443449',x-3,y-4,x+10,y-2);
     }
     // Small narrative debris, laid into the ground with contact shadows.
     for(let i=0;i<3;i++)this._litter(c,random()*244+6,random()*244+6,Math.floor(random()*6),random);
-    if(random()>.42)this._drain(c,24+random()*205,20+random()*215);
+    if(random()>.42){const x=24+random()*205,y=20+random()*215;this._drain(c,x,y);ambient.vents.push({x,y});}
     this._forestEdge(c,tx,ty,seed);
     this._riverTile(c,tx,ty,seed);
     this.tiles.set(key,image);if(this.tiles.size>48)this.tiles.delete(this.tiles.keys().next().value);return image;
@@ -454,20 +455,76 @@ export class CityArt {
     else {const n=2+Math.floor(random()*4);for(let j=0;j<n;j++)R(c,j%2?'#8c6c70':'#5e4f66',x+random()*9-4,y+random()*6-3,2,1);}
   }
   _drain(c,x,y){R(c,'#171a2c',x-10,y-6,22,13);R(c,'#63546b',x-9,y-5,20,10);R(c,'#25283d',x-8,y-4,18,8);for(let i=0;i<6;i++)R(c,'#777084',x-7+i*3,y-4,1,8);R(c,'#afa0a9',x-8,y-5,17,1);R(c,'#191a2d',x-9,y+5,20,2);}
+  _steam(){
+    if(this.steamStrip)return this.steamStrip;
+    const image=canvas(24*12,42);if(!image)return null;
+    const c=image.getContext('2d');
+    for(let frame=0;frame<12;frame++)for(let puff=0;puff<4;puff++){
+      const phase=(frame/12+puff/4)%1,rise=phase*34;
+      c.globalAlpha=Math.sin(phase*Math.PI)*.12;
+      O(c,'#b1b2bc',frame*24+8+Math.sin(phase*6+puff)*3-phase*3,34-rise,5+phase*7,4+phase*4,2);
+    }
+    this.steamStrip=image;return image;
+  }
+  _groundLife(ctx,ambient,wx,wy,time){
+    if(!ambient)return;
+    const phase=ambient.phase,t=time*.7+phase;
+    if(!ambient.forest){
+      if(ambient.vents.length){
+        const strip=this._steam(),frame=((Math.floor(time*8+phase*2)%12)+12)%12;
+        if(strip)for(const vent of ambient.vents){
+          const x=wx+vent.x,y=wy+vent.y,lane=Math.round((x-1024)/4096),water=riverSection(lane,y);
+          if(Math.abs(x-water.x)<65)continue;
+          ctx.drawImage(strip,frame*24,0,24,42,x-12,y-37,24,42);
+        }
+      }
+    }else{
+      // This district is painted at night. A handful of dim fireflies and grass
+      // tips sit below actors, without a particle list that grows during travel.
+      for(let i=0;i<4;i++){
+        const x=wx+36+((phase*31+i*67)%184)+Math.sin(t*.63+i)*7,y=wy+32+((phase*23+i*41)%190)+Math.cos(t*.47+i)*5;
+        const pulse=Math.max(0,Math.sin(t*.8+i*2));ctx.globalAlpha=.12+pulse*.22;
+        R(ctx,'#b3bb89',x,y,2,1);ctx.globalAlpha=pulse*.06;R(ctx,'#b3bb89',x-2,y-2,6,5);
+      }
+      ctx.globalAlpha=.28;
+      for(let i=0;i<5;i++){
+        const x=wx+24+((phase*19+i*43)%208),y=wy+38+((phase*13+i*71)%184);
+        if(trailDistance(x,y)<45)continue;
+        R(ctx,'#718269',x+Math.sin(t+i)*1.3,y-3,1,3);
+      }
+    }
+    // A gust carries just two leaves or scraps per tile, fading before wrapping.
+    for(let i=0;i<2;i++){
+      const cycle=((time*.055+phase*.17+i*.47)%1+1)%1,drift=cycle*38;
+      ctx.globalAlpha=Math.sin(cycle*Math.PI)*.34;
+      const x=wx+42+((phase*17+i*119)%154)+drift,y=wy+40+((phase*37+i*97)%166)+Math.sin(cycle*TAU+i)*6;
+      R(ctx,ambient.forest?'#a18c65':'#8c8090',x,y,3,1);R(ctx,ambient.forest?'#736f50':'#625e74',x+1,y+1,2,1);
+    }
+  }
   drawGround(ctx,camera,width,height,seed=42,time=0,reduced=false){
     if(this.seed!==seed){this.seed=seed;this.tiles.clear();this.props.clear();this.propBytes=0;this.cutaways.clear();}
     const left=camera.x-width/2,top=camera.y-height*.48,minX=Math.floor(left/256),minY=Math.floor(top/256),maxX=Math.floor((left+width)/256),maxY=Math.floor((top+height)/256);
     for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
       const tile=this._tile(x,y,seed);if(!tile){R(ctx,'#30283f',x*256,y*256,256,256);continue;}
       ctx.drawImage(tile,x*256,y*256);
-      if(reduced)continue;
-      ctx.save();
+    }
+    if(reduced)return;
+    ctx.save();
+    // Draw after all tiles, so steam and leaves do not clip at cache boundaries.
+    for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
+      const tile=this.tiles.get(`${x}:${y}`);if(!tile)continue;
+      this._groundLife(ctx,this.ambience.get(tile),x*256,y*256,time);
       for(const p of this.puddles.get(tile)||[]){
         const shimmer=.5+.5*Math.sin(time*.85+p.phase);ctx.globalAlpha=.1+shimmer*.13;
-        R(ctx,{pink:'#ff89c9',cyan:'#9bdbe2',gold:'#e7bd80'}[p.color],x*256+p.x-p.w*.22,y*256+p.y+2,p.w*(.25+shimmer*.16),1);
+        const color={pink:'#ff89c9',cyan:'#9bdbe2',gold:'#e7bd80'}[p.color];
+        R(ctx,color,x*256+p.x-p.w*.22+Math.sin(time*.6+p.phase)*2,y*256+p.y+2,p.w*(.25+shimmer*.16),1);
+        const cycle=((time*.36+p.phase)%1+1)%1,r=2+cycle*8;
+        ctx.globalAlpha=Math.sin(cycle*Math.PI)*.18;ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();
+        ctx.ellipse(x*256+p.x,y*256+p.y,r,r*.28,0,0,TAU);ctx.stroke();
       }
-      ctx.restore();
     }
+    ctx.restore();
+    drawRiverCurrent(ctx,left,top,width,height,seed,time);
   }
 
   _building(c,p,seed){
@@ -520,6 +577,8 @@ export class CityArt {
     c.save();c.globalAlpha=.24;for(let i=0;i<6;i++)R(c,pal.neon,left+16+i%3*7,foot+16+i*3,w*.5-i*8,1);c.restore();
   }
   _window(c,x,y,w,h,pal,type,random){
+    const details=this.facadeDetails.get(c);
+    if(details&&[0,1,4].includes(type))details.push({x:x+2,y:y+2,w:w-4,h:Math.min(11,h*.49-3),warm:type!==1});
     R(c,INK,x-3,y-3,w+6,h+7);R(c,'#846a7d',x-2,y-2,w+4,h+4);R(c,'#1b1d33',x,y,w,h);
     const warm=type===0||type===4,glass=warm?'#805c4e':type===2?'#372e46':'#30516b';R(c,glass,x+1,y+1,w-2,h-2);
     if(type!==2){R(c,warm?'#e6a164':'#6793b0',x+2,y+2,warm?6:4,h-5);R(c,warm?'#ad7455':'#3f718e',x+w-7,y+3,5,h-6);P(c,warm?'#e6b77e':'#86b0c8',[[x+3,y+2],[x+11,y+2],[x+3,y+12]]);}
@@ -749,14 +808,15 @@ export class CityArt {
     if(this.props.has(key)){const item=this.props.get(key);this.props.delete(key);this.props.set(key,item);return item;}
     const building=p.type==='building',cw=building?w+74:p.type==='billboard'?Math.max(128,w+30):100,ch=building?h+190:180,ax=Math.floor(cw/2),ay=building?Math.ceil(h/2)+110:110;
     const image=canvas(cw,ch);if(!image)return null;const c=image.getContext('2d');c.imageSmoothingEnabled=false;c.translate(ax,ay);
+    const details=[];if(building)this.facadeDetails.set(c,details);
     const lit=(building&&p.buildingKind!=='ruin')||['foodcart','vending','phone'].includes(p.type),light=lit?canvas(cw,ch):null;
     if(light){const lc=light.getContext('2d');lc.translate(ax,ay);this.lighting.set(c,lc);}
     if(building)this._buildingVariant(c,p,seed);else if(['pine','rock','stump','log','forestRuin'].includes(p.type))this._nature(c,{...p,variant:v},seed);else if(p.type==='car')this._car(c,p,seed);else if(p.type==='bike')this._bike(c,p);else if(p.type==='bin')this._bin(c);else if(p.type==='bench')this._bench(c);else if(p.type==='lamp')this._lamp(c);else if(p.type==='mirror')this._mirror(c);else if(p.type==='phone')this._phone(c);else if(p.type==='billboard')this._billboard(c,{...p,variant:v});else if(p.type==='foodcart')this._foodcart(c,p);else if(p.type==='vending')this._vending(c,p);else if(p.type==='planter')this._planter(c,p);else if(p.type==='tree')this._tree(c,p);else if(p.type==='table')this._table(c,p);else if(p.type==='cone')this._cone(c,p);else if(p.type==='barricade')this._barricade(c,p);else if(p.type==='crate')this._crate(c,p);else if(p.type==='pallet')this._pallet(c,p);else if(p.type==='bags')this._bags(c,p);else if(p.type==='trophy')this._trophy(c,p);else if(p.type==='hydrant')this._hydrant(c,p);
-    this.lighting.delete(c);
+    this.lighting.delete(c);this.facadeDetails.delete(c);
     if(light){
       c.translate(-ax,-ay);c.globalCompositeOperation='destination-over';c.globalAlpha=reduced?.22:1;c.drawImage(light,0,0);
     }
-    const result={image,x:-ax,y:-ay,bytes:cw*ch*4};this.props.set(key,result);this.propBytes+=result.bytes;this._trimProps();return result;
+    const result={image,x:-ax,y:-ay,windows:details.filter((_,i)=>i%4===0).slice(0,2),bytes:cw*ch*4};this.props.set(key,result);this.propBytes+=result.bytes;this._trimProps();return result;
   }
   occludes(p,body,seed=42,reduced=false){
     // Architecture opens a window around Toma rather than hiding his body.
@@ -786,6 +846,28 @@ export class CityArt {
     }
     return false;
   }
+  _facadeLife(ctx,p,item,time,seed){
+    const phase=hash(p.x,p.y,seed+821),t=time+phase*47;
+    ctx.save();
+    for(const [i,w]of item.windows.entries()){
+      const cycle=(t/(26+i*11)+i*.37)%1,light=.5+.5*Math.tanh(Math.sin(cycle*TAU)*9);
+      const tv=i===0&&phase>.83;
+      ctx.globalAlpha=tv?.14+.055*Math.sin(t*5.3)+.035*Math.sin(t*8.7):.38*(1-light);
+      const color=tv?'#8fbbd4':'#111b2e',half=(w.w-2)/2;
+      R(ctx,color,p.x+w.x,p.y+w.y,half,w.h);R(ctx,color,p.x+w.x+half+2,p.y+w.y,half,w.h);
+      if(!tv){ctx.globalAlpha=light*.16;R(ctx,w.warm?'#e3b47c':'#90b8c8',p.x+w.x,p.y+w.y,half,w.h);}
+    }
+    if(p.buildingKind==='shop'){
+      const {top,foot}=buildingGeometry(p),breath=.5+.5*Math.sin(t*1.2);
+      // Only a seeded minority has a two-beat fault, once per 19 seconds.
+      const fault=t%19,stutter=phase>.7&&((fault>0&&fault<.07)||(fault>.15&&fault<.23));
+      ctx.globalAlpha=stutter?.32:.06+breath*.06;
+      R(ctx,stutter?'#18192b':'#ffe1aa',p.x-p.w/2+6,p.y+top-2,p.w-13,stutter?10:1);
+      this._glow(ctx,'gold',p.x,p.y+top+5,p.w+28,36,stutter?.01:.07+breath*.06);
+      ctx.globalAlpha=.08+breath*.07;R(ctx,'#c3a280',p.x-p.w*.22+Math.sin(t)*2,p.y+foot+17,p.w*.43,1);
+    }
+    ctx.restore();
+  }
   drawProp(ctx,p,seed=42,time=0,reduced=false,focus=null){
     if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;const item=this._propImage(p,seed,reduced);if(!item)return;
     const cover=propForegroundBounds(p);
@@ -794,15 +876,27 @@ export class CityArt {
     const obscures=!architecture&&cover&&focus&&(coversActor(focus)||(focus.companion&&coversActor(focus.girl))||(focus.enemies||[]).some(e=>!e.dead&&e.hp>0&&coversActor(e,38)));
     const image=windows.length?this._cutaway(item,p,windows):item.image;
     if(obscures){ctx.save();ctx.globalAlpha=.34;}
+    const swaying=!reduced&&(p.type==='pine'||p.type==='tree');
+    if(swaying){const phase=hash(p.x,p.y,seed+811)*TAU,shear=(Math.sin(time*.85+phase)+.35*Math.sin(time*1.7+phase))*.012;ctx.save();ctx.translate(p.x,p.y+10);ctx.transform(1,0,shear,1,0,0);ctx.translate(-p.x,-p.y-10);}
     if(p.artScale&&p.artScale!==1){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.scale(p.artScale,p.artScale);ctx.drawImage(image,item.x,item.y);ctx.restore();}
     else ctx.drawImage(image,Math.round(p.x+item.x),Math.round(p.y+item.y));
+    if(swaying)ctx.restore();
     if(obscures)ctx.restore();
     if(reduced)return;
     const scaled=p.artScale&&p.artScale!==1;
     if(scaled){ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.artScale,p.artScale);ctx.translate(-p.x,-p.y);}
+    // Never paint a light back over the local actor-reveal cutaway.
+    if(architecture&&!windows.length)this._facadeLife(ctx,p,item,time,seed);
     // Minute life in an abandoned district: unreliable neon, not whole-screen flashes.
-    if(p.type==='lamp'){const flicker=Math.sin(time*1.2+p.x)>.93?.45:1;ctx.save();ctx.globalAlpha=.32*flicker;O(ctx,'#ffe2a3',p.x+10,p.y-89,29,14,2);ctx.globalAlpha=.64*flicker;R(ctx,'#fff0c8',p.x+15,p.y-84,16,2);ctx.restore();}
-    else if(p.type==='phone'){ctx.save();ctx.globalAlpha=.2+.12*Math.sin(time*2+p.y);R(ctx,'#ee71b7',p.x-11,p.y-62,25,1);ctx.restore();}
+    if(p.type==='lamp'){const breath=.85+.15*Math.sin(time*1.1+p.x);ctx.save();ctx.globalAlpha=.22*breath;O(ctx,'#ffe2a3',p.x+6,p.y-92,37,20,2);ctx.globalAlpha=.45*breath;R(ctx,'#fff0c8',p.x+15,p.y-84,16,2);ctx.restore();}
+    else if(['phone','vending','foodcart'].includes(p.type)){
+      const phase=hash(p.x,p.y,seed+823),t=time+phase*43,breath=.5+.5*Math.sin(t*1.3),fault=t%23;
+      const stutter=phase>.74&&((fault<.065)||(fault>.16&&fault<.23));
+      const y=p.type==='phone'?-62:p.type==='vending'?-61:-75,w=p.type==='foodcart'?40:25;
+      ctx.save();ctx.globalAlpha=stutter?.4:.1+breath*.12;
+      R(ctx,stutter?'#19172b':'#e8b0cc',p.x-w/2,p.y+y,w,stutter?7:1);
+      this._glow(ctx,p.type==='foodcart'?'gold':'pink',p.x,p.y+y+3,w+48,32,stutter?.01:.06+breath*.07);ctx.restore();
+    }
     else if(p.type==='mirror'&&Math.sin(time*.6+p.x)>.85)star(ctx,p.x+8,p.y-48,'#e6d8ed',2);
     if(scaled)ctx.restore();
   }
