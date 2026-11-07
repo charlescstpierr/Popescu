@@ -1,6 +1,6 @@
 import {riverSection} from './biomes.js';
 
-// Ground-only art: no obstacles, world mutation, animation or additional cache.
+// Ground-only art: no obstacles, world mutation or additional tile cache.
 // Every sample and random detail is anchored in world coordinates. The overlap
 // includes the full height of stones, reeds and bridge fronts at tile edges.
 const rect=(c,color,x,y,w,h)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
@@ -117,6 +117,34 @@ export function drawRiverTile(c,tx,ty,seed=42){
    for(let i=0;i<6;i++)stone(c,a.x-wx-a.halfWidth+5+i*(a.halfWidth*2-10)/5,fy-wy+(i%2)*4,4,3);
   }
   for(let by=Math.ceil((wy-80)/512)*512;by<=wy+336;by+=512)bridge(c,1024+lane*4096-wx,by-wy);
+ }
+ c.restore();
+}
+
+// The tile remains cached. Only these narrow, world-anchored surface marks flow.
+export function drawRiverCurrent(c,left,top,width,height,seed=42,time=0,reduced=false){
+ if(reduced)return;
+ const first=Math.ceil((left-65-1024)/4096),last=Math.floor((left+width+65-1024)/4096);
+ if(first>last)return;
+ c.save();
+ for(let lane=first;lane<=last;lane++){
+  const travel=time*11+(seed%31)+lane*7;
+  for(let row=Math.floor((top-travel-8)/32);row*32+travel<top+height;row++){
+   const y=row*32+travel;
+   if(y<top||y>=top+height||Math.abs(y-Math.round(y/512)*512)<=88)continue;
+   const a=artSection(lane,y),r=randomAt(lane,row,seed+809);
+   for(let i=0;i<3;i++){
+    const span=3+r()*7,x=a.x+(r()-.5)*(a.halfWidth*2-24)-span/2;
+    c.globalAlpha=.18+.08*Math.sin(time*.9+row+i);
+    rect(c,i===0?'#a5c9bf':'#82afad',x,y+i*2,span,1);
+   }
+   if(row%3===0){
+    c.globalAlpha=.19;
+    const side=row%2===0?-1:1;
+    rect(c,'#b8ccc0',a.x+side*(a.halfWidth-8)-2,y-2,4,1);
+    rect(c,'#89b5b0',a.x+side*(a.halfWidth-10)-1,y+1,3,1);
+   }
+  }
  }
  c.restore();
 }

@@ -43,8 +43,7 @@ export const CHIP_VOICES = Object.freeze({
   tom: { wave: 'triangle', attack: 0.001, decay: 0.03, sustain: 0.2, release: 0.025, priority: 3 },
 });
 
-// The original SFX pulse waves stay byte-for-byte equivalent. The selected
-// battle track has its own presets so menu timbres do not change.
+// Battle and effects share the rounded pulse palette; menu presets stay intact.
 export const CHIP_WAVES = {
   pulse25: { duty: 0.25, harmonics: 32, rolloff: 0 },
   pulse125: { duty: 0.125, harmonics: 32, rolloff: 0 },
@@ -160,6 +159,8 @@ export function getMusicStepEvents(scene, step, intensity = 0.35) {
 
 const SFX_GAPS = { kill: 0.14, shoot: 0.09, heart: 0.14, collect: 0.1, coin: 0.12, gas: 0.65, hit: 0.17, truth: 0.4, click: 0.05, chest: 0.3, level: 0.6, victory: 1.5, defeat: 1.5, split: 0.7, rooster: 0.9, snap: 1 };
 const IMPORTANT_SFX = new Set(['hit', 'chest', 'level', 'victory', 'defeat', 'split', 'rooster', 'snap']);
+const PICKUP_SCALE = [0, 2, 3, 5, 7, 10, 12];
+const IMPACT_ENVELOPE = { attack: 0.001, decay: 0.008, sustain: 0.025, release: 0.018 };
 
 export class AudioManager {
   constructor({ enabled = true, volume = 0.5 } = {}) {
@@ -186,6 +187,7 @@ export class AudioManager {
     this._destroyed = false;
     this._sfxTokens = 8;
     this._sfxTokenTime = 0;
+    this._pickupStep = 0;
   }
 
   unlock() {
@@ -419,9 +421,9 @@ export class AudioManager {
     }
   }
 
-  _jingle(notes, time, spacing, duration = spacing * 1.5) {
+  _jingle(notes, time, spacing, duration = spacing * 1.5, options = {}) {
     notes.forEach((note, index) => {
-      if (note) this._tone(note, time + index * spacing, duration, 0.12, 'square');
+      if (note) this._tone(note, time + index * spacing, duration, options.level ?? 0.12, options.wave || 'square', 'sfx', null, options);
     });
   }
 
@@ -439,28 +441,40 @@ export class AudioManager {
     }
     // Damage survives routine bursts, but never steals a higher-priority cue.
     this._sfxPriority = name === 'hit' ? 1 : IMPORTANT_SFX.has(name) ? 3 : 0;
+    const previous = this._lastSfx.get(name) ?? -Infinity;
     this._lastSfx.set(name, now);
     switch (name) {
-      case 'shoot':
-        this._tone(84, now, 0.055, 0.04, 'pulse125', 'sfx', 52);
-        this._noise(now, 0.025, 0.018, 2300);
+      case 'shoot': {
+        const pitch = (Math.random() - 0.5) * 1.3, force = 0.92 + Math.random() * 0.16;
+        this._tone(81 + pitch, now, 0.062, 0.095 * force, 'ironPulse', 'sfx', 46 + pitch, IMPACT_ENVELOPE);
+        this._noise(now, 0.022, 0.042 * force, 2400);
         break;
-      case 'kill':
-        // A dry pixel crack, short low pop and restrained cyan-reward ping.
-        // Routine priority and the shared voice/token caps preserve the melody.
-        this._noise(now, 0.028, 0.035, 1700);
-        this._tone(60, now, 0.065, 0.06, 'triangle', 'sfx', 43);
-        this._tone(91, now + 0.045, 0.075, 0.035, 'sine', 'sfx', 96);
+      }
+      case 'kill': {
+        const pitch = (Math.random() - 0.5) * 1.6, force = 0.91 + Math.random() * 0.18;
+        // Only visible kills arrive here. The tick precedes the low pop and ping;
+        // the existing 140 ms gate coalesces crowd deaths without a sound queue.
+        this._noise(now, 0.018, 0.055 * force, 2100);
+        this._tone(60 + pitch, now, 0.085, 0.11 * force, 'triangle', 'sfx', 40 + pitch, IMPACT_ENVELOPE);
+        this._tone(84 + pitch, now + 0.032, 0.048, 0.035 * force, 'sine', 'sfx', 91 + pitch, IMPACT_ENVELOPE);
         break;
+      }
       case 'heart':
         this._tone(76, now, 0.12, 0.08, 'triangle', 'sfx', 88);
         this._tone(83, now + 0.035, 0.09, 0.04, 'sine');
         break;
-      case 'collect':
-        this._tone(88, now, 0.045, 0.04, 'triangle', 'sfx', 95);
+      case 'collect': {
+        this._pickupStep = now - previous > 0.6 ? 0 : Math.min(PICKUP_SCALE.length - 1, this._pickupStep + 1);
+        const note = 76 + PICKUP_SCALE[this._pickupStep];
+        this._tone(note, now, 0.075, 0.068, 'triangle', 'sfx', null,
+          { attack: 0.002, decay: 0.012, sustain: 0.12, release: 0.028 });
         break;
+      }
       case 'coin':
-        this._jingle([88, 95], now, 0.055, 0.11);
+        this._tone(88, now, 0.085, 0.075, 'roundPulse', 'sfx', null,
+          { attack: 0.001, decay: 0.012, sustain: 0.09, release: 0.025 });
+        this._tone(95, now + 0.038, 0.11, 0.06, 'sine', 'sfx', null,
+          { attack: 0.002, decay: 0.018, sustain: 0.12, release: 0.035 });
         break;
       case 'chest':
         this._jingle([64, 68, 71, 76, 83], now, 0.07, 0.18);
@@ -472,24 +486,28 @@ export class AudioManager {
         this._noise(now, 0.23, 0.07, 420, 'sfx', true);
         break;
       case 'hit':
-        this._noise(now, 0.12, 0.14, 650);
-        this._tone(45, now, 0.13, 0.13, 'square', 'sfx', 29);
+        this._noise(now, 0.085, 0.16, 420, 'sfx', true);
+        this._tone(43, now, 0.145, 0.24, 'sine', 'sfx', 28,
+          { attack: 0.002, decay: 0.025, sustain: 0.12, release: 0.045 });
         break;
       case 'truth':
         this._jingle([71, 78, 83, 90], now, 0.045, 0.18);
         this._noise(now, 0.17, 0.06, 3500);
         break;
       case 'level':
-        this._jingle([64, 67, 71, 76, 79, 83], now, 0.07, 0.16);
-        this._tone(52, now, 0.5, 0.1, 'triangle');
+        this._jingle([64, 71, 76, 79, 83, 88], now, 0.065, 0.13,
+          { wave: 'ironPulse', level: 0.13, attack: 0.002, decay: 0.02, sustain: 0.3, release: 0.035 });
+        this._tone(52, now, 0.46, 0.12, 'triangle', 'sfx', null, { sustain: 0.3 });
         break;
       case 'victory':
-        this._jingle([76, 76, 0, 76, 79, 83, 88, 83, 88], now, 0.115, 0.22);
-        [52, 55, 59].forEach((note) => this._tone(note, now + 0.69, 0.65, 0.08, 'triangle'));
+        this._jingle([76, 76, 0, 79, 83, 0, 88, 83, 88], now, 0.105, 0.2,
+          { wave: 'ironPulse', level: 0.15, attack: 0.003, decay: 0.025, sustain: 0.4, release: 0.045 });
+        [52, 55, 59].forEach((note) => this._tone(note, now + 0.63, 0.65, 0.075, 'triangle', 'sfx', null, { sustain: 0.4, release: 0.13 }));
         break;
       case 'defeat':
-        this._jingle([76, 74, 71, 67, 63, 59], now, 0.14, 0.25);
-        this._tone(43, now + 0.72, 0.48, 0.13, 'sawtooth', 'sfx', 31);
+        this._jingle([76, 71, 67, 64, 63, 59], now, 0.135, 0.22,
+          { wave: 'roundPulse', level: 0.14, attack: 0.003, decay: 0.025, sustain: 0.3, release: 0.055 });
+        this._tone(43, now + 0.68, 0.44, 0.16, 'triangle', 'sfx', 28, { sustain: 0.25, release: 0.12 });
         break;
       case 'snap':
         // One dry finger snap: three short voices, no screen-wide blast.

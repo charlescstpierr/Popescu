@@ -19,7 +19,7 @@ import {TRAVESTIA} from './travestia.js';
 import {drawPelicanGround,drawPelicanCards} from './pelican-art.js';
 import {HeroArt} from './hero-art.js';
 import {computeHeroPose} from './hero-pose.js';
-import {CombatArt,drawTelegraph,TELEGRAPH_STYLES,enemyAccent} from './combat-art.js';
+import {CombatArt,DangerLayer,drawTelegraph,TELEGRAPH_STYLES,enemyAccent,FX,burstColor} from './combat-art.js';
 import {PowerArt} from './power-art.js';
 import {ActorArt} from './actor-art.js';
 import {CityArt} from './city-art.js';
@@ -364,7 +364,7 @@ export class Renderer {
   constructor(canvas) {
     this.canvas=canvas;this.ctx=canvas.getContext('2d',{alpha:false});
     this.width=390;this.height=844;this.dpr=1;this.sprites=new Map();
-    this.seed=null;this.time=0;this.actors=new ActorArt();this.companion=new CompanionArt();this.charles=new CharlesArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready,this.charles.ready,this.companion.ready]);this.combat=new CombatArt();this.powers=new PowerArt();this.defeatStamps=new Map();this.scorches=[];this.seenDefeats=new WeakSet();this.heroPowerStamps=new Map();this.lampPool=null;this.reducedEffects=false;
+    this.seed=null;this.time=0;this.actors=new ActorArt();this.companion=new CompanionArt();this.charles=new CharlesArt();this.hero=new HeroArt();this.city=new CityArt();this.ready=Promise.all([this.actors.ready,this.hero.ready,this.charles.ready,this.companion.ready]);this.combat=new CombatArt();this.danger=new DangerLayer();this.powers=new PowerArt();this.defeatStamps=new Map();this.scorches=[];this.splats=[];this.seenDefeats=new WeakSet();this.heroPowerStamps=new Map();this.lampPool=null;this.reducedEffects=false;
     this.resize(canvas.clientWidth||390,canvas.clientHeight||844);
   }
   resize(w,h) {
@@ -385,7 +385,8 @@ export class Renderer {
     this.sprites.set(key,canvas);return canvas;
   }
   _drawGround(camera,seed) {
-    this.city.drawGround(this.ctx,camera,this.width,this.height,seed,this.time,this.reducedEffects);
+    // While the camera shakes, cover a few extra pixels so no screen edge is left bare.
+    const pad=this.groundPad||0;this.city.drawGround(this.ctx,camera,this.width+pad*2,this.height+pad*2,seed,this.time,this.reducedEffects);
   }
 
   _shadow(x,y,w=25,h=8,alpha=.48) {
@@ -485,16 +486,18 @@ this._shadow(x,y+7,40,8);
       else{const glow=ctx.createRadialGradient(x,y,2,x,y,12);glow.addColorStop(0,color);glow.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=glow;ctx.fillRect(x-12,y-12,24,24);}
       ctx.restore();
     }
-    if(p.kind==='xp'){
-      let drewTrail=false;
-      if(trail&&!this.reducedEffects&&state){
-        const {target,reach,distance}=pickupAttraction(state,p),dx=p.x-target.x,dy=p.y-target.y;
-        if(distance>22&&distance<reach){
-          drewTrail=true;ctx.save();ctx.globalAlpha=.8;ctx.fillStyle='#75e7f2';
-          for(let i=1;i<=4;i++)ctx.fillRect(Math.round(x+dx/distance*i*6),Math.round(y+dy/distance*i*6),3,2);
-          ctx.restore();
-        }
+    let drewTrail=false;
+    if(trail&&!this.reducedEffects&&state){
+      const {target,reach,distance}=pickupAttraction(state,p),dx=p.x-target.x,dy=p.y-target.y;
+      if(distance>22&&distance<reach){
+        // Magnet pull: a pale streak behind the pickup, tapering away from the collector.
+        const color=p.kind==='xp'?'#75e7f2':p.kind==='coin'?'#f5cd76':p.kind==='gem'?'#e68ff2':'#ff9fb4',ux=dx/distance,uy=dy/distance,pull=Math.min(1,1.25-distance/reach);
+        drewTrail=true;ctx.save();ctx.lineCap='round';ctx.strokeStyle='#e8fdff';ctx.globalAlpha=.35+.3*pull;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x+ux*5,y+uy*5);ctx.lineTo(x+ux*(18+10*pull),y+uy*(18+10*pull));ctx.stroke();
+        ctx.fillStyle=color;for(let i=1;i<=4;i++){ctx.globalAlpha=.9-i*.16;ctx.fillRect(Math.round(x+ux*i*6),Math.round(y+uy*i*6),5-i,2);}
+        ctx.restore();
       }
+    }
+    if(p.kind==='xp'){
       // A hollow cyan diamond stays distinct from coins, gems and purple debris.
       this._shadow(x,p.y+5,9,4,.3);
       poly(ctx,'#172239',[[x,y-8],[x+7,y],[x,y+8],[x-7,y]]);
@@ -512,15 +515,25 @@ this._shadow(x,y+7,40,8);
       poly(ctx,'#ffe2ff',[[x-3,y-6],[x+2,y-6],[x,y-2],[x-5,y-2]]);
       poly(ctx,'#a950c3',[[x,y-2],[x+6,y-2],[x,y+6]]);line(ctx,'#f8bcff',x,y-2,x,y+5,1);
     }else {poly(ctx,C.ink,[[x,y-7],[x+6,y-2],[x+3,y+6],[x-3,y+6],[x-6,y-2]]);poly(ctx,'#71d3fd',[[x,y-6],[x+5,y-2],[x+2,y+5],[x-2,y+5],[x-5,y-2]]);poly(ctx,'#c0f8ff',[[x,y-5],[x+1,y-2],[x-2,y+3],[x-4,y-2]]);line(ctx,'#3575bb',x+1,y-2,x+2,y+4,1);}
+    return drewTrail;
   }
   _defeatGround(s,effects){
-    if(this.reducedEffects){this.scorches=[];return;}
+    if(this.reducedEffects){this.scorches=[];this.splats=[];return;}
+    const splats=this.splats||(this.splats=[]);
     for(const e of effects)if(!this.seenDefeats.has(e)){
       this.seenDefeats.add(e);
       if(['tank','matriarch','orangutan','rival_goat','rival_rooster','travestia','pelican','moose'].includes(e.actor.type))this.scorches.push({x:e.actor.x,y:e.actor.y,start:e.start,r:Math.max(22,Math.min(38,e.actor.r||24))});
+      // Ordinary defeats leave a small fading mark: brief permanence, strictly capped.
+      else{splats.push({x:Math.round(e.actor.x),y:Math.round(e.actor.y),start:e.start,r:Math.max(10,Math.min(17,(e.actor.r||15)*.8)),color:burstColor(e.actor.type),seed:Number(e.actor.id)||0});if(splats.length>FX.splat.cap)splats.shift();}
     }
     this.scorches=this.scorches.filter(e=>s.elapsed>=e.start&&s.elapsed-e.start<1.5).slice(-24);
+    this.splats=splats.filter(e=>s.elapsed>=e.start&&s.elapsed-e.start<FX.splat.life);
     const ctx=this.ctx;ctx.save();
+    for(const e of this.splats){
+      const t=(s.elapsed-e.start)/FX.splat.life,fade=t<.7?1:(1-t)/.3;
+      ctx.globalAlpha=.42*fade;ctx.fillStyle='#0d0815';ctx.beginPath();ctx.ellipse(e.x,e.y+9,e.r,e.r*.38,0,0,TAU);ctx.fill();
+      ctx.globalAlpha=.75*fade;ctx.fillStyle=e.color;for(let n=0;n<7;n++){const a=n*.9+e.seed*.7,d=e.r*(.35+(n%3)*.3);ctx.fillRect(Math.round(e.x+Math.cos(a)*d),Math.round(e.y+9+Math.sin(a)*d*.38),n%2?2:3,n%3?1:2);}
+    }
     for(const e of this.scorches){ctx.globalAlpha=.32*(1-(s.elapsed-e.start)/1.5);ctx.fillStyle='#171021';ctx.beginPath();ctx.ellipse(e.x,e.y+8,e.r,e.r*.32,0,0,TAU);ctx.fill();ctx.fillStyle='#59404e';for(let n=0;n<5;n++)ctx.fillRect(Math.round(e.x-e.r*.7+n*e.r*.3),Math.round(e.y+4+(n%2)*5),5,2);}
     ctx.restore();
   }
@@ -544,10 +557,16 @@ this._shadow(x,y+7,40,8);
       const tint=ivory.getContext('2d');tint.drawImage(original,0,0);tint.globalCompositeOperation='source-in';tint.fillStyle='#fff4d7';tint.fillRect(0,0,224,224);
       stamp={original,ivory};this.defeatStamps.set(effect,stamp);
     }
-    const ctx=this.ctx,x=Math.round(effect.actor.x)-112,y=Math.round(effect.actor.y)-184;ctx.save();
-    {
-      ctx.globalAlpha=.95;for(const [dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]])ctx.drawImage(stamp.ivory,x+dx,y+dy);
-      ctx.globalAlpha=1;ctx.drawImage(stamp.original,x,y);ctx.globalAlpha=.3*(1-age/duration);ctx.drawImage(stamp.ivory,x,y);
+    // Enemy-only pop: a near-white silhouette swells for about two frames, then
+    // squashes into the ground around its feet while the breakup takes over.
+    const ctx=this.ctx,fx=Math.round(effect.actor.x),fy=Math.round(effect.actor.y)+10,x=fx-112,y=fy-194;ctx.save();
+    if(age<FX.pop.hold){
+      const k=1+.12*(1-age/FX.pop.hold);ctx.translate(fx,fy);ctx.scale(k,k);ctx.translate(-fx,-fy);
+      ctx.globalAlpha=1;ctx.drawImage(stamp.original,x,y);ctx.globalAlpha=.92;ctx.drawImage(stamp.ivory,x,y);
+    }else{
+      const u=Math.min(1,(age-FX.pop.hold)/(duration-FX.pop.hold)),e=u*u;ctx.translate(fx,fy);ctx.scale(1+.3*e,1-.58*e);ctx.translate(-fx,-fy);
+      ctx.globalAlpha=.95*(1-.5*u);for(const [dx,dy]of [[-1,0],[1,0],[0,-1],[0,1]])ctx.drawImage(stamp.ivory,x+dx,y+dy);
+      ctx.globalAlpha=1-.4*u;ctx.drawImage(stamp.original,x,y);ctx.globalAlpha=.4*(1-u);ctx.drawImage(stamp.ivory,x,y);
     }
     ctx.restore();
   }
@@ -591,7 +610,7 @@ this._shadow(x,y+7,40,8);
         ctx.save();const pool=ctx.createRadialGradient(x,y-19,4,x,y-19,59);pool.addColorStop(0,'rgba(244,192,113,.13)');pool.addColorStop(.5,'rgba(235,173,98,.06)');pool.addColorStop(1,'rgba(235,173,98,0)');ctx.fillStyle=pool;ctx.fillRect(x-59,y-78,118,118);ctx.restore();
         this._shadow(x,y+10,44,14,.17);this._shadow(x,y+10,36,10,.28);
       }
-      this._heroPowerUnderlay(s);this._shadow(x,y+10,27,6,.56);if(this.hero.draw(this.ctx,s,this.time,this.reducedEffects))return;
+      this._heroPowerUnderlay(s);this._shadow(x,y+10,27,6,.56);this.combat?.drawHeroUnder(ctx,s,this.reducedEffects);if(this.hero.draw(this.ctx,s,this.time,this.reducedEffects))return;
     }
     const ctx=this.ctx,isEnemy=kind==='enemy',isGirl=kind==='girl';
     const type=actor.type||'normal',gas=isEnemy&&(actor.gasPose||0)>0;
@@ -718,6 +737,11 @@ this._shadow(x,y+7,40,8);
     if(p.kind==='heart'){if(p.viral&&p.hitIds?.size&&!this.reducedEffects){const dx=p.x-p.linkX,dy=p.y-p.linkY,d=Math.hypot(dx,dy)||1;for(let n=0;n<Math.min(d,260);n+=10)line(ctx,'#f58cbe',p.linkX+dx*n/d,p.linkY+dy*n/d,p.linkX+dx*Math.min(n+4,d)/d,p.linkY+dy*Math.min(n+4,d)/d,2);}heart(ctx,p.x-(p.drone?3:5),p.y-(p.drone?3:5),p.drone?'#7be9ff':C.pink,p.drone?.45:.75);return;}
     if(p.kind==='bill'){ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y));ctx.rotate(Math.floor(this.time*8)%4*.18-.3);rect(ctx,C.ink,-7,-4,14,9);rect(ctx,'#65c66a',-6,-3,12,7);rect(ctx,'#d5eda1',-1,-2,3,5);rect(ctx,'#2f7945',-5,-2,2,4);ctx.restore();return;}
     const len=Math.hypot(p.vx||1,p.vy||0)||1,dx=(p.vx||1)/len,dy=(p.vy||0)/len;
+    if(!this.reducedEffects){
+      // A short fading tracer makes every shot readable at a distance.
+      ctx.save();ctx.lineCap='round';ctx.strokeStyle='#ffc56e';ctx.globalAlpha=.22;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(p.x-dx*38,p.y-dy*38);ctx.lineTo(p.x-dx*16,p.y-dy*16);ctx.stroke();
+      ctx.globalAlpha=.45;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.x-dx*24,p.y-dy*24);ctx.lineTo(p.x-dx*12,p.y-dy*12);ctx.stroke();ctx.restore();
+    }
     if(!this.reducedEffects&&s?.upg?.muscle>0&&p.damage>18)line(ctx,C.pink,p.x-dx*14,p.y-dy*14,p.x,p.y,4);
     if(!this.reducedEffects)line(ctx,'#b28349',p.x-dx*17,p.y-dy*17,p.x,p.y,3);
     line(ctx,'#ffe4a0',p.x-dx*10,p.y-dy*10,p.x,p.y,2);line(ctx,'#fffdeb',p.x-dx*5,p.y-dy*5,p.x,p.y,1);rect(ctx,'#ffffff',p.x-1,p.y-1,2,2);
@@ -743,6 +767,15 @@ this._shadow(x,y+7,40,8);
     for(const e of enemies)if(!e.dead){drawAnimalWarning(ctx,e,this.reducedEffects,pass,this.time);drawEgoGround(ctx,e,this.reducedEffects,pass,this.time);drawPelicanGround(ctx,e,this.reducedEffects,pass,this.time);if(e.type==='pelican'&&pass==='ground')drawPelicanCards(ctx,e,this.reducedEffects,'ground');this._travestiaAttack(e,pass);this._orangutanAttack(e,pass);this._rivalAttack(e,false,pass);}
     for(const p of shockwaves||[])this._shockwave(p,pass);
   }
+  _dangerGround(enemies,shockwaves){
+    // Overlapping danger fills merge into one layer (see DangerLayer); the
+    // crisp edges are still drawn later, above actors, with unchanged timing.
+    const scene=this.ctx,layered=(typeof OffscreenCanvas!=='undefined'||typeof document!=='undefined')&&typeof scene.getTransform==='function'&&scene.canvas?.width>0;
+    if(!layered){this._dangerWarnings(enemies,shockwaves,'ground');return;}
+    this.ctx=this.danger.record(scene);
+    try{this._dangerWarnings(enemies,shockwaves,'ground');}finally{this.ctx=scene;}
+    this.danger.flush(.5/this.dpr);
+  }
   _heroVisibility(state,covered){
     const now=state.elapsed||0,previous=this.heroVisibility;
     if(!previous||previous.state!==state||now<previous.time)this.heroVisibility={state,time:now,opacity:0};
@@ -755,14 +788,16 @@ this._shadow(x,y+7,40,8);
     const state=game.state||game.s;if(!state)return;const arrival=charlesArrival(state.charles);const s=state.charles&&state.charles.phase!=='complete'?{...state,elapsed:state.elapsed+state.charles.elapsed}:state;
     // Time is seconds, so long sessions and the first ten seconds behave alike.
     this.time=Number.isFinite(time)?time:0;
-    const seed=game.world?.seed??42;if(!this.combat.owner.has(state)||state.elapsed<this.combat.lastElapsed||this.seed!==seed){this.scorches=[];this.seenDefeats=new WeakSet();}this.combat.prepare(s,seed,game.defeatEffects,state);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
+    const seed=game.world?.seed??42;if(!this.combat.owner.has(state)||state.elapsed<this.combat.lastElapsed||this.seed!==seed){this.scorches=[];this.splats=[];this.seenDefeats=new WeakSet();}this.combat.prepare(s,seed,game.defeatEffects,state);const activeDefeats=new Set(game.defeatEffects||[]);for(const effect of this.defeatStamps.keys())if(!activeDefeats.has(effect))this.defeatStamps.delete(effect);if(this.seed!==seed)this.seed=seed;
     const ctx=this.ctx,w=this.width,h=this.height;
     ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.globalAlpha=1;
     rect(ctx,'#191b31',0,0,w,h);
     // Reserve room below Charles's permanent banner, up to 48 px on short
     // screens. Shift the shared view, never actors or attack geometry.
     const charlesInset=s.charles&&s.charles.phase!=='complete'&&!s.endless?Math.max(0,Math.min(48,430-h*.48)):0;
-    const camera={x:s.x||0,y:(s.y||0)-charlesInset},ox=Math.round(w/2-camera.x),oy=Math.round(h*.48-camera.y);
+    // Presentation-only camera shake: a few pixels, decaying, off in reduced effects.
+    const kick=this.combat.shake(s.elapsed,this.reducedEffects),shakeX=kick.x,shakeY=kick.y;this.groundPad=shakeX||shakeY?8:0;
+    const camera={x:s.x||0,y:(s.y||0)-charlesInset},ox=Math.round(w/2-camera.x)+shakeX,oy=Math.round(h*.48-camera.y)+shakeY;
     ctx.save();ctx.translate(ox,oy);
     this._drawGround(camera,seed);
     const destroyed=game.world?.destroyed;const props=(game.world?.getVisible?.(camera.x,camera.y,w+210,h+240)||[]).map(p=>presentSceneryProp(charlesProp(p,destroyed))).filter(p=>p&&this.city.isPropVisible(p,camera,w,h));
@@ -792,7 +827,8 @@ this._shadow(x,y+7,40,8);
       ctx.save();ctx.globalAlpha=.35;ring(ctx,'#edb0ff',x,y,r,.09,2,this.reducedEffects?0:s.elapsed*.12,1);
       if(!this.reducedEffects){ctx.globalAlpha=.12;ring(ctx,'#f8d8ff',x,y,r-4,.12,1,-s.elapsed*.08,1);}ctx.restore();
     }
-    if(!arrival?.locked)this._dangerWarnings(enemies,s.shockwaves,'ground');
+    if(!arrival?.locked)this._dangerGround(enemies,s.shockwaves);
+    this.combat.drawUnder(ctx,s,this.reducedEffects);
     const items=[];if(s.charles&&s.charles.phase!=='complete'&&!arrival)items.push({y:s.charles.y+10,kind:'charles',data:s.charles});const inView=(x,y,pad=135)=>Math.abs(x-camera.x)<w/2+pad&&y>camera.y-h*.48-pad&&y<camera.y+h*.52+pad;
     for(const p of props)items.push({y:propDepth(p),kind:'prop',data:p});
     for(const c of s.chests||[])items.push({y:c.y+11,kind:'chest',data:c});
@@ -839,9 +875,11 @@ this._shadow(x,y+7,40,8);
       else if(item.kind==='chest'){this._chest(item.data);if(chestTrophyEligible(s,item.data)){const group=BOSS_TROPHIES[item.data.bossType];drawTrophyIcon(ctx,group.choices[0],item.data.x,item.data.y-47,.56,group.color);}}
       else if(item.kind==='vehicle'){if(item.data.kind==='bike')this._bike(item.data,true);else this._car(item.data,true);}
       else {
-        const a=item.data,actorPhase=actorFrame(a,item.kind);
+        const a=item.data,actorPhase=actorFrame(a,item.kind),recoil=item.kind==='enemy'?this.combat.recoil(a.id,s.elapsed,this.reducedEffects):null;
+        if(recoil){ctx.save();ctx.translate(recoil.x,recoil.y);}
         if(item.kind==='enemy'&&arrival){ctx.save();ctx.globalAlpha*=arrival.enemyOpacity;this._actor(a,item.kind,(actorPhase+8)%8,s);ctx.restore();}
         else this._actor(a,item.kind,(actorPhase+8)%8,s);
+        if(recoil)ctx.restore();
       }
     }
     for(const p of shots)this._shot(p,s);
@@ -864,5 +902,8 @@ this._shadow(x,y+7,40,8);
     if(!this.reducedEffects){ctx.save();ctx.globalAlpha=.045;for(let y=0;y<h;y+=4)rect(ctx,'#080a21',0,y,w,1);ctx.restore();}
     const vignette=ctx.createRadialGradient(w/2,h*.48,Math.min(w,h)*.28,w/2,h*.48,Math.max(w,h)*.7);
     vignette.addColorStop(0,'rgba(10,8,25,0)');vignette.addColorStop(.55,'rgba(8,7,25,.07)');vignette.addColorStop(1,'rgba(8,7,25,.34)');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
+    // Toma's own hits: a brief red edge, never a tint on his painting.
+    const hurt=this.combat.hurt(s.elapsed,this.reducedEffects);
+    if(hurt>0){ctx.save();ctx.globalAlpha=hurt;const edge=ctx.createRadialGradient(w/2,h*.48,Math.min(w,h)*.32,w/2,h*.48,Math.max(w,h)*.62);edge.addColorStop(0,'rgba(255,40,72,0)');edge.addColorStop(.55,'rgba(255,40,72,.16)');edge.addColorStop(1,'rgba(255,32,64,.55)');ctx.fillStyle=edge;ctx.fillRect(0,0,w,h);ctx.restore();}
   }
 }
