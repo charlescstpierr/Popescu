@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import * as audioModule from '../dist/audio.js';
 import { Game } from '../dist/engine.js';
-import { renderMusic, encodeWav } from '../scripts/render-music-preview.mjs';
+import { renderMusic, encodeWav, measureAudio } from '../scripts/render-music-preview.mjs';
 
 class Param {
   constructor(value = 0) { this.value = value; this.events = []; }
@@ -238,6 +238,21 @@ test('audition WAV renders the same hook events into finite, unclipped PCM', () 
   assert.equal(wav.length, 44 + rendered.samples.length * 2);
 });
 
+test('audio measurements retain raw peaks, count clipping and expose 10 ms envelopes', () => {
+  const samples = new Float32Array(40);
+  samples.fill(0.5, 0, 10); samples.fill(0.25, 10, 20);
+  const result = measureAudio(samples, 1000);
+  assert.equal(result.peak, 0.5);
+  assert.equal(result.rms, Math.sqrt((10 * 0.25 + 10 * 0.0625) / 40));
+  assert.deepEqual(result.windows.map(window => window.rms), [0.5, 0.25, 0, 0]);
+  assert.equal(result.clipped, 0);
+  samples[0] = 1.2; samples[1] = -1;
+  assert.equal(measureAudio(samples, 1000).clipped, 2);
+  assert.ok(measureAudio(samples, 1000).peak > 1, 'measurement never normalizes or clips');
+  samples[2] = NaN;
+  assert.throws(() => measureAudio(samples, 1000), /non-finite/);
+});
+
 test('kill cue is brief, throttled under crowds and honors mute and pause',async t=>{
  const audio=await createAudio(t);audio.setScene('battle');await Promise.resolve();
  const lead=[...audio._voices].find(voice=>voice.instrument==='lead'),before=audio.context.sources.length;
@@ -259,7 +274,7 @@ function exhaustRoutineCredits(audio) {
   assert.ok(audio._sfxTokens < 1, 'the real routine limiter is exhausted');
 }
 
-test('accepted damage keeps its original two-part cue when routine credits are exhausted', async t => {
+test('accepted damage keeps a distinct low two-part thud when routine credits are exhausted', async t => {
   const audio = await createAudio(t);
   audio.setScene('battle'); await Promise.resolve();
   exhaustRoutineCredits(audio);
@@ -268,13 +283,72 @@ test('accepted damage keeps its original two-part cue when routine credits are e
   const hit = [...audio._voices].filter(voice => !existing.has(voice));
   assert.equal(hit.length, 2, 'both damage components must reach the audio graph');
   assert.equal(audio._sfxTokens, credits, 'damage does not spend routine credits');
-  assert.deepEqual(hit.map(voice => Math.max(...voice.gain.gain.events.map(([value]) => value))), [0.14, 0.13]);
-  assert.equal(hit[0].filter.type, 'highpass');
-  assert.equal(hit[0].filter.frequency.value, 650);
-  assert.equal(hit[1].source.type, 'square');
-  assert.equal(hit[1].source.frequency.events[0][0], 110);
-  assert.ok(hit.every(voice => voice.source.stopTime - voice.source.startTime < 0.15));
+  assert.equal(hit[0].filter.type, 'lowpass');
+  assert.ok(hit[0].filter.frequency.value <= 500);
+  assert.equal(hit[1].source.type, 'sine');
+  assert.ok(hit[1].source.frequency.events[0][0] < 110);
+  assert.ok(hit.every(voice => voice.source.stopTime - voice.source.startTime < 0.18));
   assert.ok(audio._voices.size <= 32);
+});
+
+test('rapid shots and kills vary within a narrow pitch and gain range with short quiet tails', async t => {
+  const audio = await createAudio(t);
+  const random = Math.random;
+  t.after(() => { Math.random = random; });
+  for (const name of ['shoot', 'kill']) {
+    const pitches = [], peaks = [];
+    for (const value of [0, 0.25, 0.75, 1]) {
+      Math.random = () => value;
+      audio.context.advance(0.2);
+      const before = new Set(audio._voices);
+      audio.sfx(name);
+      const voices = [...audio._voices].filter(voice => !before.has(voice));
+      const body = voices.find(voice => !voice.filter);
+      pitches.push(body.source.frequency.events[0][0]);
+      const envelope = body.gain.gain.events.map(([value]) => value);
+      peaks.push(Math.max(...envelope));
+      assert.ok(envelope[2] < Math.max(...envelope) * 0.15, 'tail drops below 15% of the transient');
+      assert.ok(voices.every(voice => voice.source.stopTime - voice.source.startTime < 0.12));
+    }
+    assert.equal(new Set(pitches).size, 4, `${name} varies pitch`);
+    assert.ok(Math.max(...pitches) / Math.min(...pitches) < 1.12, 'variation stays below two semitones');
+    assert.equal(new Set(peaks).size, 4, `${name} varies gain`);
+    assert.ok(Math.max(...peaks) / Math.min(...peaks) < 1.3);
+  }
+});
+
+test('XP pickups climb, cap their register and reset after a pause; coins remain distinct', async t => {
+  const audio = await createAudio(t);
+  const collect = () => {
+    const start = audio.context.sources.length;
+    audio.sfx('collect');
+    return audio.context.sources[start]?.frequency.events[0]?.[0];
+  };
+  const pitches = [collect()];
+  for (let i = 0; i < 15; i++) { audio.context.advance(0.12); pitches.push(collect()); }
+  assert.ok(pitches.slice(1, 7).every((pitch, i) => pitch > pitches[i]));
+  assert.equal(pitches.at(-1), pitches.at(-2), 'long vacuum streaks hold their top note');
+  assert.ok(pitches.at(-1) / pitches[0] <= 2.01, 'one octave maximum');
+  audio.context.advance(0.65);
+  assert.equal(collect(), pitches[0]);
+  const before = audio.context.sources.length;
+  audio.sfx('coin');
+  assert.equal(audio.context.sources.length - before, 2, 'currency has its own two-note cue');
+  assert.notEqual(audio.context.sources[before].frequency.events[0][0], pitches[0]);
+});
+
+test('routine voice pressure retires the oldest equal-priority sound and keeps recent impacts', async t => {
+  const audio = await createAudio(t);
+  audio._stopVoices();
+  const musicBefore = audio._step;
+  const cue = () => audio._tone(60, audio.context.currentTime, 1, 0.05, 'triangle');
+  for (let i = 0; i < 8; i++) cue();
+  const oldest = [...audio._voices][0], retained = [...audio._voices].slice(1);
+  cue();
+  assert.equal(audio._voices.size, 8);
+  assert.ok(!audio._voices.has(oldest));
+  assert.ok(retained.every(voice => audio._voices.has(voice)));
+  assert.equal(audio._step, musicBefore);
 });
 
 test('ordinary effects cannot steal a live damage cue or the melody and bass', async t => {

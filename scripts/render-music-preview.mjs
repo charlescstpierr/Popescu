@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { MUSIC_SCORE, getMusicVoice, CHIP_WAVES, createChipNoise, getMusicStepEvents } from '../dist/audio.js';
 
 const frequency = note => 440 * 2 ** ((note - 69) / 12);
@@ -105,15 +106,133 @@ export function encodeWav(samples, sampleRate) {
   return wav;
 }
 
+export function measureAudio(samples, sampleRate) {
+  let peak = 0, power = 0, clipped = 0;
+  const windows = [];
+  const size = Math.round(sampleRate * 0.01);
+  for (let start = 0; start < samples.length; start += size) {
+    let windowPeak = 0, windowPower = 0;
+    const end = Math.min(samples.length, start + size);
+    for (let i = start; i < end; i++) {
+      if (!Number.isFinite(samples[i])) throw new Error('non-finite audio sample');
+      const value = Math.abs(samples[i]);
+      peak = Math.max(peak, value); windowPeak = Math.max(windowPeak, value);
+      power += value * value; windowPower += value * value;
+      if (value >= 1) clipped++;
+    }
+    windows.push({ time: start / sampleRate, peak: windowPeak, rms: Math.sqrt(windowPower / (end - start)) });
+  }
+  return { peak, rms: Math.sqrt(power / samples.length), clipped, windows };
+}
+
+// Optional Chromium QA. This runs AudioManager's real Web Audio graph without
+// audition normalization, including its gain buses, envelopes and voice limits.
+export async function renderAudioPreview({ events = [], seconds = 4, music = true, volume = 1, sourcePath = fileURLToPath(new URL('../dist/audio.js', import.meta.url)) } = {}) {
+  if (!Number.isFinite(seconds) || seconds < 0.08 || seconds > 120) throw new Error('seconds must be from 0.08 to 120');
+  if (!Number.isFinite(volume) || volume < 0 || volume > 1) throw new Error('volume must be from 0 to 1');
+  const require = createRequire(import.meta.url);
+  const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core');
+  const browser = await chromium.launch({ ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
+  try {
+    const page = await browser.newPage();
+    const source = fs.readFileSync(sourcePath, 'utf8');
+    const result = await page.evaluate(async ({ source, events, seconds, music, volume }) => {
+      const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
+      const { AudioManager } = await import(url);
+      URL.revokeObjectURL(url);
+      const sampleRate = 44100;
+      const context = new OfflineAudioContext(1, Math.ceil(seconds * sampleRate), sampleRate);
+      let created = 0, maximumVoices = 0, maximumSfxVoices = 0;
+      const adapter = new Proxy(context, {
+        get(target, key) {
+          // Rendering is advanced explicitly at 40 ms checkpoints below.
+          if (key === 'state') return 'running';
+          if (['resume', 'suspend', 'close'].includes(key)) return () => Promise.resolve();
+          if (['createOscillator', 'createBufferSource'].includes(key)) return (...args) => { created++; return target[key](...args); };
+          const value = target[key];
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
+      globalThis.AudioContext = class { constructor() { return adapter; } };
+      let seed = 42;
+      Math.random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+      const audio = new AudioManager({ volume });
+      audio.setScene('battle');
+      await audio.unlock();
+      audio._clearClock();
+      if (!music) { audio._stopVoices(); audio._musicBus.gain.value = 0; }
+      const pending = [...events].sort((a, b) => a.at - b.at);
+      const tick = () => {
+        if (music) audio._schedule();
+        while (pending.length && pending[0].at <= context.currentTime + 0.0001) {
+          const event = pending.shift();
+          for (let i = 0; i < (event.count || 1); i++) audio.sfx(event.name);
+        }
+        maximumVoices = Math.max(maximumVoices, audio._voices.size);
+        maximumSfxVoices = Math.max(maximumSfxVoices, [...audio._voices].filter(voice => voice.kind === 'sfx').length);
+      };
+      tick();
+      let pause = context.suspend(0.04);
+      const rendering = context.startRendering();
+      for (let step = 1; step * 0.04 < seconds; step++) {
+        await pause;
+        tick();
+        if ((step + 1) * 0.04 < seconds) pause = context.suspend((step + 1) * 0.04);
+        await context.resume();
+      }
+      const buffer = await rendering;
+      const samples = Array.from(buffer.getChannelData(0));
+      audio.destroy();
+      return { samples, sampleRate, created, maximumVoices, maximumSfxVoices };
+    }, { source, events, seconds, music, volume });
+    return { ...result, samples: Float32Array.from(result.samples), ...measureAudio(result.samples, result.sampleRate) };
+  } finally {
+    await browser.close();
+  }
+}
+
+export const SOUND_PREVIEWS = {
+  shots: { seconds: 2.4, music: false, events: Array.from({ length: 10 }, (_, i) => ({ at: 0.16 + i * 0.16, name: 'shoot' })) },
+  kills: { seconds: 2.4, music: false, events: Array.from({ length: 8 }, (_, i) => ({ at: 0.16 + i * 0.24, name: 'kill', count: 300 })) },
+  pickups: { seconds: 4, music: false, events: [
+    ...Array.from({ length: 9 }, (_, i) => ({ at: 0.16 + i * 0.16, name: 'collect' })),
+    { at: 2.24, name: 'collect' }, { at: 2.72, name: 'coin' }, { at: 3.12, name: 'coin' },
+  ] },
+  hurt: { seconds: 2, music: false, events: [{ at: 0.16, name: 'kill' }, { at: 0.64, name: 'hit' }, { at: 1.28, name: 'hit' }] },
+  stingers: { seconds: 6, music: false, events: [{ at: 0.16, name: 'level' }, { at: 1.28, name: 'chest' }, { at: 2.4, name: 'victory' }, { at: 4.16, name: 'defeat' }] },
+  music: { seconds: 8, music: true, events: [] },
+  combat: { seconds: 8, music: true, events: [
+    ...Array.from({ length: 42 }, (_, i) => ({ at: 0.16 + i * 0.16, name: 'shoot' })),
+    ...Array.from({ length: 26 }, (_, i) => ({ at: 0.24 + i * 0.24, name: 'kill', count: 300 })),
+    ...Array.from({ length: 34 }, (_, i) => ({ at: 0.32 + i * 0.16, name: 'collect' })),
+    { at: 1.6, name: 'coin' }, { at: 2.4, name: 'hit' }, { at: 3.2, name: 'truth' },
+    { at: 4, name: 'rooster' }, { at: 4.8, name: 'hit' }, { at: 5.6, name: 'level' },
+  ] },
+};
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = Object.fromEntries(process.argv.slice(2).reduce((pairs, value, index, all) => {
     if (value.startsWith('--')) pairs.push([value.slice(2), all[index + 1]]);
     return pairs;
   }, []));
   const scene = args.scene || 'battle';
-  const result = renderMusic(scene, Number(args.bars || 16), Number(args.intensity || 0.65));
-  const output = path.resolve(args.out || `qa-output/toma-${scene}-preview.wav`);
-  fs.mkdirSync(path.dirname(output), { recursive: true });
-  fs.writeFileSync(output, encodeWav(result.samples, result.sampleRate));
-  console.log(JSON.stringify({ output, scene, seconds: result.duration, notesAndDrums: result.events.length, peak: result.peak, rms: result.rms }));
+  if (args.effects) {
+    const scenario = SOUND_PREVIEWS[args.effects];
+    if (!scenario) throw new Error(`effects must be one of ${Object.keys(SOUND_PREVIEWS).join(', ')}`);
+    const result = await renderAudioPreview({ ...scenario, volume: Number(args.volume ?? 1), ...(args.source ? { sourcePath: path.resolve(args.source) } : {}) });
+    const output = path.resolve(args.out || `qa-output/toma-${args.effects}.wav`);
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, encodeWav(result.samples, result.sampleRate));
+    const { samples, ...measurements } = result;
+    fs.writeFileSync(output.replace(/\.wav$/, '') + '.json', JSON.stringify(measurements, null, 2) + '\n');
+    const { windows, ...summary } = measurements;
+    console.log(JSON.stringify({ output, ...summary }));
+    process.exitCode = result.clipped ? 1 : 0;
+  } else {
+    const result = renderMusic(scene, Number(args.bars || 16), Number(args.intensity || 0.65));
+    const output = path.resolve(args.out || `qa-output/toma-${scene}-preview.wav`);
+    fs.mkdirSync(path.dirname(output), { recursive: true });
+    fs.writeFileSync(output, encodeWav(result.samples, result.sampleRate));
+    console.log(JSON.stringify({ output, scene, seconds: result.duration, notesAndDrums: result.events.length, peak: result.peak, rms: result.rms }));
+  }
 }
