@@ -504,7 +504,28 @@ export class Game {
         else e.phase='chase';
       }
       if(e.type==='explosive' && e.charmed<=0 && !suppressed){if(e.windup>0){e.phase='windup';e.windup-=dt;if(e.windup<=0){this.explode(e,EXPLOSIVE_BLAST.radius,23);e.dead=true;this.kill(e);continue;}}else if(d<68){e.windup=.72;e.phase='windup';}}
-      if(e.type==='matriarch'){e.summon-=dt;if(e.summon<=0){e.summon=9;for(let j=0;j<4;j++)this.spawnEnemy(j===0?'gas':'orangutan',e.x+(j-1.5)*39,e.y+35);this.pulse(e.x,e.y,100,'#ec6ca8',.6);}}
+      if(e.type==='matriarch'){
+        e.summon-=dt;
+        if(e.summon<=0){
+          e.summon=9;
+          for(let j=0;j<4&&s.enemies.length<CAP.enemies;j++){
+            const type=j===0?'gas':'orangutan',r=BASE[type].r*.64;
+            const preferredX=e.x+(j-1.5)*39,preferredY=e.y+35;
+            let x=preferredX,y=preferredY;
+            if(this.world.collides(x,y,r)){
+              let found=false;
+              for(let ring=1;ring<=4&&!found;ring++)for(let k=0;k<8;k++){
+                const angle=k*TAU/8;
+                x=preferredX+Math.cos(angle)*ring*24;y=preferredY+Math.sin(angle)*ring*24;
+                if(!this.world.collides(x,y,r)){found=true;break;}
+              }
+              if(!found){x=e.x;y=e.y;if(this.world.collides(x,y,r))continue;}
+            }
+            this.spawnEnemy(type,x,y);
+          }
+          this.pulse(e.x,e.y,100,'#ec6ca8',.6);
+        }
+      }
       if(!animalLocked(e)&&!egoBeastLocked(e)&&e.windup<=0&&e.gasPose<=0&&!(e.swipe>0)&&!(e.charge>0)&&!(e.crow>0)){const speed=e.speed*(suppressed?.55:1)*(1-.07*this.rank('charisma'))*(e.type==='sprinter'?(Math.sin(s.elapsed*2.7+e.id)>.15?1.55:.65):1);const ox=e.x,oy=e.y;this.move(e,dx/d*speed*dt,dy/d*speed*dt,e.r*.64);if(length(e.x-ox,e.y-oy)<speed*dt*.2 && d>35){const sign=e.id%2?1:-1;this.move(e,-dy/d*speed*dt*sign,dx/d*speed*dt*sign,e.r*.64);}recordEnemyWalk(this.enemyGait,e,length(e.x-ox,e.y-oy));if(this.rank('charisma')&&length(e.x-ox,e.y-oy)>0&&dist(e,s)<200)this.powerEffect('charisma','slow',e.x,e.y,0,{tx:ox,ty:oy});}
       if(d<e.r+15&&e.attack<=0&&e.charmed<=0&&!ANIMALS[e.type]&&!EGO_BEASTS[e.type]&&e.type!=='travestia'&&e.type!=='pelican'&&e.type!=='orangutan'&&!isRival(e.type)){e.attack=suppressed?1.6:.85;if(target===g){g.hp-=12*(this.difficulty.damage||1);this.burst(g.x,g.y,'#fc7f9f',5);}else this.damage((e.type==='tank'?20:e.type==='matriarch'?26:11)*(this.difficulty.damage||1),'touch',{kind:'ordinary-contact',actorType:e.type,actorId:e.id});}
       if(e.charmed>0 && e.target==='enemy' && d<e.r+target.r+4 && e.attack<=0){e.attack=.55;this.hurt(target,20+5*this.rank('charisma'));}
