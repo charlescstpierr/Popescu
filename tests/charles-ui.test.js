@@ -23,7 +23,7 @@ function app(existingValues,locks,clock=performance){
   for(const match of readFileSync(new URL('../dist/index.html',import.meta.url),'utf8').matchAll(/<[^>]+id="([^"]+)"[^>]*>/g)){const cls=match[0].match(/class="([^"]*)"/);for(const name of cls?.[1].split(/\s+/)||[])get(match[1]).classList.add(name);}
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get activeElement(){return document.activeElement},get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,renderTrophies,syncEngineScreen,updateHud,onGameEvent,showBanter,get runId(){return runId}};',context);
-  return {holdLock(){let release;const held=new Promise(resolve=>release=resolve);queue=queue.then(()=>held);return release;},events,charlesPortraits,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick?.(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
+  return {holdLock(){let release;const held=new Promise(resolve=>release=resolve);queue=queue.then(()=>held);return release;},events,charlesPortraits,confirm:value=>confirmed=value,values,sounds,get,click:id=>{const result=get(id).onclick?.();if(['play','restart','retry'].includes(id)&&context.controller.screen==='new-run-confirm')return get(confirmed?'new-run-start':'new-run-cancel').onclick?.();return result;},get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
 }
 
 
