@@ -39,7 +39,6 @@ function sceneCursor(g,scene){const line=scene.lines[scene.index];return {id:g.s
 function waitForCalm(g,scene,now){
  const state=g.speech;
  if(scene.waitSince===undefined)scene.waitSince=now;
- if(now-scene.waitSince>=SCENE_CALM_WAIT){if(scene.remember)g.eventSeen.add(`skip:${scene.id}`);cancelScene(g);return false;}
  if(!state.queue.some(line=>line.sceneId===scene.id)){
   if(state.queue.length>=SPEECH_QUEUE_LIMIT){const discard=state.queue.findLastIndex(queued=>!queued.sceneId);if(discard>=0)state.queue.splice(discard,1);}
   state.queue.push(sceneCursor(g,scene));
@@ -84,6 +83,11 @@ export function flushSpeech(g){
     state.scene=null;
    }
   }
+ }
+ const waiting=state.scene;
+ if(waiting?.waitSince!==undefined&&now-waiting.waitSince>=SCENE_CALM_WAIT){
+  if(waiting.remember)g.eventSeen.add(`skip:${waiting.id}`);
+  cancelScene(g);
  }
  if(state.active||g.banterEnabled===false)return;
  if(state.scene){
