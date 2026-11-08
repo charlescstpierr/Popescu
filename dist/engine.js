@@ -8,6 +8,7 @@ import {carLevel,launchLamborghini,updateLamborghini} from './lamborghini.js';
 import {lethalDamageCause} from './run-history.js';
 import {createSpeech,enqueueSpeech,flushSpeech,presentSpeech,dismissSpeech,beginSpeechScene,setSpeechEnabled} from './speech.js';
 import {BOSS_TYPES} from './boss-director.js';
+import {SURVIVAL_SECONDS,LEGACY_SURVIVAL_SECONDS,survivalDuration,progressionTime,finaleAt,finaleBeats} from './run-rules.js';
 import {charlesActive,charlesArrival,startCharles,finishCharles,hitCharles,updateCharles} from './charles.js';
 import {updateTrophyEffects,reduceTrophyDamage,notifyTrophyDamage,trophySpeedMultiplier} from './trophy-effects.js';
 import {createTrophyState,queueBossTrophy,openPendingTrophy,chooseBossTrophy,trimTrophyChests} from './boss-trophies.js';
@@ -21,7 +22,7 @@ import { DISCOVERIES, DISCOVERY_COOLDOWN } from './discoveries.js';
 import { tailLocked, updateTravestia } from './travestia.js';
 import { World } from './world.js';
 import { computeHeroPose, solveHeroAim, advanceHeroMotion } from './hero-pose.js';
-import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, STORY_MILESTONES, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STREET_SCENE_TYPES, COMPANION_ARRIVALS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
+import { companionLevel, EVENTS, UPGRADES, DIFFICULTIES, contextualBarks, WORLD_REMARKS, storyMilestones, STORY_SCENES, STORY_BUILD_IDS, storyMilestoneLine, STREET_SCENE_TYPES, COMPANION_ARRIVALS, STUNT_BARKS, STUNT_REPLIES, RIVAL_BARKS, RIVAL_REPLIES, RIVAL_COMPANION_REPLIES, ROOSTER_REACTION } from './content.js';
 
 // One footprint for explosive damage and its player-center warning.
 export const EXPLOSIVE_BLAST=Object.freeze({radius:87,playerPadding:12});
@@ -41,13 +42,14 @@ export const CALM_N=6,CALM_R=180;
 export const CALM_DANGER_R=420;
 const isAttackPhase=phase=>typeof phase==='string'&&(phase.endsWith('_warning')||phase.endsWith('_windup')||phase.startsWith('peli_')&&phase!=='peli_recover'||['animal_active','ego_active','windup','swipe','crow','charge','gas','shockwave','tail_dash','tail_spin','cape_spin','peli_hug','peli_tarot'].includes(phase));
 export class Game {
-  constructor({difficulty='normal',seed=42,onEvent=()=>{}}={}) {
+  constructor({difficulty='normal',seed=42,onEvent=()=>{},survivalDuration:duration=SURVIVAL_SECONDS}={}) {
+    if(![SURVIVAL_SECONDS,LEGACY_SURVIVAL_SECONDS].includes(duration))throw new RangeError('Unsupported survival duration');
     this.onEvent=onEvent;this.seed=seed|0;this.rng=(seed|0) || 1;this.id=1;this.world=new World(seed);this.viewport={width:390,height:844};
     this.difficulty=DIFFICULTIES[difficulty] || DIFFICULTIES.normal || {hp:1,damage:1,spawn:1,speed:1};
     const hp=this.difficulty.hp>5?this.difficulty.hp:100*(this.difficulty.hp||1);
-    this.state=this.s={mode:'playing',difficulty,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
+    this.state=this.s={mode:'playing',difficulty,survivalDuration:duration,x:0,y:0,hp,maxhp:hp,shield:0,xp:0,xpNeed:8,level:1,elapsed:0,kills:0,coins:0,coinsSpent:0,upgradeRerolls:0,evolutions:{},trophies:createTrophyState(),charles:null,gems:0,endless:false,invulnerable:0,moveX:0,moveY:0,travelX:0,travelY:0,walkDistance:0,walkMoving:false,faceX:0,faceY:1,aimX:1,aimY:0,aimSide:1,stunt:{kind:'split',progress:0,time:0,duration:1.3,active:false,faceX:0,faceY:1,count:0},upg:{},companion:false,girl:{x:-28,y:24,hp:70,maxhp:70,down:0,shoot:0},enemies:[],shots:[],drops:[],clouds:[],particles:[],vehicles:[],pulses:[],chests:[],shockwaves:[],options:[],shotClock:.12,airplane:{x:0,y:0,active:false,life:0,r:440},stats:{}};
     this.timers={spawn:.02,car:1,money:1,airplane:2,chopper:.1,truth:1,bark:13,chest:28,horde:20,pack:10,rival:60,animal:6,animalIndex:0,ego:9,egoIndex:0};
-    this.bossDirector=createBossDirector(this.seed);this.encounters=createEncounterDialogue();this.pausedEncountersEnabled=false;
+    this.bossDirector=createBossDirector(this.seed,0,[],duration);this.encounters=createEncounterDialogue();this.pausedEncountersEnabled=false;
     // A transient speech cue: restoring a run never invents recent health loss.
     this.recentHealthDamage=null;
     // Visual-only records are bounded immediately and intentionally omitted from saved runs.
@@ -126,7 +128,7 @@ export class Game {
     s.options=[];s.mode='playing';s.invulnerable=Math.max(s.invulnerable,.6);this.sound('level');this.finishUpgradeChoice();return true;
   }
   gainXP(value){
-    const s=this.s;s.xp+=value;if(s.xp<s.xpNeed || s.mode!=='playing')return;
+    const s=this.s;s.xp+=value*LEGACY_SURVIVAL_SECONDS/survivalDuration(s);if(s.xp<s.xpNeed || s.mode!=='playing')return;
     s.xp-=s.xpNeed;s.level++;s.xpNeed=Math.round(8+s.level*4.2+Math.pow(s.level,1.2));s.hp=Math.min(s.maxhp,s.hp+4);
     s.upgradeRerolls=0;s.options=this.rollUpgradeOptions();s.mode='upgrade';s.moveX=0;s.moveY=0;this.sound('level');this.emit('upgrade',s.options);
   }
@@ -167,7 +169,7 @@ export class Game {
     this.spawnWave(dt);if(this.rank('airplane')&&this.timers.airplane<=dt)this.activateAirplane();this.updateCompanion(dt);this.updateEnemies(dt);const trophySpeed=trophySpeedMultiplier(s);updateTrophyEffects(this,dt);if(trophySpeedMultiplier(s)!==trophySpeed)this.recalculate();if(s.hp>0){this.updateStunt(dt,moved);this.updateRivalBanter();}this.weapons(dt);this.updateShots(dt);this.updateVehicles(dt);this.updateClouds(dt);this.updateShockwaves(dt,{x:previousX,y:previousY},{x:previousGirlX,y:previousGirlY});this.updateDrops(dt);this.updateChests(dt);this.updateEffects(dt);
     if(s.hp>0)delete s.deathCause;
     if(s.hp<=0){s.hp=0;s.mode='gameover';this.sound('defeat');this.emit('gameover',s);return;}
-    if(s.elapsed>=1200 && !s.endless){startCharles(this);return;}
+    if(s.elapsed>=survivalDuration(s) && !s.endless){startCharles(this);return;}
     this.openTrophy();
     if(s.mode==='playing'&&!this.openEncounterDialogue()){this.flushSpeech();this.story(dt);}
     for(const [key,max] of Object.entries(CAP))if(key!=='drops'&&s[key].length>max){if(key==='chests')s.chests=trimTrophyChests(s,max);else s[key].splice(0,s[key].length-max);}
@@ -229,7 +231,7 @@ export class Game {
   spawnEnemy(type,x,y,animalIntroduction=false){
     const s=this.s;if(EGO_BEASTS[type]&&(s.enemies.filter(e=>!e.dead&&EGO_BEASTS[e.type]).length>=EGO_LIMITS.active||s.enemies.filter(e=>!e.dead&&e.type===type).length>=EGO_LIMITS.perType))return null;if(isMajorBoss(type)&&s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return null;if(s.enemies.length>=CAP.enemies||isRival(type)&&s.enemies.filter(e=>!e.dead&&isRival(e.type)).length>=2)return null;const spec=BASE[type]||BASE.normal;
     if(x===undefined){const w=this.viewport.width/2+spec.r+24,top=this.viewport.height*.48+spec.r+24,bottom=this.viewport.height*.52+spec.r+24,side=Math.floor(this.random()*4);x=s.x+(side===0?-w:side===1?w:(this.random()*2-1)*w);y=s.y+(side===2?-top:side===3?bottom:-top+this.random()*(top+bottom));if(ANIMALS[type]||EGO_BEASTS[type]){const entry=EGO_BEASTS[type]?findEgoEntry(this,type,{x,y},animalIntroduction):findAnimalEntry(this,type,{x,y},animalIntroduction);if(!entry)return null;({x,y}=entry);}else for(let i=0;i<8 && this.world.collides(x,y,25);i++){x+=(x<s.x?-1:1)*35;y+=(y<s.y?-1:1)*28;}}
-    const minutes=s.elapsed/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
+    const minutes=progressionTime(s)/60,scale=1+Math.min(1.6,minutes*.065)+Math.max(0,minutes-20)*.035;
     // Several attack cycles must survive developed offensive builds. Summons
     // justify a gentler first matriarch; only newly spawned bosses gain HP.
     const earlyBossHealth=type==='matriarch'?1.8:2.4;
@@ -269,23 +271,24 @@ export class Game {
     }
     return pack;
   }
-  // Pacing is derived from the existing simulation clock, so old saves need no migration.
+  // Recovery windows retain their full duration on the simulation clock.
   runPacing(){
-    const t=this.s.elapsed,finale=!this.s.endless&&t>=1140;
+    const t=this.s.elapsed,finale=!this.s.endless&&t>=finaleAt(this.s);
     const recovery=t>=120&&!finale&&(t-120)%90>=60&&(t-120)%90<75;
     return {finale,recovery,pressure:recovery?.35:finale?.65:1};
   }
   pendingEncounterNotices(){
     // Rebuild only pending threats from saved simulation clocks, never old jokes.
     const s=this.s,d=this.bossDirector,notices={};
-    if(d.warned&&(s.endless||s.elapsed+d.remaining<1140)&&!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)){
+    if(d.warned&&(s.endless||s.elapsed+d.remaining<finaleAt(s))&&!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)){
       const name={matriarch:'La modération',travestia:'Travestia',pelican:'Péli Zodiaque'}[d.nextType];
       notices.boss=`${name} arrive ${d.remaining>0?`dans environ ${Math.ceil(d.remaining)} s`:'bientôt'}. Garde une sortie !`;
     }
-    if(s.elapsed>=120&&this.timers.horde>0&&this.timers.horde<=6&&(s.endless||s.elapsed+this.timers.horde<1140)){
+    if(s.elapsed>=120&&this.timers.horde>0&&this.timers.horde<=6&&(s.endless||s.elapsed+this.timers.horde<finaleAt(s))){
       notices.horde=`Une horde arrive dans environ ${Math.ceil(this.timers.horde)} s. Garde une sortie !`;
     }
-    if(!s.endless)for(const [at,arrival,label,hint] of [[1130,1140,'Dernière minute','Garde une sortie !'],[1154,1160,'Le dernier rival arrive','Garde tes distances !'],[1174,1180,'Dernière vague','Tiens jusqu’à vingt minutes !']]){
+    const beats=finaleBeats(s),target=survivalDuration(s)===SURVIVAL_SECONDS?'dix':'vingt';
+    if(!s.endless)for(const [at,arrival,label,hint] of [[beats.warning,beats.boss,'Dernière minute','Garde une sortie !'],[beats.rivalWarning,beats.rival,'Le dernier rival arrive','Garde tes distances !'],[beats.hordeWarning,beats.horde,'Dernière vague',`Tiens jusqu’à ${target} minutes !`]]){
       if(this.eventSeen.has(`finale:${at}`)&&s.elapsed>=at&&s.elapsed<arrival)notices.finale=`${label} dans environ ${Math.ceil(arrival-s.elapsed)} s. ${hint}`;
     }
     return notices;
@@ -317,6 +320,7 @@ export class Game {
   }
   updateFinale(dt){
     const s=this.s;if(s.endless)return;
+    const beats=finaleBeats(s),target=survivalDuration(s)===SURVIVAL_SECONDS?'dix':'vingt';
     const beat=(at,action)=>{
       const key=`finale:${at}`,pending=`${key}:pending`;
       const crossed=s.elapsed>=at&&s.elapsed-dt<at;
@@ -326,26 +330,26 @@ export class Game {
         else{this.eventSeen.delete(pending);this.eventSeen.add(key);}
       }
     };
-    beat(1130,()=>this.announceEncounter('Dernière minute dans dix secondes. Un dernier défi t’attend : garde une sortie !','finale'));
-    beat(1140,()=>{
+    beat(beats.warning,()=>this.announceEncounter('Dernière minute dans dix secondes. Un dernier défi t’attend : garde une sortie !','finale'));
+    beat(beats.boss,()=>{
       this.timers.horde=45;this.timers.rival=90;
       if(!s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead)&&!this.spawnScheduledBoss())return false;
-      this.announceEncounter('Le dernier direct ! Survis jusqu’à vingt minutes. Ses attaques restent esquivables.','finale');
+      this.announceEncounter(`Le dernier direct ! Survis jusqu’à ${target} minutes. Ses attaques restent esquivables.`,'finale');
     });
-    beat(1154,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !','finale'));
-    beat(1160,()=>{if(!this.spawnFinaleEnemy(this.rivalIndex%2?'rival_goat':'rival_rooster'))return false;this.rivalIndex++;});
-    beat(1174,()=>this.announceEncounter('Dernière vague dans six secondes. Tiens jusqu’à vingt minutes !','finale'));
-    beat(1180,()=>{this.reserveFinaleSlots(24);if(s.enemies.length>=CAP.enemies)return false;this.spawnHorde();this.announceEncounter('Dernière vague ! Pas besoin de tout éliminer : survis jusqu’à vingt minutes !','finale');});
+    beat(beats.rivalWarning,()=>this.announceEncounter('Un dernier rival approche. Garde tes distances !','finale'));
+    beat(beats.rival,()=>{if(!this.spawnFinaleEnemy(this.rivalIndex%2?'rival_goat':'rival_rooster'))return false;this.rivalIndex++;});
+    beat(beats.hordeWarning,()=>this.announceEncounter(`Dernière vague dans six secondes. Tiens jusqu’à ${target} minutes !`,'finale'));
+    beat(beats.horde,()=>{this.reserveFinaleSlots(24);if(s.enemies.length>=CAP.enemies)return false;this.spawnHorde();this.announceEncounter(`Dernière vague ! Pas besoin de tout éliminer : survis jusqu’à ${target} minutes !`,'finale');});
   }
   spawnHorde(){
-    const s=this.s,m=s.elapsed/60,count=18+Math.min(24,Math.floor(m*1.4));
-    const variant=s.elapsed<120?0:Math.round((s.elapsed-20)/45)%3;
+    const s=this.s,t=progressionTime(s),m=t/60,count=18+Math.min(24,Math.floor(m*1.4));
+    const variant=t<120?0:Math.round((t-20)/45)%3;
     const groups=variant===0?[['orangutan',1/3],['sprinter',1/5],['normal',.5]]:variant===1?[['gas',.2],['orangutan',.35],['normal',.45]]:[['tank',.15],['jealous',.35],['normal',.5]];
     for(const [type,share] of groups)this.spawnPack(type,Math.ceil(count*share));
     this.pulse(s.x,s.y,70,'#e2b944',.45);this.bark('SYSTÈME','Un groupe de discussion vient de te trouver.');
   }
   spawnWave(dt){
-    const s=this.s,m=s.elapsed/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;this.timers.animal-=dt;this.timers.ego-=dt;
+    const s=this.s,m=progressionTime(s)/60,pacing=this.runPacing();this.updateFinale(dt);this.timers.spawn-=dt;this.timers.animal-=dt;this.timers.ego-=dt;
     const interval=Math.max(.08,.46/(1+m*.22))/((this.difficulty.spawn||1)*pacing.pressure);
     if(this.timers.spawn<=0){
       this.timers.spawn+=interval;let type='normal';const p=this.random();
@@ -374,7 +378,7 @@ export class Game {
     this.timers.pack-=dt;
     if(this.timers.pack<=0){this.timers.pack=pacing.recovery||pacing.finale?.1:7;if(!pacing.recovery&&!pacing.finale)this.spawnPack('orangutan',3+Math.min(3,Math.floor(m/3)));}
     if(pacing.finale)return;
-    if((s.endless||s.elapsed+this.timers.horde<1140)&&s.elapsed>=120&&this.timers.horde>6&&this.timers.horde-dt<=6)this.announceEncounter('Une horde arrive dans six secondes. Garde une sortie !','horde');
+    if((s.endless||s.elapsed+this.timers.horde<finaleAt(s))&&s.elapsed>=120&&this.timers.horde>6&&this.timers.horde-dt<=6)this.announceEncounter('Une horde arrive dans six secondes. Garde une sortie !','horde');
     this.timers.horde-=dt;
     if(this.timers.horde<=0){
       this.timers.horde=45;this.spawnHorde();
@@ -396,17 +400,17 @@ export class Game {
     this.reserveFinaleSlots(1);
     const boss=this.spawnEnemy(d.nextType);
     if(!boss)return null; // Keep the same decision and RNG when the cap blocks it.
-    d.lastType=d.nextType;scheduleNextBoss(d);
+    d.lastType=d.nextType;scheduleNextBoss(d,false,survivalDuration(this.s));
     return boss;
   }
   updateBossArrivals(dt){
     const s=this.s,d=this.bossDirector;
     // Cooldown is quiet play time after defeat, never combat time or wall time.
     if(s.enemies.some(e=>isMajorBoss(e.type)&&!e.dead))return;
-    if(!s.endless&&(s.elapsed>=BOSS_SCHEDULE.finaleAt||s.elapsed+d.remaining-dt>=BOSS_SCHEDULE.finaleAt))return;
+    if(!s.endless&&(s.elapsed>=finaleAt(s)||s.elapsed+d.remaining-dt>=finaleAt(s)))return;
     d.remaining=Math.max(0,d.remaining-dt);
     if(!d.warned&&d.remaining<=BOSS_SCHEDULE.warning){
-      if(!s.endless&&s.elapsed+BOSS_SCHEDULE.warning>=BOSS_SCHEDULE.finaleAt)return;
+      if(!s.endless&&s.elapsed+BOSS_SCHEDULE.warning>=finaleAt(s))return;
       d.warned=true;d.remaining=BOSS_SCHEDULE.warning;
       const warnings={matriarch:'La modération arrive dans cinq secondes. Prépare une sortie !',travestia:'Travestia arrive dans cinq secondes. Méfie-toi de sa queue !',pelican:'Péli Zodiaque arrive dans cinq secondes. Garde une sortie pour ses câlins !'};
       this.announceEncounter(warnings[d.nextType],'boss');return;
@@ -732,7 +736,7 @@ export class Game {
   isLull(){
     const s=this.s;
     if(s.mode!=='playing')return false;
-    if(charlesActive(s)||(!s.endless&&s.elapsed>=1130))return false;
+    if(charlesActive(s)||(!s.endless&&s.elapsed>=survivalDuration(s)-70))return false;
     if(s.shockwaves.length)return false;
     if(s.clouds.some(c=>dist(c,s)<CALM_DANGER_R+(c.maxr||c.r||0)))return false;
     if(s.elapsed-this.lastHit<1)return false;
@@ -755,14 +759,14 @@ export class Game {
     if(!this.banterEnabled||this.speech.scene||s.elapsed<this.speechUntil)return;
     // Persist chapter flags in the already bounded, saved event set. A late
     // checkpoint catches up to its current chapter, not several stale speeches.
-    const due=STORY_MILESTONES.filter(m=>s.elapsed>=m.at&&!this.eventSeen.has(`chapter:${m.at}`));
+    const due=storyMilestones(s).filter(m=>s.elapsed>=m.at&&!this.eventSeen.has(`chapter:${m.at}`));
     if(due.length){
       for(const m of due)this.eventSeen.add(`chapter:${m.at}`);
-      const line=storyMilestoneLine(due.at(-1),this.eventSeen);this.bark(line.who,line.text);return;
+      const line=storyMilestoneLine(due.at(-1),this.eventSeen,s);this.bark(line.who,line.text);return;
     }
     // Optional scenes stop during the final minute. They remain eligible after
     // an interruption, and callbacks are earned only by complete reading.
-    if(s.elapsed>=20&&(s.elapsed<1130||s.endless)){
+    if(s.elapsed>=20&&(s.elapsed<survivalDuration(s)-70||s.endless)){
       const unseen=id=>!this.eventSeen.has(`scene:${id}`)&&!this.eventSeen.has(`skip:${id}`);
       // A new woman's arrival comes first; only the highest pending rank plays.
       const pending=[5,4,3,2].find(rank=>this.eventSeen.has(`companion-rank:${rank}`)&&unseen(`arrival:${rank}`));
@@ -785,7 +789,7 @@ export class Game {
       if(prop&&street(prop.type)){
         // Full street scene only in a lull and outside the final minute. Not
         // calm: nothing is consumed, the next approach tries again.
-        if((s.elapsed<1130||s.endless)&&this.isCalm()&&beginSpeechScene(this,`street:${prop.type}`,EVENTS[prop.type],{remember:true,calm:true})){this.nextEvent=s.elapsed+80;return;}
+        if((s.elapsed<survivalDuration(s)-70||s.endless)&&this.isCalm()&&beginSpeechScene(this,`street:${prop.type}`,EVENTS[prop.type],{remember:true,calm:true})){this.nextEvent=s.elapsed+80;return;}
       }else if(prop){
         const line=WORLD_REMARKS[prop.type];this.eventSeen.add(prop.type);
         this.nextEvent=s.elapsed+80;this.bark(line.who,line.text);return;

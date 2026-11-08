@@ -1,5 +1,6 @@
+import {survivalDuration} from './run-rules.js';
 import {EVENTS} from './content.js';
-import {CHARLES_LINES,charlesActive} from './charles.js';
+import {charlesLines,charlesActive} from './charles.js';
 import {PELICAN_BANTER} from './pelican.js';
 import {TRAVESTIA_BANTER} from './travestia.js';
 
@@ -16,11 +17,11 @@ export function migrateEncounterDialogue(game,dialogue){
  if(game.s.mode==='dialogue'&&JSON.stringify(dialogue?.lines)===JSON.stringify(EVENTS.companion)){state.active={id:'companion:invocation',actorId:null,actorType:'companion',scope:'survival',start:0,pair:0,lines:dialogue.lines,index:dialogue.index};state.outcomes['companion:invocation']='active';}
  return state;
 }
-export function encounterLines(id,start=0,pair=0){
+export function encounterLines(id,start=0,pair=0,s={survivalDuration:1200}){
  if(id==='companion:invocation')return EVENTS.companion.map(line=>({...line}));
  if(id==='boss:pelican')return PELICAN_BANTER[pair]?.map((text,i)=>({who:i?'TOMA':'PÉLI ZODIAQUE',text}));
  if(id==='boss:travestia')return TRAVESTIA_BANTER[pair]?.map((text,i)=>({who:i?'TOMA':'TRAVESTIA',text}));
- if(/^charles:[0-3]$/.test(id)){const first=Number(id.slice(-1))*2;return start===first||start===first+1?CHARLES_LINES.slice(start,first+2).map(line=>({...line})):null;}
+ if(/^charles:[0-3]$/.test(id)){const first=Number(id.slice(-1))*2;return start===first||start===first+1?charlesLines(s).slice(start,first+2).map(line=>({...line})):null;}
  return null;
 }
 function pendingCharlesNarrative(g){return [g.speech.active,...g.speech.queue].some(line=>line&&line.scope==='charles'&&!line.encounter);}
@@ -33,7 +34,7 @@ function safeActor(g,scene){
  return scene.actorType==='pelican'?e.phase==='chase'||e.phase==='peli_recover'||e.phase.endsWith('_warning'):['chase','tail_windup','tail_recover','tail_dash_windup','tail_dash_recover'].includes(e.phase);
 }
 export function queueEncounterDialogue(g,{id,actorId,actorType,scope='survival',start=0,pair=0}){
- const state=g.encounters,lines=encounterLines(id,start,pair);
+ const state=g.encounters,lines=encounterLines(id,start,pair,g.s);
  if((actorType!=='companion'&&(!g.pausedEncountersEnabled||!g.banterEnabled))||!lines?.length||state.outcomes[id]||state.legacyActorIds.includes(actorId)||state.queue.length>=ENCOUNTER_QUEUE_LIMIT)return false;
  if(actorType==='charles'&&pendingCharlesNarrative(g))return false;
  const scene={id,actorId,actorType,scope,start,pair,lines,index:0};
@@ -44,7 +45,7 @@ export function openEncounterDialogue(g){
  const state=g.encounters,s=g.s;
  if(state.active||s.mode!=='playing'||s.hp<=0)return false;
  const epilogue=charlesActive(s);
- if(!epilogue&&(s.options.length||s.trophies.pending.length||s.elapsed>=1200&&!s.endless))return false;
+ if(!epilogue&&(s.options.length||s.trophies.pending.length||s.elapsed>=survivalDuration(s)&&!s.endless))return false;
  while(state.queue.length){
   const scene=state.queue[0];
   if(scene.actorType!=='companion'&&(!g.pausedEncountersEnabled||!g.banterEnabled))return false;
@@ -94,7 +95,7 @@ export function validateEncounterDialogue(state,s,nextId,ui){
   check(scene.actorType===type&&scene.scope===(type==='charles'?'charles':'survival'));
   check(Number.isInteger(scene.start)&&scene.start>=0&&Number.isInteger(scene.pair)&&scene.pair>=0);
   if(type==='charles'||type==='companion')check(scene.pair===0);if(type!=='charles')check(scene.start===0);
-  const expected=encounterLines(scene.id,scene.start,scene.pair);
+  const expected=encounterLines(scene.id,scene.start,scene.pair,s);
   check(expected&&JSON.stringify(scene.lines)===JSON.stringify(expected));
   check(Number.isInteger(scene.index)&&scene.index>=0&&scene.index<scene.lines.length);
   check(state.outcomes[scene.id]===(scene===state.active?'active':'queued'));

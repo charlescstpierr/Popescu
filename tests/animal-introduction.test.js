@@ -49,7 +49,7 @@ for(const index of [0,1,2,3,4])test(`v14 checkpoint retains initial-cycle bounda
  for(const key of ['pack','horde','rival','chest'])a.timers[key]=100000;
  a.timers.spawn=0;a.timers.animal=0;a.timers.animalIndex=index;a.bossDirector.remaining=100;
  Object.assign(a.s,{walkMoving:true,travelX:0,travelY:1,moveX:0,moveY:1});
- const snapshot=captureRun(a);assert.equal(snapshot.version,15);const b=restoreRun(snapshot);
+ const snapshot=captureRun(a);assert.equal(snapshot.version,16);const b=restoreRun(snapshot);
  for(const g of [a,b])g.spawnWave(.01);assert.deepEqual(captureRun(a),captureRun(b));assert.equal(a.timers.animalIndex,index+(a.s.enemies.some(e=>ANIMALS[e.type])?1:0));
  b.pause();const paused=captureRun(b);b.update(.25,{x:1,y:0});assert.deepEqual(captureRun(b),paused);b.resume();
  a.setViewport(844,390);b.setViewport(844,390);for(let i=0;i<15;i++){a.update(1/60,{x:0,y:1});b.update(1/60,{x:0,y:1});assert.deepEqual(captureRun(a),captureRun(b));}

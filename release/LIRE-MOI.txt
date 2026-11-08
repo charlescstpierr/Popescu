@@ -11,7 +11,8 @@ Les images conservent leurs octets d'origine; elles sont séparées, pas réduit
 MISE À JOUR ET SAUVEGARDES
 Garder le même navigateur, profil et chemin complet du fichier HTML.
 Avant remplacement, fermer le jeu et conserver une copie de l'ancien dossier.
-Le format et les clés de sauvegarde restent inchangés. Le stockage des pages
+Les clés de sauvegarde restent inchangées. Le jeu migre les anciennes données
+vers v16 en conservant leurs parties de vingt minutes. Le stockage des pages
 file:// dépend toutefois du navigateur; déplacer le dossier ou changer de
 profil peut rendre les anciennes sauvegardes invisibles. Aucune migration
 entre origines ou aucun effacement du stockage n'est effectué.

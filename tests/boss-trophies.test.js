@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
 
-function quiet(){const events=[],g=new Game({seed:42,onEvent:(t,p)=>events.push([t,p])});for(const key of Object.keys(g.timers))if(key!=='animalIndex')g.timers[key]=1e5;g.nextEvent=1e5;g.s.xpNeed=100000;g.s.shotClock=1000;return {g,events};}
+function quiet(){const events=[],g=new Game({survivalDuration:1200,seed:42,onEvent:(t,p)=>events.push([t,p])});for(const key of Object.keys(g.timers))if(key!=='animalIndex')g.timers[key]=1e5;g.nextEvent=1e5;g.s.xpNeed=100000;g.s.shotClock=1000;return {g,events};}
 function chest(g,type,x=0,y=0){const boss=g.spawnEnemy(type,x,y);assert.ok(boss);g.hurt(boss,boss.hp);g.s.enemies=g.s.enemies.filter(e=>!e.dead);return g.s.chests.at(-1);}
 
 test('a boss chest keeps its real species and author while ordinary loot stays unchanged',()=>{

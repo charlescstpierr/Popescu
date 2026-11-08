@@ -1,3 +1,5 @@
+import {LEGACY_SURVIVAL_SECONDS,survivalDuration} from './run-rules.js';
+
 // Tout le monde ici est fictif, surtout la réputation que Toma se donne.
 export const DIFFICULTIES = {
   easy: { label: 'Promenade de star', hp: 1.3, damage: 0.75, spawn: 0.8, speed: 0.9 },
@@ -57,7 +59,7 @@ export const INTRO = [
   },
   {
     "who": "SYSTÈME",
-    "text": "PANNE MONDIALE. IA hors ligne. Tes créations se promènent en ville. Survis 20 minutes."
+    "text": "PANNE MONDIALE. IA hors ligne. Tes créations se promènent en ville. Survis 10 minutes."
   },
   {
     "who": "TOMA",
@@ -615,7 +617,7 @@ export const STUNT_BARKS = [
     "text": "Chuck Norris compte jusqu'à l'infini. Moi, j'y suis né.",
     "reply": {
       "who": "BLONDE IA",
-      "text": "Pis ça te prend un chrono pour compter vingt minutes."
+      "text": "Pis ça te prend un chrono pour compter ton propre exploit."
     }
   },
   {
@@ -1048,6 +1050,13 @@ export const STORY_MILESTONES = [
     "text": "Encore une minute. Garde une sortie. La victoire est à vingt minutes."
   }
 ];
+const TEN_MINUTE_MILESTONES = [
+  {at:150,who:'TOMA',text:"Deux minutes trente de survie ! La panne dure, mais moi j'suis encore en service."},
+  {at:300,who:'SYSTÈME',text:"Cinq minutes. L'IA est encore hors ligne. Les jambes font la deuxième moitié."},
+  {at:450,who:'TOMA',text:"Sept minutes trente ! Encore deux minutes trente pis j'engage quelqu'un pour raconter comment j'ai tout fait seul."},
+  {at:540,who:'SYSTÈME',text:"Encore une minute. Garde une sortie. La victoire est à dix minutes."},
+];
+export function storyMilestones(s){return survivalDuration(s)===LEGACY_SURVIVAL_SECONDS?STORY_MILESTONES:TEN_MINUTE_MILESTONES;}
 // Recover conditions by authored text/actor, including speech saved before these
 // guards existed. Do not persist derived combat context in the speech queue.
 const CONDITIONAL_BARKS=new Map(BARKS.filter(line=>line.condition).map(line=>[line.text,line]));
@@ -1078,13 +1087,14 @@ export function contextualBarks(s,recentHealthDamage=null){
   });
 }
 export function victoryQuote(s,seen=new Set()){
-  if(seen.has('scene:build-car'))return s.companion?"Vingt minutes ! Mon char a pas de siège, mais mon équipe a une vedette. Moi.":"Vingt minutes ! Pas de siège dans mon char. J'ai fait le tour du succès à pied.";
-  if(seen.has('scene:build-money'))return "Vingt minutes ! Mes billets paient pas le loyer. Ils viennent de me louer la paix.";
-  if(seen.has('scene:build-followers'))return "Vingt minutes ! Mon public est discret, mais ses balles savent applaudir.";
-  if(s.companion)return "Vingt minutes ! Ma blonde tirait, moi j'encadrais le succès. Une équipe, ça prend un visage.";
-  if(s.upg.truth)return "Vingt minutes ! La vérité frappe fort. J'vas dire que c'est moi qui l'ai entraînée.";
+  const minutes=survivalDuration(s)===LEGACY_SURVIVAL_SECONDS?'Vingt':'Dix';
+  if(seen.has('scene:build-car'))return s.companion?`${minutes} minutes ! Mon char a pas de siège, mais mon équipe a une vedette. Moi.`:`${minutes} minutes ! Pas de siège dans mon char. J'ai fait le tour du succès à pied.`;
+  if(seen.has('scene:build-money'))return `${minutes} minutes ! Mes billets paient pas le loyer. Ils viennent de me louer la paix.`;
+  if(seen.has('scene:build-followers'))return `${minutes} minutes ! Mon public est discret, mais ses balles savent applaudir.`;
+  if(s.companion)return `${minutes} minutes ! Ma blonde tirait, moi j'encadrais le succès. Une équipe, ça prend un visage.`;
+  if(s.upg.truth)return `${minutes} minutes ! La vérité frappe fort. J'vas dire que c'est moi qui l'ai entraînée.`;
   if(s.discovery?.count>=3)return "J'connais tout le quartier maintenant ! La prochaine fois, quelqu'un me prête un char.";
-  return "Vingt minutes sans IA ! Chuck Norris a un mythe. Moi, j'ai un chrono. Y'a quelqu'un qui a filmé ?!";
+  return `${minutes} minutes sans IA ! Chuck Norris a un mythe. Moi, j'ai un chrono. Y'a quelqu'un qui a filmé ?!`;
 }
 
 // Short scenes share the normal reading lane. A callback needs its completed
@@ -1177,13 +1187,18 @@ export function lastStreetScene(seen){
   for(const flag of seen){const type=flag.startsWith('scene:street:')?flag.slice(13):null;if(type&&Object.hasOwn(STREET_CALLBACKS,type))last=type;}
   return last;
 }
-export function storyMilestoneLine(milestone,seen){
-  if(milestone.at===900){const street=lastStreetScene(seen);return street?{who:'TOMA',text:STREET_CALLBACKS[street]}:milestone;}
-  if(milestone.at!==600)return milestone;
-  if(seen.has('scene:build-car'))return {who:'TOMA',text:"Dix minutes. Mon char a pas de siège ? Parfait. J'conduis mon empire à pied."};
-  if(seen.has('scene:build-truth'))return {who:'TOMA',text:"Dix minutes. La vérité frappe encore. Elle garde sa job tant qu'elle touche pas à ma bio."};
-  if(seen.has('scene:build-money'))return {who:'TOMA',text:"Dix minutes. Mes billets paient pas le loyer, mais ils font évacuer le quartier."};
-  if(seen.has('scene:build-followers'))return {who:'TOMA',text:"Dix minutes. Mon public reste discret, mais son service de sécurité travaille fort."};
-  if(seen.has('scene:first-horde'))return {who:'TOMA',text:"Dix minutes pis mes fans me poursuivent encore. J'appelle ça de la fidélité."};
+export function storyMilestoneLine(milestone,seen,s={survivalDuration:LEGACY_SURVIVAL_SECONDS}){
+  const legacy=survivalDuration(s)===LEGACY_SURVIVAL_SECONDS;
+  if(milestone.at===(legacy?900:450)){
+    const street=lastStreetScene(seen);
+    return street?{who:'TOMA',text:legacy?STREET_CALLBACKS[street]:STREET_CALLBACKS[street].replace(/^Quinze minutes/,'Sept minutes trente')}:milestone;
+  }
+  if(milestone.at!==(legacy?600:300))return milestone;
+  const minutes=legacy?'Dix':'Cinq';
+  if(seen.has('scene:build-car'))return {who:'TOMA',text:`${minutes} minutes. Mon char a pas de siège ? Parfait. J'conduis mon empire à pied.`};
+  if(seen.has('scene:build-truth'))return {who:'TOMA',text:`${minutes} minutes. La vérité frappe encore. Elle garde sa job tant qu'elle touche pas à ma bio.`};
+  if(seen.has('scene:build-money'))return {who:'TOMA',text:`${minutes} minutes. Mes billets paient pas le loyer, mais ils font évacuer le quartier.`};
+  if(seen.has('scene:build-followers'))return {who:'TOMA',text:`${minutes} minutes. Mon public reste discret, mais son service de sécurité travaille fort.`};
+  if(seen.has('scene:first-horde'))return {who:'TOMA',text:`${minutes} minutes pis mes fans me poursuivent encore. J'appelle ça de la fidélité.`};
   return milestone;
 }

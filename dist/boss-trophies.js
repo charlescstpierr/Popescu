@@ -1,3 +1,4 @@
+import {survivalDuration} from './run-rules.js';
 // Fixed rewards. No random draws, ranks or repeat rewards for the same species.
 export const TROPHIES={
  tarot:{id:'tarot',bossType:'pelican',name:'Tarot flatteur',tag:'ATTAQUE · TOUTES LES 8 S',desc:'Une carte aller-retour : 18 dégâts par passage, jusqu’à 3 cibles.',detail:'Retour au point de lancement.',color:'#cc9cf6',icon:'tarot'},
@@ -22,7 +23,7 @@ export function queueBossTrophy(game,chest){
  s.trophies.pending.push({bossType:chest.bossType,chestId:chest.id,bossId:chest.bossId});return true;
 }
 export function openPendingTrophy(game){
- const s=game.s;if(s.mode!=='playing'||s.options.length||s.hp<=0||s.elapsed>=1200&&!s.endless||!s.trophies.pending.length)return false;
+ const s=game.s;if(s.mode!=='playing'||s.options.length||s.hp<=0||s.elapsed>=survivalDuration(s)&&!s.endless||!s.trophies.pending.length)return false;
  s.mode='trophy';s.moveX=0;s.moveY=0;game.emit('trophy',s.trophies.pending[0].bossType);return true;
 }
 export function chooseBossTrophy(game,id){

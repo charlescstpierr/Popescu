@@ -45,7 +45,7 @@ test('a fleeing player can keep an animal offscreen without teleportation or for
 });
 test('viewport change can permit a normal full telegraph without resetting a saved run',()=>{
  const g=new Game({seed:42});empty(g);const e=g.spawnEnemy('moose',180,0);updateAnimal(g,e,.01,false);assert.equal(e.phase,'chase');g.setViewport(844,390);updateAnimal(g,e,.01,false);assert.equal(e.phase,'animal_warning');assert.equal(e.animalTime,ANIMALS.moose.warning);
- const snapshot=captureRun(g);assert.equal(snapshot.version,15);const copy=restoreRun(snapshot);assert.deepEqual(captureRun(copy),snapshot);
+ const snapshot=captureRun(g);assert.equal(snapshot.version,16);const copy=restoreRun(snapshot);assert.deepEqual(captureRun(copy),snapshot);
 });
 test('entry, due timer and attack gate resume exactly from v13 including pause',()=>{
  const a=new Game({seed:914});positionNewRun(a);quiet(a);a.timers.animalIndex=2;a.bossDirector.remaining=100;a.setViewport(844,390);const b=restoreRun(captureRun(a));

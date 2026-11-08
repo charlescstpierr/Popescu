@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
 import {STORY_MILESTONES,ROOSTER_REACTION} from '../dist/content.js';
-function fixture(time){const events=[],g=new Game({seed:42,onEvent:(type,payload)=>events.push({type,payload})});g.s.elapsed=time;for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;return {g,events};}
+function fixture(time){const events=[],g=new Game({survivalDuration:1200,seed:42,onEvent:(type,payload)=>events.push({type,payload})});g.s.elapsed=time;for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;return {g,events};}
 test('finale encounter leads the overlapping chapter, which remains readable and survives resume',()=>{
  const {g,events}=fixture(1140.01);g.spawnWave(.02);g.story(.02);
  assert.match(events.at(-1).payload.text,/dernier direct/i);assert.ok(!g.eventSeen.has('chapter:1140'));

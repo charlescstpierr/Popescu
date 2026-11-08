@@ -43,7 +43,7 @@ test('car launch cue is synchronized to the real car lane and does not change it
 });
 
 test('companion collection coalesces hundreds of pickups to one local cue, without extra rewards',()=>{
- const g=new Game({seed:42});choose(g,'girlfriend');g.powerEffects.length=0;g.s.xpNeed=1e9;
+ const g=new Game({seed:42,survivalDuration:1200});choose(g,'girlfriend');g.powerEffects.length=0;g.s.xpNeed=1e9;
  g.s.girl.x=-150;g.s.girl.y=0;
  for(let i=0;i<260;i++)g.s.drops.push({x:-150,y:0,kind:'xp',value:2,life:30});
  g.updateDrops(0);assert.equal(g.s.xp,520);assert.equal(g.s.drops.length,0);

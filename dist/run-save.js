@@ -1,3 +1,4 @@
+import {survivalDuration,LEGACY_SURVIVAL_SECONDS,SURVIVAL_SECONDS} from './run-rules.js';
 import {migrateEncounterDialogue,validateEncounterDialogue} from './encounter-dialogue.js';
 import {validLamborghiniState,CAR_TRIP} from './lamborghini.js';
 import {createReplayState,validateReplayState,recordReplay,validateDeathCause} from './run-history.js';
@@ -21,7 +22,7 @@ import {UPGRADES,DIFFICULTIES} from './content.js';
 // v12 data already has the required fields: migrate its version, never its trip.
 // v14 fences paused encounter cursors/context from engines that cannot resume them.
 // v15 fences new enemy attack state from older readers.
-const VERSION=15;
+const VERSION=16;
 const MAX_BYTES=1500000;
 const CAPS={enemies:300,shots:320,drops:260,clouds:90,particles:200,vehicles:10,pulses:36,chests:12,shockwaves:12,options:3};
 const INTERNAL=['encounters','speech','bossDirector','seed','rng','id','viewport','timers','eventSeen','nextEvent','lastHit','barkIndex','stuntRng','stuntCharge','runStreak','stuntWait','pendingStuntReply','pendingRivalReply','rivalIndex','rivalBarkIndex','lastRivalBark','rivalRng','speechUntil','discoveryCooldowns','discoveryContact'];
@@ -73,7 +74,7 @@ function validateTrophies(s,nextId){
   const chest=s.chests.find(c=>c.id===p.chestId);check(chest&&chest.open===true&&chest.bossType===p.bossType&&chest.bossId===p.bossId);
   pendingTypes.add(p.bossType);pendingChests.add(p.chestId);
  }
- if(s.mode==='trophy')check(t.pending.length>0&&s.hp>0&&(s.endless||s.elapsed<1200));
+ if(s.mode==='trophy')check(t.pending.length>0&&s.hp>0&&(s.endless||s.elapsed<survivalDuration(s)));
  const direction=a=>finite(a.dx)&&finite(a.dy)&&Math.abs(Math.hypot(a.dx,a.dy)-1)<1e-6;
  const position=a=>finite(a.x)&&finite(a.y)&&Math.abs(a.x)<=1e8&&Math.abs(a.y)<=1e8;
  const hits=(ids,max)=>Array.isArray(ids)&&ids.length<=max&&new Set(ids).size===ids.length&&ids.every(validId);
@@ -98,7 +99,7 @@ function validateCharles(s,nextId,world){
  check(integer(c.dialogueIndex)&&c.dialogueIndex<=CHARLES_LINES.length&&finite(c.nextDialogue)&&c.nextDialogue>=0&&c.nextDialogue<=c.elapsed+4.8+1e-6);
  check(finite(c.safeAngle)&&Math.abs(c.safeAngle)<=Math.PI&&[300,380].includes(c.waveMax)&&[112,145].includes(c.capeRadius));
  check(c.powered||c.waveMax===300&&c.capeRadius===112);
- check(s.elapsed>=1200);
+ check(s.elapsed>=survivalDuration(s));
  if(c.phase==='complete')check(['defeated','left'].includes(c.outcome)&&(s.endless||s.mode==='victory'));
  else check(c.outcome===''&&!s.endless&&['playing','paused','dialogue'].includes(s.mode)&&s.hp>0&&c.phaseTime>0);
  if(c.phase==='intro')check(c.hits===0&&c.attackCount===0&&!c.powered);
@@ -145,10 +146,13 @@ function validate(snapshot){
   // Old schemas cannot contain a new boss or invent its missing attack state.
   check(object(snapshot.game)&&object(snapshot.game.timers)&&Array.isArray(snapshot.game.s?.enemies));
   // A prior schema cannot claim new actors, phases, fields, or scheduler state.
-  check(!Object.keys(snapshot.game.timers).some(key=>key.startsWith('ego')));
-  check(snapshot.game.s.enemies.every(e=>object(e)&&!Object.hasOwn(EGO_BEASTS,e.type)&&!e.phase?.startsWith('ego_')&&!Object.keys(e).some(key=>key.startsWith('ego'))));
-  check(!Object.hasOwn(EGO_BEASTS,snapshot.game.s.deathCause?.actorType));
-  snapshot.game.timers.ego=9;snapshot.game.timers.egoIndex=0;
+  if(snapshot.version<15){
+   check(!Object.keys(snapshot.game.timers).some(key=>key.startsWith('ego')));
+   check(snapshot.game.s.enemies.every(e=>object(e)&&!Object.hasOwn(EGO_BEASTS,e.type)&&!e.phase?.startsWith('ego_')&&!Object.keys(e).some(key=>key.startsWith('ego'))));
+   check(!Object.hasOwn(EGO_BEASTS,snapshot.game.s.deathCause?.actorType));
+   snapshot.game.timers.ego=9;snapshot.game.timers.egoIndex=0;
+  }
+  snapshot.game.s.survivalDuration=LEGACY_SURVIVAL_SECONDS;
   if(snapshot.version<5)check(snapshot.game.s.enemies.every(e=>object(e)&&e.type!=='pelican'&&!e.phase?.startsWith('peli_')&&!Object.keys(e).some(key=>key.startsWith('peli'))));
   if(snapshot.version<=3){snapshot.game.timers.animal??=12;snapshot.game.timers.animalIndex??=0;}
   if(snapshot.version===3)check(snapshot.game.s.enemies.every(e=>!ANIMALS[e.type]));
@@ -178,7 +182,7 @@ function validate(snapshot){
   if(snapshot.version<14)snapshot.game.encounters=migrateEncounterDialogue(snapshot.game,snapshot.dialogue);
   snapshot.version=VERSION;
  }
- check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));check(integer(d.timers.egoIndex)&&finite(d.timers.ego)&&Math.abs(d.timers.ego)<=1e8);
+ check(snapshot.version===VERSION&&object(snapshot.game));const d=snapshot.game,s=d.s;check(object(s)&&Object.hasOwn(DIFFICULTIES,s.difficulty));const base=new Game({difficulty:s.difficulty,seed:d.seed});shape(s,base.s);check([SURVIVAL_SECONDS,LEGACY_SURVIVAL_SECONDS].includes(s.survivalDuration));shape(d.viewport,base.viewport);shape(d.timers,base.timers);check(integer(d.timers.animalIndex));check(integer(d.timers.egoIndex)&&finite(d.timers.ego)&&Math.abs(d.timers.ego)<=1e8);
  if(s.heroMotion!==undefined){const m=s.heroMotion;check(object(m)&&Object.keys(m).length===4&&finite(m.angle)&&Math.abs(m.angle)<=Math.PI&&finite(m.phase)&&m.phase>=0&&m.phase<8&&finite(m.distance)&&m.distance>=0&&typeof m.reverse==='boolean');}
  const director=d.bossDirector;check(object(director));
  check(integer(director.rng)&&director.rng<=4294967295&&BOSS_TYPES.includes(director.nextType));
@@ -288,7 +292,7 @@ function validate(snapshot){
  for(const c of s.chests)check(typeof c.open==='boolean');for(const wave of s.shockwaves)check(typeof wave.hitPlayer==='boolean'&&typeof wave.hitGirl==='boolean');
  for(const option of s.options)check([...EVOLUTIONS.map(u=>u.id),...UPGRADES.map(u=>u.id),'recovery','payday','barrier'].includes(option.id)&&typeof option.name==='string'&&typeof option.desc==='string');
  validateTrophies(s,d.id);validateCharles(s,d.id,base.world);
- if(s.mode==='upgrade')check(s.options.length>0);if(s.mode==='gameover')check(s.hp===0);if(s.mode==='victory')check(s.elapsed>=1200&&!s.endless);
+ if(s.mode==='upgrade')check(s.options.length>0);if(s.mode==='gameover')check(s.hp===0);if(s.mode==='victory')check(s.elapsed>=survivalDuration(s)&&!s.endless);
  if(s.mode==='dialogue'){const ui=snapshot.dialogue;check(object(ui)&&Array.isArray(ui.lines)&&ui.lines.length>0&&ui.lines.length<=100&&integer(ui.index)&&ui.index<ui.lines.length);for(const line of ui.lines)check(object(line)&&typeof line.who==='string'&&typeof line.text==='string');}else check(snapshot.dialogue===null);
  validateEncounterDialogue(d.encounters,s,d.id,snapshot.dialogue);
  if(s.charles&&s.charles.phase!=='complete'&&s.mode==='dialogue')check(d.encounters.active?.actorType==='charles');

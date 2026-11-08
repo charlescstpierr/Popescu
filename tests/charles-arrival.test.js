@@ -47,7 +47,7 @@ test('active trophy attacks expire without hurting frozen enemies or generating 
 test('pause and save preserve the exact arrival and do not replay its snap',()=>{
  for(const checkpoint of [.2,2.8,3.44,3.6,4.2]){
   const {g:a,events}=won();a.startCharlesEpilogue();tick(a,checkpoint);a.pause();const paused=captureRun(a);tick(a,2,{x:1,y:1});assert.deepEqual(captureRun(a),paused);
-  const b=restoreRun(paused),other=[];b.onEvent=(type,value)=>other.push({type,value});assert.deepEqual(captureRun(b),paused);assert.equal(paused.version,15);a.resume();b.resume();const prior=snaps(events).length;
+  const b=restoreRun(paused),other=[];b.onEvent=(type,value)=>other.push({type,value});assert.deepEqual(captureRun(b),paused);assert.equal(paused.version,16);a.resume();b.resume();const prior=snaps(events).length;
   for(let n=0;n<240;n++){a.update(1/60);b.update(1/60);assert.deepEqual(captureRun(a),captureRun(b));}
   assert.equal(snaps(other).length,snaps(events).length-prior);assert.equal(snaps(events).length,1);
  }

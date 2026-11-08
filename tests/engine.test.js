@@ -132,11 +132,11 @@ test('charisma slows approaching enemies and companion aura collects XP', () => 
   const base=game(),charm=game();acquire(charm,'charisma');
   for(const g of [base,charm]){g.timers.spawn=100;g.s.enemies=[enemy('normal',100,0,{speed:100})];g.update(.1);}
   assert.ok(charm.s.enemies[0].x>base.s.enemies[0].x);
-  const g=game();acquire(g,'girlfriend');g.s.girl.x=-80;g.s.girl.y=0;g.s.drops=[{x:-82,y:0,kind:'xp',value:1,life:30}];g.update(.02);assert.equal(g.s.xp,1);assert.equal(g.s.drops.length,0);
+  const g=game();acquire(g,'girlfriend');g.s.girl.x=-80;g.s.girl.y=0;g.s.drops=[{x:-82,y:0,kind:'xp',value:1,life:30}];g.update(.02);assert.equal(g.s.xp,2);assert.equal(g.s.drops.length,0);
 });
 
 test('late endless levels still offer three useful choices after upgrade ranks are exhausted', () => {
-  const g=game();const {UPGRADES}=awaitedContent;for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;g.s.evolutions={billionaire:true,viralLove:true};
+  const g=game({survivalDuration:1200});const {UPGRADES}=awaitedContent;for(const u of UPGRADES)g.s.upg[u.id]=u.max||5;g.s.evolutions={billionaire:true,viralLove:true};
   g.s.hp=10;g.s.drops=[{x:0,y:0,kind:'xp',value:20,life:10}];g.update(.02);
   assert.equal(g.s.mode,'upgrade');assert.equal(g.s.options.length,3);assert.equal(new Set(g.s.options.map(o=>o.id)).size,3);
   const option=g.s.options.find(o=>o.id==='recovery');assert.ok(option);g.chooseUpgrade('recovery');assert.ok(g.s.hp>10);assert.equal(g.s.mode,'playing');

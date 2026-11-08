@@ -1,3 +1,4 @@
+import * as runRules from '../dist/run-rules.js';
 import {renderEncounterPresentation} from '../dist/dialogue-presentation.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,7 +17,7 @@ function app(existingValues){
   const sounds=[];const elements=new Map(),values=existingValues||new Map([['toma-popescu-v1',JSON.stringify({introSeen:true})]]);let queue=Promise.resolve(),confirmed=true;const events={};
   const element=()=>({children:[],listeners:{},textContent:'',style:{setProperty(){},removeProperty(){}},classList:{state:new Set(),toggle(key,on){if(on===undefined)on=!this.state.has(key);on?this.state.add(key):this.state.delete(key);},add(...keys){for(const key of keys)this.state.add(key);},remove(...keys){for(const key of keys)this.state.delete(key);},contains(key){return this.state.has(key);}},addEventListener(type,handler){this.listeners[type]=handler;},setAttribute(key,value){this[key]=value;},replaceChildren(){this.children=[];},append(...items){this.children.push(...items);},getBoundingClientRect:()=>({width:390,height:844}),getContext:()=>({})});
   const get=id=>{if(!elements.has(id))elements.set(id,element());return elements.get(id);};
-  const context=vm.createContext({renderEncounterPresentation:args=>renderEncounterPresentation({...args,document:context.document}),...content,...opening,...persistence,...evolutions,carLevel,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{constructor(){this.actors={available:()=>true};}resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
+  const context=vm.createContext({renderEncounterPresentation:args=>renderEncounterPresentation({...args,document:context.document}),...content,...runRules,...opening,...persistence,...evolutions,carLevel,discoveryPrompt,Game,console,performance,Date,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),requestAnimationFrame(){},ResizeObserver:class{observe(){}},HTMLInputElement:class{},crypto:{randomUUID:()=>String(Math.random())},navigator:{locks:{request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}}},window:{addEventListener(type,fn){events[type]=fn;},confirm:()=>confirmed},document:{hidden:false,getElementById:get,querySelector:()=>element(),querySelectorAll:()=>[],createElement:element,addEventListener(){}},localStorage:{getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)},Renderer:class{constructor(){this.actors={available:()=>true};}resize(){}render(){}},drawIcon(){},AudioManager:class{setEnabled(){}setVolume(){}setScene(){}setDucked(){}setIntensity(){}sfx(name){sounds.push(name);}unlock(){return Promise.resolve();}}});
   const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');
   vm.runInContext(source+'\n globalThis.controller={get game(){return game},get screen(){return screen},setDifficulty,frame,recordRun,renderResult,persistRun,resumeSaved,get runId(){return runId}};',context);
   return {events,confirm:value=>confirmed=value,values,sounds,get,click:id=>get(id).onclick(),get game(){return context.controller.game;},controller:context.controller,saved:()=>JSON.parse(values.get('toma-popescu-run-v1')).totals};
@@ -169,7 +170,7 @@ for(const banter of [false,true])for(const reduced of [false,true]){
  test(`finale warnings remain visible with ${label}`,async()=>{
   const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter,reduced})]]));await a.click('play');
   const g=a.game;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;
-  for(const [time,notice] of [[1130.01,/Dernière minute/],[1140.01,/dernier direct/],[1154.01,/dernier rival/],[1174.01,/Dernière vague dans/],[1180.01,/Dernière vague !/]]){
+  for(const [time,notice] of [[530.01,/Dernière minute/],[540.01,/dernier direct/],[554.01,/dernier rival/],[574.01,/Dernière vague dans/],[580.01,/Dernière vague !/]]){
    a.click('banter-close');g.s.elapsed=time;g.spawnWave(.02);
    assert.equal(a.get('banter').classList.contains('hidden'),false,`finale warning at ${time} must be visible`);
    assert.match(a.get('banter-text').textContent,notice);
@@ -243,7 +244,7 @@ test('resume never repeats optional jokes or invents a countdown after the encou
 });
 
 test('announced finale countdown returns from a saved pause with remaining time',async()=>{
- for(const [warningAt,pattern] of [[1130,/Dernière minute.*8 s/],[1154,/rival.*4 s/],[1174,/vague.*4 s/]]){
+ for(const [warningAt,pattern] of [[530,/Dernière minute.*8 s/],[554,/rival.*4 s/],[574,/vague.*4 s/]]){
   const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,banter:false,reduced:true})]]));await a.click('play');
   const g=a.game;for(const key in g.timers)g.timers[key]=100000;g.nextEvent=100000;g.s.elapsed=warningAt+.01;g.spawnWave(.02);
   g.s.elapsed+=2.5;a.click('pause');await a.controller.persistRun();const b=app(a.values);await b.click('resume-saved');b.click('resume');

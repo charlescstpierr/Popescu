@@ -1,3 +1,5 @@
+import {LEGACY_SURVIVAL_SECONDS,survivalDuration} from './run-rules.js';
+
 // Charles arrives at the survival threshold. His clock never changes the record.
 export const CHARLES={hitsToTransform:18,maxDestroyed:64,waveWidth:18,gapHalfAngle:.52,phases:{intro:8,hover:2.4,shock_warning:2.6,shockwave:1.8,cape_warning:2.2,cape_spin:.85,recover:2,descend:1.25,bend:1.5,scream:1.25,burst:1.4,empowered:2.2,complete:0}};
 export const CHARLES_ARRIVAL=Object.freeze({flightEnd:2.6,prepare:2.95,snap:3.45,clear:4.05,release:4.5});
@@ -20,6 +22,8 @@ export const CHARLES_LINES=[
  {who:'TOMA',text:"J'ai survécu pour vrai, moi. Ça, tu peux pas l'effacer."},
  {who:'CHARLES',text:"Ça, c'est vrai. Le reste, on va le regarder sans filtre."}
 ];
+const TEN_MINUTE_CHARLES_LINES=CHARLES_LINES.map((line,index)=>index===0?{...line,text:"Dix minutes, Charles. Chuck Norris demande mon programme d'entraînement."}:line);
+export function charlesLines(s){return survivalDuration(s)===LEGACY_SURVIVAL_SECONDS?CHARLES_LINES:TEN_MINUTE_CHARLES_LINES;}
 export function charlesActive(s){return Boolean(s.charles&&s.charles.phase!=='complete'&&!s.endless);}
 const angleDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
 export function charlesWaveRadius(c){return c.waveMax*(1-c.phaseTime/c.phaseDuration);}
@@ -30,7 +34,7 @@ export function startCharles(g){
  // Upgrade may have opened earlier in this same simulation step. Keep its
  // choices for endless mode, but give the arrival priority over that modal.
  // Victory remains accepted for saves produced before automatic arrival.
- const s=g.s;if(!['playing','upgrade','victory'].includes(s.mode)||s.endless||s.charles||s.elapsed<1200||s.hp<=0)return false;
+ const s=g.s;if(!['playing','upgrade','victory'].includes(s.mode)||s.endless||s.charles||s.elapsed<survivalDuration(s)||s.hp<=0)return false;
  g.clearSpeech();g.cancelEncounterDialogues('survival');
  const offset=Math.max(-30,Math.min(80,g.viewport.height*.48-310));
  s.charles={id:g.id++,type:'charles',x:s.x+(g.viewport.height<650?65:0),y:s.y-offset,r:28,hp:1,maxhp:1,dead:false,charmed:0,hitFlash:0,hits:0,powered:false,phase:'intro',phaseTime:8,phaseDuration:8,elapsed:0,attackCount:0,safeAngle:Math.PI/2,waveMax:300,capeRadius:112,dialogueIndex:0,nextDialogue:0,outcome:'',destroyed:[]};
@@ -96,12 +100,13 @@ function nextAttack(g,c){
 }
 export function updateCharles(g,dt,previousPlayer){
  const s=g.s,c=s.charles;if(!charlesActive(s))return;
+ const lines=charlesLines(s);
  const arrivalBefore=charlesArrival(c);
  c.elapsed+=dt;c.hitFlash=Math.max(0,c.hitFlash-dt);
- if(!arrivalBefore?.locked&&c.dialogueIndex<CHARLES_LINES.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
+ if(!arrivalBefore?.locked&&c.dialogueIndex<lines.length&&c.elapsed>=c.nextDialogue&&['intro','hover','recover','empowered'].includes(c.phase)){
   const start=c.dialogueIndex;
-  if(g.queueEncounterDialogue({id:`charles:${Math.floor(start/2)}`,actorId:c.id,actorType:'charles',scope:'charles',start})){c.dialogueIndex=Math.min(CHARLES_LINES.length,start+2-start%2);c.nextDialogue=c.elapsed+4.8;}
-  else if(!g.pausedEncountersEnabled&&!g.encounters.queue.some(scene=>scene.actorType==='charles')){const dialogue=CHARLES_LINES[start];if(g.bark(dialogue.who,dialogue.text,true)){c.dialogueIndex++;c.nextDialogue=c.elapsed+4.8;}}
+  if(g.queueEncounterDialogue({id:`charles:${Math.floor(start/2)}`,actorId:c.id,actorType:'charles',scope:'charles',start})){c.dialogueIndex=Math.min(lines.length,start+2-start%2);c.nextDialogue=c.elapsed+4.8;}
+  else if(!g.pausedEncountersEnabled&&!g.encounters.queue.some(scene=>scene.actorType==='charles')){const dialogue=lines[start];if(g.bark(dialogue.who,dialogue.text,true)){c.dialogueIndex++;c.nextDialogue=c.elapsed+4.8;}}
  }
  const oldPhase=c.phase,oldRadius=c.phase==='shockwave'?charlesWaveRadius(c):0;
  if(['hover','recover','empowered'].includes(c.phase))follow(g,c,dt);

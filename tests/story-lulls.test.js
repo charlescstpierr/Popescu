@@ -7,7 +7,7 @@ import {SCENE_CALM_WAIT} from '../dist/speech.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
 
 function fixture({seed=42,props=[]}={}){
- const events=[],g=new Game({seed,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});
+ const events=[],g=new Game({survivalDuration:1200,seed,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});
  g.s.elapsed=30;g.timers.bark=1000;g.world.getVisible=()=>props.map(type=>({type,x:g.s.x,y:g.s.y,w:24}));return {g,events};
 }
 function read(g){g.s.elapsed=g.speech.active.until+.001;g.flushSpeech();}

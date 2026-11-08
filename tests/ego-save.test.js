@@ -8,9 +8,9 @@ const fixture=()=>JSON.parse(readFileSync(new URL('./fixtures/paused-v14-travest
 const species=['ego_toad','ego_chameleon','ego_peacock','ego_rat'];
 test('v14 migration adds only new scheduler state and preserves active dialogue cursor and progress',()=>{
  const old=fixture(),original=structuredClone(old),next=captureRun(restoreRun(old));
- assert.equal(next.version,15);assert.equal(next.game.timers.ego,9);assert.equal(next.game.timers.egoIndex,0);
+ assert.equal(next.version,16);assert.equal(next.game.timers.ego,9);assert.equal(next.game.timers.egoIndex,0);
  assert.equal(next.game.encounters.active.index,1);assert.deepEqual(old,original);
- next.version=14;delete next.game.timers.ego;delete next.game.timers.egoIndex;assert.deepEqual(next,old);
+ assert.equal(next.game.s.survivalDuration,1200);delete next.game.s.survivalDuration;next.version=14;delete next.game.timers.ego;delete next.game.timers.egoIndex;assert.deepEqual(next,old);
 });
 test('every historical schema rejects injected new enemy state and scheduler fields',()=>{
  for(let version=1;version<=14;version++)for(const inject of [s=>s.game.timers.ego=1,s=>s.game.timers.egoIndex=1,s=>s.game.s.enemies[0].egoTime=0,s=>s.game.s.enemies[0].phase='ego_active',...species.map(type=>s=>s.game.s.enemies[0].type=type)]){

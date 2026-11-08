@@ -12,3 +12,6 @@ proof/charles/frames/
 
 # Optional large exports are generated on demand, never the current release.
 generated/
+
+# Local decision trails and private review output.
+.audit/

@@ -18,7 +18,7 @@ test('experience gauge exposes the real progress and flashes only when a level i
  const a=app();await a.click('play');const g=a.game,gauge=a.get('xp-gauge');
  g.s.xp=4;a.controller.updateHud();assert.equal(a.get('xp-fill').style.width,'50%');assert.equal(a.get('xp-text').textContent,'EXPÉRIENCE 4 / 8');
  assert.equal(gauge['aria-valuenow'],4);assert.equal(gauge['aria-valuemax'],8);assert.equal(gauge.classList.contains('level-flash'),false);
- g.gainXP(4);assert.equal(a.controller.screen,'upgrades');assert.equal(gauge.classList.contains('level-flash'),true);
+ g.gainXP(2);assert.equal(a.controller.screen,'upgrades');assert.equal(gauge.classList.contains('level-flash'),true);
  gauge.dispatch('animationend');assert.equal(gauge.classList.contains('level-flash'),false);
  a.controller.updateHud();assert.equal(gauge['aria-valuemax'],g.s.xpNeed);assert.equal(gauge['aria-valuenow'],0);
  g.s.xp=g.s.xpNeed+5;a.controller.updateHud();assert.equal(gauge['aria-valuenow'],g.s.xpNeed);assert.equal(a.get('xp-fill').style.width,'100%');assert.equal(g.s.xp,g.s.xpNeed+5);
@@ -26,5 +26,5 @@ test('experience gauge exposes the real progress and flashes only when a level i
 
 test('reduced effects keep experience progress without a level flash',async()=>{
  const a=app(new Map([['toma-popescu-v1',JSON.stringify({introSeen:true,reduced:true})]]));await a.click('play');
- a.game.gainXP(8);a.controller.updateHud();assert.equal(a.controller.screen,'upgrades');assert.equal(a.get('xp-gauge').classList.contains('level-flash'),false);assert.equal(a.get('xp-text').textContent,`EXPÉRIENCE 0 / ${a.game.s.xpNeed}`);
+ a.game.gainXP(4);a.controller.updateHud();assert.equal(a.controller.screen,'upgrades');assert.equal(a.get('xp-gauge').classList.contains('level-flash'),false);assert.equal(a.get('xp-text').textContent,`EXPÉRIENCE 0 / ${a.game.s.xpNeed}`);
 });

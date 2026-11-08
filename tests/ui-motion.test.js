@@ -40,9 +40,9 @@ test('timer marks minute boundaries and each second of the last minute, without 
  const a=app();await a.click('play');a.game.s.elapsed=59;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),false);
  a.game.s.elapsed=60;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),true);
  a.get('time').dispatch('animationend');a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),false);
- a.game.s.elapsed=1140;a.controller.updateHud();a.get('time').dispatch('animationend');
- a.game.s.elapsed=1141;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),true);
- a.get('time').dispatch('animationend');a.game.s.endless=true;a.game.s.elapsed=1142;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),false);
+ a.game.s.elapsed=540;a.controller.updateHud();a.get('time').dispatch('animationend');
+ a.game.s.elapsed=541;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),true);
+ a.get('time').dispatch('animationend');a.game.s.endless=true;a.game.s.elapsed=542;a.controller.updateHud();assert.equal(has(a,'time','timer-beat'),false);
 });
 
 test('XP completion sweeps and bursts once; a reroll does not replay a level gain',async()=>{

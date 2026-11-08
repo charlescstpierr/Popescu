@@ -5,7 +5,7 @@ import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun,RunStore} from '../dist/run-save.js';
 const bank=(value=216,x=-2000,y=0)=>({x,y,kind:'xp',value,life:38,compact:true});
 const total=g=>g.s.drops.filter(d=>d.kind==='xp').reduce((n,d)=>n+d.value,0);
-function quiet(){const g=new Game({seed:42});g.world.collides=()=>false;for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;return g;}
+function quiet(){const g=new Game({survivalDuration:1200,seed:42});g.world.collides=()=>false;for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;return g;}
 function backwardsShot(g){const e=g.spawnEnemy('tank',g.s.x-150,g.s.y);e.speed=0;g.s.shotClock=0;return e;}
 
 test('shooting backwards cannot move 216 banked XP into the path of forward travel',()=>{

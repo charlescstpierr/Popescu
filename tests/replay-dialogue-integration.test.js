@@ -21,7 +21,7 @@ test('published v10 Charles saves acquire speech and replay metadata without cha
  const raw=JSON.stringify(old);storage.setItem(store.key,raw);
  const migratedStore=new RunStore(storage),saved=record(migratedStore);
  assert.equal(storage.getItem(store.key),raw);assert.deepEqual(saved.totals,old.totals);
- assert.equal(saved.version,15);assert.equal(saved.replay.legacyBest,1400);assert.deepEqual(saved.replay.history,[]);
+ assert.equal(saved.version,16);assert.equal(saved.replay.legacyBest,1400);assert.deepEqual(saved.replay.history,[]);
  const resumed=restoreRun(saved.run.snapshot);assert.deepEqual(resumed.s.charles,g.s.charles);assert.equal(resumed.speech.active,null);
  assert.ok(migratedStore.checkpoint('legacy-charles',resumed,{credit:true}).ok);
  assert.equal(record(migratedStore).replay.history[0].outcome,'victory');

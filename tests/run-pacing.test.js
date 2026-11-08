@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
-function quiet(time=0){const events=[],g=new Game({seed:42,onEvent:(t,p)=>events.push([t,p])});for(const k in g.timers)g.timers[k]=100000;g.s.elapsed=time;g.nextEvent=100000;return {g,events};}
+function quiet(time=0){const events=[],g=new Game({survivalDuration:1200,seed:42,onEvent:(t,p)=>events.push([t,p])});for(const k in g.timers)g.timers[k]=100000;g.s.elapsed=time;g.nextEvent=100000;return {g,events};}
 function spawnCount(time){const {g}=quiet(time);g.timers.spawn=0;g.timers.pack=0;for(let i=0;i<150;i++){g.s.elapsed+=1/30;g.spawnWave(1/30);}return g.s.enemies.length;}
 test('recovery window reduces arrivals and holds packs without a catch-up burst',()=>{
  assert.ok(spawnCount(180)<spawnCount(160)/2);
@@ -48,7 +48,7 @@ test('pausing before a finale boundary freezes its warning and encounter clock',
  g.resume();g.update(.02);assert.equal(events.filter(([t,p])=>t==='bark'&&p.text.includes('Dernière minute')).length,1);
 });
 test('full final minute survives deterministic saves and starts Charles once',()=>{
- const events=[],g=new Game({seed:71,onEvent:(t,p)=>events.push([t,p])});g.s.elapsed=1129.8;g.s.invulnerable=200;g.nextEvent=100000;
+ const events=[],g=new Game({survivalDuration:1200,seed:71,onEvent:(t,p)=>events.push([t,p])});g.s.elapsed=1129.8;g.s.invulnerable=200;g.nextEvent=100000;
  let b=restoreRun(captureRun(g));
  for(let i=0;i<1500&&!g.s.charles;i++){
   for(const run of [g,b]){if(run.s.mode==='upgrade')run.chooseUpgrade(run.s.options[0].id);if(run.s.mode==='dialogue')run.finishDialogue();run.update(.05,{x:Math.cos(i/50),y:Math.sin(i/50)});}

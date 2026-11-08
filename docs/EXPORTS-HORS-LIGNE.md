@@ -17,7 +17,7 @@ Repère historique : lors du passage initial au dossier hors ligne, le HTML est 
 
 ## Sauvegardes et mise à jour
 
-Fermer le jeu, garder une copie de l'ancien dossier, puis remplacer la version courante en conservant le même chemin complet du HTML, le même navigateur et le même profil. Ce changement d'emballage conserve le format v15 du candidat combiné ainsi que les clés `toma-popescu-v1` et `toma-popescu-run-v1`. La mise à jour combinée du jeu migre les anciennes sauvegardes v13/v14 vers v15 lors de leur lecture. Les scripts d'export ne migrent, ne suppriment ni ne réinitialisent les données du navigateur.
+Fermer le jeu, garder une copie de l'ancien dossier, puis remplacer la version courante en conservant le même chemin complet du HTML, le même navigateur et le même profil. Ce changement d'emballage conserve le format v16 ainsi que les clés `toma-popescu-v1` et `toma-popescu-run-v1`. La mise à jour combinée du jeu migre les anciennes sauvegardes jusqu’à v15 vers v16 lors de leur lecture, en conservant leur durée de vingt minutes. Les scripts d'export ne migrent, ne suppriment ni ne réinitialisent les données du navigateur.
 
 Le comportement de `localStorage` sur `file://` dépend du navigateur. Conserver le chemin réduit le risque de changer de stockage, mais ne garantit pas que tous les navigateurs l'autorisent. Déplacer ou renommer le dossier, utiliser un autre profil ou passer du Site au fichier local peut rendre les anciennes sauvegardes invisibles. La reprise du Site vers un fichier local n'est pas une migration automatique.
 

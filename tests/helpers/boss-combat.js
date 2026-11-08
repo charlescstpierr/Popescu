@@ -13,7 +13,7 @@ export const EXTRA_BOSS_BUILDS = [
  {name:'late-max-charm',at:1080,upg:{muscle:4,followers:4,girlfriend:5,charisma:5,chopper:3,money:3,ego:3,speed:2,validation:3},evolutions:['viralLove']},
 ];
 export function bossFight(Game,{type='pelican',difficulty='normal',build=BOSS_BUILDS[0],maxTime=150,baselineHealth=false,distance=115,seed=914}={}){
- const game=new Game({seed,difficulty}),s=game.s;
+ const game=new Game({seed,difficulty,survivalDuration:1200}),s=game.s;
  // The arena removes cover/pathfinding variance, not damage, attack warnings or adds.
  game.world.collides=()=>false;game.world.update=()=>{};game.world.chunk=()=>[];
  s.elapsed=build.at;s.x=-distance;s.y=0;game.nextEvent=1e6;

@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {Game} from '../dist/engine.js';
 import {RunStore,LockedRunStore,captureRun,restoreRun} from '../dist/run-save.js';
 const memory=()=>{const data=new Map();return {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v),data};};
-const game=(difficulty='normal')=>new Game({difficulty,seed:987});
+const game=(difficulty='normal')=>new Game({survivalDuration:1200,difficulty,seed:987});
 function finish(g,{time=90,kills=10,coins=7,win=false}={}){Object.assign(g.s,{elapsed:time,kills,coins,hp:win?g.s.hp:0,mode:win?'victory':'gameover'});return g;}
 const saved=store=>store.read().value;
 

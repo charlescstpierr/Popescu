@@ -38,7 +38,7 @@ test('late-game bosses survive their first attack instead of dying during the wa
 });
 test('the additional boss health curve stops increasing in endless mode',()=>{
  for(const type of BOSS_TYPES){
-  const make=time=>{const g=new Game();g.s.elapsed=time;return g.spawnEnemy(type,0,0);};
+  const make=time=>{const g=new Game({survivalDuration:1200});g.s.elapsed=time;return g.spawnEnemy(type,0,0);};
   const late=make(1080),endless=make(3600);
   // Existing endless health scaling remains, but the new durability factor is capped.
   const normalScale=(2.6+40*.035)/2.17;
@@ -47,7 +47,7 @@ test('the additional boss health curve stops increasing in endless mode',()=>{
  }
 });
 test('ordinary enemies and rivals keep their health and weapon damage',()=>{
- const g=new Game();g.s.elapsed=600;
+ const g=new Game({survivalDuration:1200});g.s.elapsed=600;
  for(const [type,hp]of Object.entries({normal:39.6,sprinter:28.05,gas:69.3,tank:217.8,orangutan:66,rival_rooster:247.5,rival_goat:363})){
   g.s.enemies=[];const e=g.spawnEnemy(type,0,0);assert.ok(Math.abs(e.hp-hp)<1e-9,type);
   g.hurt(e,18);assert.ok(Math.abs(e.hp-(hp-18))<1e-9,type);
@@ -55,11 +55,11 @@ test('ordinary enemies and rivals keep their health and weapon damage',()=>{
 });
 test('wounded bosses in existing v7 saves resume without healing or changing remaining health',()=>{
  for(const type of BOSS_TYPES){
-  const g=new Game();g.s.elapsed=180;const e=g.spawnEnemy(type,100,0);
+  const g=new Game({survivalDuration:1200});g.s.elapsed=180;const e=g.spawnEnemy(type,100,0);
   // Existing pre-balance values deliberately do not use the new spawn maximum.
   const previousMax={matriarch:696.685,travestia:812.6,pelican:908.2}[type];
   e.maxhp=previousMax;e.hp=previousMax*.37;
-  const snapshot=captureRun(g);assert.equal(snapshot.version,15);
+  const snapshot=captureRun(g);assert.equal(snapshot.version,16);
   const resumed=restoreRun(snapshot);assert.deepEqual(captureRun(resumed),snapshot);
   assert.equal(resumed.s.enemies[0].hp,e.hp);assert.equal(resumed.s.enemies[0].maxhp,e.maxhp);
   resumed.hurt(resumed.s.enemies[0],e.hp+1);assert.equal(resumed.s.kills,1);
@@ -68,7 +68,7 @@ test('wounded bosses in existing v7 saves resume without healing or changing rem
 });
 test('new boss health is saved exactly and does not reroll through repeated resumes',()=>{
  for(const type of BOSS_TYPES){
-  let g=new Game();g.s.elapsed=1080;const e=g.spawnEnemy(type,100,0);g.hurt(e,123);
+  let g=new Game({survivalDuration:1200});g.s.elapsed=1080;const e=g.spawnEnemy(type,100,0);g.hurt(e,123);
   const snapshot=captureRun(g);
   for(let i=0;i<4;i++){g=restoreRun(captureRun(g));assert.deepEqual(captureRun(g),snapshot);}
   g.hurt(g.s.enemies[0],1e6);assert.equal(g.s.chests.length,1);assert.equal(g.s.drops.find(d=>d.kind==='xp').value,22);
