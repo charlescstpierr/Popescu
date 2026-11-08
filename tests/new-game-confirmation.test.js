@@ -36,3 +36,14 @@ test('pause restart cancellation restores the paused game and keyboard focus',as
  keypress(a,'Escape');assert.equal(a.controller.screen,'pause-screen');assert.equal(a.game,old);assert.equal(a.game.s.elapsed,12);
  assert.equal(a.values.get(key),before);assert.equal(a.controller.activeElement,a.get('restart'));
 });
+
+test('a blocked native confirmation cannot block the in-game replacement choice',async()=>{
+ const a=await exited();a.confirm(false);await a.click('play');
+ assert.equal(a.controller.screen,'new-run-confirm');await a.click('new-run-start');
+ assert.equal(a.controller.screen,'hud');assert.equal(a.game.s.elapsed,0);
+});
+
+test('a dismissed replacement choice cannot be accepted later from another screen',async()=>{
+ const a=await exited(),before=a.values.get(key);await a.click('play');a.click('new-run-cancel');a.click('credits-open');
+ await a.click('new-run-start');assert.equal(a.controller.screen,'credits');assert.equal(a.values.get(key),before);
+});
