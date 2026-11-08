@@ -1,64 +1,45 @@
 # Toma Popescu : 10 minutes sans IA
 
-Un jeu de survie en pixel art, en français québécois. L'IA tombe en panne et les créations de Toma prennent la ville d'assaut. Déplace-toi, développe tes pouvoirs et tiens dix minutes jusqu'à l'arrivée de Charles.
+**[Jouer dans le navigateur](https://charlescstpierr.github.io/Popescu/)** · Gratuit. Pas de compte à créer.
 
-**[Jouer dans le navigateur](https://charlescstpierr.github.io/Popescu/)**
+> **Toma** : « Check le char. Huit cent mille piasses, mes abdos sont sortis, pis y'a même pas une criss de feuille dans ma piscine à Dubaï. »
+>
+> **Blonde IA** : « T'as demandé de retirer les feuilles de la photo. La piscine aussi est générée. »
 
-Le tir est automatique. Le monde mêle quartiers urbains, forêts et découvertes, avec des hordes, des rivaux et trois boss majeurs. Après la survie et l'épilogue de Charles, tu peux continuer à l'infini.
+<a href="https://charlescstpierr.github.io/Popescu/"><img src="proof/readme/partie-en-ligne.png" alt="Le jeu en ligne : Toma armé dans la ville, une gorille en approche et l'objectif 10:00 dans le HUD." width="360"></a>
 
-## Commandes
+Pis là, l'IA plante. Va falloir courir pour vrai.
 
-- **Téléphone ou tablette** : glisse le pouce dans la partie inférieure gauche pour te déplacer.
-- **Clavier** : WASD, ZQSD ou flèches. Échap met la partie en pause. M active ou coupe le son.
-- **Améliorations** : choisis une carte quand Toma monte de niveau. Les attaques ennemies sont annoncées pour pouvoir les esquiver.
+Tu bouges, Toma tire tout seul. Ramasse l'expérience entre les gorilles et choisis ta prochaine carte : **Muscles Photoshop**, **Abonnés fictifs**, **Lamborghini imaginaire**. Même son char finit par servir à quelque chose.
 
-Le son démarre après une interaction. Les choix de cartes, les pauses et certains dialogues suspendent le chrono. Les dix minutes désignent la durée de survie; le combat contre Charles n'a pas de limite automatique.
+Le bouc charge. Le coq gueule, pis Toma répond : *« Men, farmes ta criss de gueule ! »* Pis il fait le grand écart. Débloque la Blonde IA : elle tire des cœurs et répond à ses niaiseries.
 
-## Jouer hors ligne
+Choisis ton niveau de déni : facile, normal, difficile ou cauchemar. Tiens dix minutes de survie jusqu'à l'arrivée de Charles. Après l'épilogue, tu peux continuer à l'infini.
 
-1. [Télécharge le dépôt en ZIP](https://github.com/charlescstpierr/Popescu/archive/refs/heads/main.zip).
-2. Extrais l'archive complète.
-3. Ouvre `release/Toma_Popescu_JOUER.html` dans un navigateur de bureau, en gardant `release/assets/` à côté.
+**[Faire courir Toma](https://charlescstpierr.github.io/Popescu/)**
 
-Ne télécharge pas seulement le HTML et ne le lance pas depuis l'aperçu du ZIP. Cette version fonctionne sans serveur ni connexion. Les [instructions hors ligne](docs/EXPORTS-HORS-LIGNE.md) détaillent les exports et les mises à jour.
+**Clavier** : WASD, ZQSD ou flèches. Échap pour la pause, M pour le son.<br>
+**Tactile** : glisse le pouce en bas à gauche.
 
-## Sauvegardes
+<details>
+<summary>Jouer hors ligne ou ouvrir le code</summary>
 
-La partie, les records et les préférences restent dans le stockage local du navigateur, sans compte ni serveur de jeu. Les nouvelles parties durent dix minutes. Les anciennes sauvegardes conservent leurs vingt minutes et leur progression.
+Ta partie se sauvegarde dans ton navigateur. Le chrono attend pendant les choix et certains dialogues.
 
-Chaque origine web possède son stockage. Le Site d'origine, GitHub Pages et le fichier hors ligne ne partagent donc pas automatiquement les sauvegardes. Pour mettre à jour la version hors ligne, garde le même navigateur, le même profil et le même chemin du HTML.
+Sur ordinateur, [télécharge le ZIP](https://github.com/charlescstpierr/Popescu/archive/refs/heads/main.zip), extrais tout, puis ouvre `release/Toma_Popescu_JOUER.html`. Garde `release/assets/` à côté. Ne lance pas le HTML depuis l'aperçu du ZIP.
 
-## Développement
+Les sauvegardes du site et du fichier local restent séparées. Les anciennes parties gardent leurs vingt minutes. Charles conserve un combat sans limite de temps après la survie.
 
-Le jeu utilise JavaScript natif et des modules ES, sans compilation. `dist/` contient l'application servie sur GitHub Pages.
+JavaScript natif, sans compilation. Pour lancer les sources :
 
 ```bash
 python3 -m http.server 8000 --directory dist
 ```
 
-Ouvre ensuite `http://localhost:8000`. Pour ouvrir directement un fichier HTML, utilise la version de `release/`.
+Ouvre `http://localhost:8000`. Les tests se lancent avec `npm test`, avec Node.js et Python 3.
 
-```bash
-npm test
-python3 scripts/export-offline.py
-python3 scripts/export-standalone.py
-```
+[Instructions hors ligne](docs/EXPORTS-HORS-LIGNE.md) · [Contexte du projet](docs/REPRISE.md) · [Consignes de développement](AGENTS.md)
 
-Les tests nécessitent Node.js et Python 3. Le moteur et les exports ne nécessitent aucun paquet externe. Quatre vérifications natives sont ignorées avec une raison explicite si le paquet facultatif `@napi-rs/canvas` est absent.
+</details>
 
-L'export courant est le dossier `release/`. L'export facultatif en un seul fichier va dans `generated/standalone/`, qui n'est pas suivi dans Git. Les images ne sont pas reconstruites par les exports.
-
-Les changements de `main` passent les tests avant la publication GitHub Pages. Seul `dist/` est déployé. L'historique, les documents, les tests et les sources artistiques restent dans le dépôt.
-
-## Repères du code
-
-- `dist/engine.js` possède la simulation, sans DOM.
-- `dist/run-rules.js` définit la durée et le calendrier de fin de partie.
-- `dist/app.js` relie les écrans, les contrôles et les sauvegardes.
-- `dist/content.js` contient les textes et les améliorations.
-- `dist/renderer.js` dessine le jeu sans modifier la simulation.
-- `dist/audio.js` synthétise la musique et les effets.
-
-Pour reprendre le développement, lis [le contexte actuel](docs/REPRISE.md) et [les consignes du projet](AGENTS.md). Le [plan des dix minutes](docs/plans/SURVIE-10-MINUTES.md) explique le recalibrage et la compatibilité des sauvegardes.
-
-Les personnages et les situations sont parodiques. Les tests Canvas et DOM ne remplacent pas une vérification du toucher et des performances sur un téléphone physique.
+*Toma est un personnage parodique. C'est son ego qui mange les coups.*
