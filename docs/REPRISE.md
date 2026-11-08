@@ -1,3 +1,7 @@
+# Survie raccourcie à dix minutes
+
+Les nouvelles parties durent dix minutes, avec progression et expérience accélérées, boss rapprochés et une dernière minute complète. Les sauvegardes antérieures au format v16 conservent leur durée de vingt minutes. Voir [le plan et les règles](plans/SURVIE-10-MINUTES.md). Les sections suivantes décrivent les versions historiques.
+
 # Silhouette harmonisée du 6 novembre 2026
 
 Le candidat v8 harmonise les huit feuilles, utilisées dans quatorze directions, sans changer le moteur ni les sauvegardes. Lire [QA-TOMA-CONSISTENCY.md](QA-TOMA-CONSISTENCY.md). Les mentions v7 ci-dessous décrivent l’historique.

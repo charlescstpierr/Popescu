@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../dist/engine.js';
-function setup(count=0,x=160,y=0){const events=[],game=new Game({seed:42,onEvent:(t,p)=>events.push([t,p])});game.world.collides=()=>false;for(const key in game.timers)game.timers[key]=100000;game.nextEvent=100000;const e=game.spawnEnemy('pelican',x,y);e.peliAttackCount=count;return {game,e,s:game.s,events};}
+function setup(count=0,x=160,y=0){const events=[],game=new Game({survivalDuration:1200,seed:42,onEvent:(t,p)=>events.push([t,p])});game.world.collides=()=>false;for(const key in game.timers)game.timers[key]=100000;game.nextEvent=100000;const e=game.spawnEnemy('pelican',x,y);e.peliAttackCount=count;return {game,e,s:game.s,events};}
 function advance(game,seconds){for(let t=0;t<seconds-1e-8;t+=.01){game.s.elapsed+=.01;game.s.invulnerable=0;game.updateEnemies(.01);}}
 test('Péli is a unique major boss with elite rewards, never a generic enemy',()=>{const {game,e,s}=setup();assert.ok(e.hp>=680);assert.equal(game.spawnEnemy('pelican',200,0),null);game.hurt(e,1e6);assert.equal(s.chests.length,1);assert.equal(s.drops.find(d=>d.kind==='xp').value,22);assert.equal(s.drops.find(d=>d.kind==='gem').value,3);game.hurt(e,1e6);assert.equal(s.chests.length,1);});
 test('hug locks a readable warning and never deals contact damage during preparation',()=>{const {game,e,s}=setup(0,40,0);game.updateEnemies(.01);assert.equal(e.phase,'peli_hug_warning');const origin=[e.x,e.y,e.peliDX,e.peliDY];game.move(e,50,20,e.r);game.areaDamage(e.x-20,e.y,100,1,true);advance(game,1.2);assert.deepEqual([e.x,e.y,e.peliDX,e.peliDY],origin);assert.equal(s.hp,s.maxhp);assert.equal(s.mode,'playing');});

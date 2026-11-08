@@ -18,7 +18,7 @@ test('spawning a different major boss never stacks a second encounter',()=>{
 test('genuine v5 overlap migrates without deleting enemies or progress',()=>{
  const original=JSON.parse(readFileSync(new URL('./fixtures/runstore-v5.json',import.meta.url),'utf8'));
  const game=restoreRun(original.run.snapshot),saved=captureRun(game);
- assert.equal(saved.version,15);assert.deepEqual(saved.game.s,{...original.run.snapshot.game.s,coinsSpent:0,upgradeRerolls:0,evolutions:{},travelX:0,travelY:0,trophies:createTrophyState(),charles:null});
+ assert.equal(saved.version,16);assert.deepEqual(saved.game.s,{...original.run.snapshot.game.s,coinsSpent:0,upgradeRerolls:0,evolutions:{},travelX:0,travelY:0,trophies:createTrophyState(),charles:null,survivalDuration:1200});
  assert.equal(game.s.enemies.length,2);assert.ok(game.bossDirector);
  assert.equal(game.spawnEnemy('travestia',500,0),null);
 });
@@ -26,7 +26,7 @@ test('duplicate Travestia IDs cannot restore a second copy of the same boss',()=
  const g=new Game();g.spawnEnemy('travestia',500,0);const snapshot=captureRun(g),duplicate=structuredClone(snapshot.game.s.enemies[0]);duplicate.id=snapshot.game.id++;snapshot.game.s.enemies.push(duplicate);assert.throws(()=>restoreRun(snapshot));
 });
 test('an expired capped finale receives a fresh five-second warning on endless continuation',()=>{
- const events=[],g=new Game({onEvent:(t,p)=>events.push([t,p])});for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;
+ const events=[],g=new Game({survivalDuration:1200,onEvent:(t,p)=>events.push([t,p])});for(const k in g.timers)g.timers[k]=100000;g.nextEvent=100000;
  for(let i=0;i<300;i++)g.spawnEnemy('normal',0,0);
  g.bossDirector.remaining=5.01;g.s.elapsed=1133;g.spawnWave(.02);g.s.elapsed=1138;g.spawnWave(5);
  assert.equal(g.bossDirector.remaining,0);assert.equal(g.bossDirector.warned,true);
@@ -39,7 +39,7 @@ test('an expired capped finale receives a fresh five-second warning on endless c
  g.spawnWave(4.99);assert.equal(g.s.enemies.length,299);g.spawnWave(.02);assert.equal(g.s.enemies.length,300);assert.ok(g.s.enemies.some(e=>e.type===selected.type));
 });
 test('the director does not announce a five-second arrival across the finale boundary',()=>{
- const events=[],g=new Game({onEvent:(t,p)=>events.push([t,p])});for(const key in g.timers)g.timers[key]=100000;
+ const events=[],g=new Game({survivalDuration:1200,onEvent:(t,p)=>events.push([t,p])});for(const key in g.timers)g.timers[key]=100000;
  g.s.elapsed=1135.01;g.bossDirector.remaining=5.02;g.spawnWave(1/30);
  assert.equal(g.bossDirector.warned,false);
  assert.ok(!events.some(([t,p])=>t==='bark'&&p.text.includes('cinq secondes')));

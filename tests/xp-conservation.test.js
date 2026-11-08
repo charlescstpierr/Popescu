@@ -4,7 +4,7 @@ import {Game} from '../dist/engine.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
 const xp=(value,x=500,life=38)=>({x,y:0,kind:'xp',value,life});
 const total=g=>g.s.drops.filter(d=>d.kind==='xp').reduce((n,d)=>n+d.value,0);
-const run=()=>{const g=new Game({seed:19});g.world.collides=()=>false;return g;};
+const run=()=>{const g=new Game({survivalDuration:1200,seed:19});g.world.collides=()=>false;return g;};
 
 test('expired XP becomes a persistent pickup without awarding a level',()=>{
  const g=run();g.s.drops=[xp(47,500,.01)];g.updateDrops(.02);

@@ -4,7 +4,7 @@ import {Game} from '../dist/engine.js';
 import * as content from '../dist/content.js';
 import * as speech from '../dist/speech.js';
 import {captureRun,restoreRun} from '../dist/run-save.js';
-function fixture(){const events=[],g=new Game({seed:42,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});g.s.elapsed=30;g.timers.bark=1000;g.world.getVisible=()=>[];g.storyOffset=()=>0;return {g,events};}
+function fixture(){const events=[],g=new Game({survivalDuration:1200,seed:42,onEvent:(type,payload)=>{if(type==='bark')events.push(payload);}});g.s.elapsed=30;g.timers.bark=1000;g.world.getVisible=()=>[];g.storyOffset=()=>0;return {g,events};}
 function read(g){g.s.elapsed=g.speech.active.until+.001;g.flushSpeech();}
 
 test('each stunt boast owns a specific answer instead of indexing an unrelated pool',()=>{
@@ -58,7 +58,7 @@ test('a build scene needs the actual upgrade and its callback needs completed re
 });
 test('v11 saves gain an empty scene cursor without losing reading or replay data',()=>{
  const {g}=fixture();g.bark('TOMA','Ancienne phrase encore à lire.');const old=captureRun(g);old.version=11;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.speech.scene;for(const line of [old.game.speech.active,...old.game.speech.queue])if(line)delete line.sceneId;
- const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,15);
+ const copy=restoreRun(old);assert.equal(copy.speech.scene,null);assert.equal(copy.speech.active.text,old.game.speech.active.text);assert.equal(captureRun(copy).version,16);
 });
 
 test('every story line restores the same cursor, remainder and final completion',()=>{

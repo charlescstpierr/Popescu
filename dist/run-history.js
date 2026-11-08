@@ -1,3 +1,4 @@
+import {survivalDuration,SURVIVAL_SECONDS} from './run-rules.js';
 import {DIFFICULTIES,UPGRADES} from './content.js';
 import {EVOLUTIONS,totalEarnedCoins} from './evolutions.js';
 import {BOSS_TROPHIES} from './boss-trophies.js';
@@ -48,7 +49,7 @@ export function validateReplayState(replay){
   check(only(run,['id','seed','difficulty','mode','outcome','time','kills','coins','level','build','deathCause'])&&typeof run.id==='string'&&run.id.length>0&&run.id.length<200&&Object.hasOwn(DIFFICULTIES,run.difficulty)&&MODES.includes(run.mode));
   const key=JSON.stringify([run.id,run.mode]);check(!ids.has(key));ids.add(key);
   check(Number.isInteger(run.seed)&&run.seed>=-2147483648&&run.seed<=2147483647&&number(run.time)&&count(run.kills)&&count(run.coins)&&count(run.level)&&run.level>0&&['victory','defeat','abandoned'].includes(run.outcome));
-  if(run.outcome==='victory')check(run.mode==='survival'&&run.time>=1200);
+  if(run.outcome==='victory')check(run.mode==='survival'&&run.time>=SURVIVAL_SECONDS);
   validateBuild(run.build);
   if(run.deathCause!==null){check(run.outcome==='defeat');validateDeathCause(run.deathCause,run.time);}
  }
@@ -56,10 +57,10 @@ export function validateReplayState(replay){
 }
 export function recordReplay(replay,id,snapshot,{replaced=false}={}){
  const s=snapshot.game.s,mode=s.endless?'endless':'survival',time=s.elapsed,coins=totalEarnedCoins(s),record=replay.records[s.difficulty][mode];
- record.bestTime=Math.max(record.bestTime,mode==='survival'?Math.min(1200,time):time);record.bestKills=Math.max(record.bestKills,s.kills);record.bestCoins=Math.max(record.bestCoins,coins);record.bestLevel=Math.max(record.bestLevel,s.level);
+ record.bestTime=Math.max(record.bestTime,mode==='survival'?Math.min(survivalDuration(s),time):time);record.bestKills=Math.max(record.bestKills,s.kills);record.bestCoins=Math.max(record.bestCoins,coins);record.bestLevel=Math.max(record.bestLevel,s.level);
  // Pausing/menu credits are checkpoints, not finished runs. Charles is an
  // optional epilogue: reaching it cannot turn the survival victory into a loss.
- const outcome=s.mode==='gameover'?'defeat':!s.endless&&s.elapsed>=1200?'victory':replaced?'abandoned':null;
+ const outcome=s.mode==='gameover'?'defeat':!s.endless&&s.elapsed>=survivalDuration(s)?'victory':replaced?'abandoned':null;
  if(!outcome)return;
  const build={upgrades:Object.fromEntries(Object.entries(s.upg).filter(([,rank])=>rank>0)),evolutions:Object.keys(s.evolutions).filter(id=>s.evolutions[id]).sort(),trophies:{...s.trophies.chosen}};
  const summary={id,seed:snapshot.game.seed,difficulty:s.difficulty,mode,outcome,time,kills:s.kills,coins,level:s.level,build,deathCause:outcome==='defeat'?copy(s.deathCause??null):null};

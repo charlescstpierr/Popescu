@@ -8,7 +8,7 @@ import {app} from './helpers/focus-controller.js';
 const advance=(g,seconds)=>{for(let i=0;i<Math.ceil(seconds*60);i++)g.update(Math.min(1/60,seconds-i/60));};
 const visible=(a,id)=>!a.get(id).classList.contains('hidden');
 function boundary(difficulty='normal'){
- const events=[],g=new Game({seed:71,difficulty,onEvent:(type,value)=>events.push({type,value})});
+ const events=[],g=new Game({survivalDuration:1200,seed:71,difficulty,onEvent:(type,value)=>events.push({type,value})});
  g.s.elapsed=1199.99;g.s.invulnerable=10;g.s.shotClock=100;
  for(const key of ['spawn','pack','horde','rival','boss','animal','ego'])g.timers[key]=10000;
  g.nextEvent=10000;g.spawnEnemy('normal',100,80);
@@ -42,7 +42,7 @@ test('save before the threshold and during the automatic flight preserves one sn
 
 for(const withXP of [false,true])test(`automatic arrival keeps the HUD, resets held inputs and saves before any result${withXP?' with simultaneous upgrade':''}`,async()=>{
  const a=app();await a.click('play');const g=a.game;
- g.s.elapsed=1199.99;g.s.invulnerable=10;g.s.shotClock=100;
+ g.s.elapsed=599.99;g.s.invulnerable=10;g.s.shotClock=100;
  if(withXP)g.s.drops=[{x:g.s.x,y:g.s.y,kind:'xp',value:50,life:10}];
  a.events.keydown({key:'d',target:{}});assert.deepEqual([...a.controller.inputState.keys],['d']);
  g.update(.02);assert.equal(g.s.charles?.phase,'intro');assert.equal(a.controller.screen,'hud');
@@ -66,7 +66,7 @@ test('automatic arrival requests a checkpoint immediately rather than waiting fo
  const locks={request(_key,fn){const result=queue.then(fn);queue=result.catch(()=>{});return result;}},drain=()=>locks.request('toma-popescu-run-v1',()=>{});
  const a=app(undefined,locks,{now:()=>now});await a.click('play');a.controller.frame(now);await drain();
  const before=JSON.parse(a.values.get('toma-popescu-run-v1'));
- a.game.s.elapsed=1199.99;a.game.update(.02);now+=16;a.controller.frame(now);await drain();
+ a.game.s.elapsed=599.99;a.game.update(.02);now+=16;a.controller.frame(now);await drain();
  const saved=JSON.parse(a.values.get('toma-popescu-run-v1'));
  assert.ok(saved.revision>before.revision);assert.equal(saved.run.snapshot.game.s.charles.phase,'intro');
  assert.equal(saved.run.snapshot.game.s.mode,'playing');assert.equal(a.controller.screen,'hud');

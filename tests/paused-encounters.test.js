@@ -10,12 +10,12 @@ import {PELICAN_BANTER,PELICAN_BANTER_LEGACY_REPLIES} from '../dist/pelican.js';
 import {TRAVESTIA_BANTER,TRAVESTIA_BANTER_LEGACY_REPLIES} from '../dist/travestia.js';
 
 function run(type='pelican',enabled=true){
- const events=[],g=new Game({seed:43,onEvent:(type,payload)=>events.push({type,payload})});
+ const events=[],g=new Game({survivalDuration:1200,seed:43,onEvent:(type,payload)=>events.push({type,payload})});
  g.setPausedEncountersEnabled(enabled);g.world.collides=()=>false;
  for(const key of Object.keys(g.timers))if(key!=='animalIndex')g.timers[key]=1000;
  g.nextEvent=1000;g.s.shotClock=1000;const e=g.spawnEnemy(type,100,0);e.cooldown=0;return {g,e,events};
 }
-function charles(index=0){const g=new Game({seed:72});g.setPausedEncountersEnabled(true);g.s.elapsed=1200;g.s.mode='victory';g.startCharlesEpilogue();g.s.charles.dialogueIndex=index;return g;}
+function charles(index=0){const g=new Game({survivalDuration:1200,seed:72});g.setPausedEncountersEnabled(true);g.s.elapsed=1200;g.s.mode='victory';g.startCharlesEpilogue();g.s.charles.dialogueIndex=index;return g;}
 function finishArrival(g){for(let i=0;i<280&&g.s.mode==='playing';i++)g.update(1/60);}
 function snapshot(g){return captureRun(g);}
 function pendingTrophy(g,type='travestia'){const bossId=g.id++,chestId=g.id++;g.s.chests.push({id:chestId,x:500,y:500,open:true,openedAt:g.s.elapsed,bossType:type,bossId});g.s.trophies.pending.push({bossType:type,chestId,bossId});}
@@ -35,7 +35,7 @@ for(const type of ['pelican','travestia'])test(`${type}: each speaker and queued
  const {g,e}=run(type);g.updateEnemies(.01);let b=restoreRun(snapshot(g));assert.deepEqual(snapshot(b),snapshot(g));
  b.setPausedEncountersEnabled(true);b.openEncounterDialogue();assert.equal(b.s.mode,'dialogue');
  for(let index=0;index<2;index++){
-  const saved=snapshot(b),restored=restoreRun(saved);assert.equal(saved.version,15);assert.deepEqual(snapshot(restored),saved);
+  const saved=snapshot(b),restored=restoreRun(saved);assert.equal(saved.version,16);assert.deepEqual(snapshot(restored),saved);
   assert.equal(restored.pausedEncountersEnabled,false,'entry capability does not silently dismiss a saved modal');restored.update(.25);assert.deepEqual(snapshot(restored),saved);
   assert.equal(restored.advanceEncounterDialogue(`boss:${type}`,index),true);b=restored;
  }
@@ -89,7 +89,7 @@ test('ordinary speech payload preserves actor, scope and scene context on Toma r
 });
 
 test('v13 migration suppresses only already-started legacy actors and permits a fresh first encounter',()=>{
- const g=new Game({seed:43}),old=captureRun(g);old.version=13;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.encounters;const fresh=restoreRun(old);fresh.setPausedEncountersEnabled(true);const first=fresh.spawnEnemy('pelican',100,0);first.cooldown=0;fresh.updateEnemies(.01);assert.equal(fresh.encounters.queue.length,1);
+ const g=new Game({survivalDuration:1200,seed:43}),old=captureRun(g);old.version=13;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.encounters;const fresh=restoreRun(old);fresh.setPausedEncountersEnabled(true);const first=fresh.spawnEnemy('pelican',100,0);first.cooldown=0;fresh.updateEnemies(.01);assert.equal(fresh.encounters.queue.length,1);
  const {g:legacy,e}=run('pelican',false);legacy.updateEnemies(.01);const saved=captureRun(legacy);saved.version=13;delete saved.game?.timers?.ego;delete saved.game?.timers?.egoIndex;delete saved.game.encounters;const restored=restoreRun(saved);restored.setPausedEncountersEnabled(true);assert.deepEqual(restored.encounters.legacyActorIds,[e.id]);restored.s.enemies=[];const later=restored.spawnEnemy('pelican',100,0);later.cooldown=0;restored.speechUntil=0;restored.clearSpeech();restored.updateEnemies(.01);assert.equal(restored.encounters.queue.length,1);assert.equal(restored.encounters.queue[0].actorId,later.id);
 });
 
@@ -111,7 +111,7 @@ test('first companion invocation waits behind reward choices and survives a queu
  const b=restoreRun(captureRun(g));b.s.xp=0;b.chooseUpgrade(b.s.options[0].id);assert.equal(b.s.mode,'playing');b.update(.01);assert.equal(b.s.mode,'dialogue');assert.equal(b.encounters.active.id,'companion:invocation');b.finishDialogue(true);assert.equal(b.encounters.outcomes['companion:invocation'],'skipped');assert.equal(b.startDialogue(EVENTS.companion),false);
 });
 test('saved v13 companion invocation gains stable context without moving its cursor or changing old gameplay',()=>{
- const g=new Game();g.s.mode='dialogue';const old=captureRun(g,{lines:EVENTS.companion,index:3});old.version=13;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.encounters;const b=restoreRun(old);assert.equal(b.encounters.active.id,'companion:invocation');assert.equal(b.encounters.active.index,3);assert.equal(b.dialoguePresentation().actorType,'companion');const next=captureRun(b);delete next.game.encounters;next.version=13;delete next.game.timers.ego;delete next.game.timers.egoIndex;assert.deepEqual(next,old);
+ const g=new Game({survivalDuration:1200});g.s.mode='dialogue';const old=captureRun(g,{lines:EVENTS.companion,index:3});old.version=13;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.encounters;const b=restoreRun(old);assert.equal(b.encounters.active.id,'companion:invocation');assert.equal(b.encounters.active.index,3);assert.equal(b.dialoguePresentation().actorType,'companion');const next=captureRun(b);delete next.game.encounters;next.version=13;delete next.game.timers.ego;delete next.game.timers.egoIndex;assert.deepEqual(next,old);
 });
 
 test('companion invocation remains available with optional action banter off',()=>{const g=new Game();g.setBanterEnabled(false);assert.equal(g.startDialogue(EVENTS.companion),true);assert.equal(g.s.mode,'dialogue');assert.equal(g.encounters.active.id,'companion:invocation');});

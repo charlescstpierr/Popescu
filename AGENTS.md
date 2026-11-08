@@ -24,7 +24,7 @@ Ce dépôt est une copie portable de la version v1.5 approuvée. Le prochain obj
 - Dans un dialogue, le grand portrait et son nom suivent la personne qui parle (`line.who`), jamais l’acteur propriétaire de la scène. Garder séparés le contexte de rencontre sauvegardé et la présentation du locuteur. Le portrait courant de Toma est `dialogue-toma.png`; les rangs de Blonde IA restent issus de la progression courante.
 
 - Le moteur reste indépendant du DOM; le rendu ne modifie jamais l'état de simulation.
-- Conserver les contrôles tactiles et clavier, les attaques annoncées et esquivables, les plafonds mémoire, les quatre difficultés, la victoire à 20 minutes et l'infini optionnel.
+- Conserver les contrôles tactiles et clavier, les attaques annoncées et esquivables, les plafonds mémoire, les quatre difficultés, la victoire à 10 minutes pour les nouvelles parties, les anciennes sauvegardes à 20 minutes et l'infini optionnel.
 - Garder la satire québécoise dirigée contre l'ego fictif de Toma. Les insultes destinées aux rivaux masculins restent réservées à ces rivaux. Les interventions spontanées de la compagne en partie dépendent de son déblocage.
 - Ne pas remplacer les effets établis par leurs anciens contresens: `airplane` est le Mode avion défensif; `chopper` est une moto Harley holographique.
 - La réplique au vrai cri du coq est exactement `Men, farmes ta criss de gueule !`; une préparation interrompue ne la déclenche pas.

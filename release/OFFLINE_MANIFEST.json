@@ -4,13 +4,13 @@
   "files": [
     {
       "path": "LIRE-MOI.txt",
-      "bytes": 1360,
-      "sha256": "ba0d1b86187cb0d3ec2aa56a60b44a73808542cb106330e0d58042d9340d576d"
+      "bytes": 1439,
+      "sha256": "14dff2f8b01eb8169b0d4ada95ac03f247abf3ac1fc4edfaa15214c0648c97d2"
     },
     {
       "path": "Toma_Popescu_JOUER.html",
-      "bytes": 885630,
-      "sha256": "3c6b141bd30ccd1d3c78f085ac5de5c7d8f1f73f39c1d440e84ed07ed19fb84b"
+      "bytes": 889981,
+      "sha256": "f9e6c17f09c4cc75432674bb5f51ad4355f7ebd9f62aa28a22490166fb3530c6"
     },
     {
       "path": "assets/actors-v2.json",

@@ -19,11 +19,11 @@ function phase(g,e,name,time=limits[name]/2){const kind=['hug','zodiac','tarot']
 function resume(g){const events=[],copy=restoreRun(captureRun(g),{onEvent:(type,payload)=>events.push([type,payload])});copy.world.collides=()=>false;return {copy,events};}
 
 test('pelican initializes every persistable attack field alongside the shared boss schedule',()=>{
- const g=new Game({seed:42}),e=g.spawnEnemy('pelican',123,-45);
+ const g=new Game({survivalDuration:1200,seed:42}),e=g.spawnEnemy('pelican',123,-45);
  assert.ok(g.bossDirector.remaining>=150&&g.bossDirector.remaining<=210);
  for(const key of fields)assert.ok(Object.hasOwn(e,key),key);
  assert.equal(e.peliX,123);assert.equal(e.peliY,-45);assert.equal(e.peliDX,1);assert.equal(e.peliDY,0);
- assert.equal(captureRun(g).version,15);
+ assert.equal(captureRun(g).version,16);
 });
 for(const [name,time] of [['peli_hug_warning',.7],['peli_hug',.4],['peli_zodiac_warning',.9],['peli_zodiac',.7],['peli_tarot_warning',.6],['peli_tarot',.6],['peli_recover',.5]])test(`${name} resumes exactly without restarting or skipping the attack`,()=>{
  const {g,e}=setup();phase(g,e,name,time);
@@ -87,13 +87,13 @@ test('duplicate live pelicans are rejected instead of creating a second boss on 
  const {g}=setup(),saved=captureRun(g),other=structuredClone(saved.game.s.enemies[0]);other.id=saved.game.id++;saved.game.s.enemies.push(other);assert.throws(()=>restoreRun(saved));
 });
 for(const version of [1,2,3,4])test(`v${version} migrates into the shared boss scheduler without losing progress or discoveries`,()=>{
- const g=new Game({seed:42});g.spawnEnemy('normal',100,100);g.s.elapsed=123;g.s.hp=67;g.s.kills=7;g.s.coins=11;
+ const g=new Game({survivalDuration:1200,seed:42});g.spawnEnemy('normal',100,100);g.s.elapsed=123;g.s.hp=67;g.s.kills=7;g.s.coins=11;
  g.discoveryCooldowns.set('site',250);g.discoveryContact='site';g.eventSeen.add('phone');
  const old=captureRun(g);old.version=version;delete old.game?.timers?.ego;delete old.game?.timers?.egoIndex;delete old.game.timers.pelican;
  if(version<=3){delete old.game.timers.animal;delete old.game.timers.animalIndex;}
  if(version===1){delete old.game.timers.travestia;for(const enemy of old.game.s.enemies)for(const key of ['tailTime','tailFaceX','tailHitPlayer','tailHitGirl'])delete enemy[key];}
  const original=structuredClone(old),copy=restoreRun(old),saved=captureRun(copy);
- assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,15);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
+ assert.deepEqual(old,original,'migration must not mutate the supplied snapshot');assert.equal(saved.version,16);assert.ok(copy.bossDirector.remaining>5&&copy.bossDirector.remaining<=210);
  assert.equal(copy.s.elapsed,123);assert.equal(copy.s.hp,67);assert.equal(copy.s.kills,7);assert.equal(copy.s.coins,11);
  assert.deepEqual([...copy.discoveryCooldowns],[['site',250]]);assert.equal(copy.discoveryContact,'site');assert.ok(copy.eventSeen.has('phone'));
 });
@@ -104,13 +104,13 @@ test('legacy versions cannot smuggle new pelican enemies or attack state through
  }
 });
 test('v4 store envelope upgrades atomically and keeps cumulative credits intact',()=>{
- const storage=memory(),originalStore=new RunStore(storage),g=new Game({seed:42});g.s.kills=7;g.s.coins=11;g.s.elapsed=123;
+ const storage=memory(),originalStore=new RunStore(storage),g=new Game({survivalDuration:1200,seed:42});g.s.kills=7;g.s.coins=11;g.s.elapsed=123;
  assert.ok(originalStore.begin('legacy-v4',g,{best:100,lifetime:20,coins:30}).ok);assert.ok(originalStore.checkpoint('legacy-v4',g,{credit:true}).ok);
  const old=JSON.parse(storage.getItem(originalStore.key));old.version=4;old.run.snapshot.version=4;delete old.run.snapshot.game.timers.ego;delete old.run.snapshot.game.timers.egoIndex;delete old.run.snapshot.game.timers.pelican;
  const raw=JSON.stringify(old);storage.setItem(originalStore.key,raw);const store=new RunStore(storage),read=store.read();
- assert.equal(read.status,'ready');assert.equal(read.value.version,15);assert.equal(read.value.run.snapshot.version,15);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
+ assert.equal(read.status,'ready');assert.equal(read.value.version,16);assert.equal(read.value.run.snapshot.version,16);assert.deepEqual(read.value.totals,old.totals);assert.equal(storage.getItem(store.key),raw);
  const copy=restoreRun(read.value.run.snapshot);assert.ok(store.checkpoint('legacy-v4',copy,{credit:true}).ok);
- const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,15);assert.equal(written.run.snapshot.version,15);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
+ const written=JSON.parse(storage.getItem(store.key));assert.equal(written.version,16);assert.equal(written.run.snapshot.version,16);assert.equal(written.revision,old.revision+1);assert.deepEqual(written.totals,old.totals);
 });
 test('real pre-animal v3 envelope retains its Travestia state and both scheduler migrations',()=>{
  const raw=readFileSync(new URL('./fixtures/runstore-v3.json',import.meta.url),'utf8'),old=JSON.parse(raw),storage=memory();storage.setItem('toma-popescu-run-v1',raw);
